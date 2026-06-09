@@ -1,0 +1,15 @@
+# Federated node: contributes to and imports from a trust domain (with discount).
+federation_mode: federated
+transport:
+  mode: hybrid            # push | pull-on-demand | hybrid (spec §11.5)
+federation:
+  subnet_id: "example-federation"
+  import_discount: 0.5    # foreign consensus counts less than own (spec §5.2)
+  mode: allowlist         # allowlist (default-deny) | blocklist (default-allow)
+anchors:
+  - source: project-default
+score:
+  block_threshold: 75
+resources:
+  max_cpu_percent: 25     # good-neighbour budget (spec §11.5)
+  max_bandwidth_kbps: 512

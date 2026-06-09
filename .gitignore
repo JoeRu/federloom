@@ -1,0 +1,19 @@
+# Build output
+/bin/
+*.exe
+swarmd
+swarmctl
+
+# Local runtime state
+*.db
+/data/
+/var/
+
+# Secrets — never commit keys or filled-in configs
+*.key
+*.pem
+config.local.yaml
+cs-firewall-bouncer.yaml
+
+# Go
+vendor/

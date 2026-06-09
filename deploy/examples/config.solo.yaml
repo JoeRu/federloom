@@ -1,0 +1,8 @@
+# Single node, no network participation. Local detection + enforcement only (MVP).
+federation_mode: solo
+enforce:
+  backend: ipset          # ipset | nftables | crowdsec
+score:
+  block_threshold: 80     # local threshold; lists are aids only (spec Leitprinzip 7)
+decay:
+  half_life: 168h         # TODO: tune (spec problem D)

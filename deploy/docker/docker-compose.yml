@@ -1,0 +1,13 @@
+# Standalone deployment (outside Mailcow).
+services:
+  swarmguard:
+    build: { context: ../.., dockerfile: deploy/docker/Dockerfile }
+    container_name: swarmguard
+    restart: unless-stopped
+    cap_add: [ NET_ADMIN, NET_RAW ]
+    network_mode: host
+    volumes:
+      - ./config.yaml:/etc/swarmguard/config.yaml:ro
+      - swarmguard-data:/var/lib/swarmguard
+volumes:
+  swarmguard-data:

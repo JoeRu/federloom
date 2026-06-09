@@ -1,0 +1,7 @@
+# Own isolated subnet: own trust roots, no import from other domains (spec §5.2).
+federation_mode: isolated
+federation:
+  subnet_id: "my-org-internal"
+  import_discount: 0.0    # import nothing
+anchors:
+  - source: self-added

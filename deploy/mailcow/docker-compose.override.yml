@@ -1,0 +1,21 @@
+# SwarmGuard as a non-invasive Mailcow add-on.
+#
+# Pattern follows JoeRu/Mailcow-Crowdsec-Override: drop this into
+# /opt/mailcow-dockerized/ — docker compose merges it automatically, no changes
+# to Mailcow's own files, upgrade-safe. See deploy/mailcow/README.md.
+services:
+  swarmguard:
+    image: ghcr.io/joeru/swarmguard:latest   # built from deploy/docker/Dockerfile
+    container_name: swarmguard
+    restart: unless-stopped
+    # Read Docker logs for ingest (read-only), like the CrowdSec override does.
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./swarmguard/config.yaml:/etc/swarmguard/config.yaml:ro
+      - swarmguard-data:/var/lib/swarmguard
+    # Enforcement happens on the host; the daemon needs net admin for ipset/nft.
+    cap_add: [ NET_ADMIN, NET_RAW ]
+    network_mode: host
+
+volumes:
+  swarmguard-data:
