@@ -15,12 +15,13 @@ import (
 
 // Node is a SwarmGuard P2P peer: libp2p host + gossipsub topic + Kademlia DHT.
 type Node struct {
-	host   host.Host
-	ps     *pubsub.PubSub
-	topic  *pubsub.Topic
-	sub    *pubsub.Subscription
-	dht    *dht.IpfsDHT
-	events chan proto.Event
+	host     host.Host
+	ps       *pubsub.PubSub
+	topic    *pubsub.Topic
+	sub      *pubsub.Subscription
+	dht      *dht.IpfsDHT
+	events   chan proto.Event
+	stopLoop context.CancelFunc
 }
 
 // New creates and starts a Node. Call Close() to release all resources.
@@ -40,33 +41,42 @@ func New(ctx context.Context, opts Options) (*Node, error) {
 		return nil, fmt.Errorf("transport: create dht: %w", err)
 	}
 
+	// cleanup closes both d and h if we return early below
+	var ok bool
+	defer func() {
+		if !ok {
+			_ = d.Close()
+			_ = h.Close()
+		}
+	}()
+
 	ps, err := pubsub.NewGossipSub(ctx, h, pubsub.WithFloodPublish(true))
 	if err != nil {
-		h.Close()
 		return nil, fmt.Errorf("transport: create gossipsub: %w", err)
 	}
 
 	t, err := ps.Join(opts.Topic)
 	if err != nil {
-		h.Close()
 		return nil, fmt.Errorf("transport: join topic %q: %w", opts.Topic, err)
 	}
 
 	sub, err := t.Subscribe()
 	if err != nil {
-		h.Close()
 		return nil, fmt.Errorf("transport: subscribe: %w", err)
 	}
 
+	loopCtx, stopLoop := context.WithCancel(ctx)
 	n := &Node{
-		host:   h,
-		ps:     ps,
-		topic:  t,
-		sub:    sub,
-		dht:    d,
-		events: make(chan proto.Event, 64),
+		host:     h,
+		ps:       ps,
+		topic:    t,
+		sub:      sub,
+		dht:      d,
+		events:   make(chan proto.Event, 64),
+		stopLoop: stopLoop,
 	}
-	go n.readLoop(ctx)
+	go n.readLoop(loopCtx)
+	ok = true
 	return n, nil
 }
 
@@ -88,6 +98,7 @@ func (n *Node) Subscribe() <-chan proto.Event { return n.events }
 
 // Close shuts down the subscription, topic, DHT, and host.
 func (n *Node) Close() error {
+	n.stopLoop()
 	n.sub.Cancel()
 	_ = n.topic.Close()
 	_ = n.dht.Close()

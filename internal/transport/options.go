@@ -23,7 +23,7 @@ const DefaultTopic = "swarmguard/events/v0"
 type Options struct {
 	// ListenAddrs are the multiaddrs to listen on.
 	ListenAddrs []multiaddr.Multiaddr
-	// BootstrapPeers are known peers to connect to on startup (via Bootstrap).
+	// BootstrapPeers are known peers for DHT routing. Pass them to Bootstrap() after New().
 	BootstrapPeers []peer.AddrInfo
 	// Mode controls relay vs leaf behaviour.
 	Mode NodeMode
