@@ -3,31 +3,40 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"os/signal"
 	"strings"
 	"syscall"
-	"time"
 
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/multiformats/go-multiaddr"
 
+	"github.com/JoeRu/swarmguard/internal/config"
+	"github.com/JoeRu/swarmguard/internal/node"
 	"github.com/JoeRu/swarmguard/internal/transport"
-	"github.com/JoeRu/swarmguard/pkg/proto"
 )
 
 func main() {
+	configPath := flag.String("config", "", "path to YAML config file (optional; flags override)")
 	listen    := flag.String("listen", "/ip4/0.0.0.0/tcp/7700", "multiaddr to listen on")
 	advertise := flag.String("advertise", "", "multiaddr to print as the public address (for Docker/NAT)")
 	bootstrap := flag.String("bootstrap", "", "comma-separated bootstrap peer multiaddrs (must include /p2p/<peerID>)")
-	relay     := flag.Bool("relay", false, "run as relay/aggregator node (does not publish events)")
+	relay     := flag.Bool("relay", false, "run as relay/aggregator node (does not process local events)")
 	flag.Parse()
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
+
+	cfg := config.Defaults()
+	if *configPath != "" {
+		loaded, err := config.Load(*configPath)
+		if err != nil {
+			log.Fatalf("load config %q: %v", *configPath, err)
+		}
+		cfg = loaded
+	}
 
 	listenMA, err := multiaddr.NewMultiaddr(*listen)
 	if err != nil {
@@ -39,21 +48,21 @@ func main() {
 		mode = transport.ModeRelay
 	}
 
-	node, err := transport.New(ctx, transport.Options{
+	t, err := transport.New(ctx, transport.Options{
 		ListenAddrs: []multiaddr.Multiaddr{listenMA},
 		Mode:        mode,
 	})
 	if err != nil {
-		log.Fatalf("start node: %v", err)
+		log.Fatalf("start transport: %v", err)
 	}
-	defer node.Close()
+	defer t.Close()
 
-	fmt.Printf("peer ID: %s\n", node.Host().ID())
+	fmt.Printf("peer ID: %s\n", t.Host().ID())
 	if *advertise != "" {
-		fmt.Printf("listening on: %s/p2p/%s\n", *advertise, node.Host().ID())
+		fmt.Printf("listening on: %s/p2p/%s\n", *advertise, t.Host().ID())
 	} else {
-		for _, addr := range node.Host().Addrs() {
-			fmt.Printf("listening on: %s/p2p/%s\n", addr, node.Host().ID())
+		for _, addr := range t.Host().Addrs() {
+			fmt.Printf("listening on: %s/p2p/%s\n", addr, t.Host().ID())
 		}
 	}
 
@@ -71,40 +80,26 @@ func main() {
 			}
 			peers = append(peers, *ai)
 		}
-		if err := node.Bootstrap(ctx, peers); err != nil {
+		if err := t.Bootstrap(ctx, peers); err != nil {
 			log.Printf("bootstrap warning: %v", err)
 		}
 	}
 
 	if *relay {
-		log.Println("running as relay/aggregator — not publishing")
+		log.Println("running as relay/aggregator — waiting for connections")
 		<-ctx.Done()
 		return
 	}
 
-	go func() {
-		for e := range node.Subscribe() {
-			data, _ := json.Marshal(e)
-			fmt.Printf("received: %s\n", data)
-		}
-	}()
+	n, err := node.New(cfg, t)
+	if err != nil {
+		log.Fatalf("create node: %v", err)
+	}
 
-	ticker := time.NewTicker(5 * time.Second)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ticker.C:
-			e := proto.Event{
-				IP:         "198.51.100.1",
-				Reason:     "smtp-auth-bruteforce",
-				Timestamp:  time.Now(),
-				ReporterID: node.Host().ID().String(),
-			}
-			if err := node.Publish(ctx, e); err != nil {
-				log.Printf("publish: %v", err)
-			}
-		case <-ctx.Done():
-			return
-		}
+	log.Printf("swarmd running (enforce=%s, honeypot=%v)",
+		cfg.Enforce.Backend, cfg.Ingest.Honeypot.Enabled)
+
+	if err := n.Run(ctx); err != nil && err != context.Canceled {
+		log.Fatalf("node exited: %v", err)
 	}
 }
