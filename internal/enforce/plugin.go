@@ -5,11 +5,18 @@
 // .claude/skills/enforce-backend.
 package enforce
 
-import "github.com/JoeRu/swarmguard/pkg/proto"
+import "context"
 
-// Sink applies the locally-decided blocklist to an enforcement backend.
+// Sink applies block decisions to a firewall backend.
+// Implementations must be safe for concurrent use.
 type Sink interface {
 	Name() string
-	// Apply reconciles the backend to exactly the given blocked IPs (idempotent).
-	Apply(blocked []proto.ScoreEntry) error
+	// Start creates the required firewall structures (idempotent). Must be called before Block/Unblock.
+	Start(ctx context.Context) error
+	// Block adds ip to the deny set.
+	Block(ip string) error
+	// Unblock removes ip from the deny set.
+	Unblock(ip string) error
+	// Close releases any resources held by the backend (does NOT flush the deny set).
+	Close() error
 }
