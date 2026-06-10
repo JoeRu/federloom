@@ -22,7 +22,7 @@ $COMPOSE up -d bootstrap
 
 BOOTSTRAP_PEER_ID=""
 for i in $(seq 1 20); do
-    LINE=$($COMPOSE logs bootstrap 2>&1 | grep "^peer ID:" | head -1 || true)
+    LINE=$($COMPOSE logs bootstrap 2>&1 | grep "peer ID:" | head -1 || true)
     if [ -n "$LINE" ]; then
         BOOTSTRAP_PEER_ID=$(echo "$LINE" | awk '{print $NF}')
         break
