@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.file_path // empty'); if [[ \"$file\" == *.go ]]; then gofmt -w \"$file\" && go vet ./...; fi"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "file=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.file_path // empty'); if [[ \"$file\" == *internal/enforce* || \"$file\" == *scripts/install* ]]; then echo 'SECURITY-CRITICAL PATH: internal/enforce and scripts/install require explicit user confirmation before editing. Pause and confirm with the user.'; exit 2; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
