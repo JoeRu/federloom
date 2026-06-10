@@ -1,8 +1,8 @@
 # Build output
 /bin/
 *.exe
-swarmd
-swarmctl
+/swarmd
+/swarmctl
 
 # Local runtime state
 *.db
