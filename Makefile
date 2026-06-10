@@ -1,4 +1,4 @@
-.PHONY: build test lint fmt adversarial run-node clean
+.PHONY: build test lint fmt adversarial run-node clean smoke
 
 build:        ## build daemon + CLI
 	go build -o bin/swarmd ./cmd/swarmd
@@ -18,3 +18,6 @@ fmt:
 
 clean:
 	rm -rf bin/
+
+smoke:        ## manual smoke test — real docker containers (~30s, requires Docker)
+	./scripts/dev/smoke-test.sh

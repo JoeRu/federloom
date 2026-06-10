@@ -1,0 +1,51 @@
+# Development smoke test topology: bootstrap + relay + 3 leaf nodes.
+# Used by scripts/dev/smoke-test.sh — do not run directly (needs BOOTSTRAP_PEER_ID env var).
+services:
+  bootstrap:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    command: >
+      --listen /ip4/0.0.0.0/tcp/7700
+      --advertise /dns4/bootstrap/tcp/7700
+
+  relay:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    command: >
+      --listen /ip4/0.0.0.0/tcp/7700
+      --bootstrap /dns4/bootstrap/tcp/7700/p2p/${BOOTSTRAP_PEER_ID}
+      --relay
+    depends_on:
+      - bootstrap
+
+  leaf1:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    command: >
+      --listen /ip4/0.0.0.0/tcp/7700
+      --bootstrap /dns4/bootstrap/tcp/7700/p2p/${BOOTSTRAP_PEER_ID}
+    depends_on:
+      - bootstrap
+
+  leaf2:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    command: >
+      --listen /ip4/0.0.0.0/tcp/7700
+      --bootstrap /dns4/bootstrap/tcp/7700/p2p/${BOOTSTRAP_PEER_ID}
+    depends_on:
+      - bootstrap
+
+  leaf3:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    command: >
+      --listen /ip4/0.0.0.0/tcp/7700
+      --bootstrap /dns4/bootstrap/tcp/7700/p2p/${BOOTSTRAP_PEER_ID}
+    depends_on:
+      - bootstrap
