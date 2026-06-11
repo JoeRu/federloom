@@ -20,10 +20,10 @@ import (
 
 func main() {
 	configPath := flag.String("config", "", "path to YAML config file (optional; flags override)")
-	listen    := flag.String("listen", "/ip4/0.0.0.0/tcp/7700", "multiaddr to listen on")
+	listen := flag.String("listen", "/ip4/0.0.0.0/tcp/7700", "multiaddr to listen on")
 	advertise := flag.String("advertise", "", "multiaddr to print as the public address (for Docker/NAT)")
 	bootstrap := flag.String("bootstrap", "", "comma-separated bootstrap peer multiaddrs (must include /p2p/<peerID>)")
-	relay     := flag.Bool("relay", false, "run as relay/aggregator node (does not process local events)")
+	relay := flag.Bool("relay", false, "run as relay/aggregator node (does not process local events)")
 	flag.Parse()
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
