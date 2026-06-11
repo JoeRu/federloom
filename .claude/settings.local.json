@@ -3,7 +3,9 @@
     "allow": [
       "Bash(cat)",
       "Bash(cp /tmp/test_imports.go /mnt/c/Users/johan/code/swarmguard/main.go)",
-      "Bash(chmod 644 /mnt/c/Users/johan/code/swarmguard/internal/transport/gossip.go /mnt/c/Users/johan/code/swarmguard/internal/transport/relay.go /mnt/c/Users/johan/code/swarmguard/internal/transport/dht.go /mnt/c/Users/johan/code/swarmguard/internal/transport/gossip_test.go /mnt/c/Users/johan/code/swarmguard/internal/transport/options.go)"
+      "Bash(chmod 644 /mnt/c/Users/johan/code/swarmguard/internal/transport/gossip.go /mnt/c/Users/johan/code/swarmguard/internal/transport/relay.go /mnt/c/Users/johan/code/swarmguard/internal/transport/dht.go /mnt/c/Users/johan/code/swarmguard/internal/transport/gossip_test.go /mnt/c/Users/johan/code/swarmguard/internal/transport/options.go)",
+      "Bash(gh repo *)",
+      "Bash(gh api *)"
     ]
   }
 }
