@@ -1,0 +1,1 @@
+{"nodes": [{"id": "root_swarmguard_internal_enforce_crowdsec_go", "label": "crowdsec.go", "file_type": "code", "source_file": "internal/enforce/crowdsec.go", "source_location": "L1"}], "edges": [], "raw_calls": []}
