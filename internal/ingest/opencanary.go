@@ -97,6 +97,7 @@ func (o *OpenCanary) tail(ctx context.Context, ch chan<- proto.Event) {
 			}
 
 			scanner := bufio.NewScanner(f)
+			scanner.Buffer(make([]byte, 1<<20), 1<<20) // 1 MiB cap — avoids silent truncation
 			for scanner.Scan() {
 				line := scanner.Bytes()
 				offset += int64(len(line)) + 1 // +1 for newline
@@ -130,6 +131,9 @@ func (o *OpenCanary) tail(ctx context.Context, ch chan<- proto.Event) {
 					// Channel full — drop (high-volume honeypot noise).
 					log.Printf("ingest/opencanary: channel full, dropping event for %s", oe.SrcHost)
 				}
+			}
+			if err := scanner.Err(); err != nil {
+				log.Printf("ingest/opencanary: scan error on %s: %v", o.cfg.LogFile, err)
 			}
 			f.Close()
 		}
