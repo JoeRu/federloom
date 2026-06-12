@@ -1,0 +1,22 @@
+# SwarmGuard config for the honeypot node.
+# block_threshold is set high: this is a sensor node, not a firewall.
+federation_mode: federated
+store:
+  dir: /var/lib/swarmguard
+enforce:
+  backend: ipset
+  set_name: swarmguard
+reputation:
+  block_threshold: 1000
+  unblock_threshold: 900
+  half_life: 168h
+  decay_interval: 1h
+ingest:
+  honeypot:
+    enabled: true
+    log_file: /var/log/cowrie/cowrie.json
+    poll_interval: 1s
+  opencanary:
+    enabled: true
+    log_file: /var/log/opencanary/opencanary.log
+    poll_interval: 1s

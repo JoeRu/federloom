@@ -1,0 +1,50 @@
+# Honeypot stack: Cowrie (SSH) + OpenCanary (SMTP/IMAP) + SwarmGuard node.
+# Deploy via deploy/honeypot/bootstrap.sh — do not run directly without reading that script.
+services:
+  cowrie:
+    image: cowrie/cowrie:latest
+    container_name: cowrie
+    restart: unless-stopped
+    ports:
+      - "22:2222"
+    volumes:
+      - cowrie-logs:/cowrie/var/log/cowrie
+
+  opencanary:
+    image: thinkst/opencanary:latest
+    container_name: opencanary
+    restart: unless-stopped
+    ports:
+      - "25:25"
+      - "143:143"
+    volumes:
+      - opencanary-logs:/var/log/opencanary
+      - ./opencanary.json:/etc/opencanaryd/opencanary.conf:ro
+
+  swarmguard:
+    image: swarmguard:latest
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    container_name: swarmguard
+    restart: unless-stopped
+    cap_add: [NET_ADMIN, NET_RAW]
+    ports:
+      - "7700:7700"
+    volumes:
+      - ./config.yaml:/etc/swarmguard/config.yaml:ro
+      - cowrie-logs:/var/log/cowrie:ro
+      - opencanary-logs:/var/log/opencanary:ro
+      - swarmguard-data:/var/lib/swarmguard
+    command: >
+      --config /etc/swarmguard/config.yaml
+      --listen /ip4/0.0.0.0/tcp/7700
+      --advertise /ip4/167.233.115.41/tcp/7700
+    depends_on:
+      - cowrie
+      - opencanary
+
+volumes:
+  cowrie-logs:
+  opencanary-logs:
+  swarmguard-data:

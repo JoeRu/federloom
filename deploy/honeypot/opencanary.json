@@ -1,0 +1,30 @@
+{
+    "device.node_id": "swarmguard-honeypot-1",
+    "git.enabled": false,
+    "ftp.enabled": false,
+    "http.enabled": false,
+    "imap.enabled": true,
+    "imap.port": 143,
+    "smtp.enabled": true,
+    "smtp.port": 25,
+    "smtp.banner": "220 mail.example.com ESMTP",
+    "ssh.enabled": false,
+    "telnet.enabled": false,
+    "logger": {
+        "class": "PyLogger",
+        "kwargs": {
+            "formatters": {
+                "plain": {
+                    "format": "%(message)s"
+                }
+            },
+            "handlers": {
+                "file": {
+                    "class": "logging.FileHandler",
+                    "filename": "/var/log/opencanary/opencanary.log",
+                    "mode": "a"
+                }
+            }
+        }
+    }
+}
