@@ -8,7 +8,7 @@ services:
     ports:
       - "22:2222"
     volumes:
-      - cowrie-logs:/cowrie/var/log/cowrie
+      - cowrie-logs:/cowrie/cowrie-git/var/log/cowrie
 
   opencanary:
     image: thinkst/opencanary:latest

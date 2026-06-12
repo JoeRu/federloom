@@ -6,6 +6,7 @@ store:
 enforce:
   backend: ipset
   set_name: swarmguard-client
+  chain: INPUT
 reputation:
   block_threshold: 1000
   unblock_threshold: 900
