@@ -48,3 +48,33 @@ store:
 		t.Error("expected honeypot.enabled = true")
 	}
 }
+
+func TestDefaultsOpenCanaryPollInterval(t *testing.T) {
+	cfg := config.Defaults()
+	if cfg.Ingest.OpenCanary.PollInterval.Duration <= 0 {
+		t.Errorf("OpenCanary default PollInterval must be > 0, got %v", cfg.Ingest.OpenCanary.PollInterval.Duration)
+	}
+}
+
+func TestLoadYAMLOpenCanaryEnabled(t *testing.T) {
+	raw := []byte(`
+ingest:
+  opencanary:
+    enabled: true
+    log_file: /var/log/opencanary/opencanary.log
+    poll_interval: 2s
+`)
+	cfg, err := config.LoadYAML(raw)
+	if err != nil {
+		t.Fatalf("LoadYAML: %v", err)
+	}
+	if !cfg.Ingest.OpenCanary.Enabled {
+		t.Error("OpenCanary.Enabled should be true")
+	}
+	if cfg.Ingest.OpenCanary.LogFile != "/var/log/opencanary/opencanary.log" {
+		t.Errorf("LogFile: got %q, want /var/log/opencanary/opencanary.log", cfg.Ingest.OpenCanary.LogFile)
+	}
+	if cfg.Ingest.OpenCanary.PollInterval.Duration != 2*time.Second {
+		t.Errorf("PollInterval: got %v, want 2s", cfg.Ingest.OpenCanary.PollInterval.Duration)
+	}
+}

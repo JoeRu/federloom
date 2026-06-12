@@ -48,7 +48,15 @@ type ReputationConfig struct {
 
 // IngestConfig groups all ingest source configs.
 type IngestConfig struct {
-	Honeypot HoneypotConfig `yaml:"honeypot"`
+	Honeypot   HoneypotConfig   `yaml:"honeypot"`
+	OpenCanary OpenCanaryConfig `yaml:"opencanary"`
+}
+
+// OpenCanaryConfig configures the OpenCanary ingest adapter.
+type OpenCanaryConfig struct {
+	Enabled      bool     `yaml:"enabled"`
+	LogFile      string   `yaml:"log_file"`
+	PollInterval Duration `yaml:"poll_interval"`
 }
 
 // HoneypotConfig configures the Cowrie ingest adapter.
@@ -86,6 +94,9 @@ func Defaults() *Config {
 		},
 		Ingest: IngestConfig{
 			Honeypot: HoneypotConfig{
+				PollInterval: Duration{time.Second},
+			},
+			OpenCanary: OpenCanaryConfig{
 				PollInterval: Duration{time.Second},
 			},
 		},
