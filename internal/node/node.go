@@ -60,6 +60,9 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 	if cfg.Ingest.Honeypot.Enabled {
 		sources = append(sources, ingest.NewHoneypot(cfg.Ingest.Honeypot, selfID))
 	}
+	if cfg.Ingest.OpenCanary.Enabled {
+		sources = append(sources, ingest.NewOpenCanary(cfg.Ingest.OpenCanary, selfID))
+	}
 
 	return &Node{
 		cfg:        cfg,
