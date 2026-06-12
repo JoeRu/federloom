@@ -1,0 +1,25 @@
+# Local SwarmGuard peer for smoke-testing federation with the honeypot node.
+# Usage:
+#   HONEYPOT_PEER_ADDR=/ip4/167.233.115.41/tcp/7700/p2p/<PEER_ID> \
+#     docker compose -f deploy/client/docker-compose.yml up
+services:
+  swarmguard:
+    image: swarmguard:latest
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    container_name: swarmguard-client
+    restart: unless-stopped
+    cap_add: [NET_ADMIN, NET_RAW]
+    ports:
+      - "7701:7700"
+    volumes:
+      - ./config.yaml:/etc/swarmguard/config.yaml:ro
+      - swarmguard-client-data:/var/lib/swarmguard
+    command: >
+      --config /etc/swarmguard/config.yaml
+      --listen /ip4/0.0.0.0/tcp/7700
+      --bootstrap ${HONEYPOT_PEER_ADDR}
+
+volumes:
+  swarmguard-client-data:

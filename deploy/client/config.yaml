@@ -1,0 +1,13 @@
+# SwarmGuard config for the local federated peer (smoke test client).
+# No ingest sources — this node only receives events via gossipsub.
+federation_mode: federated
+store:
+  dir: /var/lib/swarmguard
+enforce:
+  backend: ipset
+  set_name: swarmguard-client
+reputation:
+  block_threshold: 1000
+  unblock_threshold: 900
+  half_life: 168h
+  decay_interval: 1h
