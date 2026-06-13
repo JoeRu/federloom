@@ -33,6 +33,9 @@ func IssueCert(priv ed25519.PrivateKey, peerID string, validUntil time.Time) pro
 // key is the caller's concern (internal/trust) — a valid cert from an
 // un-anchored identity still resolves as a stranger.
 func VerifyCert(cert proto.PeerCert, now time.Time) error {
+	if cert.PeerID == "" {
+		return fmt.Errorf("identity: cert has empty peer ID")
+	}
 	if len(cert.PersonKey) != ed25519.PublicKeySize {
 		return fmt.Errorf("identity: cert for %s: bad person key length %d", cert.PeerID, len(cert.PersonKey))
 	}

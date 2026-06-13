@@ -36,6 +36,14 @@ func TestCertExpiredFails(t *testing.T) {
 	}
 }
 
+func TestCertRejectsEmptyPeerID(t *testing.T) {
+	priv, _ := identity.GeneratePersonKey(filepath.Join(t.TempDir(), "person.key"))
+	cert := identity.IssueCert(priv, "", time.Now().Add(time.Hour))
+	if err := identity.VerifyCert(cert, time.Now()); err == nil {
+		t.Error("cert with empty peer ID accepted")
+	}
+}
+
 func TestCertRejectsDelimiterInPeerID(t *testing.T) {
 	priv, _ := identity.GeneratePersonKey(filepath.Join(t.TempDir(), "person.key"))
 	cert := identity.IssueCert(priv, "evil|injected", time.Now().Add(time.Hour))
