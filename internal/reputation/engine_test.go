@@ -102,3 +102,26 @@ func TestCorroborationStrangersCountOnce(t *testing.T) {
 		t.Errorf("corroboration = %d, want 2 (1 Person group + 1 stranger bucket)", rec.Corroboration)
 	}
 }
+
+// TestAnchoredAddsScoreOnTopOfSaturatedStrangers: once strangers have pinned the
+// score at the cap, an anchored reporter still raises it past the cap — the
+// stranger ceiling must not bound anchored contributions (spec §4.2).
+func TestAnchoredAddsScoreOnTopOfSaturatedStrangers(t *testing.T) {
+	e := openEngineCap(t, 15)
+	for i := 0; i < 50; i++ {
+		if _, err := e.Record("192.0.2.5", "ssh-auth-success", "stranger", 1.0, "", false); err != nil {
+			t.Fatalf("stranger Record: %v", err)
+		}
+	}
+	saturated, _ := e.GetRecord("192.0.2.5")
+	if saturated.Score > 15.0001 {
+		t.Fatalf("precondition: strangers exceeded cap (%v)", saturated.Score)
+	}
+	score, err := e.Record("192.0.2.5", "ssh-auth-success", "joA", 0.9, "jo", true)
+	if err != nil {
+		t.Fatalf("anchored Record: %v", err)
+	}
+	if score <= saturated.Score {
+		t.Errorf("anchored reporter added no score over saturated strangers: %v -> %v", saturated.Score, score)
+	}
+}

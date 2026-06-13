@@ -50,12 +50,12 @@ func TestNeverBlockPoisoningRFC1918(t *testing.T) {
 			}
 			defer s.Close()
 
-			engine := reputation.New(s, 7*24*time.Hour)
+			engine := reputation.New(s, 7*24*time.Hour, 15)
 			sink := &mockSink{}
 
 			for i := 0; i < 10; i++ {
 				peerID := fmt.Sprintf("malicious-peer-%d", i)
-				score, err := engine.Record(ip, "ssh-auth-success", peerID, 1.0)
+				score, err := engine.Record(ip, "ssh-auth-success", peerID, 1.0, peerID, true)
 				if err != nil {
 					t.Fatalf("Record[%d]: %v", i, err)
 				}
@@ -78,7 +78,7 @@ func TestNeverBlockPoisoningRFC1918(t *testing.T) {
 // and link-local addresses (spec §6.2 / CLAUDE.md invariant 3).
 func TestNeverBlockPoisoningLoopback(t *testing.T) {
 	protected := []string{
-		"::1",    // IPv6 loopback
+		"::1",     // IPv6 loopback
 		"fe80::1", // IPv6 link-local
 	}
 
@@ -93,12 +93,12 @@ func TestNeverBlockPoisoningLoopback(t *testing.T) {
 			}
 			defer s.Close()
 
-			engine := reputation.New(s, 7*24*time.Hour)
+			engine := reputation.New(s, 7*24*time.Hour, 15)
 			sink := &mockSink{}
 
 			for i := 0; i < 10; i++ {
 				peerID := fmt.Sprintf("malicious-peer-%d", i)
-				score, err := engine.Record(ip, "ssh-auth-success", peerID, 1.0)
+				score, err := engine.Record(ip, "ssh-auth-success", peerID, 1.0, peerID, true)
 				if err != nil {
 					t.Fatalf("Record[%d]: %v", i, err)
 				}
@@ -129,7 +129,7 @@ func TestNeverBlockPublicIPNotProtected(t *testing.T) {
 	}
 	defer s.Close()
 
-	engine := reputation.New(s, 7*24*time.Hour)
+	engine := reputation.New(s, 7*24*time.Hour, 15)
 	nbl := enforce.NewNeverBlockList(nil)
 	sink := &mockSink{}
 
@@ -139,7 +139,7 @@ func TestNeverBlockPublicIPNotProtected(t *testing.T) {
 	//   after 3: 64 + 1*40*(1-64/100) = 64 + 14.4 = 78.4  → > 75 threshold
 	for i := 0; i < 3; i++ {
 		peerID := fmt.Sprintf("peer-%d", i)
-		score, err := engine.Record(ip, "ssh-auth-success", peerID, 1.0)
+		score, err := engine.Record(ip, "ssh-auth-success", peerID, 1.0, peerID, true)
 		if err != nil {
 			t.Fatalf("Record[%d]: %v", i, err)
 		}

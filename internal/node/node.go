@@ -39,7 +39,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 	if halfLife <= 0 {
 		halfLife = 7 * 24 * time.Hour
 	}
-	eng := reputation.New(s, halfLife)
+	eng := reputation.New(s, halfLife, cfg.Trust.StrangerScoreCap)
 
 	var sink enforce.Sink
 	switch cfg.Enforce.Backend {
@@ -133,7 +133,7 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 		return
 	}
 	e.ReporterID = n.selfID
-	score, err := n.rep.Record(e.IP, e.Reason, n.selfID, 1.0)
+	score, err := n.rep.Record(e.IP, e.Reason, n.selfID, 1.0, n.selfID, true)
 	if err != nil {
 		log.Printf("node: record local %s: %v", e.IP, err)
 		return
@@ -154,7 +154,7 @@ func (n *Node) processRemote(e proto.Event) {
 	if n.neverblock.Contains(e.IP) {
 		return
 	}
-	score, err := n.rep.Record(e.IP, e.Reason, e.ReporterID, 0.3)
+	score, err := n.rep.Record(e.IP, e.Reason, e.ReporterID, 0.3, "", false)
 	if err != nil {
 		log.Printf("node: record remote %s: %v", e.IP, err)
 		return
