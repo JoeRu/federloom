@@ -3,8 +3,10 @@ package main
 import (
 	"crypto/ed25519"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
+	"io/fs"
 	"os"
 	"time"
 
@@ -163,7 +165,17 @@ func writeCert(path string, cert proto.PeerCert) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(path, data, 0o644)
+	// Atomic write: swarmd reads peer.cert at boot; a truncated read during a
+	// racing `identity init` would drop the node's vouch.
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, data, 0o644); err != nil {
+		return err
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		os.Remove(tmp)
+		return err
+	}
+	return nil
 }
 
 func appendIssuedCert(path string, cert proto.PeerCert) error {
@@ -180,11 +192,17 @@ func appendIssuedCert(path string, cert proto.PeerCert) error {
 	return trust.SaveCerts(path, append(certs, cert))
 }
 
-// personPubMust loads the Person public key for self-anchor detection in trust.go.
-func personPubMust(personKeyFile string) ed25519.PublicKey {
+// ownPersonPub loads this operator's own Person public key for self-anchor
+// detection. A missing key (no identity yet) returns (nil, nil) — there is
+// simply nothing to compare against. Any other error (e.g. bad permissions)
+// is surfaced so the own-identity guard is never silently bypassed.
+func ownPersonPub(personKeyFile string) (ed25519.PublicKey, error) {
 	priv, err := identity.LoadPersonKey(personKeyFile)
-	if err != nil {
-		return nil
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil
 	}
-	return identity.PersonPub(priv)
+	if err != nil {
+		return nil, err
+	}
+	return identity.PersonPub(priv), nil
 }

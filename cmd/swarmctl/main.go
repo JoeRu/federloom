@@ -10,17 +10,19 @@ import (
 func usage() {
 	fmt.Fprint(os.Stderr, `swarmctl — SwarmGuard admin CLI
 
+Flags must come BEFORE positional args (PERSON, PEER_ID, FILE).
+
 Usage:
   swarmctl identity                      print this node's peer ID
   swarmctl identity init --label NAME    create a Person identity + self peer-cert
   swarmctl identity show                 print Person pubkey + fingerprint
   swarmctl peer-cert PEER_ID             sign a peer-cert for another machine
-  swarmctl trust add PERSON --identity ed25519:...   anchor a Person
-  swarmctl trust set PERSON [--weight W] [--label L]
+  swarmctl trust add --identity ed25519:... [--weight W] [--label L] PERSON
+  swarmctl trust set [--weight W] [--label L] PERSON
   swarmctl trust remove PERSON
   swarmctl trust list
   swarmctl trust export                  write this Person's bundle to stdout
-  swarmctl trust import FILE [--as NAME] [--weight W]
+  swarmctl trust import [--as NAME] [--weight W] FILE
 
 All commands accept -config PATH (same file swarmd uses).
 `)
