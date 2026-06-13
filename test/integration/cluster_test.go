@@ -70,8 +70,8 @@ func TestStarTopologyGossipForward(t *testing.T) {
 	for i, r := range receivers {
 		select {
 		case got := <-r.Subscribe():
-			if got.IP != want.IP {
-				t.Errorf("receiver %d: got IP %q, want %q", i, got.IP, want.IP)
+			if got.Event.IP != want.IP {
+				t.Errorf("receiver %d: got IP %q, want %q", i, got.Event.IP, want.IP)
 			}
 		case <-time.After(3 * time.Second):
 			t.Errorf("receiver %d did not receive event within 3s", i)
@@ -99,8 +99,8 @@ func TestStarTopologyGossipSymmetric(t *testing.T) {
 	for i, r := range receivers {
 		select {
 		case got := <-r.Subscribe():
-			if got.IP != want.IP {
-				t.Errorf("receiver %d: got IP %q, want %q", i, got.IP, want.IP)
+			if got.Event.IP != want.IP {
+				t.Errorf("receiver %d: got IP %q, want %q", i, got.Event.IP, want.IP)
 			}
 		case <-time.After(3 * time.Second):
 			t.Errorf("receiver %d did not receive event within 3s", i)

@@ -10,14 +10,17 @@ import (
 )
 
 // ScoreRecord is the internal on-disk reputation record for one IP.
-// ReporterIDs is tracking metadata never sent on the wire.
+// ReporterIDs/Groups are tracking metadata never sent on the wire.
 type ScoreRecord struct {
-	Score         float64   `json:"score"`
-	Corroboration int       `json:"corroboration"`
-	FirstSeen     time.Time `json:"first_seen"`
-	LastSeen      time.Time `json:"last_seen"`
-	Reasons       []string  `json:"reasons"`
-	ReporterIDs   []string  `json:"reporter_ids"`
+	Score           float64   `json:"score"`
+	Corroboration   int       `json:"corroboration"`
+	FirstSeen       time.Time `json:"first_seen"`
+	LastSeen        time.Time `json:"last_seen"`
+	Reasons         []string  `json:"reasons"`
+	ReporterIDs     []string  `json:"reporter_ids"`
+	Groups          []string  `json:"groups,omitempty"`           // distinct anchored Person names that reported this IP
+	StrangerSeen    bool      `json:"stranger_seen,omitempty"`    // at least one un-anchored reporter
+	StrangerContrib float64   `json:"stranger_contrib,omitempty"` // cumulative score points added by strangers (capped)
 }
 
 // BadgerStore wraps BadgerDB for reputation persistence.

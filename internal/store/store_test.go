@@ -87,3 +87,31 @@ func TestScanScores(t *testing.T) {
 		t.Errorf("wrong scores: %v", seen)
 	}
 }
+
+func TestScoreRecordTrustFieldsRoundTrip(t *testing.T) {
+	s := openTestStore(t)
+
+	rec := store.ScoreRecord{
+		Score:           42,
+		Groups:          []string{"jo", "alice"},
+		StrangerSeen:    true,
+		StrangerContrib: 7.5,
+		LastSeen:        time.Now(),
+	}
+	if err := s.PutScore("192.0.2.7", rec, time.Hour); err != nil {
+		t.Fatalf("PutScore: %v", err)
+	}
+	got, err := s.GetScore("192.0.2.7")
+	if err != nil {
+		t.Fatalf("GetScore: %v", err)
+	}
+	if len(got.Groups) != 2 || got.Groups[0] != "jo" {
+		t.Errorf("Groups = %v, want [jo alice]", got.Groups)
+	}
+	if !got.StrangerSeen {
+		t.Error("StrangerSeen lost")
+	}
+	if got.StrangerContrib != 7.5 {
+		t.Errorf("StrangerContrib = %v, want 7.5", got.StrangerContrib)
+	}
+}

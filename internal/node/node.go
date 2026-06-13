@@ -2,17 +2,21 @@ package node
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"sync"
 	"time"
 
 	"github.com/JoeRu/swarmguard/internal/config"
 	"github.com/JoeRu/swarmguard/internal/enforce"
+	"github.com/JoeRu/swarmguard/internal/identity"
 	"github.com/JoeRu/swarmguard/internal/ingest"
 	"github.com/JoeRu/swarmguard/internal/reputation"
 	"github.com/JoeRu/swarmguard/internal/store"
 	"github.com/JoeRu/swarmguard/internal/transport"
+	"github.com/JoeRu/swarmguard/internal/trust"
 	"github.com/JoeRu/swarmguard/pkg/proto"
 )
 
@@ -26,6 +30,8 @@ type Node struct {
 	sink       enforce.Sink
 	neverblock *enforce.NeverBlockList
 	selfID     string
+	trust      *trust.Store
+	vouch      *proto.PeerCert // this node's own peer-cert, attached to published events
 }
 
 // New wires all subsystems from cfg. t may be nil for local-only operation.
@@ -39,7 +45,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 	if halfLife <= 0 {
 		halfLife = 7 * 24 * time.Hour
 	}
-	eng := reputation.New(s, halfLife)
+	eng := reputation.New(s, halfLife, cfg.Trust.StrangerScoreCap)
 
 	var sink enforce.Sink
 	switch cfg.Enforce.Backend {
@@ -54,6 +60,24 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 	selfID := ""
 	if t != nil {
 		selfID = t.Host().ID().String()
+	}
+
+	ts := trust.NewStore(cfg.TrustAnchorsFile(), cfg.TrustCertsFile(), cfg.Trust.StrangerWeight)
+
+	var vouch *proto.PeerCert
+	if data, err := os.ReadFile(cfg.TrustPeerCertFile()); err == nil {
+		var cert proto.PeerCert
+		if jerr := json.Unmarshal(data, &cert); jerr != nil {
+			log.Printf("node: ignoring malformed peer cert %s: %v", cfg.TrustPeerCertFile(), jerr)
+		} else if verr := identity.VerifyCert(cert, time.Now()); verr != nil {
+			log.Printf("node: ignoring invalid peer cert %s: %v", cfg.TrustPeerCertFile(), verr)
+		} else if selfID != "" && cert.PeerID == selfID {
+			vouch = &cert
+		} else {
+			// No transport identity (selfID == "") or the cert names a different
+			// peer: a node must only vouch for its own verified peer ID.
+			log.Printf("node: peer cert %s is for %s, not this node (%q) — ignoring", cfg.TrustPeerCertFile(), cert.PeerID, selfID)
+		}
 	}
 
 	var sources []ingest.Source
@@ -73,6 +97,8 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		sink:       sink,
 		neverblock: nbl,
 		selfID:     selfID,
+		trust:      ts,
+		vouch:      vouch,
 	}, nil
 }
 
@@ -101,7 +127,7 @@ func (n *Node) Run(ctx context.Context) error {
 	ticker := time.NewTicker(decayInterval)
 	defer ticker.Stop()
 
-	var remoteCh <-chan proto.Event
+	var remoteCh <-chan transport.ReceivedEvent
 	if n.transport != nil {
 		remoteCh = n.transport.Subscribe()
 	}
@@ -114,12 +140,12 @@ func (n *Node) Run(ctx context.Context) error {
 				continue
 			}
 			n.processLocal(ctx, e)
-		case e, ok := <-remoteCh:
+		case re, ok := <-remoteCh:
 			if !ok {
 				remoteCh = nil
 				continue
 			}
-			n.processRemote(e)
+			n.ProcessRemote(re)
 		case <-ticker.C:
 			n.runDecay()
 		case <-ctx.Done():
@@ -133,7 +159,8 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 		return
 	}
 	e.ReporterID = n.selfID
-	score, err := n.rep.Record(e.IP, e.Reason, n.selfID, 1.0)
+	e.Vouch = n.vouch
+	score, err := n.rep.Record(e.IP, e.Reason, n.selfID, 1.0, n.selfID, true)
 	if err != nil {
 		log.Printf("node: record local %s: %v", e.IP, err)
 		return
@@ -150,11 +177,39 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 	}
 }
 
-func (n *Node) processRemote(e proto.Event) {
+// ProcessRemote scores one event received from the swarm: it drops spoofed
+// reporters, verifies any attached vouch, resolves the reporter's trust, and
+// records the observation. Exported so the adversarial suite can drive the
+// remote path directly.
+func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
+	e := re.Event
+	// An empty publisher means the message carried no verified origin — never
+	// trust it (real libp2p peer IDs are non-empty; this also stops the spoof
+	// guard below from passing trivially on "" == "").
+	if re.From == "" {
+		log.Printf("node: drop event with empty verified publisher")
+		return
+	}
+	if e.ReporterID != re.From {
+		log.Printf("node: drop spoofed event: reporter %q != verified publisher %q", e.ReporterID, re.From)
+		return
+	}
 	if n.neverblock.Contains(e.IP) {
 		return
 	}
-	score, err := n.rep.Record(e.IP, e.Reason, e.ReporterID, 0.3)
+
+	if e.Vouch != nil {
+		if e.Vouch.PeerID != e.ReporterID {
+			// A cert for a different peer (replayed by this reporter) proves
+			// nothing about the reporter — ignore it; they stay a stranger.
+			log.Printf("node: vouch for %q attached by %q — ignoring cert", e.Vouch.PeerID, e.ReporterID)
+		} else if err := n.trust.AddCert(*e.Vouch, time.Now()); err != nil {
+			log.Printf("node: invalid vouch from %q: %v", e.ReporterID, err)
+		}
+	}
+
+	weight, group, anchored := n.trust.Resolve(e.ReporterID)
+	score, err := n.rep.Record(e.IP, e.Reason, e.ReporterID, weight, group, anchored)
 	if err != nil {
 		log.Printf("node: record remote %s: %v", e.IP, err)
 		return
@@ -183,6 +238,25 @@ func (n *Node) runDecay() {
 	if err != nil {
 		log.Printf("node: decay scan: %v", err)
 	}
+}
+
+// GetScore returns the raw ScoreRecord for ip (zero value if not found).
+// Exported so the adversarial suite can inspect reputation state without
+// calling Run.
+func (n *Node) GetScore(ip string) (store.ScoreRecord, error) {
+	return n.rep.GetRecord(ip)
+}
+
+// SetTrustReloadInterval overrides the trust-store file re-check interval.
+// Pass 0 in tests to force a reload on every Resolve call.
+func (n *Node) SetTrustReloadInterval(d time.Duration) {
+	n.trust.SetReloadInterval(d)
+}
+
+// CloseStores releases BadgerDB resources. Call in tests that build a Node
+// outside of Run (which closes the store via defer on return).
+func (n *Node) CloseStores() {
+	_ = n.store.Close()
 }
 
 // fanIn merges multiple event channels into one.

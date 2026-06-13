@@ -78,3 +78,46 @@ ingest:
 		t.Errorf("PollInterval: got %v, want 2s", cfg.Ingest.OpenCanary.PollInterval.Duration)
 	}
 }
+
+func TestDefaultsTrust(t *testing.T) {
+	cfg := config.Defaults()
+	if cfg.Trust.AnchorWeight != 0.9 {
+		t.Errorf("AnchorWeight = %v, want 0.9", cfg.Trust.AnchorWeight)
+	}
+	if cfg.Trust.StrangerWeight != 0.3 {
+		t.Errorf("StrangerWeight = %v, want 0.3", cfg.Trust.StrangerWeight)
+	}
+	if cfg.Trust.StrangerScoreCap != 15 {
+		t.Errorf("StrangerScoreCap = %v, want 15", cfg.Trust.StrangerScoreCap)
+	}
+}
+
+func TestTrustPathDefaultsDeriveFromStoreDir(t *testing.T) {
+	cfg := config.Defaults()
+	cfg.Store.Dir = "/var/lib/swarmguard"
+	if got := cfg.TrustAnchorsFile(); got != "/var/lib/swarmguard/anchors.json" {
+		t.Errorf("TrustAnchorsFile = %q", got)
+	}
+	if got := cfg.TrustPersonKeyFile(); got != "/var/lib/swarmguard/person.key" {
+		t.Errorf("TrustPersonKeyFile = %q", got)
+	}
+	if got := cfg.TrustPeerCertFile(); got != "/var/lib/swarmguard/peer.cert" {
+		t.Errorf("TrustPeerCertFile = %q", got)
+	}
+	if got := cfg.TrustCertsFile(); got != "/var/lib/swarmguard/imported-certs.json" {
+		t.Errorf("TrustCertsFile = %q", got)
+	}
+}
+
+func TestTrustPathOverrides(t *testing.T) {
+	cfg, err := config.LoadYAML([]byte("trust:\n  anchors_file: /etc/swarmguard/anchors.json\n  stranger_score_cap: 5\n"))
+	if err != nil {
+		t.Fatalf("LoadYAML: %v", err)
+	}
+	if got := cfg.TrustAnchorsFile(); got != "/etc/swarmguard/anchors.json" {
+		t.Errorf("TrustAnchorsFile override = %q", got)
+	}
+	if cfg.Trust.StrangerScoreCap != 5 {
+		t.Errorf("StrangerScoreCap = %v, want 5", cfg.Trust.StrangerScoreCap)
+	}
+}
