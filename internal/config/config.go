@@ -32,6 +32,7 @@ type Config struct {
 	Reputation     ReputationConfig `yaml:"reputation"`
 	Ingest         IngestConfig     `yaml:"ingest"`
 	Enforce        EnforceConfig    `yaml:"enforce"`
+	Trust          TrustConfig      `yaml:"trust"`
 }
 
 // StoreConfig configures the BadgerDB reputation store.
@@ -76,6 +77,18 @@ type EnforceConfig struct {
 	ExtraWhitelist []string `yaml:"extra_whitelist"`
 }
 
+// TrustConfig tunes the social trust layer (spec §5.1, design doc
+// docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md).
+// Every value is operator-overridable (Invariant 1).
+type TrustConfig struct {
+	AnchorsFile      string  `yaml:"anchors_file"`       // default <store.dir>/anchors.json
+	PersonKeyFile    string  `yaml:"person_key_file"`    // default <store.dir>/person.key
+	PeerCertFile     string  `yaml:"peer_cert_file"`     // default <store.dir>/peer.cert
+	AnchorWeight     float64 `yaml:"anchor_weight"`      // default weight for a newly anchored Person
+	StrangerWeight   float64 `yaml:"stranger_weight"`    // trust for un-vouched reporters
+	StrangerScoreCap float64 `yaml:"stranger_score_cap"` // max total score strangers add per IP
+}
+
 // Defaults returns a Config with sensible production defaults.
 func Defaults() *Config {
 	return &Config{
@@ -101,6 +114,11 @@ func Defaults() *Config {
 				PollInterval: Duration{time.Second},
 			},
 		},
+		Trust: TrustConfig{
+			AnchorWeight:     0.9,
+			StrangerWeight:   0.3,
+			StrangerScoreCap: 15,
+		},
 	}
 }
 
@@ -125,4 +143,34 @@ func Load(path string) (*Config, error) {
 // NodeKeyFile returns the path of the persistent libp2p node key.
 func (c *Config) NodeKeyFile() string {
 	return filepath.Join(c.Store.Dir, "identity.key")
+}
+
+// TrustAnchorsFile returns the anchors.json path (config override or store-dir default).
+func (c *Config) TrustAnchorsFile() string {
+	if c.Trust.AnchorsFile != "" {
+		return c.Trust.AnchorsFile
+	}
+	return filepath.Join(c.Store.Dir, "anchors.json")
+}
+
+// TrustPersonKeyFile returns the Person identity key path.
+func (c *Config) TrustPersonKeyFile() string {
+	if c.Trust.PersonKeyFile != "" {
+		return c.Trust.PersonKeyFile
+	}
+	return filepath.Join(c.Store.Dir, "person.key")
+}
+
+// TrustPeerCertFile returns the path of this node's own vouching cert.
+func (c *Config) TrustPeerCertFile() string {
+	if c.Trust.PeerCertFile != "" {
+		return c.Trust.PeerCertFile
+	}
+	return filepath.Join(c.Store.Dir, "peer.cert")
+}
+
+// TrustCertsFile returns the path of the locally imported cert cache
+// (seeded by `swarmctl trust import`; internal file, no config key).
+func (c *Config) TrustCertsFile() string {
+	return filepath.Join(c.Store.Dir, "imported-certs.json")
 }
