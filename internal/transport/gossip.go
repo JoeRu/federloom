@@ -6,12 +6,20 @@ import (
 	"fmt"
 
 	"github.com/libp2p/go-libp2p"
-	"github.com/libp2p/go-libp2p/core/host"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"github.com/libp2p/go-libp2p/core/host"
 
 	"github.com/JoeRu/swarmguard/pkg/proto"
 )
+
+// ReceivedEvent pairs a decoded Event with the gossipsub-verified original
+// publisher. From is authenticated by libp2p message signing — the node layer
+// rejects events whose ReporterID does not match it (spec §5.1 spoof guard).
+type ReceivedEvent struct {
+	Event proto.Event
+	From  string
+}
 
 // Node is a SwarmGuard P2P peer: libp2p host + gossipsub topic + Kademlia DHT.
 type Node struct {
@@ -20,7 +28,7 @@ type Node struct {
 	topic    *pubsub.Topic
 	sub      *pubsub.Subscription
 	dht      *dht.IpfsDHT
-	events   chan proto.Event
+	events   chan ReceivedEvent
 	stopLoop context.CancelFunc
 }
 
@@ -72,7 +80,7 @@ func New(ctx context.Context, opts Options) (*Node, error) {
 		topic:    t,
 		sub:      sub,
 		dht:      d,
-		events:   make(chan proto.Event, 64),
+		events:   make(chan ReceivedEvent, 64),
 		stopLoop: stopLoop,
 	}
 	go n.readLoop(loopCtx)
@@ -92,9 +100,9 @@ func (n *Node) Publish(ctx context.Context, e proto.Event) error {
 	return n.topic.Publish(ctx, data)
 }
 
-// Subscribe returns a channel that delivers decoded events from the network.
-// The channel is closed when the Node is closed.
-func (n *Node) Subscribe() <-chan proto.Event { return n.events }
+// Subscribe returns a channel that delivers decoded events from the network
+// together with their verified publisher. Closed when the Node is closed.
+func (n *Node) Subscribe() <-chan ReceivedEvent { return n.events }
 
 // Close shuts down the subscription, topic, DHT, and host.
 func (n *Node) Close() error {
@@ -112,8 +120,8 @@ func (n *Node) readLoop(ctx context.Context) {
 		if err != nil {
 			return
 		}
-		// skip messages we published ourselves
-		if msg.ReceivedFrom == n.host.ID() {
+		// skip messages we published ourselves (GetFrom = verified original publisher)
+		if msg.GetFrom() == n.host.ID() {
 			continue
 		}
 		var e proto.Event
@@ -121,7 +129,7 @@ func (n *Node) readLoop(ctx context.Context) {
 			continue
 		}
 		select {
-		case n.events <- e:
+		case n.events <- ReceivedEvent{Event: e, From: msg.GetFrom().String()}:
 		case <-ctx.Done():
 			return
 		}

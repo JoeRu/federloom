@@ -101,7 +101,7 @@ func (n *Node) Run(ctx context.Context) error {
 	ticker := time.NewTicker(decayInterval)
 	defer ticker.Stop()
 
-	var remoteCh <-chan proto.Event
+	var remoteCh <-chan transport.ReceivedEvent
 	if n.transport != nil {
 		remoteCh = n.transport.Subscribe()
 	}
@@ -114,12 +114,12 @@ func (n *Node) Run(ctx context.Context) error {
 				continue
 			}
 			n.processLocal(ctx, e)
-		case e, ok := <-remoteCh:
+		case re, ok := <-remoteCh:
 			if !ok {
 				remoteCh = nil
 				continue
 			}
-			n.processRemote(e)
+			n.ProcessRemote(re)
 		case <-ticker.C:
 			n.runDecay()
 		case <-ctx.Done():
@@ -150,7 +150,10 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 	}
 }
 
-func (n *Node) processRemote(e proto.Event) {
+// ProcessRemote scores one event received from the swarm. Exported so the
+// adversarial suite can drive the remote path directly.
+func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
+	e := re.Event
 	if n.neverblock.Contains(e.IP) {
 		return
 	}
