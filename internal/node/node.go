@@ -240,6 +240,25 @@ func (n *Node) runDecay() {
 	}
 }
 
+// GetScore returns the raw ScoreRecord for ip (zero value if not found).
+// Exported so the adversarial suite can inspect reputation state without
+// calling Run.
+func (n *Node) GetScore(ip string) (store.ScoreRecord, error) {
+	return n.rep.GetRecord(ip)
+}
+
+// SetTrustReloadInterval overrides the trust-store file re-check interval.
+// Pass 0 in tests to force a reload on every Resolve call.
+func (n *Node) SetTrustReloadInterval(d time.Duration) {
+	n.trust.SetReloadInterval(d)
+}
+
+// CloseStores releases BadgerDB resources. Call in tests that build a Node
+// outside of Run (which closes the store via defer on return).
+func (n *Node) CloseStores() {
+	_ = n.store.Close()
+}
+
 // fanIn merges multiple event channels into one.
 func fanIn(ctx context.Context, chans ...<-chan proto.Event) <-chan proto.Event {
 	out := make(chan proto.Event, 64)
