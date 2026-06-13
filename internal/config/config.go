@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"gopkg.in/yaml.v3"
@@ -119,4 +120,9 @@ func Load(path string) (*Config, error) {
 		return nil, fmt.Errorf("config: read %q: %w", path, err)
 	}
 	return LoadYAML(data)
+}
+
+// NodeKeyFile returns the path of the persistent libp2p node key.
+func (c *Config) NodeKeyFile() string {
+	return filepath.Join(c.Store.Dir, "identity.key")
 }

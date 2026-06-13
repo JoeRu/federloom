@@ -14,6 +14,7 @@ import (
 	"github.com/multiformats/go-multiaddr"
 
 	"github.com/JoeRu/swarmguard/internal/config"
+	"github.com/JoeRu/swarmguard/internal/identity"
 	"github.com/JoeRu/swarmguard/internal/node"
 	"github.com/JoeRu/swarmguard/internal/transport"
 )
@@ -48,9 +49,15 @@ func main() {
 		mode = transport.ModeRelay
 	}
 
+	priv, err := identity.LoadOrCreateNodeKey(cfg.NodeKeyFile())
+	if err != nil {
+		log.Fatalf("node identity: %v", err)
+	}
+
 	t, err := transport.New(ctx, transport.Options{
 		ListenAddrs: []multiaddr.Multiaddr{listenMA},
 		Mode:        mode,
+		PrivKey:     priv,
 	})
 	if err != nil {
 		log.Fatalf("start transport: %v", err)
