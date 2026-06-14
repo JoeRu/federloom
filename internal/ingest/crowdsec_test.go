@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -170,5 +171,72 @@ func TestCrowdSec_LAPIError(t *testing.T) {
 	cs.fetchAlerts(context.Background(), ch)
 	if len(ch) != 0 {
 		t.Errorf("got %d events on LAPI error, want 0", len(ch))
+	}
+}
+
+func TestCrowdSec_MachineAuth(t *testing.T) {
+	const fakeJWT = "eyJ.test.token"
+	var mu sync.Mutex
+	authCalls := 0
+	var lastAuthHeader string
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v1/auth/machine":
+			var req csAuthReq
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				http.Error(w, "bad request", http.StatusBadRequest)
+				return
+			}
+			if req.MachineID != "agent1" || req.Password != "secret" {
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				return
+			}
+			mu.Lock()
+			authCalls++
+			mu.Unlock()
+			json.NewEncoder(w).Encode(csAuthResp{
+				Token:  fakeJWT,
+				Expire: time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+			})
+		case "/v1/decisions/stream":
+			mu.Lock()
+			lastAuthHeader = r.Header.Get("Authorization")
+			mu.Unlock()
+			json.NewEncoder(w).Encode(csDecisionStream{})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	cs := NewCrowdSec(config.CrowdSecConfig{
+		LAPIURL:         srv.URL,
+		MachineID:       "agent1",
+		MachinePassword: "secret",
+		EnableDecisions: true,
+	}, "self-test")
+
+	// Seed JWT to skip initial auth; then call get() which checks expiry.
+	if err := cs.authenticate(context.Background()); err != nil {
+		t.Fatalf("authenticate: %v", err)
+	}
+
+	ch := make(chan proto.Event, 10)
+	cs.fetchDecisions(context.Background(), ch)
+
+	mu.Lock()
+	auth := lastAuthHeader
+	calls := authCalls
+	mu.Unlock()
+
+	if !strings.HasPrefix(auth, "Bearer ") {
+		t.Errorf("Authorization header = %q, want Bearer token", auth)
+	}
+	if !strings.Contains(auth, fakeJWT) {
+		t.Errorf("Authorization header = %q, want JWT %q", auth, fakeJWT)
+	}
+	if calls != 1 {
+		t.Errorf("auth called %d times, want 1", calls)
 	}
 }
