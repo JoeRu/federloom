@@ -1,0 +1,226 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    },
+    {
+      "name": "DS_SWARMGUARD_SQLITE",
+      "label": "SwarmGuard SQLite",
+      "type": "datasource",
+      "pluginId": "frser-sqlite-datasource",
+      "pluginName": "frser-sqlite-datasource"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {"type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0"},
+    {"type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0"},
+    {"type": "datasource", "id": "frser-sqlite-datasource", "name": "frser-sqlite-datasource", "version": "1.0.0"},
+    {"type": "panel", "id": "timeseries", "name": "Time series", "version": ""},
+    {"type": "panel", "id": "stat", "name": "Stat", "version": ""},
+    {"type": "panel", "id": "barchart", "name": "Bar chart", "version": ""},
+    {"type": "panel", "id": "table", "name": "Table", "version": ""}
+  ],
+  "annotations": {"list": []},
+  "description": "SwarmGuard reputation events, rule firings, and active blocks with due-time",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "id": 10,
+      "title": "Live — Prometheus",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 1}},
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 1},
+      "id": 1,
+      "options": {"legend": {"calcs": ["sum"], "displayMode": "table"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+          "expr": "sum by (reason) (rate(swarmguard_events_received_total{job=~\"$node\"}[5m]) * 60)",
+          "legendFormat": "{{reason}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Events / min by reason",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "palette-classic"}, "custom": {"lineWidth": 1}},
+        "overrides": []
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 1},
+      "id": 2,
+      "options": {"legend": {"calcs": ["sum"], "displayMode": "table"}, "tooltip": {"mode": "multi"}},
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+          "expr": "sum by (action) (rate(swarmguard_rules_fired_total{job=~\"$node\"}[5m]) * 60)",
+          "legendFormat": "{{action}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Rule firings / min by action",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 9},
+      "id": 3,
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "orientation": "auto", "textMode": "auto", "colorMode": "background"},
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+          "expr": "sum(swarmguard_blocked_ips{job=~\"$node\"})",
+          "legendFormat": "Blocked IPs",
+          "refId": "A"
+        }
+      ],
+      "title": "Blocked IPs",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"steps": [{"color": "blue", "value": null}]}}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 9},
+      "id": 4,
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "orientation": "auto", "textMode": "auto", "colorMode": "background"},
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+          "expr": "sum(swarmguard_federation_peers{job=~\"$node\"})",
+          "legendFormat": "Peers",
+          "refId": "A"
+        }
+      ],
+      "title": "Federation peers",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 9},
+      "id": 5,
+      "options": {"xField": "Value", "orientation": "horizontal"},
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+          "expr": "topk(10, sum by (reporter_id) (swarmguard_events_received_total{job=~\"$node\"}))",
+          "legendFormat": "{{reporter_id}}",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Top 10 reporters",
+      "type": "barchart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 17},
+      "id": 11,
+      "title": "History — SQLite (local node only)",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 18},
+      "id": 6,
+      "options": {"sortBy": [{"displayName": "time", "desc": true}]},
+      "targets": [
+        {
+          "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
+          "rawSql": "SELECT datetime(ts,'unixepoch','localtime') AS time, ip, reason, reporter, ROUND(score,1) AS score FROM events ORDER BY ts DESC LIMIT 200",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "title": "Event log (latest 200)",
+      "type": "table"
+    },
+    {
+      "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 26},
+      "id": 7,
+      "options": {"sortBy": [{"displayName": "due_time", "desc": false}]},
+      "targets": [
+        {
+          "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
+          "rawSql": "SELECT ip, ROUND(score_at_block,1) AS score, datetime(expected_unblock,'unixepoch','localtime') AS due_time FROM blocks WHERE unblocked_at IS NULL ORDER BY expected_unblock ASC",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "title": "Active blocks + due-time",
+      "type": "table"
+    },
+    {
+      "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 26},
+      "id": 8,
+      "options": {"sortBy": [{"displayName": "time", "desc": true}]},
+      "targets": [
+        {
+          "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
+          "rawSql": "SELECT datetime(ts,'unixepoch','localtime') AS time, ip, rule, action, ROUND(score,1) AS score FROM rule_firings ORDER BY ts DESC LIMIT 200",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "title": "Rule firings (latest 200)",
+      "type": "table"
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["swarmguard"],
+  "templating": {
+    "list": [
+      {
+        "current": {"selected": true, "text": "All", "value": "$__all"},
+        "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+        "definition": "label_values(swarmguard_events_received_total,job)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Node",
+        "multi": false,
+        "name": "node",
+        "options": [],
+        "query": {
+          "query": "label_values(swarmguard_events_received_total,job)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {"from": "now-6h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "SwarmGuard",
+  "uid": "swarmguard-v1",
+  "version": 1,
+  "weekStart": ""
+}

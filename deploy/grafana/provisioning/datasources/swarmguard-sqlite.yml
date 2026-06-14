@@ -1,0 +1,9 @@
+apiVersion: 1
+datasources:
+  - name: SwarmGuard SQLite
+    type: frser-sqlite-datasource
+    access: proxy
+    uid: swarmguard-sqlite
+    jsonData:
+      path: /var/lib/swarmguard/metrics.db
+    editable: true
