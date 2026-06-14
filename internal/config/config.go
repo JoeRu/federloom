@@ -27,12 +27,13 @@ func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 
 // Config is the top-level runtime configuration.
 type Config struct {
-	FederationMode string           `yaml:"federation_mode"`
-	Store          StoreConfig      `yaml:"store"`
-	Reputation     ReputationConfig `yaml:"reputation"`
-	Ingest         IngestConfig     `yaml:"ingest"`
-	Enforce        EnforceConfig    `yaml:"enforce"`
-	Trust          TrustConfig      `yaml:"trust"`
+	FederationMode string              `yaml:"federation_mode"`
+	Store          StoreConfig         `yaml:"store"`
+	Reputation     ReputationConfig    `yaml:"reputation"`
+	Ingest         IngestConfig        `yaml:"ingest"`
+	Enforce        EnforceConfig       `yaml:"enforce"`
+	Trust          TrustConfig         `yaml:"trust"`
+	Observability  ObservabilityConfig `yaml:"observability"`
 }
 
 // StoreConfig configures the BadgerDB reputation store.
@@ -104,6 +105,15 @@ type TrustConfig struct {
 	AnchorWeight     float64 `yaml:"anchor_weight"`      // default weight for a newly anchored Person
 	StrangerWeight   float64 `yaml:"stranger_weight"`    // trust for un-vouched reporters
 	StrangerScoreCap float64 `yaml:"stranger_score_cap"` // max total score strangers add per IP
+}
+
+// ObservabilityConfig controls the optional observability plane (spec §11.2).
+// Both outputs are disabled by default; set non-empty values to enable.
+type ObservabilityConfig struct {
+	PrometheusAddr      string   `yaml:"prometheus_addr"`       // e.g. ":9101"; "" = disabled
+	SQLitePath          string   `yaml:"sqlite_path"`           // path to metrics.db; "" = disabled
+	SQLiteRetention     Duration `yaml:"sqlite_retention"`      // rows older than this are pruned
+	ScoreGaugeThreshold float64  `yaml:"score_gauge_threshold"` // 0 = half of block_threshold
 }
 
 // Defaults returns a Config with sensible production defaults.

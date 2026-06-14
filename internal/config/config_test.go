@@ -121,3 +121,40 @@ func TestTrustPathOverrides(t *testing.T) {
 		t.Errorf("StrangerScoreCap = %v, want 5", cfg.Trust.StrangerScoreCap)
 	}
 }
+
+func TestObservabilityConfig_YAML(t *testing.T) {
+	yaml := `
+observability:
+  prometheus_addr: ":9101"
+  sqlite_path: "metrics.db"
+  sqlite_retention: 360h
+  score_gauge_threshold: 30
+`
+	cfg, err := config.LoadYAML([]byte(yaml))
+	if err != nil {
+		t.Fatalf("LoadYAML: %v", err)
+	}
+	if cfg.Observability.PrometheusAddr != ":9101" {
+		t.Errorf("PrometheusAddr = %q, want :9101", cfg.Observability.PrometheusAddr)
+	}
+	if cfg.Observability.SQLitePath != "metrics.db" {
+		t.Errorf("SQLitePath = %q, want metrics.db", cfg.Observability.SQLitePath)
+	}
+	if cfg.Observability.SQLiteRetention.Duration != 360*time.Hour {
+		t.Errorf("SQLiteRetention = %v, want 360h", cfg.Observability.SQLiteRetention.Duration)
+	}
+	if cfg.Observability.ScoreGaugeThreshold != 30 {
+		t.Errorf("ScoreGaugeThreshold = %v, want 30", cfg.Observability.ScoreGaugeThreshold)
+	}
+}
+
+func TestObservabilityConfig_Defaults(t *testing.T) {
+	cfg := config.Defaults()
+	// All fields zero/empty = observability disabled by default (spec §11.2).
+	if cfg.Observability.PrometheusAddr != "" {
+		t.Errorf("default PrometheusAddr should be empty, got %q", cfg.Observability.PrometheusAddr)
+	}
+	if cfg.Observability.SQLitePath != "" {
+		t.Errorf("default SQLitePath should be empty, got %q", cfg.Observability.SQLitePath)
+	}
+}
