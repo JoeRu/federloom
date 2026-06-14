@@ -31,6 +31,7 @@ services:
     cap_add: [NET_ADMIN, NET_RAW]
     ports:
       - "7700:7700"
+      - "9101:9101"
     volumes:
       - ./config.yaml:/etc/swarmguard/config.yaml:ro
       - ./rules.yaml:/etc/swarmguard/rules.yaml:ro

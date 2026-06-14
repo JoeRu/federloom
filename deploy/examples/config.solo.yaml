@@ -14,3 +14,10 @@ ingest:
     poll_interval: 30s
     enable_decisions: true
     enable_alerts: true
+# Optional observability plane (disabled by default, spec §11.2).
+# Uncomment to enable:
+# observability:
+#   prometheus_addr: ":9101"          # expose Prometheus /metrics
+#   sqlite_path: "metrics.db"         # event history (relative to store.dir)
+#   sqlite_retention: 360h            # prune rows older than 15 days
+#   score_gauge_threshold: 0          # emit ip_score gauge for IPs above this; 0 = block_threshold/2
