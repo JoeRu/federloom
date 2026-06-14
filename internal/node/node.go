@@ -13,6 +13,7 @@ import (
 	"github.com/JoeRu/swarmguard/internal/enforce"
 	"github.com/JoeRu/swarmguard/internal/identity"
 	"github.com/JoeRu/swarmguard/internal/ingest"
+	"github.com/JoeRu/swarmguard/internal/observability"
 	"github.com/JoeRu/swarmguard/internal/reputation"
 	"github.com/JoeRu/swarmguard/internal/rules"
 	"github.com/JoeRu/swarmguard/internal/store"
@@ -35,6 +36,7 @@ type Node struct {
 	vouch      *proto.PeerCert   // this node's own peer-cert, attached to published events
 	rules      *rules.RuleSet    // NEW
 	burst      *rules.BurstStore // NEW
+	obs        *observability.Observer
 }
 
 // New wires all subsystems from cfg. t may be nil for local-only operation.
@@ -94,6 +96,11 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		sources = append(sources, ingest.NewCrowdSec(cfg.Ingest.CrowdSec, selfID))
 	}
 
+	obs, err := observability.New(cfg.Observability, cfg.Reputation, cfg.Store.Dir)
+	if err != nil {
+		return nil, fmt.Errorf("node: observability: %w", err)
+	}
+
 	return &Node{
 		cfg:        cfg,
 		transport:  t,
@@ -107,11 +114,13 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		vouch:      vouch,
 		rules:      rules.Load(cfg.RulesFilePath(), cfg.Reputation.BlockThreshold),
 		burst:      rules.NewBurstStore(),
+		obs:        obs,
 	}, nil
 }
 
 // Run starts all subsystems and blocks until ctx is cancelled.
 func (n *Node) Run(ctx context.Context) error {
+	n.obs.Start(ctx)
 	if err := n.sink.Start(ctx); err != nil {
 		return fmt.Errorf("node: start enforce sink: %w", err)
 	}
@@ -140,6 +149,21 @@ func (n *Node) Run(ctx context.Context) error {
 		remoteCh = n.transport.Subscribe()
 	}
 
+	if n.transport != nil {
+		go func() {
+			t := time.NewTicker(30 * time.Second)
+			defer t.Stop()
+			for {
+				select {
+				case <-t.C:
+					n.obs.UpdatePeers(len(n.transport.Host().Network().Peers()))
+				case <-ctx.Done():
+					return
+				}
+			}
+		}()
+	}
+
 	for {
 		select {
 		case e, ok := <-localEvents:
@@ -154,6 +178,7 @@ func (n *Node) Run(ctx context.Context) error {
 				continue
 			}
 			n.ProcessRemote(re)
+			n.obs.RecordFederated("in")
 		case <-ticker.C:
 			n.runDecay()
 		case <-ctx.Done():
@@ -174,18 +199,23 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 	}
 	n.burst.Record(e.IP, e.Reason, time.Now())
 	rec, _ := n.rep.GetRecord(e.IP)
-	action, _ := n.rules.Evaluate(e, rec, n.burst)
+	action, ruleName := n.rules.Evaluate(e, rec, n.burst)
 	switch action {
 	case rules.ActionBlock:
 		if err := n.sink.Block(e.IP); err != nil {
 			log.Printf("node: block %s: %v", e.IP, err)
+		} else {
+			n.obs.RecordBlock(e.IP, rec.Score)
 		}
 	case rules.ActionWatch:
 		log.Printf("node: watch %s reason=%s score=%.1f", e.IP, e.Reason, rec.Score)
 	}
+	n.obs.RecordEvent(e, rec.Score, ruleName, string(action))
 	if n.transport != nil {
 		if err := n.transport.Publish(ctx, e); err != nil {
 			log.Printf("node: publish %s: %v", e.IP, err)
+		} else {
+			n.obs.RecordFederated("out")
 		}
 	}
 }
@@ -228,15 +258,18 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 	}
 	n.burst.Record(e.IP, e.Reason, time.Now())
 	rec, _ := n.rep.GetRecord(e.IP)
-	action, _ := n.rules.Evaluate(e, rec, n.burst)
+	action, ruleName := n.rules.Evaluate(e, rec, n.burst)
 	switch action {
 	case rules.ActionBlock:
 		if err := n.sink.Block(e.IP); err != nil {
 			log.Printf("node: block %s: %v", e.IP, err)
+		} else {
+			n.obs.RecordBlock(e.IP, rec.Score)
 		}
 	case rules.ActionWatch:
 		log.Printf("node: watch %s reason=%s score=%.1f", e.IP, e.Reason, rec.Score)
 	}
+	n.obs.RecordEvent(e, rec.Score, ruleName, string(action))
 }
 
 func (n *Node) runDecay() {
@@ -249,6 +282,8 @@ func (n *Node) runDecay() {
 		if score < n.cfg.Reputation.UnblockThreshold {
 			if err := n.sink.Unblock(ip); err != nil {
 				log.Printf("node: unblock %s: %v", ip, err)
+			} else {
+				n.obs.RecordUnblock(ip)
 			}
 		}
 		return nil
