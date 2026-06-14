@@ -33,6 +33,7 @@ services:
       - "7700:7700"
     volumes:
       - ./config.yaml:/etc/swarmguard/config.yaml:ro
+      - ./rules.yaml:/etc/swarmguard/rules.yaml:ro
       - cowrie-logs:/var/log/cowrie:ro
       - opencanary-logs:/var/log/opencanary:ro
       - swarmguard-data:/var/lib/swarmguard

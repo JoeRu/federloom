@@ -1,0 +1,30 @@
+# SwarmGuard rules for the honeypot sensor node.
+#
+# This node is a sensor — its job is to attract attackers, collect intel,
+# and federate events to peers. block_threshold is set to 1000 (never fires).
+# Rules here are conservative: only block IPs that achieved interactive access;
+# watch everything else so the attacker keeps interacting and feeding us data.
+
+# SSH post-auth command: attacker ran commands in the honeypot shell — block locally.
+- name: honeypot-shell-exec
+  reason: ssh-post-auth-command
+  min_corroboration: 1
+  action: block
+
+# SSH auth success: attacker authenticated to Cowrie — block locally.
+- name: honeypot-auth-success
+  reason: ssh-auth-success
+  min_corroboration: 1
+  action: block
+
+# CrowdSec confirmed ban: trust the local CrowdSec decision — block.
+- name: crowdsec-decision
+  reason: crowdsec-decision
+  min_corroboration: 1
+  action: block
+
+# Everything else (ssh-probe, ssh-auth-bruteforce, smtp-auth-bruteforce, alerts…):
+# watch only — keep the sensor visible to attackers and maximise data collection.
+- name: watch-all
+  min_corroboration: 1
+  action: watch

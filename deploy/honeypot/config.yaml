@@ -8,10 +8,11 @@ enforce:
   set_name: swarmguard
   chain: INPUT
 reputation:
-  block_threshold: 1000
+  block_threshold: 1000    # high: sensor node; legacy fallback never fires
   unblock_threshold: 900
   half_life: 168h
   decay_interval: 1h
+  rules_file: /etc/swarmguard/rules.yaml
 ingest:
   honeypot:
     enabled: true
@@ -21,3 +22,10 @@ ingest:
     enabled: true
     log_file: /var/log/opencanary/opencanary.log
     poll_interval: 1s
+  crowdsec:
+    enabled: false          # enable after: cscli bouncers add swarmguard
+    lapi_url: "http://localhost:8080"
+    api_key: ""             # set in config.local.yaml — never commit
+    poll_interval: 30s
+    enable_decisions: true
+    enable_alerts: true
