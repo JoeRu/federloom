@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/JoeRu/swarmguard/pkg/proto"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/JoeRu/swarmguard/pkg/proto"
 )
 
 type prometheusOutput struct {
