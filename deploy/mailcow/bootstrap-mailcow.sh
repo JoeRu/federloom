@@ -16,16 +16,9 @@ ssh_run()  { ssh -l "$SSH_USER" "$SERVER" "$@"; }
 sudo_run() { ssh -l "$SSH_USER" "$SERVER" sudo "$@"; }
 
 echo "==> [1/6] Registering CrowdSec bouncer on $SERVER"
-API_KEY=$(sudo_run docker exec "$CROWDSEC_CTR" cscli bouncers add swarmguard --key "" 2>&1 \
-  | grep -oP '(?<=API key for '\''swarmguard'\'':\n|key:\s)\S+' \
-  || true)
-
-# Fallback: cscli outputs the key as the last non-empty line of stdout
-if [[ -z "$API_KEY" ]]; then
-  RAW=$(sudo_run docker exec "$CROWDSEC_CTR" cscli bouncers add swarmguard 2>&1 || true)
-  # Key is on a line by itself after "API key for 'swarmguard':"
-  API_KEY=$(echo "$RAW" | awk '/API key for/{found=1; next} found && NF{print; exit}')
-fi
+RAW=$(sudo_run docker exec "$CROWDSEC_CTR" cscli bouncers add swarmguard 2>&1 || true)
+# cscli prints the key as the first non-empty line after "API key for '...':"
+API_KEY=$(echo "$RAW" | awk '/API key for/{found=1; next} found && /[A-Za-z0-9+\/=]/{gsub(/[[:space:]]/,""); print; exit}')
 
 if [[ -z "$API_KEY" ]]; then
   echo ""
