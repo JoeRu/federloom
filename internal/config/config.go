@@ -46,6 +46,7 @@ type ReputationConfig struct {
 	BlockThreshold   float64  `yaml:"block_threshold"`
 	UnblockThreshold float64  `yaml:"unblock_threshold"`
 	DecayInterval    Duration `yaml:"decay_interval"`
+	RulesFile        string   `yaml:"rules_file"` // empty = legacy threshold mode
 }
 
 // IngestConfig groups all ingest source configs.
@@ -173,4 +174,13 @@ func (c *Config) TrustPeerCertFile() string {
 // (seeded by `swarmctl trust import`; internal file, no config key).
 func (c *Config) TrustCertsFile() string {
 	return filepath.Join(c.Store.Dir, "imported-certs.json")
+}
+
+// RulesFilePath returns the path of the operator rule file. If rules_file is
+// not set, it defaults to <store.dir>/rules.yaml (absent = legacy mode).
+func (c *Config) RulesFilePath() string {
+	if c.Reputation.RulesFile != "" {
+		return c.Reputation.RulesFile
+	}
+	return filepath.Join(c.Store.Dir, "rules.yaml")
 }
