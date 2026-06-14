@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"sync"
 	"time"
 
@@ -222,12 +221,18 @@ type csAlert struct {
 }
 
 func (c *CrowdSec) fetchAlerts(ctx context.Context, ch chan<- proto.Event) {
-	since := c.lastAlert
-	if since.IsZero() {
-		since = time.Now().Add(-24 * time.Hour) // bootstrap: last 24h on first poll
+	// CrowdSec v1.7.x /v1/alerts accepts a duration string for ?since= (e.g. "24h"),
+	// not an RFC3339 timestamp. We compute the elapsed time since the last poll
+	// and add a 10s buffer to cover slow polls. First call looks back 24h.
+	var sinceDur time.Duration
+	if c.lastAlert.IsZero() {
+		sinceDur = 24 * time.Hour
+	} else {
+		sinceDur = time.Since(c.lastAlert) + 10*time.Second
 	}
+	sinceStr := fmt.Sprintf("%ds", int(sinceDur.Seconds()))
 
-	u := c.cfg.LAPIURL + "/v1/alerts?since=" + url.QueryEscape(since.UTC().Format(time.RFC3339)) + "&limit=500"
+	u := c.cfg.LAPIURL + "/v1/alerts?since=" + sinceStr + "&limit=500"
 	resp, err := c.getWithMachine(ctx, u)
 	if err != nil {
 		log.Printf("crowdsec: alerts fetch: %v", err)

@@ -141,7 +141,7 @@ func TestCrowdSec_FetchAlerts_ScenarioMapping(t *testing.T) {
 func TestCrowdSec_FetchAlerts_Since(t *testing.T) {
 	var mu sync.Mutex
 	callCount := 0
-	var sinceParam string
+	var sinceParams []string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/v1/watchers/login" {
 			json.NewEncoder(w).Encode(csAuthResp{Token: "tok", Expire: time.Now().Add(time.Hour).UTC().Format(time.RFC3339)})
@@ -149,9 +149,7 @@ func TestCrowdSec_FetchAlerts_Since(t *testing.T) {
 		}
 		mu.Lock()
 		callCount++
-		if callCount == 2 {
-			sinceParam = r.URL.Query().Get("since")
-		}
+		sinceParams = append(sinceParams, r.URL.Query().Get("since"))
 		mu.Unlock()
 		json.NewEncoder(w).Encode([]csAlert{})
 	}))
@@ -159,23 +157,23 @@ func TestCrowdSec_FetchAlerts_Since(t *testing.T) {
 
 	cs := crowdSecMachineForTest(t, srv.URL)
 	ch := make(chan proto.Event, 10)
-	before := time.Now()
-	cs.fetchAlerts(context.Background(), ch) // first poll — sets lastAlert ≈ before
-	cs.fetchAlerts(context.Background(), ch) // second poll — must send ?since=lastAlert
+	cs.fetchAlerts(context.Background(), ch) // first poll
+	cs.fetchAlerts(context.Background(), ch) // second poll
 
 	mu.Lock()
-	sp := sinceParam
+	params := sinceParams
 	mu.Unlock()
 
-	if sp == "" {
-		t.Fatal("second poll did not include ?since= parameter")
+	if len(params) < 2 {
+		t.Fatalf("expected 2 alert polls, got %d", len(params))
 	}
-	since, err := time.Parse(time.RFC3339, sp)
-	if err != nil {
-		t.Fatalf("since is not valid RFC3339: %q: %v", sp, err)
+	// First poll bootstraps with 24h.
+	if params[0] != "86400s" {
+		t.Errorf("first poll since = %q, want 86400s", params[0])
 	}
-	if since.Before(before.Add(-time.Second)) {
-		t.Errorf("since %v is more than 1s before first poll start %v", since, before)
+	// Second poll uses elapsed time since lastAlert (seconds, > 0).
+	if params[1] == "" || params[1] == "0s" {
+		t.Errorf("second poll since = %q, want non-zero duration", params[1])
 	}
 }
 
