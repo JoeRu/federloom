@@ -1,0 +1,52 @@
+# SwarmGuard — example block rules
+#
+# Copy this file to your store directory (e.g. data/reputation/rules.yaml)
+# and set `reputation.rules_file` in config.yaml, or rely on the default
+# auto-discovery at <store.dir>/rules.yaml.
+#
+# Rules are evaluated top-to-bottom; the first matching rule wins.
+# All conditions in a rule are ANDed — omit a field to skip that check.
+#
+# Actions: block | watch | ignore
+
+# Honeypot command execution — high-confidence; block on single corroborator.
+- name: honeypot-shell-exec
+  reason: ssh-post-auth-command
+  min_corroboration: 1
+  action: block
+
+# SSH auth success on honeypot — attacker authenticated; block immediately.
+- name: honeypot-auth-success
+  reason: ssh-auth-success
+  min_corroboration: 1
+  action: block
+
+# SMTP auth bruteforce confirmed by 2+ reporters.
+- name: smtp-brute-consensus
+  reason: smtp-auth-bruteforce
+  min_corroboration: 2
+  action: block
+
+# IMAP auth bruteforce confirmed by 2+ reporters.
+- name: imap-brute-consensus
+  reason: imap-auth-bruteforce
+  min_corroboration: 2
+  action: block
+
+# SSH auth bruteforce burst — 15 events in 10 minutes triggers block.
+- name: ssh-brute-burst
+  reason: ssh-auth-bruteforce
+  min_burst: 15
+  burst_window: 10m
+  action: block
+
+# SSH probe seen by 3+ distinct reporters — coordinated scan.
+- name: ssh-probe-consensus
+  reason: ssh-probe
+  min_corroboration: 3
+  action: block
+
+# Score-based fallback — catches everything that didn't match a specific rule.
+- name: score-fallback
+  min_score: 75
+  action: block

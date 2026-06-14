@@ -4,6 +4,25 @@ All notable changes are documented here. Format: Keep a Changelog; versioning: S
 
 ## [Unreleased]
 
+### Added (rules engine)
+- **Pure YAML rules engine** — `internal/rules` package replaces the single
+  `block_threshold` scalar with a hot-reloadable `rules.yaml` file.
+  - `RuleSet.Evaluate(event, scoreRecord, burstStore)` — first-match rule
+    evaluation with AND conditions: `reason`, `min_score`, `min_corroboration`,
+    `anchored_only`, `min_burst`+`burst_window`.
+  - `BurstStore` — in-memory sliding-window counter per (ip, reason); resets on
+    restart (burst = happening now).
+  - Hot-reload: file re-read on mtime+size change; corrupt file keeps last-good.
+  - Rule validation: rules with unknown action or `min_burst` without `burst_window`
+    are dropped with a log warning at load time.
+  - Actions: `block`, `watch` (log only), `ignore`.
+  - Legacy fallback: if `rules.yaml` is absent, falls back to
+    `score >= block_threshold` — zero config change for existing deployments.
+  - `deploy/examples/rules.yaml` — default rules covering SSH/SMTP/IMAP honeypot
+    events, burst detection, and a score-based fallback.
+- `internal/config` — `ReputationConfig.RulesFile string` (`yaml:"rules_file"`)
+  and `Config.RulesFilePath()` helper.
+
 ### Added
 - **Social trust anchors (spec §5.1)** — Ed25519 Person identity keys that bind
   a human to their machines. One operator anchors another's key; every machine
