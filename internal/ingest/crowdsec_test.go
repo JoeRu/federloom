@@ -182,7 +182,7 @@ func TestCrowdSec_MachineAuth(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/v1/auth/machine":
+		case "/v1/watchers/login":
 			var req csAuthReq
 			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 				http.Error(w, "bad request", http.StatusBadRequest)

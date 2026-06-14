@@ -118,7 +118,7 @@ func (c *CrowdSec) authenticate(ctx context.Context) error {
 		Password:  c.cfg.MachinePassword,
 		Scenarios: []string{},
 	})
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.cfg.LAPIURL+"/v1/auth/machine", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.cfg.LAPIURL+"/v1/watchers/login", bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
