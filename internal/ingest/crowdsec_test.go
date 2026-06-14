@@ -14,13 +14,25 @@ import (
 	"github.com/JoeRu/swarmguard/pkg/proto"
 )
 
-// crowdSecForTest returns a CrowdSec adapter pointed at the given test-server URL.
+// crowdSecForTest returns a CrowdSec adapter in bouncer-only mode (decisions, no alerts).
 func crowdSecForTest(t *testing.T, url string) *CrowdSec {
 	t.Helper()
 	return NewCrowdSec(config.CrowdSecConfig{
 		LAPIURL:         url,
 		APIKey:          "test-key",
 		EnableDecisions: true,
+		EnableAlerts:    false,
+	}, "self-test")
+}
+
+// crowdSecMachineForTest returns a CrowdSec adapter in machine-only mode (alerts, no decisions).
+func crowdSecMachineForTest(t *testing.T, url string) *CrowdSec {
+	t.Helper()
+	return NewCrowdSec(config.CrowdSecConfig{
+		LAPIURL:         url,
+		MachineID:       "agent1",
+		MachinePassword: "secret",
+		EnableDecisions: false,
 		EnableAlerts:    true,
 	}, "self-test")
 }
@@ -99,6 +111,10 @@ func TestCrowdSec_FetchDecisions_SkipsDeleted(t *testing.T) {
 
 func TestCrowdSec_FetchAlerts_ScenarioMapping(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/v1/watchers/login" {
+			json.NewEncoder(w).Encode(csAuthResp{Token: "tok", Expire: time.Now().Add(time.Hour).UTC().Format(time.RFC3339)})
+			return
+		}
 		json.NewEncoder(w).Encode([]csAlert{
 			{Source: csAlertSource{IP: "1.2.3.4"}, Scenario: "crowdsecurity/ssh-bf", StartAt: time.Now().UTC().Format(time.RFC3339)},
 			{Source: csAlertSource{IP: "5.6.7.8"}, Scenario: "crowdsecurity/novelty", StartAt: time.Now().UTC().Format(time.RFC3339)},
@@ -106,7 +122,7 @@ func TestCrowdSec_FetchAlerts_ScenarioMapping(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	cs := crowdSecForTest(t, srv.URL)
+	cs := crowdSecMachineForTest(t, srv.URL)
 	ch := make(chan proto.Event, 10)
 	cs.fetchAlerts(context.Background(), ch)
 	if len(ch) != 2 {
@@ -127,6 +143,10 @@ func TestCrowdSec_FetchAlerts_Since(t *testing.T) {
 	callCount := 0
 	var sinceParam string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/v1/watchers/login" {
+			json.NewEncoder(w).Encode(csAuthResp{Token: "tok", Expire: time.Now().Add(time.Hour).UTC().Format(time.RFC3339)})
+			return
+		}
 		mu.Lock()
 		callCount++
 		if callCount == 2 {
@@ -137,7 +157,7 @@ func TestCrowdSec_FetchAlerts_Since(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	cs := crowdSecForTest(t, srv.URL)
+	cs := crowdSecMachineForTest(t, srv.URL)
 	ch := make(chan proto.Event, 10)
 	before := time.Now()
 	cs.fetchAlerts(context.Background(), ch) // first poll — sets lastAlert ≈ before
@@ -165,12 +185,23 @@ func TestCrowdSec_LAPIError(t *testing.T) {
 	}))
 	defer srv.Close()
 
+	// Decisions error (bouncer mode).
 	cs := crowdSecForTest(t, srv.URL)
 	ch := make(chan proto.Event, 10)
 	cs.fetchDecisions(context.Background(), ch)
-	cs.fetchAlerts(context.Background(), ch)
 	if len(ch) != 0 {
 		t.Errorf("got %d events on LAPI error, want 0", len(ch))
+	}
+
+	// Alerts error (machine mode — seed JWT to bypass auth call).
+	csm := crowdSecMachineForTest(t, srv.URL)
+	csm.jwtMu.Lock()
+	csm.jwt = "tok"
+	csm.jwtExpiry = time.Now().Add(time.Hour)
+	csm.jwtMu.Unlock()
+	csm.fetchAlerts(context.Background(), ch)
+	if len(ch) != 0 {
+		t.Errorf("got %d events on alerts LAPI error, want 0", len(ch))
 	}
 }
 
@@ -199,31 +230,26 @@ func TestCrowdSec_MachineAuth(t *testing.T) {
 				Token:  fakeJWT,
 				Expire: time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
 			})
-		case "/v1/decisions/stream":
+		case "/v1/alerts":
 			mu.Lock()
 			lastAuthHeader = r.Header.Get("Authorization")
 			mu.Unlock()
-			json.NewEncoder(w).Encode(csDecisionStream{})
+			json.NewEncoder(w).Encode([]csAlert{})
 		default:
 			http.NotFound(w, r)
 		}
 	}))
 	defer srv.Close()
 
-	cs := NewCrowdSec(config.CrowdSecConfig{
-		LAPIURL:         srv.URL,
-		MachineID:       "agent1",
-		MachinePassword: "secret",
-		EnableDecisions: true,
-	}, "self-test")
+	cs := crowdSecMachineForTest(t, srv.URL)
 
-	// Seed JWT to skip initial auth; then call get() which checks expiry.
+	// Authenticate and then fetchAlerts — which uses machine JWT via getWithMachine.
 	if err := cs.authenticate(context.Background()); err != nil {
 		t.Fatalf("authenticate: %v", err)
 	}
 
 	ch := make(chan proto.Event, 10)
-	cs.fetchDecisions(context.Background(), ch)
+	cs.fetchAlerts(context.Background(), ch)
 
 	mu.Lock()
 	auth := lastAuthHeader

@@ -56,20 +56,29 @@ func NewCrowdSec(cfg config.CrowdSecConfig, selfID string) *CrowdSec {
 func (c *CrowdSec) Name() string { return "crowdsec" }
 
 // Start launches the polling goroutine and returns the event channel.
+// Auth requirements:
+//   - enable_decisions: requires api_key (bouncer key; /v1/decisions/stream rejects JWT)
+//   - enable_alerts:    requires machine_id + machine_password (machine JWT; bouncer key returns 401)
 func (c *CrowdSec) Start(ctx context.Context) (<-chan proto.Event, error) {
 	if c.cfg.LAPIURL == "" {
 		return nil, fmt.Errorf("crowdsec: lapi_url is required")
 	}
+	if c.cfg.EnableDecisions && c.cfg.APIKey == "" {
+		return nil, fmt.Errorf("crowdsec: api_key required for enable_decisions")
+	}
 	hasMachine := c.cfg.MachineID != "" && c.cfg.MachinePassword != ""
-	if !hasMachine && c.cfg.APIKey == "" {
-		return nil, fmt.Errorf("crowdsec: api_key or machine_id+machine_password required")
+	if c.cfg.EnableAlerts && !hasMachine {
+		return nil, fmt.Errorf("crowdsec: machine_id + machine_password required for enable_alerts")
+	}
+	if !c.cfg.EnableDecisions && !c.cfg.EnableAlerts {
+		return nil, fmt.Errorf("crowdsec: at least one of enable_decisions or enable_alerts must be true")
 	}
 	interval := c.cfg.PollInterval.Duration
 	if interval <= 0 {
 		interval = 30 * time.Second
 	}
 
-	if hasMachine {
+	if hasMachine && c.cfg.EnableAlerts {
 		authCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()
 		if err := c.authenticate(authCtx); err != nil {
@@ -167,7 +176,7 @@ func (c *CrowdSec) fetchDecisions(ctx context.Context, ch chan<- proto.Event) {
 	}
 	u := c.cfg.LAPIURL + "/v1/decisions/stream?startup=" + startup
 
-	resp, err := c.get(ctx, u)
+	resp, err := c.getWithBouncer(ctx, u)
 	if err != nil {
 		log.Printf("crowdsec: decisions fetch: %v", err)
 		return
@@ -219,7 +228,7 @@ func (c *CrowdSec) fetchAlerts(ctx context.Context, ch chan<- proto.Event) {
 	}
 
 	u := c.cfg.LAPIURL + "/v1/alerts?since=" + url.QueryEscape(since.UTC().Format(time.RFC3339)) + "&limit=500"
-	resp, err := c.get(ctx, u)
+	resp, err := c.getWithMachine(ctx, u)
 	if err != nil {
 		log.Printf("crowdsec: alerts fetch: %v", err)
 		return
@@ -263,40 +272,49 @@ func mapScenario(scenario string) string {
 	return "crowdsec-alert"
 }
 
-// get performs an authenticated GET. Uses JWT Bearer if machine auth is configured,
-// otherwise falls back to X-Api-Key (bouncer mode).
-func (c *CrowdSec) get(ctx context.Context, rawURL string) (*http.Response, error) {
-	if c.cfg.MachineID != "" {
-		c.jwtMu.Lock()
-		needsRefresh := c.jwt == "" || time.Now().After(c.jwtExpiry.Add(-5*time.Minute))
-		c.jwtMu.Unlock()
-		if needsRefresh {
-			if err := c.authenticate(ctx); err != nil {
-				return nil, fmt.Errorf("crowdsec: re-authenticate: %w", err)
-			}
-		}
-	}
-
+// getWithBouncer performs a GET authenticated with the bouncer API key (X-Api-Key).
+// Used for /v1/decisions/stream — bouncers cannot use JWT for that endpoint.
+func (c *CrowdSec) getWithBouncer(ctx context.Context, rawURL string) (*http.Response, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
 		return nil, err
 	}
-	if c.cfg.MachineID != "" {
-		c.jwtMu.Lock()
-		jwt := c.jwt
-		c.jwtMu.Unlock()
-		req.Header.Set("Authorization", "Bearer "+jwt)
-	} else {
-		req.Header.Set("X-Api-Key", c.cfg.APIKey)
-	}
+	req.Header.Set("X-Api-Key", c.cfg.APIKey)
 	req.Header.Set("Accept", "application/json")
+	return c.do(req)
+}
+
+// getWithMachine performs a GET authenticated with the machine JWT (Bearer).
+// Used for /v1/alerts — machine accounts cannot use the bouncer key for that endpoint.
+func (c *CrowdSec) getWithMachine(ctx context.Context, rawURL string) (*http.Response, error) {
+	c.jwtMu.Lock()
+	needsRefresh := c.jwt == "" || time.Now().After(c.jwtExpiry.Add(-5*time.Minute))
+	c.jwtMu.Unlock()
+	if needsRefresh {
+		if err := c.authenticate(ctx); err != nil {
+			return nil, fmt.Errorf("crowdsec: re-authenticate: %w", err)
+		}
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	c.jwtMu.Lock()
+	jwt := c.jwt
+	c.jwtMu.Unlock()
+	req.Header.Set("Authorization", "Bearer "+jwt)
+	req.Header.Set("Accept", "application/json")
+	return c.do(req)
+}
+
+func (c *CrowdSec) do(req *http.Request) (*http.Response, error) {
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
 		resp.Body.Close()
-		return nil, fmt.Errorf("LAPI returned %d for %s", resp.StatusCode, rawURL)
+		return nil, fmt.Errorf("LAPI returned %d for %s", resp.StatusCode, req.URL)
 	}
 	return resp, nil
 }
