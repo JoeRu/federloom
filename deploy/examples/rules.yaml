@@ -46,6 +46,24 @@
   min_corroboration: 3
   action: block
 
+# CrowdSec decision — confirmed ban from local CrowdSec instance.
+- name: crowdsec-decision
+  reason: crowdsec-decision
+  min_corroboration: 1
+  action: block
+
+# CrowdSec alert corroborated by a second source (honeypot or peer).
+- name: crowdsec-alert-corroborated
+  reason: crowdsec-alert
+  min_corroboration: 2
+  action: block
+
+# Unknown CrowdSec scenario seen by at least one source — watch only.
+- name: crowdsec-alert-watch
+  reason: crowdsec-alert
+  min_corroboration: 1
+  action: watch
+
 # Score-based fallback — catches everything that didn't match a specific rule.
 - name: score-fallback
   min_score: 75

@@ -4,6 +4,14 @@ All notable changes are documented here. Format: Keep a Changelog; versioning: S
 
 ## [Unreleased]
 
+### Added
+- **CrowdSec ingest adapter** (`internal/ingest/crowdsec.go`): polls `/v1/decisions/stream`
+  and `/v1/alerts` from a local CrowdSec LAPI instance; decisions emit
+  `crowdsec-decision` events, alerts map via `scenarioMap` to existing SwarmGuard
+  reason strings or fall back to `crowdsec-alert`. Opt-in via `ingest.crowdsec.enabled`.
+- Three CrowdSec rules in `deploy/examples/rules.yaml`: `crowdsec-decision` (block),
+  `crowdsec-alert-corroborated` (block ≥ 2 sources), `crowdsec-alert-watch` (watch).
+
 ### Added (rules engine)
 - **Pure YAML rules engine** — `internal/rules` package replaces the single
   `block_threshold` scalar with a hot-reloadable `rules.yaml` file.

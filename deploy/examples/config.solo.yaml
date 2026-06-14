@@ -6,3 +6,11 @@ score:
   block_threshold: 80     # local threshold; lists are aids only (spec Leitprinzip 7)
 decay:
   half_life: 168h         # TODO: tune (spec problem D)
+ingest:
+  crowdsec:
+    enabled: false          # set to true after: cscli bouncers add swarmguard
+    lapi_url: "http://localhost:8080"
+    api_key: ""             # paste bouncer key here — never commit; use config.local.yaml
+    poll_interval: 30s
+    enable_decisions: true
+    enable_alerts: true

@@ -90,6 +90,9 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 	if cfg.Ingest.OpenCanary.Enabled {
 		sources = append(sources, ingest.NewOpenCanary(cfg.Ingest.OpenCanary, selfID))
 	}
+	if cfg.Ingest.CrowdSec.Enabled {
+		sources = append(sources, ingest.NewCrowdSec(cfg.Ingest.CrowdSec, selfID))
+	}
 
 	return &Node{
 		cfg:        cfg,
