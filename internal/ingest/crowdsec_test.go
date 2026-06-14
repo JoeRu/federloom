@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 	"time"
 
@@ -121,13 +122,16 @@ func TestCrowdSec_FetchAlerts_ScenarioMapping(t *testing.T) {
 }
 
 func TestCrowdSec_FetchAlerts_Since(t *testing.T) {
+	var mu sync.Mutex
 	callCount := 0
 	var sinceParam string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
 		callCount++
 		if callCount == 2 {
 			sinceParam = r.URL.Query().Get("since")
 		}
+		mu.Unlock()
 		json.NewEncoder(w).Encode([]csAlert{})
 	}))
 	defer srv.Close()
@@ -138,12 +142,16 @@ func TestCrowdSec_FetchAlerts_Since(t *testing.T) {
 	cs.fetchAlerts(context.Background(), ch) // first poll — sets lastAlert ≈ before
 	cs.fetchAlerts(context.Background(), ch) // second poll — must send ?since=lastAlert
 
-	if sinceParam == "" {
+	mu.Lock()
+	sp := sinceParam
+	mu.Unlock()
+
+	if sp == "" {
 		t.Fatal("second poll did not include ?since= parameter")
 	}
-	since, err := time.Parse(time.RFC3339, sinceParam)
+	since, err := time.Parse(time.RFC3339, sp)
 	if err != nil {
-		t.Fatalf("since is not valid RFC3339: %q: %v", sinceParam, err)
+		t.Fatalf("since is not valid RFC3339: %q: %v", sp, err)
 	}
 	if since.Before(before.Add(-time.Second)) {
 		t.Errorf("since %v is more than 1s before first poll start %v", since, before)
