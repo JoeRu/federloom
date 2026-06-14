@@ -58,13 +58,23 @@ type fileStat struct {
 	size  int64
 }
 
+// burstCacheKey identifies a burst count query by both reason and window so
+// that two rules with the same burst_window but different reasons do not share
+// a cached count (Fix 3).
+type burstCacheKey struct {
+	reason string
+	window time.Duration
+}
+
 // RuleSet holds the loaded rules and hot-reloads them when the backing file changes.
 type RuleSet struct {
-	mu       sync.RWMutex
+	mu       sync.RWMutex // protects rules and lastStat for readers
+	reloadMu sync.Mutex   // serialises file reload attempts (Fix 1)
 	rules    []Rule
 	path     string
 	lastStat fileStat
 	fallback float64 // score threshold used when rules list is empty (legacy mode)
+	loaded   bool    // true after first successful file read (Fix 2)
 }
 
 // Load returns a RuleSet backed by path. If path is empty or the file does not
@@ -90,10 +100,11 @@ func (rs *RuleSet) Evaluate(e proto.Event, rec store.ScoreRecord, b *BurstStore)
 		return ActionNone
 	}
 
-	// burstCache memoises Count() calls for the same BurstWindow within one
-	// Evaluate() invocation so we don't re-scan the slice per rule.
+	// burstCache memoises Count() calls for the same (reason, BurstWindow) pair
+	// within one Evaluate() invocation so we don't re-scan the slice per rule.
+	// The key includes reason to prevent cross-reason cache collisions (Fix 3).
 	now := time.Now()
-	burstCache := make(map[time.Duration]int)
+	burstCache := make(map[burstCacheKey]int)
 
 	for _, r := range rs.rules {
 		if r.Reason != "" && r.Reason != e.Reason {
@@ -110,10 +121,11 @@ func (rs *RuleSet) Evaluate(e proto.Event, rec store.ScoreRecord, b *BurstStore)
 		}
 		if r.MinBurst > 0 {
 			w := r.BurstWindow.Duration
-			cnt, ok := burstCache[w]
+			ck := burstCacheKey{reason: e.Reason, window: w}
+			cnt, ok := burstCache[ck]
 			if !ok {
 				cnt = b.Count(e.IP, e.Reason, w, now)
-				burstCache[w] = cnt
+				burstCache[ck] = cnt
 			}
 			if cnt < r.MinBurst {
 				continue
@@ -124,6 +136,9 @@ func (rs *RuleSet) Evaluate(e proto.Event, rec store.ScoreRecord, b *BurstStore)
 	return ActionNone
 }
 
+// maybeReload checks whether the backing file has changed and calls reload()
+// if so. It uses a double-checked locking pattern with reloadMu to ensure
+// only one goroutine parses the file at a time (Fix 1).
 func (rs *RuleSet) maybeReload() {
 	if rs.path == "" {
 		return
@@ -139,6 +154,16 @@ func (rs *RuleSet) maybeReload() {
 	if unchanged {
 		return
 	}
+	// Serialise reload — only one goroutine parses the file at a time.
+	rs.reloadMu.Lock()
+	defer rs.reloadMu.Unlock()
+	// Re-check after acquiring lock; another goroutine may have reloaded already.
+	rs.mu.RLock()
+	unchanged = cur == rs.lastStat
+	rs.mu.RUnlock()
+	if unchanged {
+		return
+	}
 	rs.reload()
 }
 
@@ -148,6 +173,13 @@ func (rs *RuleSet) reload() {
 	}
 	data, err := os.ReadFile(rs.path)
 	if err != nil {
+		// Fix 2: after a successful initial load, warn instead of silently dropping.
+		rs.mu.RLock()
+		alreadyLoaded := rs.loaded
+		rs.mu.RUnlock()
+		if alreadyLoaded {
+			log.Printf("rules: keeping last-good ruleset; read error for %s: %v", rs.path, err)
+		}
 		return // file missing = legacy mode; suppress log spam on fresh installs
 	}
 	var loaded []Rule
@@ -155,11 +187,36 @@ func (rs *RuleSet) reload() {
 		log.Printf("rules: keeping last-good ruleset; parse error in %s: %v", rs.path, err)
 		return
 	}
+	// Fix 4: drop misconfigured rules before installing them.
+	loaded = validateRules(loaded, rs.path)
 	info, _ := os.Stat(rs.path)
 	rs.mu.Lock()
 	rs.rules = loaded
+	rs.loaded = true
 	if info != nil {
 		rs.lastStat = fileStat{mtime: info.ModTime(), size: info.Size()}
 	}
 	rs.mu.Unlock()
+}
+
+// validateRules filters out rules that would cause incorrect behaviour at
+// runtime so that a misconfigured file does not silently produce wrong results.
+// Each dropped rule is logged (Fix 4).
+func validateRules(rules []Rule, path string) []Rule {
+	valid := rules[:0:0] // new slice, avoids mutating the original backing array
+	for _, r := range rules {
+		if r.MinBurst > 0 && r.BurstWindow.Duration == 0 {
+			log.Printf("rules: skipping rule %q in %s: min_burst set but burst_window is zero", r.Name, path)
+			continue
+		}
+		switch r.Action {
+		case ActionBlock, ActionWatch, ActionIgnore:
+			// ok
+		default:
+			log.Printf("rules: skipping rule %q in %s: unknown action %q", r.Name, path, r.Action)
+			continue
+		}
+		valid = append(valid, r)
+	}
+	return valid
 }

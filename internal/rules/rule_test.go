@@ -159,9 +159,9 @@ func TestEvaluate_HotReload(t *testing.T) {
 		t.Fatalf("before reload: got %v, want watch", got)
 	}
 
-	// Overwrite with a different rule; sleep to ensure mtime changes.
-	time.Sleep(2 * time.Millisecond)
-	writeRulesTo(t, path, `
+	// Overwrite with a different rule; bump mtime explicitly to avoid
+	// filesystem 1-second granularity surprises (Fix 5).
+	writeRulesAndBumpMtime(t, path, `
 - name: second-version
   reason: ssh-probe
   min_corroboration: 1
@@ -183,11 +183,80 @@ func TestEvaluate_CorruptFileKeepsLastGood(t *testing.T) {
 	if got := rs.Evaluate(ev("ssh-probe"), recCorr(1), emptyBurst()); got != ActionBlock {
 		t.Fatalf("initial load: got %v, want block", got)
 	}
-	time.Sleep(2 * time.Millisecond)
-	writeRulesTo(t, path, `:::not yaml:::`)
+	// Bump mtime explicitly so the hot-reload path is triggered (Fix 5).
+	writeRulesAndBumpMtime(t, path, `:::not yaml:::`)
 	// Must still use last-good ruleset
 	if got := rs.Evaluate(ev("ssh-probe"), recCorr(1), emptyBurst()); got != ActionBlock {
 		t.Errorf("after corrupt file: got %v, want block (last-good)", got)
+	}
+}
+
+func TestEvaluate_BurstCacheIsolatedByReason(t *testing.T) {
+	path := writeRules(t, `
+- name: ssh-burst
+  reason: ssh-probe
+  min_burst: 2
+  burst_window: 1m
+  action: block
+- name: smtp-burst
+  reason: smtp-auth-bruteforce
+  min_burst: 2
+  burst_window: 1m
+  action: block
+`)
+	rs := Load(path, 999)
+	b := NewBurstStore()
+	base := time.Now()
+
+	// Only record ssh-probe events
+	b.Record("1.2.3.4", "ssh-probe", base)
+	b.Record("1.2.3.4", "ssh-probe", base)
+
+	// ssh-probe rule fires
+	if got := rs.Evaluate(ev("ssh-probe"), noRec(), b); got != ActionBlock {
+		t.Errorf("ssh-probe burst: got %v, want block", got)
+	}
+	// smtp rule must NOT fire — different reason, zero smtp burst count
+	if got := rs.Evaluate(ev("smtp-auth-bruteforce"), noRec(), b); got != ActionNone {
+		t.Errorf("smtp burst with no smtp events: got %v, want none", got)
+	}
+}
+
+func TestEvaluate_InvalidActionDropped(t *testing.T) {
+	path := writeRules(t, `
+- name: typo-action
+  reason: ssh-probe
+  min_corroboration: 1
+  action: bloc
+- name: valid-fallback
+  reason: ssh-probe
+  min_corroboration: 1
+  action: watch
+`)
+	rs := Load(path, 999)
+	// The typo rule must be dropped; the valid fallback fires instead
+	got := rs.Evaluate(ev("ssh-probe"), recCorr(1), emptyBurst())
+	if got != ActionWatch {
+		t.Errorf("invalid action dropped: got %v, want watch", got)
+	}
+}
+
+func TestEvaluate_BurstWithoutWindowDropped(t *testing.T) {
+	path := writeRules(t, `
+- name: missing-window
+  reason: ssh-probe
+  min_burst: 3
+  action: block
+- name: valid-fallback
+  reason: ssh-probe
+  min_corroboration: 1
+  action: watch
+`)
+	rs := Load(path, 999)
+	// The misconfigured burst rule must be dropped; the valid fallback fires
+	got := rs.Evaluate(ev("ssh-probe"), recCorr(1), emptyBurst())
+	if got != ActionWatch {
+		t.Errorf("burst-without-window dropped: got %v, want watch", got)
 	}
 }
 
@@ -204,5 +273,17 @@ func writeRulesTo(t *testing.T, path, content string) {
 	t.Helper()
 	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
 		t.Fatalf("write rules file: %v", err)
+	}
+}
+
+// writeRulesAndBumpMtime writes content to path and then advances the file's
+// mtime by one second so that hot-reload detection is reliable on filesystems
+// with 1-second mtime granularity (Fix 5).
+func writeRulesAndBumpMtime(t *testing.T, path, content string) {
+	t.Helper()
+	writeRulesTo(t, path, content)
+	future := time.Now().Add(time.Second)
+	if err := os.Chtimes(path, future, future); err != nil {
+		t.Fatalf("bump mtime: %v", err)
 	}
 }
