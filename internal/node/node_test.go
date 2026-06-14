@@ -9,6 +9,7 @@ import (
 	"github.com/JoeRu/swarmguard/internal/enforce"
 	"github.com/JoeRu/swarmguard/internal/identity"
 	"github.com/JoeRu/swarmguard/internal/reputation"
+	"github.com/JoeRu/swarmguard/internal/rules"
 	"github.com/JoeRu/swarmguard/internal/store"
 	"github.com/JoeRu/swarmguard/internal/transport"
 	"github.com/JoeRu/swarmguard/internal/trust"
@@ -40,6 +41,8 @@ func testNode(t *testing.T) (*Node, string) {
 		neverblock: enforce.NewNeverBlockList(nil),
 		trust:      ts,
 		selfID:     "12D3KooWself",
+		rules:      rules.Load("", cfg.Reputation.BlockThreshold),
+		burst:      rules.NewBurstStore(),
 	}, dir
 }
 

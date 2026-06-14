@@ -14,6 +14,7 @@ import (
 	"github.com/JoeRu/swarmguard/internal/identity"
 	"github.com/JoeRu/swarmguard/internal/ingest"
 	"github.com/JoeRu/swarmguard/internal/reputation"
+	"github.com/JoeRu/swarmguard/internal/rules"
 	"github.com/JoeRu/swarmguard/internal/store"
 	"github.com/JoeRu/swarmguard/internal/transport"
 	"github.com/JoeRu/swarmguard/internal/trust"
@@ -31,7 +32,9 @@ type Node struct {
 	neverblock *enforce.NeverBlockList
 	selfID     string
 	trust      *trust.Store
-	vouch      *proto.PeerCert // this node's own peer-cert, attached to published events
+	vouch      *proto.PeerCert   // this node's own peer-cert, attached to published events
+	rules      *rules.RuleSet    // NEW
+	burst      *rules.BurstStore // NEW
 }
 
 // New wires all subsystems from cfg. t may be nil for local-only operation.
@@ -99,6 +102,8 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		selfID:     selfID,
 		trust:      ts,
 		vouch:      vouch,
+		rules:      rules.Load(cfg.RulesFilePath(), cfg.Reputation.BlockThreshold),
+		burst:      rules.NewBurstStore(),
 	}, nil
 }
 
@@ -160,15 +165,19 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 	}
 	e.ReporterID = n.selfID
 	e.Vouch = n.vouch
-	score, err := n.rep.Record(e.IP, e.Reason, n.selfID, 1.0, n.selfID, true)
-	if err != nil {
+	if _, err := n.rep.Record(e.IP, e.Reason, n.selfID, 1.0, n.selfID, true); err != nil {
 		log.Printf("node: record local %s: %v", e.IP, err)
 		return
 	}
-	if score >= n.cfg.Reputation.BlockThreshold {
+	n.burst.Record(e.IP, e.Reason, time.Now())
+	rec, _ := n.rep.GetRecord(e.IP)
+	switch n.rules.Evaluate(e, rec, n.burst) {
+	case rules.ActionBlock:
 		if err := n.sink.Block(e.IP); err != nil {
 			log.Printf("node: block %s: %v", e.IP, err)
 		}
+	case rules.ActionWatch:
+		log.Printf("node: watch %s reason=%s score=%.1f", e.IP, e.Reason, rec.Score)
 	}
 	if n.transport != nil {
 		if err := n.transport.Publish(ctx, e); err != nil {
@@ -209,15 +218,19 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 	}
 
 	weight, group, anchored := n.trust.Resolve(e.ReporterID)
-	score, err := n.rep.Record(e.IP, e.Reason, e.ReporterID, weight, group, anchored)
-	if err != nil {
+	if _, err := n.rep.Record(e.IP, e.Reason, e.ReporterID, weight, group, anchored); err != nil {
 		log.Printf("node: record remote %s: %v", e.IP, err)
 		return
 	}
-	if score >= n.cfg.Reputation.BlockThreshold {
+	n.burst.Record(e.IP, e.Reason, time.Now())
+	rec, _ := n.rep.GetRecord(e.IP)
+	switch n.rules.Evaluate(e, rec, n.burst) {
+	case rules.ActionBlock:
 		if err := n.sink.Block(e.IP); err != nil {
 			log.Printf("node: block %s: %v", e.IP, err)
 		}
+	case rules.ActionWatch:
+		log.Printf("node: watch %s reason=%s score=%.1f", e.IP, e.Reason, rec.Score)
 	}
 }
 
