@@ -53,6 +53,7 @@ type ReputationConfig struct {
 type IngestConfig struct {
 	Honeypot   HoneypotConfig   `yaml:"honeypot"`
 	OpenCanary OpenCanaryConfig `yaml:"opencanary"`
+	CrowdSec   CrowdSecConfig   `yaml:"crowdsec"`
 }
 
 // OpenCanaryConfig configures the OpenCanary ingest adapter.
@@ -67,6 +68,16 @@ type HoneypotConfig struct {
 	Enabled      bool     `yaml:"enabled"`
 	LogFile      string   `yaml:"log_file"`
 	PollInterval Duration `yaml:"poll_interval"`
+}
+
+// CrowdSecConfig configures the CrowdSec LAPI ingest adapter.
+type CrowdSecConfig struct {
+	Enabled         bool     `yaml:"enabled"`
+	LAPIURL         string   `yaml:"lapi_url"`
+	APIKey          string   `yaml:"api_key"`
+	PollInterval    Duration `yaml:"poll_interval"`
+	EnableDecisions bool     `yaml:"enable_decisions"`
+	EnableAlerts    bool     `yaml:"enable_alerts"`
 }
 
 // EnforceConfig selects and tunes the firewall backend.
@@ -113,6 +124,12 @@ func Defaults() *Config {
 			},
 			OpenCanary: OpenCanaryConfig{
 				PollInterval: Duration{time.Second},
+			},
+			CrowdSec: CrowdSecConfig{
+				PollInterval:    Duration{30 * time.Second},
+				EnableDecisions: true,
+				EnableAlerts:    true,
+				// Enabled: false (zero value — opt-in)
 			},
 		},
 		Trust: TrustConfig{
