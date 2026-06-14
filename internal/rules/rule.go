@@ -85,9 +85,10 @@ func Load(path string, fallbackThreshold float64) *RuleSet {
 	return rs
 }
 
-// Evaluate returns the action for the given event + reputation state.
+// Evaluate returns the action and matched rule name for the given event + reputation state.
+// Rule name is empty when no rule matched (legacy fallback or ActionNone).
 // It hot-reloads the rule file when mtime or size has changed since the last call.
-func (rs *RuleSet) Evaluate(e proto.Event, rec store.ScoreRecord, b *BurstStore) Action {
+func (rs *RuleSet) Evaluate(e proto.Event, rec store.ScoreRecord, b *BurstStore) (Action, string) {
 	rs.maybeReload()
 
 	rs.mu.RLock()
@@ -95,9 +96,9 @@ func (rs *RuleSet) Evaluate(e proto.Event, rec store.ScoreRecord, b *BurstStore)
 
 	if len(rs.rules) == 0 {
 		if rec.Score >= rs.fallback {
-			return ActionBlock
+			return ActionBlock, ""
 		}
-		return ActionNone
+		return ActionNone, ""
 	}
 
 	// burstCache memoises Count() calls for the same (reason, BurstWindow) pair
@@ -131,9 +132,9 @@ func (rs *RuleSet) Evaluate(e proto.Event, rec store.ScoreRecord, b *BurstStore)
 				continue
 			}
 		}
-		return r.Action
+		return r.Action, r.Name
 	}
-	return ActionNone
+	return ActionNone, ""
 }
 
 // maybeReload checks whether the backing file has changed and calls reload()

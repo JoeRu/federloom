@@ -174,7 +174,8 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 	}
 	n.burst.Record(e.IP, e.Reason, time.Now())
 	rec, _ := n.rep.GetRecord(e.IP)
-	switch n.rules.Evaluate(e, rec, n.burst) {
+	action, _ := n.rules.Evaluate(e, rec, n.burst)
+	switch action {
 	case rules.ActionBlock:
 		if err := n.sink.Block(e.IP); err != nil {
 			log.Printf("node: block %s: %v", e.IP, err)
@@ -227,7 +228,8 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 	}
 	n.burst.Record(e.IP, e.Reason, time.Now())
 	rec, _ := n.rep.GetRecord(e.IP)
-	switch n.rules.Evaluate(e, rec, n.burst) {
+	action, _ := n.rules.Evaluate(e, rec, n.burst)
+	switch action {
 	case rules.ActionBlock:
 		if err := n.sink.Block(e.IP); err != nil {
 			log.Printf("node: block %s: %v", e.IP, err)
