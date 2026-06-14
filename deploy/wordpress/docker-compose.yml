@@ -1,0 +1,35 @@
+# SwarmGuard sidecar for WordPress/Traefik stack.
+#
+# network_mode: host is required so the container can:
+#   - reach CrowdSec LAPI at 172.21.0.3:8080 (internal traefik Docker bridge)
+#   - apply ipset/iptables rules to the host kernel (requires NET_ADMIN)
+#
+# The CrowdSec container is NOT exposed on host ports; it lives on the internal
+# traefik network (172.21.0.0/16). The host has 172.21.0.1 as the bridge gateway,
+# so network_mode: host lets SwarmGuard reach 172.21.0.3:8080 directly.
+#
+# Before starting:
+#   1. Run ./bootstrap-wordpress.sh — registers bouncer, writes config.local.yaml, builds image
+#   2. Open port 7700 in the NixOS firewall if you want peers to initiate connections here
+services:
+  swarmguard:
+    image: swarmguard:latest
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    container_name: swarmguard-wordpress
+    restart: unless-stopped
+    cap_add: [NET_ADMIN, NET_RAW]
+    network_mode: host
+    volumes:
+      - ./config.local.yaml:/etc/swarmguard/config.yaml:ro
+      - ./rules.yaml:/etc/swarmguard/rules.yaml:ro
+      - swarmguard-data:/var/lib/swarmguard
+    command: >
+      --config /etc/swarmguard/config.yaml
+      --listen /ip4/0.0.0.0/tcp/7700
+      --advertise /ip4/65.108.62.108/tcp/7700
+      --bootstrap /ip4/167.233.115.41/tcp/7700/p2p/12D3KooWBvpzbEBgcFbHrw3kEFjfdFB2AwimGMhMrVGQBHMpZNjD
+
+volumes:
+  swarmguard-data:
