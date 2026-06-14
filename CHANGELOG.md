@@ -5,6 +5,22 @@ All notable changes are documented here. Format: Keep a Changelog; versioning: S
 ## [Unreleased]
 
 ### Added
+- `internal/observability`: dual-output Observer — Prometheus `/metrics` (port 9101) + SQLite
+  event history with configurable retention (default 15 days). Both disabled by default.
+- Six Prometheus metrics: `swarmguard_events_received_total`, `swarmguard_rules_fired_total`,
+  `swarmguard_blocked_ips`, `swarmguard_ip_score`, `swarmguard_federation_peers`,
+  `swarmguard_events_federated_total`.
+- SQLite tables: `events`, `rule_firings`, `blocks` with precomputed `expected_unblock`
+  (due-time for active blocks).
+- `deploy/grafana/swarmguard-dashboard.json`: importable Grafana dashboard covering live
+  Prometheus panels and local SQLite history panels.
+- `rules.Evaluate` now returns `(Action, string)` — matched rule name available for metrics.
+- Honeypot, mailcow, and wordpress deploy configs updated to enable observability.
+
+### Changed
+- `internal/rules`: `Evaluate` signature changed to `(Action, string)`.
+
+### Added
 - **CrowdSec ingest adapter** (`internal/ingest/crowdsec.go`): polls `/v1/decisions/stream`
   and `/v1/alerts` from a local CrowdSec LAPI instance; decisions emit
   `crowdsec-decision` events, alerts map via `scenarioMap` to existing SwarmGuard
