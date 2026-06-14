@@ -27,11 +27,11 @@ func (b *BurstStore) Record(ip, reason string, now time.Time) {
 	b.mu.Unlock()
 }
 
-// Count returns how many events for (ip, reason) fall within the last window.
-// Evicts stale entries as a side effect (lazy GC — no background goroutine).
-func (b *BurstStore) Count(ip, reason string, window time.Duration) int {
+// Count returns how many events for (ip, reason) fall within [now-window, now].
+// Evicts stale entries and compacts memory as a side effect (lazy GC — no background goroutine).
+func (b *BurstStore) Count(ip, reason string, window time.Duration, now time.Time) int {
 	k := burstKey{ip, reason}
-	cutoff := time.Now().Add(-window)
+	cutoff := now.Add(-window)
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	ts := b.entries[k]
@@ -39,6 +39,11 @@ func (b *BurstStore) Count(ip, reason string, window time.Duration) int {
 	for i < len(ts) && ts[i].Before(cutoff) {
 		i++
 	}
-	b.entries[k] = ts[i:]
-	return len(b.entries[k])
+	live := append([]time.Time(nil), ts[i:]...)
+	if len(live) == 0 {
+		delete(b.entries, k)
+		return 0
+	}
+	b.entries[k] = live
+	return len(live)
 }
