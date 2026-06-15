@@ -3,6 +3,7 @@ package observability
 import (
 	"context"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/JoeRu/swarmguard/internal/config"
@@ -13,8 +14,10 @@ import (
 // and an optional SQLite output. All methods are safe to call on a nil
 // *Observer — nil means observability is disabled.
 type Observer struct {
-	prom *prometheusOutput
-	sq   *sqliteOutput
+	prom     *prometheusOutput
+	sq       *sqliteOutput
+	mu       sync.Mutex
+	blockedSet map[string]struct{} // deduplicates Inc/Dec calls for the gauge
 }
 
 // New creates an Observer from cfg. Both outputs are optional; an empty addr
@@ -23,7 +26,7 @@ func New(cfg config.ObservabilityConfig, repCfg config.ReputationConfig, storeDi
 	if cfg.PrometheusAddr == "" && cfg.SQLitePath == "" {
 		return nil, nil
 	}
-	o := &Observer{}
+	o := &Observer{blockedSet: make(map[string]struct{})}
 
 	if cfg.PrometheusAddr != "" {
 		threshold := cfg.ScoreGaugeThreshold
@@ -90,12 +93,21 @@ func (o *Observer) RecordEvent(e proto.Event, score float64, rule, action string
 }
 
 // RecordBlock records that ip was added to the block set at the given score.
+// Duplicate calls for the same IP are ignored so the gauge stays accurate.
 func (o *Observer) RecordBlock(ip string, score float64) {
 	if o == nil {
 		return
 	}
-	if o.prom != nil {
-		o.prom.blockedIPs.Inc()
+	o.mu.Lock()
+	_, already := o.blockedSet[ip]
+	if !already {
+		o.blockedSet[ip] = struct{}{}
+	}
+	o.mu.Unlock()
+	if !already {
+		if o.prom != nil {
+			o.prom.blockedIPs.Inc()
+		}
 	}
 	if o.sq != nil {
 		o.sq.recordBlock(ip, score)
@@ -107,8 +119,16 @@ func (o *Observer) RecordUnblock(ip string) {
 	if o == nil {
 		return
 	}
-	if o.prom != nil {
-		o.prom.blockedIPs.Dec()
+	o.mu.Lock()
+	_, was := o.blockedSet[ip]
+	if was {
+		delete(o.blockedSet, ip)
+	}
+	o.mu.Unlock()
+	if was {
+		if o.prom != nil {
+			o.prom.blockedIPs.Dec()
+		}
 	}
 	if o.sq != nil {
 		o.sq.recordUnblock(ip)
