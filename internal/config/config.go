@@ -16,43 +16,6 @@ type Duration struct{ time.Duration }
 // Pattern matching: exact string OR prefix ending in "*" (e.g. "smtp-*" matches any reason starting with "smtp-").
 type TaxonomyConfig map[string][]string
 
-// Resolve returns the effective taxonomy by merging t over the default taxonomy.
-// Keys in t override defaults for the same purpose; new keys are additive.
-// A nil/empty t returns the default taxonomy.
-// The default taxonomy maps: "mail" -> ["smtp-*", "imap-*", "pop3-*"], "web" -> ["http-*"], "ssh" -> ["ssh-*"].
-func (t TaxonomyConfig) Resolve() TaxonomyConfig {
-	defaultTaxonomy := TaxonomyConfig{
-		"mail": {"smtp-*", "imap-*", "pop3-*"},
-		"web":  {"http-*"},
-		"ssh":  {"ssh-*"},
-	}
-
-	if len(t) == 0 {
-		return defaultTaxonomy
-	}
-
-	// Start with a copy of defaults
-	result := make(TaxonomyConfig)
-	for k, v := range defaultTaxonomy {
-		result[k] = append([]string{}, v...)
-	}
-
-	// Override with custom taxonomy
-	for k, v := range t {
-		result[k] = v
-	}
-
-	return result
-}
-
-// PurposePatterns returns the pattern list for the named purpose from the effective
-// taxonomy (t must already be resolved). Returns nil when purpose is "" (meaning "all").
-func (t TaxonomyConfig) PurposePatterns(purpose string) []string {
-	if purpose == "" {
-		return nil
-	}
-	return t[purpose]
-}
 
 func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 	var s string

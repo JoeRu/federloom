@@ -79,7 +79,7 @@ func TestMatchesPatterns(t *testing.T) {
 	}
 }
 
-func TestResolve(t *testing.T) {
+func TestResolveTaxonomy(t *testing.T) {
 	tests := []struct {
 		name string
 		t    config.TaxonomyConfig
@@ -143,23 +143,23 @@ func TestResolve(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := tt.t.Resolve()
+			got := ResolveTaxonomy(tt.t)
 			// Compare keys
 			if len(got) != len(tt.want) {
-				t.Errorf("Resolve() returned %d keys, want %d", len(got), len(tt.want))
+				t.Errorf("ResolveTaxonomy() returned %d keys, want %d", len(got), len(tt.want))
 			}
 			for k, wantPatterns := range tt.want {
 				gotPatterns, ok := got[k]
 				if !ok {
-					t.Errorf("Resolve() missing key %q", k)
+					t.Errorf("ResolveTaxonomy() missing key %q", k)
 					continue
 				}
 				if len(gotPatterns) != len(wantPatterns) {
-					t.Errorf("Resolve()[%q] = %v, want %v", k, gotPatterns, wantPatterns)
+					t.Errorf("ResolveTaxonomy()[%q] = %v, want %v", k, gotPatterns, wantPatterns)
 				} else {
 					for i, p := range gotPatterns {
 						if i < len(wantPatterns) && p != wantPatterns[i] {
-							t.Errorf("Resolve()[%q][%d] = %v, want %v", k, i, p, wantPatterns[i])
+							t.Errorf("ResolveTaxonomy()[%q][%d] = %v, want %v", k, i, p, wantPatterns[i])
 						}
 					}
 				}
@@ -169,7 +169,7 @@ func TestResolve(t *testing.T) {
 }
 
 func TestPurposePatterns(t *testing.T) {
-	taxonomy := config.TaxonomyConfig{}.Resolve()
+	taxonomy := ResolveTaxonomy(config.TaxonomyConfig{})
 
 	tests := []struct {
 		name    string
@@ -205,7 +205,7 @@ func TestPurposePatterns(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := taxonomy.PurposePatterns(tt.purpose)
+			got := PurposePatterns(taxonomy, tt.purpose)
 			if len(got) != len(tt.want) {
 				t.Errorf("PurposePatterns(%q) returned %d patterns, want %d", tt.purpose, len(got), len(tt.want))
 			}
