@@ -123,20 +123,8 @@ func (s *Server) unsubscribe(ch chan EventMsg) {
 	close(ch)
 }
 
-// --- stub handlers (implementations in Tasks 4 and 5) ---
-
-func (s *Server) handleScore(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
-}
-
-func (s *Server) handleBlocklist(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
-}
+// --- stub handler (implementation in Task 5) ---
 
 func (s *Server) handleEvents(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
-}
-
-func (s *Server) handleCrowdSecCTI(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "not implemented", http.StatusNotImplemented)
 }
