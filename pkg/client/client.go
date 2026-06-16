@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -161,6 +162,7 @@ func (c *Client) Events(ctx context.Context) (<-chan EventMsg, error) {
 			}
 			var msg EventMsg
 			if err := json.Unmarshal([]byte(data), &msg); err != nil {
+				log.Printf("client: unmarshal event: %v", err)
 				continue
 			}
 			select {
@@ -168,6 +170,9 @@ func (c *Client) Events(ctx context.Context) (<-chan EventMsg, error) {
 			case <-ctx.Done():
 				return
 			}
+		}
+		if err := scanner.Err(); err != nil && ctx.Err() == nil {
+			log.Printf("client: events stream error: %v", err)
 		}
 	}()
 	return ch, nil
