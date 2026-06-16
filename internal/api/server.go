@@ -123,8 +123,3 @@ func (s *Server) unsubscribe(ch chan EventMsg) {
 	close(ch)
 }
 
-// --- stub handler (implementation in Task 5) ---
-
-func (s *Server) handleEvents(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
-}
