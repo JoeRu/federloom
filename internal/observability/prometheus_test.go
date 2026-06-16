@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/JoeRu/swarmguard/pkg/proto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -77,5 +78,42 @@ func TestPrometheusOutput_NoRuleName_SkipsRuleCounter(t *testing.T) {
 	body := scrape(t, p)
 	if strings.Contains(body, "swarmguard_rules_fired_total") {
 		t.Errorf("rules counter should not appear when no rule matched in:\n%s", body)
+	}
+}
+
+func TestPrometheusOutput_RecordBlock_EmitsCounterAndHistograms(t *testing.T) {
+	p, _ := newPrometheusOutput("", 37.5)
+	firstSeen := time.Now().Add(-5 * time.Minute)
+	p.recordBlock("ssh-burst", firstSeen, 3)
+
+	body := scrape(t, p)
+	if !strings.Contains(body, `swarmguard_blocks_total{rule="ssh-burst"} 1`) {
+		t.Errorf("missing blocks_total in:\n%s", body)
+	}
+	if !strings.Contains(body, `swarmguard_time_to_block_seconds_count{rule="ssh-burst"} 1`) {
+		t.Errorf("missing time_to_block histogram in:\n%s", body)
+	}
+	if !strings.Contains(body, `swarmguard_corroboration_at_block_count{rule="ssh-burst"} 1`) {
+		t.Errorf("missing corroboration histogram in:\n%s", body)
+	}
+}
+
+func TestPrometheusOutput_RecordUnblock_EmitsCounter(t *testing.T) {
+	p, _ := newPrometheusOutput("", 37.5)
+	p.recordUnblock("http-probe-consensus")
+
+	body := scrape(t, p)
+	if !strings.Contains(body, `swarmguard_unblocks_total{rule="http-probe-consensus"} 1`) {
+		t.Errorf("missing unblocks_total in:\n%s", body)
+	}
+}
+
+func TestPrometheusOutput_RecordRecurrence_EmitsCounter(t *testing.T) {
+	p, _ := newPrometheusOutput("", 37.5)
+	p.recordRecurrence("score-fallback")
+
+	body := scrape(t, p)
+	if !strings.Contains(body, `swarmguard_block_recurrence_total{rule="score-fallback"} 1`) {
+		t.Errorf("missing block_recurrence_total in:\n%s", body)
 	}
 }
