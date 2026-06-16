@@ -1,0 +1,46 @@
+# SwarmGuard rules for the local smoke-test client.
+# block_threshold in config is 1000 (enforcement disabled), so blocks are
+# logged but no iptables rules are actually installed. Thresholds here are
+# intentionally low so we can see rules firing during live observation.
+
+# SSH post-auth command from honeypot — highest confidence.
+- name: honeypot-shell-exec
+  reason: ssh-post-auth-command
+  min_corroboration: 1
+  action: block
+
+# SSH auth success on honeypot.
+- name: honeypot-auth-success
+  reason: ssh-auth-success
+  min_corroboration: 1
+  action: block
+
+# CrowdSec confirmed ban corroborated by any other reporter.
+- name: crowdsec-decision-corroborated
+  reason: crowdsec-decision
+  min_corroboration: 2
+  action: block
+
+# SSH brute force burst — 10 events in 5 min from any reporter.
+- name: ssh-burst
+  reason: ssh-auth-bruteforce
+  min_burst: 10
+  burst_window: 5m
+  action: block
+
+# Anything seen by 3+ independent reporters.
+- name: multi-reporter
+  min_corroboration: 3
+  action: block
+
+# Single CrowdSec alert — watch only.
+- name: crowdsec-alert-single
+  reason: crowdsec-alert
+  min_corroboration: 1
+  action: watch
+
+# SSH probe from a single reporter — watch.
+- name: ssh-probe-single
+  reason: ssh-probe
+  min_corroboration: 1
+  action: watch

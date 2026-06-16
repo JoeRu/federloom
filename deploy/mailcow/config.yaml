@@ -24,3 +24,12 @@ ingest:
     enable_alerts: true
 observability:
   prometheus_addr: ":9101"
+api:
+  addr: ":9102"
+  purpose: "mail"
+  taxonomy:
+    mail:
+      - smtp-*
+      - imap-*
+      - pop3-*
+      - crowdsec-alert

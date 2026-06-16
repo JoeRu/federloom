@@ -24,3 +24,10 @@ ingest:
     enable_alerts: true
 observability:
   prometheus_addr: ":9101"
+api:
+  addr: ":9102"
+  purpose: "web"
+  taxonomy:
+    web:
+      - http-*
+      - crowdsec-alert

@@ -76,6 +76,17 @@ ingest:
     poll_interval: 30s
     enable_decisions: true
     enable_alerts: true
+observability:
+  prometheus_addr: ":9101"
+api:
+  addr: ":9102"
+  purpose: "mail"
+  taxonomy:
+    mail:
+      - smtp-*
+      - imap-*
+      - pop3-*
+      - crowdsec-alert
 EOF
 
 echo "==> [5/6] Starting SwarmGuard"

@@ -15,6 +15,7 @@ services:
       - "7701:7700"
     volumes:
       - ./config.yaml:/etc/swarmguard/config.yaml:ro
+      - ./rules.yaml:/etc/swarmguard/rules.yaml:ro
       - swarmguard-client-data:/var/lib/swarmguard
     command: >
       --config /etc/swarmguard/config.yaml

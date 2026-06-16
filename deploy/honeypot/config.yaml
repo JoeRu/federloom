@@ -7,6 +7,9 @@ enforce:
   backend: ipset
   set_name: swarmguard
   chain: INPUT
+  extra_whitelist:
+    - 65.108.62.108    # wordpress peer (swarmguard-wordpress)
+    - 135.181.91.151   # mailcow peer (swarmguard-mailcow)
 reputation:
   block_threshold: 1000    # high: sensor node; legacy fallback never fires
   unblock_threshold: 900
@@ -33,3 +36,5 @@ observability:
   prometheus_addr: ":9101"
   sqlite_path: "metrics.db"      # relative to store.dir: /var/lib/swarmguard/metrics.db
   sqlite_retention: 360h         # 15 days
+api:
+  addr: ":9102"

@@ -32,6 +32,7 @@ services:
     ports:
       - "7700:7700"
       - "9101:9101"
+      - "9102:9102"
     volumes:
       - ./config.yaml:/etc/swarmguard/config.yaml:ro
       - ./rules.yaml:/etc/swarmguard/rules.yaml:ro

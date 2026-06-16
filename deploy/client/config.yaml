@@ -12,3 +12,4 @@ reputation:
   unblock_threshold: 900
   half_life: 168h
   decay_interval: 1h
+  rules_file: /etc/swarmguard/rules.yaml
