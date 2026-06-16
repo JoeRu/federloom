@@ -56,6 +56,8 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 	switch cfg.Enforce.Backend {
 	case "nftables":
 		sink = enforce.NewNftables(cfg.Enforce.SetName, cfg.Enforce.NftHook)
+	case "crowdsec":
+		sink = enforce.NewCrowdSec(cfg.Enforce, halfLife)
 	default:
 		sink = enforce.NewIpset(cfg.Enforce.SetName, cfg.Enforce.Chain)
 	}
