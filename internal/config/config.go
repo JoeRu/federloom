@@ -34,7 +34,7 @@ func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 type APIConfig struct {
 	Addr     string         `yaml:"addr"`     // e.g. ":9102"; "" = disabled
 	Purpose  string         `yaml:"purpose"`  // default blocklist filter: "mail", "web", "ssh", "" = all
-	Taxonomy TaxonomyConfig `yaml:"taxonomy"` // empty = use DefaultTaxonomy from internal/api
+	Taxonomy TaxonomyConfig `yaml:"taxonomy"` // empty = use built-in default taxonomy (mail/web/ssh)
 }
 
 // Config is the top-level runtime configuration.
@@ -109,7 +109,7 @@ type EnforceConfig struct {
 	CrowdSecLAPIURL         string   `yaml:"crowdsec_lapi_url"`
 	CrowdSecMachineID       string   `yaml:"crowdsec_machine_id"`
 	CrowdSecMachinePassword string   `yaml:"crowdsec_machine_password"` // set via config.local.yaml — never commit
-	CrowdSecBanDuration     string   `yaml:"crowdsec_ban_duration"`     // e.g. "168h"; "" = use half_life
+	CrowdSecBanDuration     Duration `yaml:"crowdsec_ban_duration"` // zero = use half_life
 }
 
 // TrustConfig tunes the social trust layer (spec §5.1, design doc
