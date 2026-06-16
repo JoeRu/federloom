@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/JoeRu/swarmguard/internal/api"
 	"github.com/JoeRu/swarmguard/internal/config"
 	"github.com/JoeRu/swarmguard/internal/enforce"
 	"github.com/JoeRu/swarmguard/internal/identity"
@@ -37,6 +38,7 @@ type Node struct {
 	rules      *rules.RuleSet    // NEW
 	burst      *rules.BurstStore // NEW
 	obs        *observability.Observer
+	api        *api.Server // nil-safe: all methods no-op when cfg.API.Addr == ""
 }
 
 // New wires all subsystems from cfg. t may be nil for local-only operation.
@@ -103,6 +105,8 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		return nil, fmt.Errorf("node: observability: %w", err)
 	}
 
+	apiSrv := api.New(cfg.API, s, cfg.Reputation)
+
 	return &Node{
 		cfg:        cfg,
 		transport:  t,
@@ -117,12 +121,14 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		rules:      rules.Load(cfg.RulesFilePath(), cfg.Reputation.BlockThreshold),
 		burst:      rules.NewBurstStore(),
 		obs:        obs,
+		api:        apiSrv,
 	}, nil
 }
 
 // Run starts all subsystems and blocks until ctx is cancelled.
 func (n *Node) Run(ctx context.Context) error {
 	n.obs.Start(ctx)
+	n.api.Start(ctx)
 	if err := n.sink.Start(ctx); err != nil {
 		return fmt.Errorf("node: start enforce sink: %w", err)
 	}
@@ -213,6 +219,7 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 		log.Printf("node: watch %s reason=%s score=%.1f", e.IP, e.Reason, rec.Score)
 	}
 	n.obs.RecordEvent(e, rec.Score, ruleName, string(action))
+	n.api.Broadcast(e.IP, rec.Score, e.Reason, e.ReporterID)
 	if n.transport != nil {
 		if err := n.transport.Publish(ctx, e); err != nil {
 			log.Printf("node: publish %s: %v", e.IP, err)
@@ -272,6 +279,7 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 		log.Printf("node: watch %s reason=%s score=%.1f", e.IP, e.Reason, rec.Score)
 	}
 	n.obs.RecordEvent(e, rec.Score, ruleName, string(action))
+	n.api.Broadcast(e.IP, rec.Score, e.Reason, e.ReporterID)
 }
 
 func (n *Node) runDecay() {

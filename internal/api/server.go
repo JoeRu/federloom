@@ -51,10 +51,10 @@ func New(cfg config.APIConfig, s StoreReader, repCfg config.ReputationConfig) *S
 }
 
 // Start binds the HTTP server and registers all API routes.
-// It is a no-op when cfg.Addr is empty (server disabled).
+// It is a no-op when s is nil or cfg.Addr is empty (server disabled).
 // The server shuts down gracefully when ctx is cancelled.
 func (s *Server) Start(ctx context.Context) {
-	if s.cfg.Addr == "" {
+	if s == nil || s.cfg.Addr == "" {
 		return
 	}
 
@@ -82,10 +82,10 @@ func (s *Server) Start(ctx context.Context) {
 }
 
 // Broadcast sends an event to all active SSE subscribers.
-// It is a no-op when the server is disabled (empty addr).
+// It is a no-op when s is nil or the server is disabled (empty addr).
 // Slow subscribers are dropped non-blocking.
 func (s *Server) Broadcast(ip string, score float64, reason, reporter string) {
-	if s.cfg.Addr == "" {
+	if s == nil || s.cfg.Addr == "" {
 		return
 	}
 	msg := EventMsg{
