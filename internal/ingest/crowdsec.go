@@ -194,6 +194,12 @@ func (c *CrowdSec) fetchDecisions(ctx context.Context, ch chan<- proto.Event) {
 		if d.Type != "ban" || d.Value == "" {
 			continue
 		}
+		// Skip decisions sourced from the CrowdSec Hub community blocklist or
+		// subscribed third-party lists — redistributing them through the swarm
+		// would violate the independence assumption of corroboration (spec §4.2).
+		if d.Origin == "capi" || d.Origin == "lists" {
+			continue
+		}
 		select {
 		case ch <- proto.Event{
 			IP:         d.Value,

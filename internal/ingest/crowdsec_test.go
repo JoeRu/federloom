@@ -264,3 +264,58 @@ func TestCrowdSec_MachineAuth(t *testing.T) {
 		t.Errorf("auth called %d times, want 1", calls)
 	}
 }
+
+func TestFetchDecisionsOriginFilter(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		json.NewEncoder(w).Encode(csDecisionStream{
+			New: []csDecision{
+				{Value: "1.1.1.1", Type: "ban", Origin: "crowdsec"},
+				{Value: "2.2.2.2", Type: "ban", Origin: "capi"},
+				{Value: "3.3.3.3", Type: "ban", Origin: "lists"},
+				{Value: "4.4.4.4", Type: "ban", Origin: "manual"},
+			},
+		})
+	}))
+	defer srv.Close()
+
+	cs := crowdSecForTest(t, srv.URL)
+	ch := make(chan proto.Event, 10)
+	cs.fetchDecisions(context.Background(), ch)
+
+	// Collect all events with a short timeout to avoid blocking.
+	var got []string
+	deadline := time.After(100 * time.Millisecond)
+collect:
+	for {
+		select {
+		case e, ok := <-ch:
+			if !ok {
+				break collect
+			}
+			got = append(got, e.IP)
+		case <-deadline:
+			break collect
+		}
+	}
+
+	if len(got) != 2 {
+		t.Fatalf("got %d events, want 2; IPs: %v", len(got), got)
+	}
+
+	wantPass := map[string]bool{"1.1.1.1": false, "4.4.4.4": false}
+	wantBlock := map[string]bool{"2.2.2.2": true, "3.3.3.3": true}
+
+	for _, ip := range got {
+		if wantBlock[ip] {
+			t.Errorf("IP %s should have been filtered (capi/lists origin) but was ingested", ip)
+		}
+		if _, expected := wantPass[ip]; expected {
+			wantPass[ip] = true
+		}
+	}
+	for ip, seen := range wantPass {
+		if !seen {
+			t.Errorf("IP %s (crowdsec/manual origin) was not ingested but should have been", ip)
+		}
+	}
+}
