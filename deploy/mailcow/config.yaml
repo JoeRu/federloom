@@ -32,4 +32,3 @@ api:
       - smtp-*
       - imap-*
       - pop3-*
-      - crowdsec-alert

@@ -30,4 +30,3 @@ api:
   taxonomy:
     web:
       - http-*
-      - crowdsec-alert

@@ -85,7 +85,6 @@ api:
   taxonomy:
     web:
       - http-*
-      - crowdsec-alert
 EOF
 
 echo "==> [5/6] Starting SwarmGuard"
