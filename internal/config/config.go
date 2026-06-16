@@ -16,7 +16,6 @@ type Duration struct{ time.Duration }
 // Pattern matching: exact string OR prefix ending in "*" (e.g. "smtp-*" matches any reason starting with "smtp-").
 type TaxonomyConfig map[string][]string
 
-
 func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 	var s string
 	if err := value.Decode(&s); err != nil {
