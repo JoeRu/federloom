@@ -10,14 +10,20 @@ import (
 	"github.com/JoeRu/swarmguard/pkg/proto"
 )
 
+type unblockedEntry struct {
+	rule        string
+	unblockedAt time.Time
+}
+
 // Observer fans out observability events to an optional Prometheus output
 // and an optional SQLite output. All methods are safe to call on a nil
 // *Observer — nil means observability is disabled.
 type Observer struct {
-	prom     *prometheusOutput
-	sq       *sqliteOutput
-	mu       sync.Mutex
-	blockedSet map[string]struct{} // deduplicates Inc/Dec calls for the gauge
+	prom              *prometheusOutput
+	sq                *sqliteOutput
+	mu                sync.Mutex
+	blockedByRule     map[string]string        // ip → rule that caused the block
+	recentlyUnblocked map[string]unblockedEntry // ip → rule+time; pruned after 7 days
 }
 
 // New creates an Observer from cfg. Both outputs are optional; an empty addr
@@ -26,7 +32,10 @@ func New(cfg config.ObservabilityConfig, repCfg config.ReputationConfig, storeDi
 	if cfg.PrometheusAddr == "" && cfg.SQLitePath == "" {
 		return nil, nil
 	}
-	o := &Observer{blockedSet: make(map[string]struct{})}
+	o := &Observer{
+		blockedByRule:     make(map[string]string),
+		recentlyUnblocked: make(map[string]unblockedEntry),
+	}
 
 	if cfg.PrometheusAddr != "" {
 		threshold := cfg.ScoreGaugeThreshold
@@ -92,25 +101,39 @@ func (o *Observer) RecordEvent(e proto.Event, score float64, rule, action string
 	}
 }
 
-// RecordBlock records that ip was added to the block set at the given score.
+// RecordBlock records that ip was added to the block set.
+// rule is the rule name that triggered the block.
+// firstSeen is when the IP was first observed (used to compute time-to-block latency).
+// corroboration is the number of distinct reporters at block time.
 // Duplicate calls for the same IP are ignored so the gauge stays accurate.
-func (o *Observer) RecordBlock(ip string, score float64) {
+func (o *Observer) RecordBlock(ip, rule string, score float64, firstSeen time.Time, corroboration int) {
 	if o == nil {
 		return
 	}
 	o.mu.Lock()
-	_, already := o.blockedSet[ip]
+	_, already := o.blockedByRule[ip]
 	if !already {
-		o.blockedSet[ip] = struct{}{}
+		o.blockedByRule[ip] = rule
+	}
+	prev, wasUnblocked := o.recentlyUnblocked[ip]
+	if wasUnblocked {
+		delete(o.recentlyUnblocked, ip)
 	}
 	o.mu.Unlock()
+
 	if !already {
 		if o.prom != nil {
 			o.prom.blockedIPs.Inc()
+			o.prom.recordBlock(rule, firstSeen, corroboration)
+		}
+		if o.sq != nil {
+			o.sq.recordBlock(ip, score)
 		}
 	}
-	if o.sq != nil {
-		o.sq.recordBlock(ip, score)
+	if wasUnblocked && time.Since(prev.unblockedAt) < 7*24*time.Hour {
+		if o.prom != nil {
+			o.prom.recordRecurrence(prev.rule)
+		}
 	}
 }
 
@@ -120,14 +143,23 @@ func (o *Observer) RecordUnblock(ip string) {
 		return
 	}
 	o.mu.Lock()
-	_, was := o.blockedSet[ip]
+	rule, was := o.blockedByRule[ip]
 	if was {
-		delete(o.blockedSet, ip)
+		delete(o.blockedByRule, ip)
+		o.recentlyUnblocked[ip] = unblockedEntry{rule: rule, unblockedAt: time.Now()}
+		// Prune entries older than 7 days to prevent unbounded map growth.
+		for k, v := range o.recentlyUnblocked {
+			if time.Since(v.unblockedAt) > 7*24*time.Hour {
+				delete(o.recentlyUnblocked, k)
+			}
+		}
 	}
 	o.mu.Unlock()
+
 	if was {
 		if o.prom != nil {
 			o.prom.blockedIPs.Dec()
+			o.prom.recordUnblock(rule)
 		}
 	}
 	if o.sq != nil {
