@@ -213,7 +213,7 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 		if err := n.sink.Block(e.IP); err != nil {
 			log.Printf("node: block %s: %v", e.IP, err)
 		} else {
-			n.obs.RecordBlock(e.IP, rec.Score)
+			n.obs.RecordBlock(e.IP, ruleName, rec.Score, rec.FirstSeen, rec.Corroboration)
 		}
 	case rules.ActionWatch:
 		log.Printf("node: watch %s reason=%s score=%.1f", e.IP, e.Reason, rec.Score)
@@ -273,7 +273,7 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 		if err := n.sink.Block(e.IP); err != nil {
 			log.Printf("node: block %s: %v", e.IP, err)
 		} else {
-			n.obs.RecordBlock(e.IP, rec.Score)
+			n.obs.RecordBlock(e.IP, ruleName, rec.Score, rec.FirstSeen, rec.Corroboration)
 		}
 	case rules.ActionWatch:
 		log.Printf("node: watch %s reason=%s score=%.1f", e.IP, e.Reason, rec.Score)
