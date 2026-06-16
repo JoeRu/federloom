@@ -88,11 +88,15 @@ type CrowdSecConfig struct {
 
 // EnforceConfig selects and tunes the firewall backend.
 type EnforceConfig struct {
-	Backend        string   `yaml:"backend"`
-	SetName        string   `yaml:"set_name"`
-	Chain          string   `yaml:"chain"`
-	NftHook        string   `yaml:"nft_hook"`
-	ExtraWhitelist []string `yaml:"extra_whitelist"`
+	Backend                 string   `yaml:"backend"`
+	SetName                 string   `yaml:"set_name"`
+	Chain                   string   `yaml:"chain"`
+	NftHook                 string   `yaml:"nft_hook"`
+	ExtraWhitelist          []string `yaml:"extra_whitelist"`
+	CrowdSecLAPIURL         string   `yaml:"crowdsec_lapi_url"`
+	CrowdSecMachineID       string   `yaml:"crowdsec_machine_id"`
+	CrowdSecMachinePassword string   `yaml:"crowdsec_machine_password"` // set via config.local.yaml — never commit
+	CrowdSecBanDuration     Duration `yaml:"crowdsec_ban_duration"`     // zero = use half_life
 }
 
 // TrustConfig tunes the social trust layer (spec §5.1, design doc
