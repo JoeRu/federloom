@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -203,7 +204,7 @@ func (c *CrowdSec) fetchDecisions(ctx context.Context, ch chan<- proto.Event) {
 		select {
 		case ch <- proto.Event{
 			IP:         d.Value,
-			Reason:     "crowdsec-decision",
+			Reason:     mapScenario(d.Scenario),
 			Timestamp:  now,
 			ReporterID: c.selfID,
 		}:
@@ -280,7 +281,13 @@ func mapScenario(scenario string) string {
 	if r, ok := scenarioMap[scenario]; ok {
 		return r
 	}
-	return "crowdsec-alert"
+	// Strip vendor prefix (e.g. "crowdsecurity/http-probing" → "http-probing").
+	// This preserves the actual scenario name so operators know what fired,
+	// and lets taxonomy patterns like "http-*" match without enumeration.
+	if i := strings.LastIndex(scenario, "/"); i >= 0 {
+		return scenario[i+1:]
+	}
+	return scenario
 }
 
 // getWithBouncer performs a GET authenticated with the bouncer API key (X-Api-Key).

@@ -62,10 +62,11 @@ func TestCrowdSec_FetchDecisions_Startup(t *testing.T) {
 	if len(ch) != 2 {
 		t.Fatalf("got %d events, want 2", len(ch))
 	}
-	for range 2 {
+	wantReasons := []string{"ssh-auth-bruteforce", "http-probe"} // http-probing is mapped via scenarioMap
+	for i := range 2 {
 		e := <-ch
-		if e.Reason != "crowdsec-decision" {
-			t.Errorf("Reason = %q, want crowdsec-decision", e.Reason)
+		if e.Reason != wantReasons[i] {
+			t.Errorf("event %d Reason = %q, want %q", i, e.Reason, wantReasons[i])
 		}
 		if e.ReporterID != "self-test" {
 			t.Errorf("ReporterID = %q, want self-test", e.ReporterID)
@@ -133,8 +134,8 @@ func TestCrowdSec_FetchAlerts_ScenarioMapping(t *testing.T) {
 	if e1.Reason != "ssh-auth-bruteforce" {
 		t.Errorf("known scenario reason = %q, want ssh-auth-bruteforce", e1.Reason)
 	}
-	if e2.Reason != "crowdsec-alert" {
-		t.Errorf("unknown scenario reason = %q, want crowdsec-alert", e2.Reason)
+	if e2.Reason != "novelty" {
+		t.Errorf("unknown scenario reason = %q, want novelty (leaf of crowdsecurity/novelty)", e2.Reason)
 	}
 }
 
