@@ -12,6 +12,18 @@ import (
 // Duration wraps time.Duration for YAML unmarshalling from strings like "7d", "24h".
 type Duration struct{ time.Duration }
 
+// TaxonomyConfig maps purpose labels to lists of reason-code patterns.
+// Pattern matching: exact string OR prefix ending in "*" (e.g. "smtp-*" matches any reason starting with "smtp-").
+type TaxonomyConfig map[string][]string
+
+// APIConfig controls the optional local HTTP API (spec §3).
+// Addr is the only required field; empty string disables the server (same opt-in pattern as PrometheusAddr).
+type APIConfig struct {
+	Addr     string         `yaml:"addr"`     // e.g. ":9102"; "" = disabled
+	Purpose  string         `yaml:"purpose"`  // default blocklist filter: "mail", "web", "ssh", "" = all
+	Taxonomy TaxonomyConfig `yaml:"taxonomy"` // empty = use built-in default taxonomy (mail/web/ssh)
+}
+
 func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 	var s string
 	if err := value.Decode(&s); err != nil {
@@ -34,6 +46,7 @@ type Config struct {
 	Enforce        EnforceConfig       `yaml:"enforce"`
 	Trust          TrustConfig         `yaml:"trust"`
 	Observability  ObservabilityConfig `yaml:"observability"`
+	API            APIConfig           `yaml:"api"`
 }
 
 // StoreConfig configures the BadgerDB reputation store.
