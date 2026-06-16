@@ -59,7 +59,7 @@ func (s *Server) Start(ctx context.Context) {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /api/v1/score/", s.handleScore)
+	mux.HandleFunc("GET /api/v1/score/{ip}", s.handleScore)
 	mux.HandleFunc("GET /api/v1/blocklist", s.handleBlocklist)
 	mux.HandleFunc("GET /api/v1/events", s.handleEvents)
 	mux.HandleFunc("GET /crowdsec/v1/decisions", s.handleCrowdSecCTI)

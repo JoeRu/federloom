@@ -97,7 +97,7 @@ func (s *Server) handleBlocklist(w http.ResponseWriter, r *http.Request) {
 		purposePatterns = PurposePatterns(s.taxonomy, f.purpose)
 	}
 
-	var entries []blockEntry
+	entries := []blockEntry{}
 	_ = s.store.ScanScores(func(ip string, rec store.ScoreRecord) error {
 		if s.passRecord(rec, f, purposePatterns) {
 			entries = append(entries, blockEntry{
@@ -110,15 +110,9 @@ func (s *Server) handleBlocklist(w http.ResponseWriter, r *http.Request) {
 		return nil
 	})
 
-	// Sort by score descending.
 	sort.Slice(entries, func(i, j int) bool {
 		return entries[i].Score > entries[j].Score
 	})
-
-	// Return empty JSON array rather than null when nothing matches.
-	if entries == nil {
-		entries = []blockEntry{}
-	}
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(entries)

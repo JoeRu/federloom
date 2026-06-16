@@ -46,10 +46,8 @@ func TestHandleScore_Found(t *testing.T) {
 	srv := newScoreServer()
 
 	r := httptest.NewRequest(http.MethodGet, "/api/v1/score/1.2.3.4", nil)
+	r.SetPathValue("ip", "1.2.3.4")
 	w := httptest.NewRecorder()
-
-	// Manually set the URL path to match the route stripping logic.
-	r.URL.Path = "/api/v1/score/1.2.3.4"
 
 	srv.handleScore(w, r)
 
@@ -87,7 +85,7 @@ func TestHandleScore_NotFound(t *testing.T) {
 	srv := newScoreServer()
 
 	r := httptest.NewRequest(http.MethodGet, "/api/v1/score/9.9.9.9", nil)
-	r.URL.Path = "/api/v1/score/9.9.9.9"
+	r.SetPathValue("ip", "9.9.9.9")
 	w := httptest.NewRecorder()
 
 	srv.handleScore(w, r)
@@ -109,7 +107,7 @@ func TestHandleScore_MissingIP(t *testing.T) {
 	srv := newScoreServer()
 
 	r := httptest.NewRequest(http.MethodGet, "/api/v1/score/", nil)
-	r.URL.Path = "/api/v1/score/"
+	// No SetPathValue call → PathValue("ip") returns "" → 400
 	w := httptest.NewRecorder()
 
 	srv.handleScore(w, r)
