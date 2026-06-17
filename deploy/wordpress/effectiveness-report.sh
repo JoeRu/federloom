@@ -16,10 +16,12 @@ WINDOW_LABEL=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --hours)
+      [[ "${2:-}" =~ ^[0-9]+$ ]] || { echo "ERROR: --hours requires a positive integer" >&2; exit 1; }
       SINCE_EPOCH=$(date -d "$2 hours ago" +%s)
       WINDOW_LABEL="last ${2}h"
       shift 2 ;;
     --days)
+      [[ "${2:-}" =~ ^[0-9]+$ ]] || { echo "ERROR: --days requires a positive integer" >&2; exit 1; }
       SINCE_EPOCH=$(date -d "$2 days ago" +%s)
       WINDOW_LABEL="last ${2}d"
       shift 2 ;;
@@ -62,8 +64,9 @@ nginx_log=$(docker logs "$NGINX_CTR" --since "$((NOW - SINCE_EPOCH))s" 2>/dev/nu
 
 # Build temp file: ip<TAB>epoch_ts from nginx log
 NGINX_TMP=$(mktemp)
+trap 'rm -f "$NGINX_TMP"' EXIT
 if [[ -n "$nginx_log" ]]; then
-  echo "$nginx_log" | grep -E '^[0-9]{1,3}(\.[0-9]{1,3}){3}[[:space:]]' | awk '
+  printf '%s\n' "$nginx_log" | grep -E '^[0-9]{1,3}(\.[0-9]{1,3}){3}[[:space:]]' | awk '
   BEGIN {
     split("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec", m)
     for (i=1;i<=12;i++) month[m[i]]=i
@@ -87,6 +90,8 @@ nginx_requests_before_block=0
 
 if [[ -n "$total_blocked" && "$total_blocked" -gt 0 ]]; then
   while IFS='|' read -r ip blocked_at; do
+    [[ "$ip" =~ ^[0-9]{1,3}(\.[0-9]{1,3}){3}$ ]] || continue
+    [[ "$blocked_at" =~ ^[0-9]+$ ]] || continue
     req_before=$(awk -v ip="$ip" -v bt="$blocked_at" -v since="$SINCE_EPOCH" \
       'BEGIN{c=0} $1==ip && $2>=since && $2<bt {c++} END{print c}' "$NGINX_TMP")
     if [[ "$req_before" -eq 0 ]]; then
@@ -120,12 +125,13 @@ latencies=$(q "
 ") || latencies=""
 
 if [[ -n "$latencies" ]]; then
-  read -r median p95 fastest <<< "$(echo "$latencies" | awk '
+  read -r median p95 fastest <<< "$(printf '%s\n' "$latencies" | awk '
   {a[NR]=$1}
   END{
     n=NR
-    med=a[int(n/2)+1]
-    p95=a[int(n*0.95)+1]
+    med=a[int((n+1)/2)]
+    p95=a[int(n*0.95+0.5)]
+    if (p95 < 1) p95 = a[1]
     fast=a[1]
     printf "%d %d %d\n", med, p95, fast
   }')"
@@ -230,16 +236,20 @@ q "
   GROUP BY rf.rule
   ORDER BY COUNT(DISTINCT b.ip) DESC;
 " 2>/dev/null | while IFS='|' read -r rule fires; do
+  rule_esc="${rule//\'/\'\'}"
+
   # Count IPs for this rule that had at least one nginx hit before their block_at
   slip_ips=0
   while IFS='|' read -r ip blocked_at; do
+    [[ "$ip" =~ ^[0-9]{1,3}(\.[0-9]{1,3}){3}$ ]] || continue
+    [[ "$blocked_at" =~ ^[0-9]+$ ]] || continue
     has_hit=$(awk -v ip="$ip" -v bt="$blocked_at" -v since="$SINCE_EPOCH" \
       'BEGIN{c=0} $1==ip && $2>=since && $2<bt {c=1; exit} END{print c}' "$NGINX_TMP")
     [[ "$has_hit" -gt 0 ]] && ((slip_ips++)) || true
   done < <(q "
     SELECT b.ip, b.blocked_at FROM blocks b
     JOIN (SELECT ip, rule FROM rule_firings WHERE action='block' GROUP BY ip) rf
-      ON rf.ip=b.ip AND rf.rule='$rule'
+      ON rf.ip=b.ip AND rf.rule='$rule_esc'
     WHERE b.blocked_at >= $SINCE_EPOCH;
   " 2>/dev/null || true)
   slip_pct=0
@@ -250,7 +260,7 @@ q "
     SELECT COUNT(DISTINCT b.ip)
     FROM blocks b
     JOIN (SELECT ip, rule, MIN(ts) AS fire_ts FROM rule_firings WHERE action='block' GROUP BY ip) rf
-      ON rf.ip = b.ip AND rf.rule='$rule'
+      ON rf.ip = b.ip AND rf.rule='$rule_esc'
     WHERE b.blocked_at >= $SINCE_EPOCH
       AND (SELECT COUNT(DISTINCT reporter) FROM events e
            WHERE e.ip=b.ip AND e.ts<=b.blocked_at) = 1;
@@ -258,7 +268,7 @@ q "
   ret=$(q "
     SELECT COUNT(*) FROM blocks b
     JOIN (SELECT ip, rule FROM rule_firings WHERE action='block' GROUP BY ip) rf
-      ON rf.ip=b.ip AND rf.rule='$rule'
+      ON rf.ip=b.ip AND rf.rule='$rule_esc'
     WHERE b.blocked_at >= $SINCE_EPOCH
       AND b.unblocked_at IS NOT NULL
       AND EXISTS(SELECT 1 FROM blocks b2 WHERE b2.ip=b.ip AND b2.blocked_at>b.unblocked_at);
