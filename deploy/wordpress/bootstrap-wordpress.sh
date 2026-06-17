@@ -80,7 +80,7 @@ ingest:
     api_key: "${API_KEY}"
     poll_interval: 30s
     enable_decisions: true
-    enable_alerts: true
+    enable_alerts: false   # alerts require machine auth; bouncer key only covers decisions
 observability:
   prometheus_addr: ":9101"
   sqlite_path: "metrics.db"
