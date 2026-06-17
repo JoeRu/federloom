@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -108,7 +109,7 @@ func (rs *RuleSet) Evaluate(e proto.Event, rec store.ScoreRecord, b *BurstStore)
 	burstCache := make(map[burstCacheKey]int)
 
 	for _, r := range rs.rules {
-		if r.Reason != "" && r.Reason != e.Reason {
+		if r.Reason != "" && !matchReason(r.Reason, e.Reason) {
 			continue
 		}
 		if r.MinScore > 0 && rec.Score < r.MinScore {
@@ -198,6 +199,15 @@ func (rs *RuleSet) reload() {
 		rs.lastStat = fileStat{mtime: info.ModTime(), size: info.Size()}
 	}
 	rs.mu.Unlock()
+}
+
+// matchReason returns true if pattern matches reason.
+// A pattern ending in "*" is a prefix match; otherwise exact equality.
+func matchReason(pattern, reason string) bool {
+	if strings.HasSuffix(pattern, "*") {
+		return strings.HasPrefix(reason, strings.TrimSuffix(pattern, "*"))
+	}
+	return pattern == reason
 }
 
 // validateRules filters out rules that would cause incorrect behaviour at

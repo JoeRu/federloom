@@ -1,19 +1,21 @@
 # SwarmGuard rules for the WordPress production node.
 # Rules are evaluated top-to-bottom; first match wins.
+# Reason patterns: exact string OR prefix wildcard ending in "*" (e.g. "http-*").
 
-# CrowdSec confirmed ban from local instance — block immediately.
-- name: crowdsec-decision
-  reason: crowdsec-decision
+# CrowdSec confirmed HTTP/WordPress ban from local instance — block immediately.
+# Covers crowdsecurity/http-*, crowdsecurity/http-sensitive-files, etc.
+- name: crowdsec-http-ban
+  reason: http-*
   min_corroboration: 1
   action: block
 
-# CrowdSec alert corroborated by honeypot or a peer — high confidence.
-- name: crowdsec-alert-corroborated
-  reason: crowdsec-alert
-  min_corroboration: 2
+# CrowdSec WordPress-scanner ban (crowdsecurity/wordpress-scan etc.).
+- name: crowdsec-wordpress-ban
+  reason: wordpress-*
+  min_corroboration: 1
   action: block
 
-# HTTP probing seen by 2+ reporters — likely scanner targeting WordPress.
+# HTTP probing seen by 2+ federation peers — scanner confirmed by swarm.
 - name: http-probe-consensus
   reason: http-probe
   min_corroboration: 2
@@ -37,12 +39,6 @@
   min_burst: 15
   burst_window: 10m
   action: block
-
-# Unknown CrowdSec scenario from a single source — watch only.
-- name: crowdsec-alert-watch
-  reason: crowdsec-alert
-  min_corroboration: 1
-  action: watch
 
 # Score-based fallback — catches anything not matched above.
 - name: score-fallback
