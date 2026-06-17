@@ -2,6 +2,7 @@
 # swarmguard-exporter.sh — textfile exporter for node_exporter (5-min cron)
 # Queries SwarmGuard SQLite + CrowdSec and writes effectiveness metrics.
 set -euo pipefail
+export PATH="/run/current-system/sw/bin:/root/.nix-profile/bin:/usr/local/bin:/usr/bin:/bin"
 
 SQLITE_DB="/var/lib/docker/volumes/wordpress_swarmguard-data/_data/metrics.db"
 NGINX_CTR="wordpress_docker_stack-nginx_webmail-1"
@@ -41,20 +42,20 @@ single_source=$(q "
       WHERE e.ip = b.ip AND e.ts <= b.blocked_at
     ) = 1
   GROUP BY rf.rule;
-" | awk -F'|' '{print "swarmguard_blocks_single_source_total{rule=\""$1"\"} "$2}')
+" | awk -F'|' '{print "swarmguard_blocks_single_source_total{rule=\""$1"\"} "$2}') || single_source=""
 
 # ── Slip-through: nginx IPs that are also in the block list ──────────────────
 # Approximate: intersection of nginx source IPs and currently-blocked IPs.
 # Note: nginx access.log is a symlink to /dev/stdout, so use docker logs instead.
 nginx_ips=$(docker logs "$NGINX_CTR" --since "${WINDOW_HOURS}h" 2>/dev/null \
-  | awk '{print $1}' | sort -u) || nginx_ips=""
+  | awk '{print $1}' \
+  | grep -E '^[0-9]{1,3}(\.[0-9]{1,3}){3}$|^[0-9a-f:]+$' \
+  | sort -u) || nginx_ips=""
 
-blocked_ips=$(q "SELECT DISTINCT ip FROM blocks WHERE blocked_at >= $SINCE AND unblocked_at IS NULL;")
+blocked_ips=$(q "SELECT DISTINCT ip FROM blocks WHERE blocked_at >= $SINCE AND unblocked_at IS NULL;" | sort) || blocked_ips=""
 
 if [[ -n "$nginx_ips" && -n "$blocked_ips" ]]; then
-  slip_count=$(comm -12 \
-    <(echo "$nginx_ips") \
-    <(echo "$blocked_ips" | sort) | wc -l | tr -d ' ')
+  slip_count=$(comm -12 <(echo "$nginx_ips") <(echo "$blocked_ips") | wc -l | tr -d ' ')
 else
   slip_count=0
 fi
@@ -99,14 +100,14 @@ recurrence=$(q "
 " | awk -F'|' '{
     ratio = ($2 > 0) ? $3/$2 : 0
     print "swarmguard_block_recurrence_ratio{rule=\""$1"\"} "ratio
-}')
+}') || recurrence=""
 
 # ── CrowdSec overlap ──────────────────────────────────────────────────────────
 cs_decisions=$(docker exec "$CROWDSEC_CTR" \
   cscli decisions list -o json --since "${WINDOW_HOURS}h" 2>/dev/null \
   | jq -r '.[].value // empty' 2>/dev/null | sort -u) || cs_decisions=""
 
-swarm_blocked=$(q "SELECT DISTINCT ip FROM blocks WHERE blocked_at >= $SINCE AND unblocked_at IS NULL;" | sort)
+swarm_blocked=$(q "SELECT DISTINCT ip FROM blocks WHERE blocked_at >= $SINCE AND unblocked_at IS NULL;" | sort) || swarm_blocked=""
 
 if [[ -n "$cs_decisions" && -n "$swarm_blocked" ]]; then
   cs_count=$(echo "$cs_decisions" | wc -l | tr -d ' ')
@@ -125,6 +126,9 @@ ${single_source}
 # HELP swarmguard_nginx_slip_through_total Blocked IPs that also appear in nginx access log (approximate slip-through), by rule.
 # TYPE swarmguard_nginx_slip_through_total gauge
 ${slip_by_rule}
+# HELP swarmguard_nginx_slip_through_total_all Total blocked IPs appearing in nginx log (all rules).
+# TYPE swarmguard_nginx_slip_through_total_all gauge
+swarmguard_nginx_slip_through_total_all ${slip_count}
 # HELP swarmguard_block_recurrence_ratio Fraction of auto-unblocked IPs re-blocked within 7 days, by rule.
 # TYPE swarmguard_block_recurrence_ratio gauge
 ${recurrence}
