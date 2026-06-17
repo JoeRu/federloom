@@ -125,3 +125,29 @@ func TestAnchoredAddsScoreOnTopOfSaturatedStrangers(t *testing.T) {
 		t.Errorf("anchored reporter added no score over saturated strangers: %v -> %v", saturated.Score, score)
 	}
 }
+
+// TestSMTPWeightsHigherThanDefault verifies SMTP/IMAP events score above the
+// 2-point default so a mailcow node reacts faster than it would to generic reasons.
+func TestSMTPWeightsHigherThanDefault(t *testing.T) {
+	cases := []struct {
+		reason  string
+		wantMin float64
+	}{
+		{"smtp-auth-bruteforce", 9},
+		{"smtp-spamtrap", 45},
+		{"imap-auth-bruteforce", 9},
+		{"pop3-auth-bruteforce", 9},
+	}
+	for _, tc := range cases {
+		t.Run(tc.reason, func(t *testing.T) {
+			e := openEngineCap(t, 15) // helper already defined in this file
+			score, err := e.Record("192.0.2.10", tc.reason, "self", 1.0, "self", true)
+			if err != nil {
+				t.Fatalf("Record: %v", err)
+			}
+			if score < tc.wantMin {
+				t.Errorf("reason=%q: score=%.2f, want >= %.2f", tc.reason, score, tc.wantMin)
+			}
+		})
+	}
+}

@@ -14,6 +14,15 @@ var reportWeight = map[string]float64{
 	"ssh-post-auth-command": 10,
 	"ssh-probe":             2,
 	"ssh-unknown":           2,
+	// SMTP/IMAP — mirrors SSH weights; spamtrap is highest (zero-FP on production)
+	"smtp-auth-bruteforce": 10,
+	"smtp-auth-success":    40,
+	"smtp-probe":           2,
+	"smtp-spamtrap":        50,
+	"imap-auth-bruteforce": 10,
+	"imap-auth-success":    30,
+	"imap-probe":           2,
+	"pop3-auth-bruteforce": 10,
 }
 
 func weightFor(reason string) float64 {
