@@ -24,6 +24,8 @@ ingest:
     enable_alerts: true
 observability:
   prometheus_addr: ":9101"
+  sqlite_path: "metrics.db"
+  sqlite_retention: "720h"   # 30 days
 api:
   addr: ":9102"
   purpose: "web"
