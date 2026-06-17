@@ -43,7 +43,8 @@ single_source=$(q "
 
 # ── Slip-through: nginx IPs that are also in the block list ──────────────────
 # Approximate: intersection of nginx source IPs and currently-blocked IPs.
-nginx_ips=$(docker exec "$NGINX_CTR" cat /var/log/nginx/access.log 2>/dev/null \
+# Note: nginx access.log is a symlink to /dev/stdout, so use docker logs instead.
+nginx_ips=$(docker logs "$NGINX_CTR" --since "${WINDOW_HOURS}h" 2>/dev/null \
   | awk '{print $1}' | sort -u) || nginx_ips=""
 
 blocked_ips=$(q "SELECT DISTINCT ip FROM blocks WHERE blocked_at >= $SINCE AND unblocked_at IS NULL;")
