@@ -99,6 +99,12 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 	if cfg.Ingest.CrowdSec.Enabled {
 		sources = append(sources, ingest.NewCrowdSec(cfg.Ingest.CrowdSec, selfID))
 	}
+	if cfg.Ingest.MailcowLogs.Enabled {
+		sources = append(sources, ingest.NewMailcow(cfg.Ingest.MailcowLogs, selfID))
+	}
+	if cfg.Ingest.Spamtrap.Enabled {
+		sources = append(sources, ingest.NewSpamtrap(cfg.Ingest.Spamtrap, selfID))
+	}
 
 	obs, err := observability.New(cfg.Observability, cfg.Reputation, cfg.Store.Dir)
 	if err != nil {

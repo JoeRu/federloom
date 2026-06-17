@@ -46,6 +46,47 @@ func testNode(t *testing.T) (*Node, string) {
 	}, dir
 }
 
+// TestNodeAcceptsMailcowAndSpamtrapConfig verifies that New() wires MailcowLogs
+// and Spamtrap sources when their configs have Enabled: true.
+func TestNodeAcceptsMailcowAndSpamtrapConfig(t *testing.T) {
+	dir := t.TempDir()
+	cfg := config.Defaults()
+	cfg.Store.Dir = dir
+	cfg.Reputation.BlockThreshold = 1000
+	cfg.Ingest.MailcowLogs.Enabled = true
+	cfg.Ingest.MailcowLogs.PostfixContainer = "test-postfix"
+	cfg.Ingest.MailcowLogs.DovecotContainer = "test-dovecot"
+	cfg.Ingest.Spamtrap.Enabled = true
+	cfg.Ingest.Spamtrap.LogFile = filepath.Join(dir, "spamtrap.log")
+
+	n, err := New(cfg, nil)
+	if err != nil {
+		t.Fatalf("New with mailcow+spamtrap config: %v", err)
+	}
+	defer n.CloseStores()
+
+	names := make([]string, 0, len(n.sources))
+	for _, src := range n.sources {
+		names = append(names, src.Name())
+	}
+	hasMail := false
+	hasSpam := false
+	for _, name := range names {
+		if name == "mailcow" {
+			hasMail = true
+		}
+		if name == "spamtrap" {
+			hasSpam = true
+		}
+	}
+	if !hasMail {
+		t.Errorf("mailcow source not wired; sources = %v", names)
+	}
+	if !hasSpam {
+		t.Errorf("spamtrap source not wired; sources = %v", names)
+	}
+}
+
 // TestSpoofedReporterDropped: ReporterID != verified publisher → event ignored.
 func TestSpoofedReporterDropped(t *testing.T) {
 	n, _ := testNode(t)
