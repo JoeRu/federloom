@@ -103,13 +103,26 @@ type CrowdSecConfig struct {
 type EnforceConfig struct {
 	Backend                 string   `yaml:"backend"`
 	SetName                 string   `yaml:"set_name"`
-	Chain                   string   `yaml:"chain"`
+	Chain                   string   `yaml:"chain"`        // single chain (legacy); use Chains for multi
+	Chains                  []string `yaml:"chains"`       // if set, overrides Chain; install rule in each chain
 	NftHook                 string   `yaml:"nft_hook"`
 	ExtraWhitelist          []string `yaml:"extra_whitelist"`
 	CrowdSecLAPIURL         string   `yaml:"crowdsec_lapi_url"`
 	CrowdSecMachineID       string   `yaml:"crowdsec_machine_id"`
 	CrowdSecMachinePassword string   `yaml:"crowdsec_machine_password"` // set via config.local.yaml — never commit
 	CrowdSecBanDuration     Duration `yaml:"crowdsec_ban_duration"` // zero = use half_life
+}
+
+// EffectiveChains returns the chains to install ipset rules in.
+// Chains takes precedence over the legacy Chain field.
+func (e EnforceConfig) EffectiveChains() []string {
+	if len(e.Chains) > 0 {
+		return e.Chains
+	}
+	if e.Chain != "" {
+		return []string{e.Chain}
+	}
+	return []string{"DOCKER-USER"}
 }
 
 // TrustConfig tunes the social trust layer (spec §5.1, design doc

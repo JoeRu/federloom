@@ -61,7 +61,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 	case "crowdsec":
 		sink = enforce.NewCrowdSec(cfg.Enforce, halfLife)
 	default:
-		sink = enforce.NewIpset(cfg.Enforce.SetName, cfg.Enforce.Chain)
+		sink = enforce.NewIpset(cfg.Enforce.SetName, cfg.Enforce.EffectiveChains())
 	}
 
 	nbl := enforce.NewNeverBlockList(cfg.Enforce.ExtraWhitelist)

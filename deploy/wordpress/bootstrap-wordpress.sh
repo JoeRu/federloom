@@ -15,7 +15,9 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 ssh_run()  { ssh -l "$SSH_USER" -p "$SSH_PORT" "$SERVER" "$@"; }
 
-echo "==> [1/6] Registering CrowdSec bouncer on $SERVER"
+echo "==> [1/7] Registering CrowdSec bouncer on $SERVER"
+# Delete stale bouncer first so we always get a fresh key (idempotent re-runs).
+ssh_run docker exec "$CROWDSEC_CTR" cscli bouncers delete swarmguard 2>/dev/null || true
 RAW=$(ssh_run docker exec "$CROWDSEC_CTR" cscli bouncers add swarmguard 2>&1 || true)
 # cscli prints the key as the first non-empty line after "API key for '...':"
 API_KEY=$(echo "$RAW" | awk '/API key for/{found=1; next} found && /[A-Za-z0-9+\/=]/{gsub(/[[:space:]]/,""); print; exit}')
@@ -58,7 +60,9 @@ store:
 enforce:
   backend: ipset
   set_name: swarmguard
-  chain: INPUT
+  chains:
+    - DOCKER-USER
+    - INPUT
   extra_whitelist:
     - 65.108.62.108    # this server's public IP
     - 172.21.0.0/16    # traefik Docker network (includes CrowdSec at 172.21.0.3)

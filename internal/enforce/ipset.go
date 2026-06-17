@@ -13,30 +13,27 @@ import (
 // and /sbin/iptables — no CGo, auditable. Requires root.
 type IpsetSink struct {
 	setName string
-	chain   string
+	chains  []string
 }
 
-// NewIpset creates an IpsetSink. setName is the ipset name; chain is the
-// iptables chain (DOCKER-USER recommended for Docker environments; INPUT for host-only).
-func NewIpset(setName, chain string) *IpsetSink {
+// NewIpset creates an IpsetSink. setName is the ipset name; chains lists the
+// iptables chains to install the drop rule in. Typical values: ["DOCKER-USER"]
+// for Docker container traffic, ["INPUT"] for host-only, or both for mixed.
+// Defaults to ["DOCKER-USER"] when chains is empty.
+func NewIpset(setName string, chains []string) *IpsetSink {
 	if setName == "" {
 		setName = "swarmguard"
 	}
-	if chain == "" {
-		chain = "DOCKER-USER"
+	if len(chains) == 0 {
+		chains = []string{"DOCKER-USER"}
 	}
-	return &IpsetSink{setName: setName, chain: chain}
+	return &IpsetSink{setName: setName, chains: chains}
 }
 
 func (s *IpsetSink) Name() string { return "ipset" }
 
 // Start creates the ipset sets and installs iptables/ip6tables rules (idempotent).
-// Logs a warning if chain is INPUT, as that misses Docker container traffic.
 func (s *IpsetSink) Start(ctx context.Context) error {
-	if s.chain == "INPUT" {
-		log.Printf("WARN enforce/ipset: chain=INPUT will not block traffic to Docker containers; use chain=DOCKER-USER for Docker environments")
-	}
-
 	// IPv4 set
 	if err := s.run(ctx, "ipset", "create", s.setName, "hash:ip", "family", "inet", "-exist"); err != nil {
 		return fmt.Errorf("enforce/ipset: create IPv4 set %q: %w", s.setName, err)
@@ -46,16 +43,18 @@ func (s *IpsetSink) Start(ctx context.Context) error {
 		log.Printf("enforce/ipset: IPv6 set creation failed (ip6tables may be unavailable): %v", err)
 	}
 
-	// iptables rule (IPv4)
-	if s.run(ctx, "iptables", "-C", s.chain, "-m", "set", "--match-set", s.setName, "src", "-j", "DROP") != nil {
-		if err := s.run(ctx, "iptables", "-I", s.chain, "-m", "set", "--match-set", s.setName, "src", "-j", "DROP"); err != nil {
-			return fmt.Errorf("enforce/ipset: install iptables rule: %w", err)
+	for _, chain := range s.chains {
+		// iptables rule (IPv4)
+		if s.run(ctx, "iptables", "-C", chain, "-m", "set", "--match-set", s.setName, "src", "-j", "DROP") != nil {
+			if err := s.run(ctx, "iptables", "-I", chain, "-m", "set", "--match-set", s.setName, "src", "-j", "DROP"); err != nil {
+				return fmt.Errorf("enforce/ipset: install iptables rule in %s: %w", chain, err)
+			}
 		}
-	}
-	// ip6tables rule (IPv6) — best-effort
-	if s.run(ctx, "ip6tables", "-C", s.chain, "-m", "set", "--match-set", s.setName+"6", "src", "-j", "DROP") != nil {
-		if err := s.run(ctx, "ip6tables", "-I", s.chain, "-m", "set", "--match-set", s.setName+"6", "src", "-j", "DROP"); err != nil {
-			log.Printf("enforce/ipset: ip6tables rule installation failed: %v", err)
+		// ip6tables rule (IPv6) — best-effort
+		if s.run(ctx, "ip6tables", "-C", chain, "-m", "set", "--match-set", s.setName+"6", "src", "-j", "DROP") != nil {
+			if err := s.run(ctx, "ip6tables", "-I", chain, "-m", "set", "--match-set", s.setName+"6", "src", "-j", "DROP"); err != nil {
+				log.Printf("enforce/ipset: ip6tables rule in %s failed: %v", chain, err)
+			}
 		}
 	}
 	return nil
