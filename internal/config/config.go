@@ -65,9 +65,11 @@ type ReputationConfig struct {
 
 // IngestConfig groups all ingest source configs.
 type IngestConfig struct {
-	Honeypot   HoneypotConfig   `yaml:"honeypot"`
-	OpenCanary OpenCanaryConfig `yaml:"opencanary"`
-	CrowdSec   CrowdSecConfig   `yaml:"crowdsec"`
+	Honeypot    HoneypotConfig   `yaml:"honeypot"`
+	OpenCanary  OpenCanaryConfig `yaml:"opencanary"`
+	CrowdSec    CrowdSecConfig   `yaml:"crowdsec"`
+	MailcowLogs MailcowConfig    `yaml:"mailcow_logs"`
+	Spamtrap    SpamtrapConfig   `yaml:"spamtrap"`
 }
 
 // OpenCanaryConfig configures the OpenCanary ingest adapter.
@@ -97,6 +99,23 @@ type CrowdSecConfig struct {
 	PollInterval    Duration `yaml:"poll_interval"`
 	EnableDecisions bool     `yaml:"enable_decisions"`
 	EnableAlerts    bool     `yaml:"enable_alerts"`
+}
+
+// MailcowConfig configures the Mailcow native log ingest adapter.
+// Reads Postfix and Dovecot container logs via "docker logs --since=<timestamp>".
+type MailcowConfig struct {
+	Enabled          bool     `yaml:"enabled"`
+	PostfixContainer string   `yaml:"postfix_container"` // default: mailcowdockerized-postfix-1
+	DovecotContainer string   `yaml:"dovecot_container"` // default: mailcowdockerized-dovecot-1
+	PollInterval     Duration `yaml:"poll_interval"`
+}
+
+// SpamtrapConfig configures the spamtrap ingest adapter.
+// Tails a log file where operators write one attacker IPv4 per line.
+type SpamtrapConfig struct {
+	Enabled      bool     `yaml:"enabled"`
+	LogFile      string   `yaml:"log_file"`
+	PollInterval Duration `yaml:"poll_interval"`
 }
 
 // EnforceConfig selects and tunes the firewall backend.
@@ -175,6 +194,12 @@ func Defaults() *Config {
 				EnableDecisions: true,
 				EnableAlerts:    true,
 				// Enabled: false (zero value — opt-in)
+			},
+			MailcowLogs: MailcowConfig{
+				PollInterval: Duration{30 * time.Second},
+			},
+			Spamtrap: SpamtrapConfig{
+				PollInterval: Duration{time.Second},
 			},
 		},
 		Trust: TrustConfig{

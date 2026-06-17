@@ -158,3 +158,49 @@ func TestObservabilityConfig_Defaults(t *testing.T) {
 		t.Errorf("default SQLitePath should be empty, got %q", cfg.Observability.SQLitePath)
 	}
 }
+
+func TestLoadYAMLMailcowConfig(t *testing.T) {
+	cfg, err := config.LoadYAML([]byte(`
+ingest:
+  mailcow_logs:
+    enabled: true
+    postfix_container: mailcowdockerized-postfix-1
+    dovecot_container: mailcowdockerized-dovecot-1
+    poll_interval: 30s
+  spamtrap:
+    enabled: true
+    log_file: /var/log/spamtrap.log
+    poll_interval: 5s
+`))
+	if err != nil {
+		t.Fatalf("LoadYAML: %v", err)
+	}
+	if !cfg.Ingest.MailcowLogs.Enabled {
+		t.Error("expected mailcow_logs.enabled = true")
+	}
+	if cfg.Ingest.MailcowLogs.PostfixContainer != "mailcowdockerized-postfix-1" {
+		t.Errorf("postfix_container: got %q", cfg.Ingest.MailcowLogs.PostfixContainer)
+	}
+	if cfg.Ingest.MailcowLogs.DovecotContainer != "mailcowdockerized-dovecot-1" {
+		t.Errorf("dovecot_container: got %q", cfg.Ingest.MailcowLogs.DovecotContainer)
+	}
+	if cfg.Ingest.MailcowLogs.PollInterval.Duration != 30*time.Second {
+		t.Errorf("poll_interval: got %v", cfg.Ingest.MailcowLogs.PollInterval.Duration)
+	}
+	if !cfg.Ingest.Spamtrap.Enabled {
+		t.Error("expected spamtrap.enabled = true")
+	}
+	if cfg.Ingest.Spamtrap.LogFile != "/var/log/spamtrap.log" {
+		t.Errorf("log_file: got %q", cfg.Ingest.Spamtrap.LogFile)
+	}
+}
+
+func TestDefaultsMailcowPollInterval(t *testing.T) {
+	cfg := config.Defaults()
+	if cfg.Ingest.MailcowLogs.PollInterval.Duration <= 0 {
+		t.Errorf("MailcowLogs default PollInterval must be > 0, got %v", cfg.Ingest.MailcowLogs.PollInterval.Duration)
+	}
+	if cfg.Ingest.Spamtrap.PollInterval.Duration <= 0 {
+		t.Errorf("Spamtrap default PollInterval must be > 0, got %v", cfg.Ingest.Spamtrap.PollInterval.Duration)
+	}
+}
