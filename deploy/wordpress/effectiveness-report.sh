@@ -97,7 +97,6 @@ if [[ -n "$total_blocked" && "$total_blocked" -gt 0 ]]; then
     fi
   done < <(q "SELECT ip, blocked_at FROM blocks WHERE blocked_at >= $SINCE_EPOCH;" || true)
 fi
-rm -f "$NGINX_TMP"
 
 echo "── Coverage ──────────────────────────────────────────────────────────────────"
 printf "IPs blocked in window:               %d\n" "$total_blocked"
@@ -107,7 +106,7 @@ if [[ "$total_blocked" -gt 0 ]]; then
   printf "  reactive (nginx hit before block): %d  (%d%%)\n" \
     "$reactive" "$((reactive*100/total_blocked))"
 fi
-printf "Nginx requests served before block:  %d\n" "$nginx_requests_before_block"
+printf "Nginx requests from reactive IPs:    %d   (requests served before block landed)\n" "$nginx_requests_before_block"
 echo ""
 
 # ── Time-to-Block Latency ─────────────────────────────────────────────────────
@@ -138,7 +137,7 @@ if [[ -n "$latencies" ]]; then
     fi
   }
   echo "── Time-to-Block Latency ─────────────────────────────────────────────────────"
-  printf "Median: %s    P95: %s    Fastest: %s\n" \
+  printf "Median: %s    P95: %s    Fastest: %s (preemptive)\n" \
     "$(fmt_sec $median)" "$(fmt_sec $p95)" "$(fmt_sec $fastest)"
 else
   echo "── Time-to-Block Latency ─────────────────────────────────────────────────────"
@@ -204,7 +203,7 @@ if [[ "$cs_count" -gt 0 ]]; then
   printf "  overlap with SwarmGuard:           %d  (%d%%)\n" \
     "$overlap" "$((cs_count>0 ? overlap*100/cs_count : 0))"
   printf "  CrowdSec-only (SwarmGuard missed): %d\n" "$cs_only"
-  printf "  SwarmGuard-only (federation):      %d\n" "$swarm_only"
+  printf "  SwarmGuard-only (federation extra): %d\n" "$swarm_only"
 fi
 
 echo ""
@@ -220,7 +219,7 @@ echo ""
 
 # ── Rule Breakdown ────────────────────────────────────────────────────────────
 echo "── Rule Breakdown ────────────────────────────────────────────────────────────"
-printf "%-32s %6s  %10s  %8s\n" "Rule" "Fires" "Single-src" "Returned"
+printf "%-32s %6s  %14s  %10s  %8s\n" "Rule" "Fires" "Slip-through" "Single-src" "Returned"
 
 q "
   SELECT rf.rule, COUNT(DISTINCT b.ip)
@@ -231,6 +230,22 @@ q "
   GROUP BY rf.rule
   ORDER BY COUNT(DISTINCT b.ip) DESC;
 " 2>/dev/null | while IFS='|' read -r rule fires; do
+  # Count IPs for this rule that had at least one nginx hit before their block_at
+  slip_ips=0
+  while IFS='|' read -r ip blocked_at; do
+    has_hit=$(awk -v ip="$ip" -v bt="$blocked_at" -v since="$SINCE_EPOCH" \
+      'BEGIN{c=0} $1==ip && $2>=since && $2<bt {c=1; exit} END{print c}' "$NGINX_TMP")
+    [[ "$has_hit" -gt 0 ]] && ((slip_ips++)) || true
+  done < <(q "
+    SELECT b.ip, b.blocked_at FROM blocks b
+    JOIN (SELECT ip, rule FROM rule_firings WHERE action='block' GROUP BY ip) rf
+      ON rf.ip=b.ip AND rf.rule='$rule'
+    WHERE b.blocked_at >= $SINCE_EPOCH;
+  " 2>/dev/null || true)
+  slip_pct=0
+  [[ "$fires" -gt 0 ]] && slip_pct=$((slip_ips*100/fires)) || true
+  slip_fmt="${slip_ips} (${slip_pct}%)"
+
   ss=$(q "
     SELECT COUNT(DISTINCT b.ip)
     FROM blocks b
@@ -248,8 +263,9 @@ q "
       AND b.unblocked_at IS NOT NULL
       AND EXISTS(SELECT 1 FROM blocks b2 WHERE b2.ip=b.ip AND b2.blocked_at>b.unblocked_at);
   " 2>/dev/null) || ret=0
-  printf "%-32s %6d  %10s  %8s\n" "$rule" "$fires" "$ss" "$ret"
+  printf "%-32s %6d  %14s  %10s  %8s\n" "$rule" "$fires" "$slip_fmt" "$ss" "$ret"
 done
+rm -f "$NGINX_TMP"
 echo ""
 
 # ── Active Blocklist ──────────────────────────────────────────────────────────
