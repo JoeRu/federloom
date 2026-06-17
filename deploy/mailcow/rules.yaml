@@ -1,15 +1,40 @@
 # SwarmGuard rules for the Mailcow production node.
 # Rules are evaluated top-to-bottom; first match wins.
+# Reason patterns: exact string OR prefix wildcard ending in "*" (e.g. "smtp-*").
 
-# CrowdSec confirmed ban from local instance — block immediately.
-- name: crowdsec-decision
-  reason: crowdsec-decision
+# Delivery to a never-used mailbox on this server — zero-false-positive signal.
+- name: spamtrap-hit
+  reason: smtp-spamtrap
   min_corroboration: 1
   action: block
 
-# CrowdSec alert corroborated by honeypot or a peer — high confidence.
-- name: crowdsec-alert-corroborated
-  reason: crowdsec-alert
+# CrowdSec confirmed SMTP ban from local instance — block immediately.
+- name: crowdsec-smtp-ban
+  reason: smtp-*
+  min_corroboration: 1
+  action: block
+
+# CrowdSec confirmed SSH ban from local instance.
+- name: crowdsec-ssh-ban
+  reason: ssh-*
+  min_corroboration: 1
+  action: block
+
+# SMTP brute force confirmed by 2+ federation reporters.
+- name: smtp-brute-consensus
+  reason: smtp-auth-bruteforce
+  min_corroboration: 2
+  action: block
+
+# IMAP brute force confirmed by 2+ federation reporters.
+- name: imap-brute-consensus
+  reason: imap-auth-bruteforce
+  min_corroboration: 2
+  action: block
+
+# POP3 brute force confirmed by 2+ reporters.
+- name: pop3-brute-consensus
+  reason: pop3-auth-bruteforce
   min_corroboration: 2
   action: block
 
@@ -25,30 +50,12 @@
   min_corroboration: 1
   action: block
 
-# SMTP brute force seen by 2+ reporters.
-- name: smtp-brute-consensus
-  reason: smtp-auth-bruteforce
-  min_corroboration: 2
-  action: block
-
-# IMAP brute force seen by 2+ reporters.
-- name: imap-brute-consensus
-  reason: imap-auth-bruteforce
-  min_corroboration: 2
-  action: block
-
-# SSH burst — 15 events in 10 min (honeypot feeds this).
+# SSH burst — 15 events in 10 min.
 - name: ssh-brute-burst
   reason: ssh-auth-bruteforce
   min_burst: 15
   burst_window: 10m
   action: block
-
-# Unknown CrowdSec scenario from a single source — watch only.
-- name: crowdsec-alert-watch
-  reason: crowdsec-alert
-  min_corroboration: 1
-  action: watch
 
 # Score-based fallback — catches anything not matched above.
 - name: score-fallback

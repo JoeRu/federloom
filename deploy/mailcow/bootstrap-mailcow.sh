@@ -16,6 +16,7 @@ ssh_run()  { ssh -l "$SSH_USER" "$SERVER" "$@"; }
 sudo_run() { ssh -l "$SSH_USER" "$SERVER" sudo "$@"; }
 
 echo "==> [1/6] Registering CrowdSec bouncer on $SERVER"
+sudo_run docker exec "$CROWDSEC_CTR" cscli bouncers delete swarmguard 2>/dev/null || true
 RAW=$(sudo_run docker exec "$CROWDSEC_CTR" cscli bouncers add swarmguard 2>&1 || true)
 # cscli prints the key as the first non-empty line after "API key for '...':"
 API_KEY=$(echo "$RAW" | awk '/API key for/{found=1; next} found && /[A-Za-z0-9+\/=]/{gsub(/[[:space:]]/,""); print; exit}')
@@ -56,7 +57,9 @@ store:
 enforce:
   backend: ipset
   set_name: swarmguard
-  chain: INPUT
+  chains:
+    - DOCKER-USER
+    - INPUT
   extra_whitelist:
     - 135.181.91.151   # this server's public IP
     - 100.120.31.14    # tailscale
@@ -69,13 +72,22 @@ reputation:
   decay_interval: 1h
   rules_file: /etc/swarmguard/rules.yaml
 ingest:
+  mailcow_logs:
+    enabled: true
+    postfix_container: mailcowdockerized-postfix-1
+    dovecot_container: mailcowdockerized-dovecot-1
+    poll_interval: 30s
+  spamtrap:
+    enabled: false
+    log_file: /var/log/swarmguard-spamtrap.log
+    poll_interval: 5s
   crowdsec:
     enabled: ${CROWDSEC_ENABLED}
     lapi_url: "http://127.0.0.1:8080"
     api_key: "${API_KEY}"
     poll_interval: 30s
     enable_decisions: true
-    enable_alerts: true
+    enable_alerts: false
 observability:
   prometheus_addr: ":9101"
 api:
