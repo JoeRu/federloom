@@ -13,6 +13,8 @@ WINDOW_HOURS=24
 
 SINCE=$(date -d "$WINDOW_HOURS hours ago" +%s)
 
+mkdir -p "$OUTDIR"
+
 # Abort cleanly if DB doesn't exist yet.
 if [[ ! -f "$SQLITE_DB" ]]; then
   echo "# swarmguard_exporter: metrics.db not found at $SQLITE_DB" > "$TMPFILE"
