@@ -74,8 +74,8 @@ reputation:
 ingest:
   mailcow_logs:
     enabled: true
-    postfix_container: mailcowdockerized-postfix-1
-    dovecot_container: mailcowdockerized-dovecot-1
+    postfix_container: mailcowdockerized-postfix-mailcow-1
+    dovecot_container: mailcowdockerized-dovecot-mailcow-1
     poll_interval: 30s
   spamtrap:
     enabled: false
