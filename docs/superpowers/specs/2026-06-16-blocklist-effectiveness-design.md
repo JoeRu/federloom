@@ -44,12 +44,14 @@ SwarmGuard process          textfile exporter (cron)       CLI report (on-demand
 | `swarmguard_blocks_total` | Counter | `rule`, `source` | Incremented on every block decision. `source`: `preemptive` (no prior nginx hit recorded) or `reactive` (IP was seen in nginx log before block). Computed by exporter retroactively — Go emits without `source`; exporter annotates. **Revised:** Go emits `swarmguard_blocks_total{rule}` only; `source` breakdown lives in the textfile exporter which has nginx log access. |
 | `swarmguard_time_to_block_seconds` | Histogram | `rule` | Duration from the first event recorded for an IP to the moment it is added to the enforce set. Buckets: 0, 30s, 1m, 2m, 5m, 10m, 30m, 1h, 4h. |
 | `swarmguard_corroboration_at_block` | Histogram | `rule` | Number of distinct `reporter_id` values seen for an IP at the moment the block rule fires. Buckets: 1, 2, 3, 4, 5, 10. Reveals rules always firing at `min_corroboration` (possibly too low). |
-| `swarmguard_unblocks_total` | Counter | `rule`, `returned` | Incremented on every auto-unblock. `returned`: `true` if the same IP generates a new event within 7 days, `false` otherwise. `returned=true` indicates block duration is too short for that rule's threat profile. |
+| `swarmguard_unblocks_total` | Counter | `rule` | Incremented on every auto-unblock. Indicates block duration may be too short for the rule's threat profile when high relative to `swarmguard_blocks_total`. |
+| `swarmguard_block_recurrence_total` | Counter | `rule` | Incremented when a previously-unblocked IP is re-blocked within 7 days. Emitted at re-block time so the counter reflects confirmed recurrences, not predicted ones. Separate from `unblocks_total` because the `returned` state is only known retroactively. |
 
 ### Wiring
 
 - `swarmguard_blocks_total` and `swarmguard_time_to_block_seconds` and `swarmguard_corroboration_at_block`: emitted in `node.go` in the `processBlock` path, after a rule match produces an `action: block`.
-- `swarmguard_unblocks_total`: emitted in the decay/unblock path in `internal/reputation/` or `internal/node/node.go` when an IP's score drops below `unblock_threshold`. The `returned` label requires a small lookup: when a new event arrives for an IP, check if it was previously unblocked; if so, increment `swarmguard_unblocks_total{returned="true"}` retroactively. Simplest approach: store a `recently_unblocked` in-memory set with a 7-day TTL.
+- `swarmguard_unblocks_total{rule}`: emitted in the unblock path in `internal/node/node.go` when an IP's score drops below `unblock_threshold`. The rule is tracked in `Observer.blockedByRule` and looked up at unblock time.
+- `swarmguard_block_recurrence_total{rule}`: emitted in `RecordBlock` when the IP appears in the `recentlyUnblocked` map (populated by `RecordUnblock`) with a timestamp within the last 7 days. This defers the counter to re-block time, when recurrence is confirmed rather than predicted. The `recentlyUnblocked` map is pruned of entries older than 7 days on every `RecordUnblock` call.
 
 ### What these enable for rule tuning
 
@@ -57,7 +59,7 @@ SwarmGuard process          textfile exporter (cron)       CLI report (on-demand
 |---|---|---|
 | `time_to_block_seconds{rule="ssh-brute-burst"}` P95 > 15m | `burst_window` too wide | Tighten `burst_window` |
 | `corroboration_at_block{rule="http-probe-consensus"}` always = 2 | `min_corroboration` is the exact trigger, no headroom | Fine — or lower to 1 if slip-through is high |
-| `unblocks_total{rule="score-fallback", returned="true"}` > 20% | Score decays too fast for this rule's attacker profile | Extend `half_life` or raise `block_threshold` |
+| `block_recurrence_total{rule="score-fallback"}` / `unblocks_total{rule="score-fallback"}` > 20% | Score decays too fast for this rule's attacker profile | Extend `half_life` or raise `block_threshold` |
 | `blocks_total{rule="crowdsec-decision"}` >> all others | CrowdSec is doing the heavy lifting | Validate other rules aren't redundant |
 
 ---

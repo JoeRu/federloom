@@ -89,12 +89,22 @@ api:
       - http-*
 EOF
 
-echo "==> [5/6] Starting SwarmGuard"
+echo "==> [5/7] Starting SwarmGuard"
 ssh_run docker compose \
   -f "$REMOTE_DIR/deploy/wordpress/docker-compose.yml" \
   up -d --build
 
-echo "==> [6/6] Waiting 10s for swarmd to print peer ID..."
+echo "==> [6/7] Installing effectiveness exporter cron + textfile dir"
+ssh_run bash -c "
+  mkdir -p /var/lib/node_exporter/textfile
+  chmod +x $REMOTE_DIR/deploy/wordpress/swarmguard-exporter.sh
+  chmod +x $REMOTE_DIR/deploy/wordpress/effectiveness-report.sh
+  (crontab -l 2>/dev/null | grep -v 'swarmguard-exporter'; echo '*/5 * * * * $REMOTE_DIR/deploy/wordpress/swarmguard-exporter.sh >> /var/log/swarmguard-exporter.log 2>&1') | crontab -
+"
+echo "    Cron installed; textfile dir ready at /var/lib/node_exporter/textfile"
+echo "    NOTE: ensure node_exporter has --collector.textfile.directory=/var/lib/node_exporter/textfile/"
+
+echo "==> [7/7] Waiting 10s for swarmd to print peer ID..."
 sleep 10
 
 PEER_ID=$(ssh_run docker logs swarmguard-wordpress 2>/dev/null \
