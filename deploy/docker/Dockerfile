@@ -7,7 +7,7 @@ RUN CGO_ENABLED=0 go build -o /out/swarmd ./cmd/swarmd \
 
 # Runtime — needs iptables/ipset tooling for the enforce backends
 FROM alpine:3.20
-RUN apk add --no-cache iptables ipset nftables
+RUN apk add --no-cache iptables ipset nftables docker-cli
 COPY --from=build /out/swarmd /usr/local/bin/swarmd
 COPY --from=build /out/swarmctl /usr/local/bin/swarmctl
 ENTRYPOINT ["/usr/local/bin/swarmd"]

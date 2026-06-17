@@ -21,6 +21,7 @@ services:
       - ./config.local.yaml:/etc/swarmguard/config.yaml:ro
       - ./rules.yaml:/etc/swarmguard/rules.yaml:ro
       - swarmguard-data:/var/lib/swarmguard
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     command: >
       --config /etc/swarmguard/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
