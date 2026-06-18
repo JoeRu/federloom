@@ -11,6 +11,7 @@ import (
 
 	"github.com/JoeRu/swarmguard/internal/api"
 	"github.com/JoeRu/swarmguard/internal/config"
+	"github.com/JoeRu/swarmguard/internal/dnsbl"
 	"github.com/JoeRu/swarmguard/internal/enforce"
 	"github.com/JoeRu/swarmguard/internal/identity"
 	"github.com/JoeRu/swarmguard/internal/ingest"
@@ -38,7 +39,8 @@ type Node struct {
 	rules      *rules.RuleSet    // NEW
 	burst      *rules.BurstStore // NEW
 	obs        *observability.Observer
-	api        *api.Server // nil-safe: all methods no-op when cfg.API.Addr == ""
+	api        *api.Server   // nil-safe: all methods no-op when cfg.API.Addr == ""
+	dnsbl      *dnsbl.Server // nil-safe: Start is no-op when addr/zone are empty
 }
 
 // New wires all subsystems from cfg. t may be nil for local-only operation.
@@ -112,6 +114,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 	}
 
 	apiSrv := api.New(cfg.API, s, cfg.Reputation)
+	dnsblSrv := dnsbl.New(cfg.DNSBL, s, cfg.Reputation)
 
 	return &Node{
 		cfg:        cfg,
@@ -128,6 +131,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		burst:      rules.NewBurstStore(),
 		obs:        obs,
 		api:        apiSrv,
+		dnsbl:      dnsblSrv,
 	}, nil
 }
 
@@ -135,6 +139,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 func (n *Node) Run(ctx context.Context) error {
 	n.obs.Start(ctx)
 	n.api.Start(ctx)
+	n.dnsbl.Start(ctx)
 	if err := n.sink.Start(ctx); err != nil {
 		return fmt.Errorf("node: start enforce sink: %w", err)
 	}
