@@ -50,7 +50,7 @@ func New(cfg config.DNSBLConfig, s StoreReader, repCfg config.ReputationConfig) 
 // It is a no-op when cfg.Addr or cfg.Zone is empty, or when s is nil.
 // The servers shut down when ctx is cancelled.
 func (s *Server) Start(ctx context.Context) {
-	if s == nil || s.cfg.Addr == "" || s.cfg.Zone == "" {
+	if s == nil || s.store == nil || s.cfg.Addr == "" || s.cfg.Zone == "" {
 		return
 	}
 
@@ -117,8 +117,20 @@ func (s *Server) handleDNS(w dns.ResponseWriter, r *dns.Msg) {
 	}
 	ip := strings.Join(parts, ".")
 
+	if net.ParseIP(ip) == nil || net.ParseIP(ip).To4() == nil {
+		m.SetRcode(r, dns.RcodeNameError)
+		_ = w.WriteMsg(m)
+		return
+	}
+
 	rec, err := s.store.GetScore(ip)
-	if err != nil || rec.LastSeen.IsZero() {
+	if err != nil {
+		log.Printf("dnsbl: store error for %s: %v", ip, err)
+		m.SetRcode(r, dns.RcodeNameError)
+		_ = w.WriteMsg(m)
+		return
+	}
+	if rec.LastSeen.IsZero() {
 		m.SetRcode(r, dns.RcodeNameError)
 		_ = w.WriteMsg(m)
 		return
