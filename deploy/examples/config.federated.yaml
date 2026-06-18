@@ -13,3 +13,9 @@ score:
 resources:
   max_cpu_percent: 25     # good-neighbour budget (spec §11.5)
   max_bandwidth_kbps: 512
+# List well-known relay peers to connect to at startup.
+# Peers are tried once on boot; the DHT routing table takes over after that.
+# Update this list when a peer's node key rotates (key rotation = new peer ID).
+bootstrap_peers: []
+# Example:
+#   - /ip4/1.2.3.4/tcp/7700/p2p/12D3KooW...

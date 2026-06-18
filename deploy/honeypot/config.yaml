@@ -38,3 +38,5 @@ observability:
   sqlite_retention: 360h         # 15 days
 api:
   addr: ":9102"
+bootstrap_peers:
+  - /ip4/167.233.115.41/tcp/7700/p2p/12D3KooWBvpzbEBgcFbHrw3kEFjfdFB2AwimGMhMrVGQBHMpZNjD  # relay peer
