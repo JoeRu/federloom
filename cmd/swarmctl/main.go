@@ -13,6 +13,10 @@ func usage() {
 Flags must come BEFORE positional args (PERSON, PEER_ID, FILE).
 
 Usage:
+  swarmctl setup [--label NAME]
+  swarmctl status
+  swarmctl federation invite --addr MULTIADDR [--weight W] [--out FILE]
+  swarmctl federation join FILE [--as NAME] [--weight W]
   swarmctl identity                      print this node's peer ID
   swarmctl identity init --label NAME    create a Person identity + self peer-cert
   swarmctl identity show                 print Person pubkey + fingerprint
@@ -35,6 +39,12 @@ func main() {
 	}
 	var err error
 	switch os.Args[1] {
+	case "setup":
+		err = cmdSetup(os.Args[2:])
+	case "status":
+		err = cmdStatus(os.Args[2:])
+	case "federation":
+		err = cmdFederation(os.Args[2:])
 	case "identity":
 		err = cmdIdentity(os.Args[2:])
 	case "peer-cert":
