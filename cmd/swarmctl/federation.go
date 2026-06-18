@@ -35,6 +35,7 @@ func federationInvite(args []string) error {
 	fset := flag.NewFlagSet("federation invite", flag.ExitOnError)
 	loadCfg := addConfigFlag(fset)
 	addr := fset.String("addr", "", "bare transport multiaddr, e.g. /ip4/1.2.3.4/tcp/7700 (required)")
+	weight := fset.Float64("weight", 0, "suggested trust weight for the invitation (default: config anchor_weight)")
 	out := fset.String("out", "", "write invitation to FILE instead of stdout")
 	if err := fset.Parse(args); err != nil {
 		return err
@@ -58,6 +59,13 @@ func federationInvite(args []string) error {
 	inv, err := federation.NewInvitation(cfg, label, *addr)
 	if err != nil {
 		return fmt.Errorf("create invitation: %w", err)
+	}
+
+	if *weight > 0 {
+		if *weight > 1 {
+			return fmt.Errorf("weight %v out of range (0,1]", *weight)
+		}
+		inv.Federation.SuggestedWeight = *weight
 	}
 
 	// Compute fingerprint for the operator hint.
