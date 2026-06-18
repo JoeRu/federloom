@@ -73,21 +73,44 @@ func main() {
 		}
 	}
 
+	// Merge bootstrap peers from config file and --bootstrap CLI flag (additive).
+	var bootstrapPeers []peer.AddrInfo
+	for _, raw := range cfg.BootstrapPeers {
+		raw = strings.TrimSpace(raw)
+		if raw == "" {
+			continue
+		}
+		ma, err := multiaddr.NewMultiaddr(raw)
+		if err != nil {
+			log.Fatalf("invalid bootstrap_peers entry %q: %v", raw, err)
+		}
+		ai, err := peer.AddrInfoFromP2pAddr(ma)
+		if err != nil {
+			log.Fatalf("parse bootstrap_peers entry %q: %v", raw, err)
+		}
+		bootstrapPeers = append(bootstrapPeers, *ai)
+	}
 	if *bootstrap != "" {
-		var peers []peer.AddrInfo
 		for _, raw := range strings.Split(*bootstrap, ",") {
 			raw = strings.TrimSpace(raw)
+			if raw == "" {
+				continue
+			}
 			ma, err := multiaddr.NewMultiaddr(raw)
 			if err != nil {
-				log.Fatalf("invalid bootstrap addr %q: %v", raw, err)
+				log.Fatalf("invalid --bootstrap addr %q: %v", raw, err)
 			}
 			ai, err := peer.AddrInfoFromP2pAddr(ma)
 			if err != nil {
-				log.Fatalf("parse bootstrap peer %q: %v", raw, err)
+				log.Fatalf("parse --bootstrap peer %q: %v", raw, err)
 			}
-			peers = append(peers, *ai)
+			bootstrapPeers = append(bootstrapPeers, *ai)
 		}
-		if err := t.Bootstrap(ctx, peers); err != nil {
+	}
+	if len(bootstrapPeers) == 0 {
+		log.Println("no bootstrap peers configured, starting as isolated node")
+	} else {
+		if err := t.Bootstrap(ctx, bootstrapPeers); err != nil {
 			log.Printf("bootstrap warning: %v", err)
 		}
 	}
