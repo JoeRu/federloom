@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -179,5 +178,4 @@ func TestInvitationSuggestedWeight(t *testing.T) {
 		t.Fatalf("NewInvitation with issued.json present: %v", err)
 	}
 	_ = inv2
-	_ = filepath.Join(cfg.Store.Dir, "x") // ensure import is used
 }

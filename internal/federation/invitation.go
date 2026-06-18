@@ -2,6 +2,7 @@ package federation
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -73,7 +74,7 @@ func NewInvitation(cfg *config.Config, label string, transportAddr string) (*Inv
 	// Step 6: load the Person key (must already exist — operator runs `swarmctl setup`).
 	personPriv, err := identity.LoadPersonKey(cfg.TrustPersonKeyFile())
 	if err != nil {
-		if os.IsNotExist(err) {
+		if errors.Is(err, os.ErrNotExist) {
 			return nil, fmt.Errorf("federation: no person identity — run `swarmctl setup` first")
 		}
 		return nil, fmt.Errorf("federation: load person key: %w — run `swarmctl setup` first", err)
@@ -83,7 +84,7 @@ func NewInvitation(cfg *config.Config, label string, transportAddr string) (*Inv
 	// A missing file is fine — empty cert list is valid.
 	issuedPath := cfg.TrustPersonKeyFile() + ".issued.json"
 	certs, err := trust.LoadCerts(issuedPath)
-	if err != nil && !os.IsNotExist(err) {
+	if err != nil {
 		return nil, fmt.Errorf("federation: load issued certs: %w", err)
 	}
 
