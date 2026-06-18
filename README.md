@@ -36,6 +36,8 @@ storage-limitation mechanism.
 
 ## Operating a federation? Read this first.
 
+See `docs/getting-started.md` for step-by-step instructions. Use `swarmctl setup` to initialise identity, then `swarmctl federation invite` (existing operators) or `swarmctl federation join` (joining operators) to exchange trust bundles.
+
 If you run (not just join) a trust domain, you must establish three things up
 front. **This is mandatory reading**, documented in
 [`docs/onboarding/`](docs/onboarding/):
@@ -69,11 +71,18 @@ tools (see [`docs/plugins.md`](docs/plugins.md)):
 - **`enforce.Sink`** — enforcement backends: `ipset`, `nftables`, or emit a
   CrowdSec-compatible blocklist so an existing bouncer does the blocking.
 
-## Quick start (scaffold)
+## Install & first run
 
 ```bash
-make build           # builds bin/swarmd and bin/swarmctl (currently stubs)
-make test            # runs tests (none yet)
+make build
+./bin/swarmd -config config.yaml   # first run generates the node key
+./bin/swarmctl setup               # initialise identity and self-certify
+```
+
+See **[docs/getting-started.md](docs/getting-started.md)** for the full guide (solo node, starting a federation, or joining one).
+
+```bash
+make test            # runs tests
 make adversarial     # poisoning/sybil suite — the security CI gate
 ```
 

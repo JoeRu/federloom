@@ -1,3 +1,6 @@
+> For the quickest path, see [`docs/getting-started.md`](getting-started.md).
+> This file covers the underlying concepts and advanced federation options.
+
 # Federation guide
 
 How to set up, join, federate, and defederate trust domains (subnets). Background:
