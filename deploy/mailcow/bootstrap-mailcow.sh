@@ -98,6 +98,8 @@ api:
       - smtp-*
       - imap-*
       - pop3-*
+bootstrap_peers:
+  - /ip4/167.233.115.41/tcp/7700/p2p/12D3KooWBvpzbEBgcFbHrw3kEFjfdFB2AwimGMhMrVGQBHMpZNjD  # honeypot relay
 EOF
 
 echo "==> [5/6] Starting SwarmGuard"
