@@ -128,6 +128,5 @@ Next: swarmctl federation invite --addr /ip4/YOUR_IP/tcp/7700 > invite.json
 	return nil
 }
 
-// cmdStatus and cmdFederation will be implemented in Tasks 3 and 4.
-func cmdStatus(args []string) error    { return fmt.Errorf("not yet implemented") }
-func cmdFederation(args []string) error { return fmt.Errorf("not yet implemented") }
+// cmdStatus will be implemented in Task 4.
+func cmdStatus(args []string) error { return fmt.Errorf("not yet implemented") }
