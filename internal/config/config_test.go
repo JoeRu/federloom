@@ -229,3 +229,35 @@ bootstrap_peers:
 		t.Errorf("unexpected peer[0]: %s", cfg.BootstrapPeers[0])
 	}
 }
+
+func TestDNSBLConfigDefaultDisabled(t *testing.T) {
+	cfg := config.Defaults()
+	if cfg.DNSBL.Addr != "" {
+		t.Errorf("DNSBL.Addr must be empty by default, got %q", cfg.DNSBL.Addr)
+	}
+	if cfg.DNSBL.Zone != "" {
+		t.Errorf("DNSBL.Zone must be empty by default, got %q", cfg.DNSBL.Zone)
+	}
+}
+
+func TestDNSBLConfigFromYAML(t *testing.T) {
+	raw := []byte(`
+dnsbl:
+  addr: ":5353"
+  zone: "dnsbl.mail.example.com."
+  min_score: 80
+`)
+	cfg, err := config.LoadYAML(raw)
+	if err != nil {
+		t.Fatalf("LoadYAML: %v", err)
+	}
+	if cfg.DNSBL.Addr != ":5353" {
+		t.Errorf("Addr: got %q, want :5353", cfg.DNSBL.Addr)
+	}
+	if cfg.DNSBL.Zone != "dnsbl.mail.example.com." {
+		t.Errorf("Zone: got %q, want dnsbl.mail.example.com.", cfg.DNSBL.Zone)
+	}
+	if cfg.DNSBL.MinScore != 80 {
+		t.Errorf("MinScore: got %v, want 80", cfg.DNSBL.MinScore)
+	}
+}

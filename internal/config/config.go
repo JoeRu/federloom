@@ -37,6 +37,14 @@ type APIConfig struct {
 	Taxonomy TaxonomyConfig `yaml:"taxonomy"` // empty = use built-in default taxonomy (mail/web/ssh)
 }
 
+// DNSBLConfig controls the optional embedded DNSBL DNS server.
+// Disabled when Addr is empty (zero value = opt-in, same pattern as APIConfig).
+type DNSBLConfig struct {
+	Addr     string  `yaml:"addr"`      // e.g. ":5353"; "" = disabled
+	Zone     string  `yaml:"zone"`      // e.g. "dnsbl.mail.example.com." — trailing dot optional
+	MinScore float64 `yaml:"min_score"` // 0 = use reputation.block_threshold
+}
+
 // Config is the top-level runtime configuration.
 type Config struct {
 	FederationMode string              `yaml:"federation_mode"`
@@ -48,6 +56,7 @@ type Config struct {
 	Observability  ObservabilityConfig `yaml:"observability"`
 	API            APIConfig           `yaml:"api"`
 	BootstrapPeers []string            `yaml:"bootstrap_peers"`
+	DNSBL          DNSBLConfig         `yaml:"dnsbl"`
 }
 
 // StoreConfig configures the BadgerDB reputation store.
@@ -94,9 +103,9 @@ type HoneypotConfig struct {
 type CrowdSecConfig struct {
 	Enabled         bool     `yaml:"enabled"`
 	LAPIURL         string   `yaml:"lapi_url"`
-	APIKey          string   `yaml:"api_key"`           // bouncer key — decisions only
-	MachineID       string   `yaml:"machine_id"`        // machine account — decisions + alerts
-	MachinePassword string   `yaml:"machine_password"`  // machine account password
+	APIKey          string   `yaml:"api_key"`          // bouncer key — decisions only
+	MachineID       string   `yaml:"machine_id"`       // machine account — decisions + alerts
+	MachinePassword string   `yaml:"machine_password"` // machine account password
 	PollInterval    Duration `yaml:"poll_interval"`
 	EnableDecisions bool     `yaml:"enable_decisions"`
 	EnableAlerts    bool     `yaml:"enable_alerts"`
@@ -123,14 +132,14 @@ type SpamtrapConfig struct {
 type EnforceConfig struct {
 	Backend                 string   `yaml:"backend"`
 	SetName                 string   `yaml:"set_name"`
-	Chain                   string   `yaml:"chain"`        // single chain (legacy); use Chains for multi
-	Chains                  []string `yaml:"chains"`       // if set, overrides Chain; install rule in each chain
+	Chain                   string   `yaml:"chain"`  // single chain (legacy); use Chains for multi
+	Chains                  []string `yaml:"chains"` // if set, overrides Chain; install rule in each chain
 	NftHook                 string   `yaml:"nft_hook"`
 	ExtraWhitelist          []string `yaml:"extra_whitelist"`
 	CrowdSecLAPIURL         string   `yaml:"crowdsec_lapi_url"`
 	CrowdSecMachineID       string   `yaml:"crowdsec_machine_id"`
 	CrowdSecMachinePassword string   `yaml:"crowdsec_machine_password"` // set via config.local.yaml — never commit
-	CrowdSecBanDuration     Duration `yaml:"crowdsec_ban_duration"` // zero = use half_life
+	CrowdSecBanDuration     Duration `yaml:"crowdsec_ban_duration"`     // zero = use half_life
 }
 
 // EffectiveChains returns the chains to install ipset rules in.
