@@ -51,13 +51,13 @@ func federationInvite(args []string) error {
 
 	labelData, err := os.ReadFile(labelPath(cfg.TrustPersonKeyFile()))
 	if err != nil {
-		return fmt.Errorf("no person identity — run `swarmctl setup` first")
+		return fmt.Errorf("no person identity (%w) — run `swarmctl setup` first", err)
 	}
 	label := strings.TrimSpace(string(labelData))
 
 	inv, err := federation.NewInvitation(cfg, label, *addr)
 	if err != nil {
-		return err
+		return fmt.Errorf("create invitation: %w", err)
 	}
 
 	// Compute fingerprint for the operator hint.
@@ -114,7 +114,7 @@ func federationJoin(args []string) error {
 
 	inv, err := federation.ReadInvitation(f)
 	if err != nil {
-		return err
+		return fmt.Errorf("read invitation %s: %w", fset.Arg(0), err)
 	}
 
 	cfg, err := loadCfg()
@@ -173,7 +173,7 @@ func federationJoin(args []string) error {
 	// Import certs.
 	existing, err := trust.LoadCerts(cfg.TrustCertsFile())
 	if err != nil {
-		return err
+		return fmt.Errorf("load certs: %w", err)
 	}
 	byPeer := map[string]int{}
 	for i, c := range existing {
@@ -197,7 +197,7 @@ func federationJoin(args []string) error {
 		imported++
 	}
 	if err := trust.SaveCerts(cfg.TrustCertsFile(), existing); err != nil {
-		return err
+		return fmt.Errorf("save certs: %w", err)
 	}
 
 	// Anchor the inviting person.
