@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"crypto/ed25519"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -54,7 +53,7 @@ func cmdSetup(args []string) error {
 	fmt.Println("[2/3] Person identity")
 	personPriv, err := identity.LoadPersonKey(cfg.TrustPersonKeyFile())
 	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) || os.IsNotExist(err) {
+		if errors.Is(err, fs.ErrNotExist) {
 			// Determine label — flag or interactive prompt
 			chosenLabel := *label
 			if chosenLabel == "" {
@@ -62,6 +61,9 @@ func cmdSetup(args []string) error {
 				scanner := bufio.NewScanner(os.Stdin)
 				if scanner.Scan() {
 					chosenLabel = strings.TrimSpace(scanner.Text())
+				}
+				if err := scanner.Err(); err != nil {
+					return fmt.Errorf("read label from stdin: %w", err)
 				}
 			}
 			if chosenLabel == "" {
@@ -104,7 +106,7 @@ func cmdSetup(args []string) error {
 		// Issue a fresh self cert
 		fmt.Print("      self-certifying this node...")
 		validUntil := time.Now().Add(365 * 24 * time.Hour)
-		cert := identity.IssueCert(ed25519.PrivateKey(personPriv), pid.String(), validUntil)
+		cert := identity.IssueCert(personPriv, pid.String(), validUntil)
 		if err := writeCert(certPath, cert); err != nil {
 			return err
 		}
