@@ -102,7 +102,7 @@ func cmdSetup(args []string) error {
 		days := int(remaining.Hours() / 24)
 		fmt.Printf("      peer.cert valid until %s  (%dd remaining)\n",
 			cert.ValidUntil.Format("2006-01-02"), days)
-	} else if os.IsNotExist(err) || errors.Is(err, fs.ErrNotExist) {
+	} else if errors.Is(err, fs.ErrNotExist) {
 		// Issue a fresh self cert
 		fmt.Print("      self-certifying this node...")
 		validUntil := time.Now().Add(365 * 24 * time.Hour)
