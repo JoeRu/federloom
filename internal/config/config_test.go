@@ -204,3 +204,28 @@ func TestDefaultsMailcowPollInterval(t *testing.T) {
 		t.Errorf("Spamtrap default PollInterval must be > 0, got %v", cfg.Ingest.Spamtrap.PollInterval.Duration)
 	}
 }
+
+func TestBootstrapPeersDefaultEmpty(t *testing.T) {
+	cfg := config.Defaults()
+	if len(cfg.BootstrapPeers) != 0 {
+		t.Errorf("Defaults().BootstrapPeers must be empty, got %v", cfg.BootstrapPeers)
+	}
+}
+
+func TestBootstrapPeersFromYAML(t *testing.T) {
+	raw := []byte(`
+bootstrap_peers:
+  - /ip4/1.2.3.4/tcp/7700/p2p/12D3KooWBvpzbEBgcFbHrw3kEFjfdFB2AwimGMhMrVGQBHMpZNjD
+  - /ip4/5.6.7.8/tcp/7700/p2p/12D3KooWBvpzbEBgcFbHrw3kEFjfdFB2AwimGMhMrVGQBHMpZNjD
+`)
+	cfg, err := config.LoadYAML(raw)
+	if err != nil {
+		t.Fatalf("LoadYAML: %v", err)
+	}
+	if len(cfg.BootstrapPeers) != 2 {
+		t.Fatalf("expected 2 bootstrap peers, got %d", len(cfg.BootstrapPeers))
+	}
+	if cfg.BootstrapPeers[0] != "/ip4/1.2.3.4/tcp/7700/p2p/12D3KooWBvpzbEBgcFbHrw3kEFjfdFB2AwimGMhMrVGQBHMpZNjD" {
+		t.Errorf("unexpected peer[0]: %s", cfg.BootstrapPeers[0])
+	}
+}

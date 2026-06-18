@@ -47,6 +47,7 @@ type Config struct {
 	Trust          TrustConfig         `yaml:"trust"`
 	Observability  ObservabilityConfig `yaml:"observability"`
 	API            APIConfig           `yaml:"api"`
+	BootstrapPeers []string            `yaml:"bootstrap_peers"`
 }
 
 // StoreConfig configures the BadgerDB reputation store.
