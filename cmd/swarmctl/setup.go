@@ -35,9 +35,14 @@ func cmdSetup(args []string) error {
 	}
 
 	fmt.Println("[1/3] Node key")
+	// Check whether the node key exists before trying to load/create it.
+	// swarmd creates it on first boot; we must not create it ourselves.
+	if _, err := os.Stat(cfg.NodeKeyFile()); os.IsNotExist(err) {
+		fmt.Println("      swarmd must run once first to generate the node key — then re-run setup.")
+		return fmt.Errorf("node key not found at %s", cfg.NodeKeyFile())
+	}
 	nodePriv, err := identity.LoadOrCreateNodeKey(cfg.NodeKeyFile())
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "      swarmd must run once first to generate the node key — then re-run setup.")
 		return err
 	}
 	pid, err := peer.IDFromPrivateKey(nodePriv)
