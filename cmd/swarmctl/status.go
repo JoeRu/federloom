@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
+	"io/fs"
 	"os"
 	"time"
 
@@ -31,7 +33,7 @@ func cmdStatus(args []string) error {
 	// ── NODE ─────────────────────────────────────────────────────────────────
 	fmt.Println("NODE")
 	nodeKeyPath := cfg.NodeKeyFile()
-	if _, err := os.Stat(nodeKeyPath); os.IsNotExist(err) {
+	if _, err := os.Stat(nodeKeyPath); errors.Is(err, fs.ErrNotExist) {
 		fmt.Println("  peer ID:     not configured — run swarmctl setup")
 		fmt.Printf("  node key:    %s  ✗\n", nodeKeyPath)
 	} else {
@@ -84,7 +86,10 @@ func cmdStatus(args []string) error {
 
 	// ── TRUST ANCHORS ────────────────────────────────────────────────────────
 	certs, _ := trust.LoadCerts(cfg.TrustCertsFile())
-	anchors, _ := trust.LoadAnchors(cfg.TrustAnchorsFile())
+	anchors, err := trust.LoadAnchors(cfg.TrustAnchorsFile())
+	if err != nil {
+		return fmt.Errorf("load anchors: %w", err)
+	}
 
 	type anchorRow struct {
 		person string
@@ -148,9 +153,9 @@ func cmdStatus(args []string) error {
 	if len(rows) == 0 {
 		fmt.Println("  not configured — run swarmctl setup")
 	} else {
-		fmt.Printf("  %-12s %-7s %-10s %-22s %s\n", "PERSON", "WEIGHT", "STATUS", "FINGERPRINT", "LABEL")
+		fmt.Printf("  %-12s %-7s %-9s %-22s %s\n", "PERSON", "WEIGHT", "STATUS", "FINGERPRINT", "LABEL")
 		for _, r := range rows {
-			fmt.Printf("  %-12s %-7.2f %-10s %-22s %s\n", r.person, r.weight, r.status, r.fp, r.label)
+			fmt.Printf("  %-12s %-7.2f %-9s %-22s %s\n", r.person, r.weight, r.status, r.fp, r.label)
 		}
 	}
 	fmt.Println()
