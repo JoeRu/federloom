@@ -10,7 +10,7 @@ import (
 	"github.com/JoeRu/swarmguard/internal/ingest"
 )
 
-func TestOpenCanaryParsesSMTPProbe(t *testing.T) {
+func TestOpenCanaryParsesHTTPProbe(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "opencanary.log")
 
@@ -29,17 +29,19 @@ func TestOpenCanaryParsesSMTPProbe(t *testing.T) {
 		t.Fatalf("Start: %v", err)
 	}
 
+	// logtype 3000 = LOG_HTTP_GET (OpenCanary logger.py); also fires for HTTPS GET
+	// (CanaryHTTPS reuses CanaryHTTP handlers — dst_port distinguishes HTTP vs HTTPS).
 	writeLines(t, logPath, []string{
-		`{"src_host":"198.51.100.1","logtype":3000,"local_time":"2026-06-12 10:00:00.000000"}`,
+		`{"src_host":"198.51.100.3","logtype":3000,"local_time":"2026-06-19 10:00:00.000000"}`,
 	})
 
 	select {
 	case e := <-ch:
-		if e.IP != "198.51.100.1" {
-			t.Errorf("IP: got %q, want 198.51.100.1", e.IP)
+		if e.IP != "198.51.100.3" {
+			t.Errorf("IP: got %q, want 198.51.100.3", e.IP)
 		}
-		if e.Reason != "smtp-probe" {
-			t.Errorf("Reason: got %q, want smtp-probe", e.Reason)
+		if e.Reason != "http-probe" {
+			t.Errorf("Reason: got %q, want http-probe", e.Reason)
 		}
 		if e.ReporterID != "selfpeer" {
 			t.Errorf("ReporterID: got %q, want selfpeer", e.ReporterID)
@@ -49,7 +51,7 @@ func TestOpenCanaryParsesSMTPProbe(t *testing.T) {
 	}
 }
 
-func TestOpenCanaryParsesIMAPAuthBruteforce(t *testing.T) {
+func TestOpenCanaryParsesHTTPPostLoginAttempt(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "opencanary.log")
 
@@ -68,8 +70,46 @@ func TestOpenCanaryParsesIMAPAuthBruteforce(t *testing.T) {
 		t.Fatalf("Start: %v", err)
 	}
 
+	// logtype 3001 = LOG_HTTP_POST_LOGIN_ATTEMPT (OpenCanary logger.py)
 	writeLines(t, logPath, []string{
-		`{"src_host":"203.0.113.7","logtype":2101,"local_time":"2026-06-12 10:00:01.000000"}`,
+		`{"src_host":"198.51.100.5","logtype":3001,"local_time":"2026-06-19 10:00:02.000000"}`,
+	})
+
+	select {
+	case e := <-ch:
+		if e.IP != "198.51.100.5" {
+			t.Errorf("IP: got %q, want 198.51.100.5", e.IP)
+		}
+		if e.Reason != "http-post-login" {
+			t.Errorf("Reason: got %q, want http-post-login", e.Reason)
+		}
+	case <-ctx.Done():
+		t.Fatal("timed out waiting for event")
+	}
+}
+
+func TestOpenCanaryParsesFTPLoginAttempt(t *testing.T) {
+	dir := t.TempDir()
+	logPath := filepath.Join(dir, "opencanary.log")
+
+	cfg := config.OpenCanaryConfig{
+		Enabled:      true,
+		LogFile:      logPath,
+		PollInterval: config.Duration{Duration: 50 * time.Millisecond},
+	}
+	o := ingest.NewOpenCanary(cfg, "selfpeer")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	ch, err := o.Start(ctx)
+	if err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+
+	// logtype 2000 = LOG_FTP_LOGIN_ATTEMPT (OpenCanary logger.py)
+	writeLines(t, logPath, []string{
+		`{"src_host":"203.0.113.7","logtype":2000,"local_time":"2026-06-19 10:00:01.000000"}`,
 	})
 
 	select {
@@ -77,8 +117,8 @@ func TestOpenCanaryParsesIMAPAuthBruteforce(t *testing.T) {
 		if e.IP != "203.0.113.7" {
 			t.Errorf("IP: got %q, want 203.0.113.7", e.IP)
 		}
-		if e.Reason != "imap-auth-bruteforce" {
-			t.Errorf("Reason: got %q, want imap-auth-bruteforce", e.Reason)
+		if e.Reason != "ftp-login-attempt" {
+			t.Errorf("Reason: got %q, want ftp-login-attempt", e.Reason)
 		}
 	case <-ctx.Done():
 		t.Fatal("timed out waiting for event")

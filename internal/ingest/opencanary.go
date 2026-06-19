@@ -21,14 +21,25 @@ type openCanaryEvent struct {
 }
 
 // openCanaryReasons maps OpenCanary logtype to SwarmGuard reason strings.
-// Verify these values against the running OpenCanary version if logtypes change:
+// Verified against /opencanary/opencanary/logger.py in the running container.
+// Cross-check: docker exec opencanary cat /opencanary/opencanary/logger.py | grep LOG_
 //
-//	docker exec opencanary grep -r "logtype" /usr/local/lib/python*/dist-packages/opencanary/modules/
+// HTTP and HTTPS share the same logtypes — CanaryHTTPS reuses CanaryHTTP handlers;
+// the destination port (80 vs 443) distinguishes the protocol in the raw log event.
 var openCanaryReasons = map[int]string{
-	3000: "smtp-probe",
-	3001: "smtp-auth-bruteforce",
-	2100: "imap-probe",
-	2101: "imap-auth-bruteforce",
+	2000: "ftp-login-attempt",
+	2001: "ftp-auth-attempt",
+	3000: "http-probe",            // LOG_HTTP_GET — fires for both HTTP and HTTPS GET
+	3001: "http-post-login",       // LOG_HTTP_POST_LOGIN_ATTEMPT
+	3002: "http-unimplemented",    // LOG_HTTP_UNIMPLEMENTED_METHOD
+	3003: "http-redirect",         // LOG_HTTP_REDIRECT
+	4000: "ssh-new-connection",    // LOG_SSH_NEW_CONNECTION
+	4001: "ssh-remote-version",    // LOG_SSH_REMOTE_VERSION_SENT
+	4002: "ssh-login-attempt",     // LOG_SSH_LOGIN_ATTEMPT
+	5000: "smb-file-open",         // LOG_SMB_FILE_OPEN
+	6001: "telnet-login-attempt",  // LOG_TELNET_LOGIN_ATTEMPT
+	7001: "http-proxy-login",      // LOG_HTTPPROXY_LOGIN_ATTEMPT
+	8001: "mysql-login-attempt",   // LOG_MYSQL_LOGIN_ATTEMPT
 }
 
 // OpenCanary tails an OpenCanary JSONL log and emits proto.Events.
