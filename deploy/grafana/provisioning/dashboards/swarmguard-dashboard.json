@@ -148,8 +148,10 @@
       "targets": [
         {
           "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
-          "rawSql": "SELECT datetime(ts,'unixepoch','localtime') AS time, ip, reason, reporter, ROUND(score,1) AS score FROM events ORDER BY ts DESC LIMIT 200",
-          "format": "table",
+          "rawQueryText": "SELECT datetime(ts,'unixepoch') AS time, ip, reason, reporter, ROUND(score,1) AS score FROM events ORDER BY ts DESC LIMIT 200",
+          "queryText": "SELECT datetime(ts,'unixepoch') AS time, ip, reason, reporter, ROUND(score,1) AS score FROM events ORDER BY ts DESC LIMIT 200",
+          "queryType": "table",
+          "timeColumns": [],
           "refId": "A"
         }
       ],
@@ -165,8 +167,10 @@
       "targets": [
         {
           "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
-          "rawSql": "SELECT ip, ROUND(score_at_block,1) AS score, datetime(expected_unblock,'unixepoch','localtime') AS due_time FROM blocks WHERE unblocked_at IS NULL ORDER BY expected_unblock ASC",
-          "format": "table",
+          "rawQueryText": "SELECT ip, ROUND(score_at_block,1) AS score, datetime(expected_unblock,'unixepoch') AS due_time FROM blocks WHERE unblocked_at IS NULL ORDER BY expected_unblock ASC",
+          "queryText": "SELECT ip, ROUND(score_at_block,1) AS score, datetime(expected_unblock,'unixepoch') AS due_time FROM blocks WHERE unblocked_at IS NULL ORDER BY expected_unblock ASC",
+          "queryType": "table",
+          "timeColumns": [],
           "refId": "A"
         }
       ],
@@ -182,8 +186,10 @@
       "targets": [
         {
           "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
-          "rawSql": "SELECT datetime(ts,'unixepoch','localtime') AS time, ip, rule, action, ROUND(score,1) AS score FROM rule_firings ORDER BY ts DESC LIMIT 200",
-          "format": "table",
+          "rawQueryText": "SELECT datetime(ts,'unixepoch') AS time, ip, rule, action, ROUND(score,1) AS score FROM rule_firings ORDER BY ts DESC LIMIT 200",
+          "queryText": "SELECT datetime(ts,'unixepoch') AS time, ip, rule, action, ROUND(score,1) AS score FROM rule_firings ORDER BY ts DESC LIMIT 200",
+          "queryType": "table",
+          "timeColumns": [],
           "refId": "A"
         }
       ],

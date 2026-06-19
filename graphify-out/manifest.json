@@ -5,19 +5,19 @@
     "semantic_hash": "b384ae2a0d397e63ebfcdd1d3a3cd6fa"
   },
   "/root/swarmguard/.claude/settings.local.json": {
-    "mtime": 1781255952.7791836,
-    "ast_hash": "b07cdb7e4b2e4780545847b6ccb8f030",
-    "semantic_hash": "b07cdb7e4b2e4780545847b6ccb8f030"
+    "mtime": 1781757094.407815,
+    "ast_hash": "de54b4a47411b6787f509ad4ce95611f",
+    "semantic_hash": "de54b4a47411b6787f509ad4ce95611f"
   },
   "/root/swarmguard/cmd/swarmctl/main.go": {
-    "mtime": 1781254608.3494089,
-    "ast_hash": "07b09a51ccf48ca589f2be9cdbf11b16",
-    "semantic_hash": "07b09a51ccf48ca589f2be9cdbf11b16"
+    "mtime": 1781805015.19115,
+    "ast_hash": "bca44a5d5af53778341b2147dc1dcc97",
+    "semantic_hash": "bca44a5d5af53778341b2147dc1dcc97"
   },
   "/root/swarmguard/cmd/swarmd/main.go": {
-    "mtime": 1781254608.3504088,
-    "ast_hash": "3aef15d690381f7148c2d109baf07611",
-    "semantic_hash": "3aef15d690381f7148c2d109baf07611"
+    "mtime": 1781757335.3797183,
+    "ast_hash": "4cc41236f5d8afbbf7719a6f5877616c",
+    "semantic_hash": "4cc41236f5d8afbbf7719a6f5877616c"
   },
   "/root/swarmguard/deploy/honeypot/bootstrap.sh": {
     "mtime": 1781254608.3514087,
@@ -35,24 +35,24 @@
     "semantic_hash": "fc362218b1934f5ce203399161e7267b"
   },
   "/root/swarmguard/internal/config/config.go": {
-    "mtime": 1781254608.3574088,
-    "ast_hash": "58acff468e1ea96a895795cd3ebccdf4",
-    "semantic_hash": "58acff468e1ea96a895795cd3ebccdf4"
+    "mtime": 1781777607.313517,
+    "ast_hash": "3f50da00b8687c894aa20803282208ca",
+    "semantic_hash": "3f50da00b8687c894aa20803282208ca"
   },
   "/root/swarmguard/internal/config/config_test.go": {
-    "mtime": 1781254608.3574088,
-    "ast_hash": "2ad66d81eab286562e36a12496fec29a",
-    "semantic_hash": "2ad66d81eab286562e36a12496fec29a"
+    "mtime": 1781777585.9537785,
+    "ast_hash": "b6d25de7a96c5f2a2d9134edc3c6d7e6",
+    "semantic_hash": "b6d25de7a96c5f2a2d9134edc3c6d7e6"
   },
   "/root/swarmguard/internal/enforce/crowdsec.go": {
-    "mtime": 1781254608.3574088,
-    "ast_hash": "d3c1a07670801891ece092e4d64781ef",
-    "semantic_hash": "d3c1a07670801891ece092e4d64781ef"
+    "mtime": 1781600048.8741872,
+    "ast_hash": "e9c4cc493d13c0343e38d464649e0645",
+    "semantic_hash": "e9c4cc493d13c0343e38d464649e0645"
   },
   "/root/swarmguard/internal/enforce/ipset.go": {
-    "mtime": 1781254608.3574088,
-    "ast_hash": "79fd08fb158c2833598cc2b2d7040a24",
-    "semantic_hash": "79fd08fb158c2833598cc2b2d7040a24"
+    "mtime": 1781701292.3001654,
+    "ast_hash": "d6edfe002f0e6ce059166d57fd74aeaf",
+    "semantic_hash": "d6edfe002f0e6ce059166d57fd74aeaf"
   },
   "/root/swarmguard/internal/enforce/neverblock.go": {
     "mtime": 1781254608.3574088,
@@ -80,9 +80,9 @@
     "semantic_hash": "e0f1bbcc54b76d3e40e91304a4321df3"
   },
   "/root/swarmguard/internal/ingest/crowdsec.go": {
-    "mtime": 1781254608.3584087,
-    "ast_hash": "9c4cf5f89d59b8bb7787cb79b61db0bd",
-    "semantic_hash": "9c4cf5f89d59b8bb7787cb79b61db0bd"
+    "mtime": 1781617184.76622,
+    "ast_hash": "032afe7c0d910758da65f1ab8368532b",
+    "semantic_hash": "032afe7c0d910758da65f1ab8368532b"
   },
   "/root/swarmguard/internal/ingest/honeypot.go": {
     "mtime": 1781254608.3584087,
@@ -95,9 +95,9 @@
     "semantic_hash": "550e69839b4db6d83089c5a1ec4b78eb"
   },
   "/root/swarmguard/internal/ingest/mailcow_logs.go": {
-    "mtime": 1781254608.3584087,
-    "ast_hash": "205114070627ad55336409ac216c5c96",
-    "semantic_hash": "205114070627ad55336409ac216c5c96"
+    "mtime": 1781704531.3774881,
+    "ast_hash": "b36646c2d3d14fc297cf6a1b64a77b93",
+    "semantic_hash": "b36646c2d3d14fc297cf6a1b64a77b93"
   },
   "/root/swarmguard/internal/ingest/opencanary.go": {
     "mtime": 1781254608.3584087,
@@ -115,9 +115,9 @@
     "semantic_hash": "64997a621a27cd21175d63764779e356"
   },
   "/root/swarmguard/internal/ingest/spamtrap.go": {
-    "mtime": 1781254608.3584087,
-    "ast_hash": "5e4ddca1e4ae9b5165d75aaf54fe0ba8",
-    "semantic_hash": "5e4ddca1e4ae9b5165d75aaf54fe0ba8"
+    "mtime": 1781704642.084135,
+    "ast_hash": "95a2c22fd7a241130e4e291830262ee4",
+    "semantic_hash": "95a2c22fd7a241130e4e291830262ee4"
   },
   "/root/swarmguard/internal/node/doc.go": {
     "mtime": 1781254608.3594086,
@@ -125,9 +125,9 @@
     "semantic_hash": "1f40eadee6c21a6e9eaa63b41267ffc6"
   },
   "/root/swarmguard/internal/node/node.go": {
-    "mtime": 1781254608.3594086,
-    "ast_hash": "9ced6aea5184c3eff3b7475daca1ffb6",
-    "semantic_hash": "9ced6aea5184c3eff3b7475daca1ffb6"
+    "mtime": 1781778704.8438797,
+    "ast_hash": "96f7406b23a6ba995a839ccea966058d",
+    "semantic_hash": "96f7406b23a6ba995a839ccea966058d"
   },
   "/root/swarmguard/internal/observability/doc.go": {
     "mtime": 1781254608.3594086,
@@ -140,9 +140,9 @@
     "semantic_hash": "fb7561c7125128f22c964d80f7b6191c"
   },
   "/root/swarmguard/internal/reputation/corroboration_test.go": {
-    "mtime": 1781254608.3594086,
-    "ast_hash": "5dcbc191e77ca51f86955d0782300e5a",
-    "semantic_hash": "5dcbc191e77ca51f86955d0782300e5a"
+    "mtime": 1781377320.3428476,
+    "ast_hash": "337d2e1f8e79b4751948c990eaf7507d",
+    "semantic_hash": "337d2e1f8e79b4751948c990eaf7507d"
   },
   "/root/swarmguard/internal/reputation/decay.go": {
     "mtime": 1781254608.3604088,
@@ -160,9 +160,9 @@
     "semantic_hash": "029e716477af35257802288d5b8bda95"
   },
   "/root/swarmguard/internal/reputation/engine.go": {
-    "mtime": 1781254608.3604088,
-    "ast_hash": "25bbb7f1ecfc598c2aad5a450b402e7f",
-    "semantic_hash": "25bbb7f1ecfc598c2aad5a450b402e7f"
+    "mtime": 1781704319.4820662,
+    "ast_hash": "05d9d4f38704657d7609f5630bc8f2ed",
+    "semantic_hash": "05d9d4f38704657d7609f5630bc8f2ed"
   },
   "/root/swarmguard/internal/resources/doc.go": {
     "mtime": 1781254608.3604088,
@@ -175,19 +175,19 @@
     "semantic_hash": "c8a34816f82ab7b6018704337812fe49"
   },
   "/root/swarmguard/internal/store/store.go": {
-    "mtime": 1781254608.3604088,
-    "ast_hash": "b66f7549b827260d1fe89e766db629c0",
-    "semantic_hash": "b66f7549b827260d1fe89e766db629c0"
+    "mtime": 1781377320.3478475,
+    "ast_hash": "99a7799387ec468d2811351be8f14259",
+    "semantic_hash": "99a7799387ec468d2811351be8f14259"
   },
   "/root/swarmguard/internal/store/store_test.go": {
-    "mtime": 1781254608.3604088,
-    "ast_hash": "eb9febcd8a0a94b8bd3124c836ec5098",
-    "semantic_hash": "eb9febcd8a0a94b8bd3124c836ec5098"
+    "mtime": 1781377320.3478475,
+    "ast_hash": "01cdf378dbde17a34b7204a460b0635d",
+    "semantic_hash": "01cdf378dbde17a34b7204a460b0635d"
   },
   "/root/swarmguard/internal/transport/dht.go": {
-    "mtime": 1781254608.3604088,
-    "ast_hash": "5fd2a79e484ac47d78a2adb61489099c",
-    "semantic_hash": "5fd2a79e484ac47d78a2adb61489099c"
+    "mtime": 1781377320.3498476,
+    "ast_hash": "58a94c3cd446bad4f13f19a10207a3b9",
+    "semantic_hash": "58a94c3cd446bad4f13f19a10207a3b9"
   },
   "/root/swarmguard/internal/transport/dht_test.go": {
     "mtime": 1781254608.3604088,
@@ -200,14 +200,14 @@
     "semantic_hash": "512f90f788428b7f9b6f096128e2a281"
   },
   "/root/swarmguard/internal/transport/gossip.go": {
-    "mtime": 1781254608.3614087,
-    "ast_hash": "52580e5866e5be8ec94c7b90607274ec",
-    "semantic_hash": "52580e5866e5be8ec94c7b90607274ec"
+    "mtime": 1781377320.3498476,
+    "ast_hash": "66c0f95143c246b27c70d43e37baac05",
+    "semantic_hash": "66c0f95143c246b27c70d43e37baac05"
   },
   "/root/swarmguard/internal/transport/gossip_test.go": {
-    "mtime": 1781254608.3614087,
-    "ast_hash": "96f5de475993228a9610a716544558ed",
-    "semantic_hash": "96f5de475993228a9610a716544558ed"
+    "mtime": 1781377320.3518474,
+    "ast_hash": "2aca9aeddd09bf21459120b6aa60f15a",
+    "semantic_hash": "2aca9aeddd09bf21459120b6aa60f15a"
   },
   "/root/swarmguard/internal/transport/options.go": {
     "mtime": 1781254608.3614087,
@@ -235,9 +235,9 @@
     "semantic_hash": "87065ceed7809607245e905494a5cdac"
   },
   "/root/swarmguard/pkg/proto/messages.go": {
-    "mtime": 1781254608.3614087,
-    "ast_hash": "88d6a7709653790617444e450ab98995",
-    "semantic_hash": "88d6a7709653790617444e450ab98995"
+    "mtime": 1781377320.3598473,
+    "ast_hash": "dc99404ed441530acc4e7d9fea95a8a1",
+    "semantic_hash": "dc99404ed441530acc4e7d9fea95a8a1"
   },
   "/root/swarmguard/scripts/dev/smoke-test.sh": {
     "mtime": 1781254608.3624086,
@@ -255,29 +255,29 @@
     "semantic_hash": "66ad221d4850457efb0b01f68ad27096"
   },
   "/root/swarmguard/test/adversarial/poisoning_test.go": {
-    "mtime": 1781254608.3624086,
-    "ast_hash": "453a83db863854abf68ada9e3d3d5d90",
-    "semantic_hash": "453a83db863854abf68ada9e3d3d5d90"
+    "mtime": 1781377320.3608472,
+    "ast_hash": "fed95a91989e5346176038b2d3142f64",
+    "semantic_hash": "fed95a91989e5346176038b2d3142f64"
   },
   "/root/swarmguard/test/adversarial/sybil_ingest_test.go": {
-    "mtime": 1781254608.3624086,
-    "ast_hash": "2626345ca8f9a6ff717ff0ff48c6787c",
-    "semantic_hash": "2626345ca8f9a6ff717ff0ff48c6787c"
+    "mtime": 1781377320.3638473,
+    "ast_hash": "53f9dae050e15b537fc704886901d38b",
+    "semantic_hash": "53f9dae050e15b537fc704886901d38b"
   },
   "/root/swarmguard/test/integration/cluster_test.go": {
-    "mtime": 1781254608.3634086,
-    "ast_hash": "4355c87dc0f2cde391a4a5b404885e23",
-    "semantic_hash": "4355c87dc0f2cde391a4a5b404885e23"
+    "mtime": 1781377320.3638473,
+    "ast_hash": "281baa09bf47657512cc841ad3d1f45a",
+    "semantic_hash": "281baa09bf47657512cc841ad3d1f45a"
   },
   "/root/swarmguard/test/integration/pipeline_test.go": {
-    "mtime": 1781254608.3634086,
-    "ast_hash": "a93b009a29d773afc94946ebc3762a57",
-    "semantic_hash": "a93b009a29d773afc94946ebc3762a57"
+    "mtime": 1781377320.3638473,
+    "ast_hash": "bf391743fc8e02a13745dca0cda36abe",
+    "semantic_hash": "bf391743fc8e02a13745dca0cda36abe"
   },
   "/root/swarmguard/test/integration/reputation_store_test.go": {
-    "mtime": 1781254608.3634086,
-    "ast_hash": "fcbbd68b8e84178cd3abd032216168e8",
-    "semantic_hash": "fcbbd68b8e84178cd3abd032216168e8"
+    "mtime": 1781377320.365847,
+    "ast_hash": "82428ff1d8216c1a1b9ab8a6f74cec99",
+    "semantic_hash": "82428ff1d8216c1a1b9ab8a6f74cec99"
   },
   "/root/swarmguard/.claude/agents/invariant-guardian.md": {
     "mtime": 1781254608.3474088,
@@ -315,9 +315,9 @@
     "semantic_hash": "334759477b2b4a17cb27b0ac39bd9bda"
   },
   "/root/swarmguard/CHANGELOG.md": {
-    "mtime": 1781254608.3494089,
-    "ast_hash": "e4800032209dd65c86da822e3daddfd1",
-    "semantic_hash": "e4800032209dd65c86da822e3daddfd1"
+    "mtime": 1781467015.0874918,
+    "ast_hash": "7143816395cd368ce7516f3c8c688dc3",
+    "semantic_hash": "7143816395cd368ce7516f3c8c688dc3"
   },
   "/root/swarmguard/CLAUDE.md": {
     "mtime": 1781254608.3494089,
@@ -325,19 +325,19 @@
     "semantic_hash": "8afe06002b53c397fe6b2b923a2f06ec"
   },
   "/root/swarmguard/README.md": {
-    "mtime": 1781254608.3494089,
-    "ast_hash": "4d0882e672c0a6f9341e33dcfbab8cf7",
-    "semantic_hash": "4d0882e672c0a6f9341e33dcfbab8cf7"
+    "mtime": 1781806436.0546544,
+    "ast_hash": "ba3338609ddc61a4aa515a9cf42fa578",
+    "semantic_hash": "ba3338609ddc61a4aa515a9cf42fa578"
   },
   "/root/swarmguard/deploy/client/config.yaml": {
-    "mtime": 1781254608.3504088,
-    "ast_hash": "da5bdeefc9233e681ebb0d11f69107da",
-    "semantic_hash": "da5bdeefc9233e681ebb0d11f69107da"
+    "mtime": 1781455951.679326,
+    "ast_hash": "b98f81a90c0d2be66a319fe1d851b9e0",
+    "semantic_hash": "b98f81a90c0d2be66a319fe1d851b9e0"
   },
   "/root/swarmguard/deploy/client/docker-compose.yml": {
-    "mtime": 1781254608.3504088,
-    "ast_hash": "0b7df0a5b24dbee4f7dc45b9eff3ffae",
-    "semantic_hash": "0b7df0a5b24dbee4f7dc45b9eff3ffae"
+    "mtime": 1781455973.0590453,
+    "ast_hash": "71a6d117ddca3366c18c58485815ff7c",
+    "semantic_hash": "71a6d117ddca3366c18c58485815ff7c"
   },
   "/root/swarmguard/deploy/docker/docker-compose.yml": {
     "mtime": 1781254608.3504088,
@@ -345,9 +345,9 @@
     "semantic_hash": "e1213bb7b40892a9f3eaea3bad6d5a31"
   },
   "/root/swarmguard/deploy/examples/config.federated.yaml": {
-    "mtime": 1781254608.3514087,
-    "ast_hash": "73adb94583bb6c656f107c338d930ee9",
-    "semantic_hash": "73adb94583bb6c656f107c338d930ee9"
+    "mtime": 1781757550.1539578,
+    "ast_hash": "2083a12fff17dbcfda8429e8b1ca1577",
+    "semantic_hash": "2083a12fff17dbcfda8429e8b1ca1577"
   },
   "/root/swarmguard/deploy/examples/config.isolated.yaml": {
     "mtime": 1781254608.3514087,
@@ -355,19 +355,19 @@
     "semantic_hash": "5e4384f9336c0d7ca8e0eefd63d3d62a"
   },
   "/root/swarmguard/deploy/examples/config.solo.yaml": {
-    "mtime": 1781254608.3514087,
-    "ast_hash": "d190432a0d88abee66a89113a6b0ec10",
-    "semantic_hash": "d190432a0d88abee66a89113a6b0ec10"
+    "mtime": 1781466649.305204,
+    "ast_hash": "228dd38fcee874ce6df4dfdb71bf08ce",
+    "semantic_hash": "228dd38fcee874ce6df4dfdb71bf08ce"
   },
   "/root/swarmguard/deploy/honeypot/config.yaml": {
-    "mtime": 1781254608.3514087,
-    "ast_hash": "5906f6bd34021ac3e1780624523018b8",
-    "semantic_hash": "5906f6bd34021ac3e1780624523018b8"
+    "mtime": 1781757540.3640835,
+    "ast_hash": "53a79392c7a812b456cb2ee40a3fd878",
+    "semantic_hash": "53a79392c7a812b456cb2ee40a3fd878"
   },
   "/root/swarmguard/deploy/honeypot/docker-compose.yml": {
-    "mtime": 1781254608.3514087,
-    "ast_hash": "3b0d3c7275efe02f77c8b1c863e59c11",
-    "semantic_hash": "3b0d3c7275efe02f77c8b1c863e59c11"
+    "mtime": 1781757544.610029,
+    "ast_hash": "49ba0b8394ade7f8d72fec4f1f3e73d6",
+    "semantic_hash": "49ba0b8394ade7f8d72fec4f1f3e73d6"
   },
   "/root/swarmguard/deploy/mailcow/README.md": {
     "mtime": 1781254608.3514087,
@@ -385,9 +385,9 @@
     "semantic_hash": "f14a21a37c48694356cd6b3f7680ea08"
   },
   "/root/swarmguard/docs/federation-guide.md": {
-    "mtime": 1781254608.352409,
-    "ast_hash": "cb9bb20c49b8e8f99f36ee9e8ec14f00",
-    "semantic_hash": "cb9bb20c49b8e8f99f36ee9e8ec14f00"
+    "mtime": 1781806417.8659048,
+    "ast_hash": "450e0c27e3df436d3d4969cc3046ca8c",
+    "semantic_hash": "450e0c27e3df436d3d4969cc3046ca8c"
   },
   "/root/swarmguard/docs/onboarding/01-ground-truth.md": {
     "mtime": 1781254608.352409,
@@ -400,9 +400,9 @@
     "semantic_hash": "5900f6b9acfd00c181ebdd008612f6f3"
   },
   "/root/swarmguard/docs/onboarding/03-key-management.md": {
-    "mtime": 1781254608.352409,
-    "ast_hash": "bcb3e804a053ab07a01cdc68f54df273",
-    "semantic_hash": "bcb3e804a053ab07a01cdc68f54df273"
+    "mtime": 1781377320.312848,
+    "ast_hash": "3db4bf8ec30adf8f92f422ea1a295faf",
+    "semantic_hash": "3db4bf8ec30adf8f92f422ea1a295faf"
   },
   "/root/swarmguard/docs/onboarding/04-override.md": {
     "mtime": 1781254608.3534088,
@@ -463,5 +463,465 @@
     "mtime": 1781254608.3624086,
     "ast_hash": "add53c820a2bb02d3e4dfe8773e5da20",
     "semantic_hash": "add53c820a2bb02d3e4dfe8773e5da20"
+  },
+  "/root/swarmguard/cmd/swarmctl/common.go": {
+    "mtime": 1781377320.2928483,
+    "ast_hash": "0408ade8be4f0c55689e93f7c602a0ec",
+    "semantic_hash": "0408ade8be4f0c55689e93f7c602a0ec"
+  },
+  "/root/swarmguard/cmd/swarmctl/identity.go": {
+    "mtime": 1781377320.2938483,
+    "ast_hash": "5de317377b56cdbc97c9783244c53d37",
+    "semantic_hash": "5de317377b56cdbc97c9783244c53d37"
+  },
+  "/root/swarmguard/cmd/swarmctl/trust.go": {
+    "mtime": 1781377320.2988484,
+    "ast_hash": "e9ae7fcd63c2a8c79f7cd71df0164bab",
+    "semantic_hash": "e9ae7fcd63c2a8c79f7cd71df0164bab"
+  },
+  "/root/swarmguard/cmd/swarmctl/trust_test.go": {
+    "mtime": 1781377320.3038483,
+    "ast_hash": "de920f7cc22822037d189140232a9927",
+    "semantic_hash": "de920f7cc22822037d189140232a9927"
+  },
+  "/root/swarmguard/deploy/mailcow/bootstrap-mailcow.sh": {
+    "mtime": 1781757870.9948332,
+    "ast_hash": "9260cd5fdf3ec0b3f300b5f5ceb24995",
+    "semantic_hash": "9260cd5fdf3ec0b3f300b5f5ceb24995"
+  },
+  "/root/swarmguard/deploy/wordpress/bootstrap-wordpress.sh": {
+    "mtime": 1781757867.4918783,
+    "ast_hash": "210a27d701529a90fb8a85bef486e0db",
+    "semantic_hash": "210a27d701529a90fb8a85bef486e0db"
+  },
+  "/root/swarmguard/internal/identity/cert.go": {
+    "mtime": 1781377320.317848,
+    "ast_hash": "5bfb47a6f507537e9e6b6908914eac0a",
+    "semantic_hash": "5bfb47a6f507537e9e6b6908914eac0a"
+  },
+  "/root/swarmguard/internal/identity/cert_test.go": {
+    "mtime": 1781377320.3238478,
+    "ast_hash": "e3ab8c486b079ccce776361b61350650",
+    "semantic_hash": "e3ab8c486b079ccce776361b61350650"
+  },
+  "/root/swarmguard/internal/identity/nodekey.go": {
+    "mtime": 1781377320.3238478,
+    "ast_hash": "cc49d2b211a962a3db2485d234c41902",
+    "semantic_hash": "cc49d2b211a962a3db2485d234c41902"
+  },
+  "/root/swarmguard/internal/identity/nodekey_test.go": {
+    "mtime": 1781377320.3238478,
+    "ast_hash": "694f0dc799a91c3952bbca07950efb1a",
+    "semantic_hash": "694f0dc799a91c3952bbca07950efb1a"
+  },
+  "/root/swarmguard/internal/identity/person.go": {
+    "mtime": 1781377320.3298478,
+    "ast_hash": "e69416b7f2029f1378a825d0fef72805",
+    "semantic_hash": "e69416b7f2029f1378a825d0fef72805"
+  },
+  "/root/swarmguard/internal/identity/person_test.go": {
+    "mtime": 1781377320.3318477,
+    "ast_hash": "da9c3d44488858cbf72aea69c963035c",
+    "semantic_hash": "da9c3d44488858cbf72aea69c963035c"
+  },
+  "/root/swarmguard/internal/ingest/crowdsec_test.go": {
+    "mtime": 1781617229.1746345,
+    "ast_hash": "be71fb0b2647963a5f69de0aaded40db",
+    "semantic_hash": "be71fb0b2647963a5f69de0aaded40db"
+  },
+  "/root/swarmguard/internal/node/node_test.go": {
+    "mtime": 1781704723.2311416,
+    "ast_hash": "4b07cb851ac768de987f74f7e938461d",
+    "semantic_hash": "4b07cb851ac768de987f74f7e938461d"
+  },
+  "/root/swarmguard/internal/reputation/engine_test.go": {
+    "mtime": 1781704289.801426,
+    "ast_hash": "af5dcea6efeaf2ebacb0b89b926b674b",
+    "semantic_hash": "af5dcea6efeaf2ebacb0b89b926b674b"
+  },
+  "/root/swarmguard/internal/rules/burst.go": {
+    "mtime": 1781422989.029322,
+    "ast_hash": "8aace2624f8522cc0cd8e8240597b8b1",
+    "semantic_hash": "8aace2624f8522cc0cd8e8240597b8b1"
+  },
+  "/root/swarmguard/internal/rules/burst_test.go": {
+    "mtime": 1781465190.81773,
+    "ast_hash": "3168cdea743ba1bd063161ef0aaf5f19",
+    "semantic_hash": "3168cdea743ba1bd063161ef0aaf5f19"
+  },
+  "/root/swarmguard/internal/rules/rule.go": {
+    "mtime": 1781702131.9058504,
+    "ast_hash": "e36acfd2f3eac4dca0e26ca197272456",
+    "semantic_hash": "e36acfd2f3eac4dca0e26ca197272456"
+  },
+  "/root/swarmguard/internal/rules/rule_test.go": {
+    "mtime": 1781464868.241932,
+    "ast_hash": "4e4032b3b0387dbf194a30187e0fdaec",
+    "semantic_hash": "4e4032b3b0387dbf194a30187e0fdaec"
+  },
+  "/root/swarmguard/internal/trust/anchors.go": {
+    "mtime": 1781377320.3548474,
+    "ast_hash": "cf169477e3a1bd933a81af49f81ae76a",
+    "semantic_hash": "cf169477e3a1bd933a81af49f81ae76a"
+  },
+  "/root/swarmguard/internal/trust/bundle.go": {
+    "mtime": 1781377320.3558474,
+    "ast_hash": "e213e0d60dddf28f6646a9c10bf40e0b",
+    "semantic_hash": "e213e0d60dddf28f6646a9c10bf40e0b"
+  },
+  "/root/swarmguard/internal/trust/certs.go": {
+    "mtime": 1781377320.3558474,
+    "ast_hash": "d2d51ab48f468e34ad8e53f3e2419398",
+    "semantic_hash": "d2d51ab48f468e34ad8e53f3e2419398"
+  },
+  "/root/swarmguard/internal/trust/store.go": {
+    "mtime": 1781377320.3568473,
+    "ast_hash": "c6337e6533a71c40157ff4215f960fa7",
+    "semantic_hash": "c6337e6533a71c40157ff4215f960fa7"
+  },
+  "/root/swarmguard/internal/trust/store_test.go": {
+    "mtime": 1781377320.3568473,
+    "ast_hash": "a94c7b9aee3d043fe32f2d51689926aa",
+    "semantic_hash": "a94c7b9aee3d043fe32f2d51689926aa"
+  },
+  "/root/swarmguard/pkg/proto/messages_test.go": {
+    "mtime": 1781377320.3608472,
+    "ast_hash": "95e1f90f110f95276fe568e47db8e6fe",
+    "semantic_hash": "95e1f90f110f95276fe568e47db8e6fe"
+  },
+  "/root/swarmguard/test/adversarial/vouch_test.go": {
+    "mtime": 1781377320.3638473,
+    "ast_hash": "1a4b4e52b05e99c769cf38d77aff4ec0",
+    "semantic_hash": "1a4b4e52b05e99c769cf38d77aff4ec0"
+  },
+  "/root/swarmguard/test/integration/vouch_pipeline_test.go": {
+    "mtime": 1781377320.365847,
+    "ast_hash": "a1fbdbfd5551e3614a2dd0e29ac84f60",
+    "semantic_hash": "a1fbdbfd5551e3614a2dd0e29ac84f60"
+  },
+  "/root/swarmguard/deploy/client/rules.yaml": {
+    "mtime": 1781455965.9401388,
+    "ast_hash": "a8f2ffb456906ef6ab135ac051ca84d5",
+    "semantic_hash": "a8f2ffb456906ef6ab135ac051ca84d5"
+  },
+  "/root/swarmguard/deploy/examples/rules.yaml": {
+    "mtime": 1781445936.191906,
+    "ast_hash": "dc261a3bc264b5f412b4f867faf02779",
+    "semantic_hash": "dc261a3bc264b5f412b4f867faf02779"
+  },
+  "/root/swarmguard/deploy/honeypot/rules.yaml": {
+    "mtime": 1781449093.904451,
+    "ast_hash": "80fb8878055c9eb134417b518f4219db",
+    "semantic_hash": "80fb8878055c9eb134417b518f4219db"
+  },
+  "/root/swarmguard/deploy/mailcow/docker-compose.yml": {
+    "mtime": 1781757524.2562907,
+    "ast_hash": "93a6405107c3ba82c3a511bc6b0b9008",
+    "semantic_hash": "93a6405107c3ba82c3a511bc6b0b9008"
+  },
+  "/root/swarmguard/deploy/mailcow/rules.yaml": {
+    "mtime": 1781704838.6697257,
+    "ast_hash": "6755ad0eacd0421cf978ec4564fde6e5",
+    "semantic_hash": "6755ad0eacd0421cf978ec4564fde6e5"
+  },
+  "/root/swarmguard/deploy/wordpress/docker-compose.yml": {
+    "mtime": 1781757536.6431315,
+    "ast_hash": "dd7687a9af6c405d4bce440fe5fcfa17",
+    "semantic_hash": "dd7687a9af6c405d4bce440fe5fcfa17"
+  },
+  "/root/swarmguard/deploy/wordpress/rules.yaml": {
+    "mtime": 1781702145.1996744,
+    "ast_hash": "087f4443e0baf67b21e1c4f248c054e9",
+    "semantic_hash": "087f4443e0baf67b21e1c4f248c054e9"
+  },
+  "/root/swarmguard/docs/superpowers/plans/2026-06-12-social-trust-anchors.md": {
+    "mtime": 1781284837.6358433,
+    "ast_hash": "6c4776040d858832148200db0150943d",
+    "semantic_hash": "6c4776040d858832148200db0150943d"
+  },
+  "/root/swarmguard/docs/superpowers/plans/2026-06-14-crowdsec-ingest.md": {
+    "mtime": 1781442404.989738,
+    "ast_hash": "cd09f6701e53641ea590e344d5368f1b",
+    "semantic_hash": "cd09f6701e53641ea590e344d5368f1b"
+  },
+  "/root/swarmguard/docs/superpowers/plans/2026-06-14-rules-engine.md": {
+    "mtime": 1781421201.7408016,
+    "ast_hash": "40f87b585613957ce9e728ed7c5fbb8e",
+    "semantic_hash": "40f87b585613957ce9e728ed7c5fbb8e"
+  },
+  "/root/swarmguard/docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md": {
+    "mtime": 1781269258.353816,
+    "ast_hash": "1d2471fcb1fd11d9f8251dc43c0c5d95",
+    "semantic_hash": "1d2471fcb1fd11d9f8251dc43c0c5d95"
+  },
+  "/root/swarmguard/docs/superpowers/specs/2026-06-14-crowdsec-ingest-design.md": {
+    "mtime": 1781441423.1866815,
+    "ast_hash": "172552b3720a92d57f9d6614ee3ba08d",
+    "semantic_hash": "172552b3720a92d57f9d6614ee3ba08d"
+  },
+  "/root/swarmguard/docs/superpowers/specs/2026-06-14-rules-engine-design.md": {
+    "mtime": 1781420827.253472,
+    "ast_hash": "3b2588be5f514801535dfd6da96fb530",
+    "semantic_hash": "3b2588be5f514801535dfd6da96fb530"
+  },
+  "/root/swarmguard/cmd/swarmctl/federation.go": {
+    "mtime": 1781806819.7664294,
+    "ast_hash": "6c92e04ad9bc69461da3df75e7aa43b6",
+    "semantic_hash": "6c92e04ad9bc69461da3df75e7aa43b6"
+  },
+  "/root/swarmguard/cmd/swarmctl/federation_test.go": {
+    "mtime": 1781805568.5432932,
+    "ast_hash": "b3b25fe130393fb5e7a0114a7777cc49",
+    "semantic_hash": "b3b25fe130393fb5e7a0114a7777cc49"
+  },
+  "/root/swarmguard/cmd/swarmctl/setup.go": {
+    "mtime": 1781805933.491746,
+    "ast_hash": "16757878484936502e24ad954a835692",
+    "semantic_hash": "16757878484936502e24ad954a835692"
+  },
+  "/root/swarmguard/cmd/swarmctl/setup_test.go": {
+    "mtime": 1781805019.5000968,
+    "ast_hash": "6f60d4fff047eceb4fbe7c9acebfd9f1",
+    "semantic_hash": "6f60d4fff047eceb4fbe7c9acebfd9f1"
+  },
+  "/root/swarmguard/cmd/swarmctl/status.go": {
+    "mtime": 1781806242.6653366,
+    "ast_hash": "a8183aa83ddd34030af4ef45d768d986",
+    "semantic_hash": "a8183aa83ddd34030af4ef45d768d986"
+  },
+  "/root/swarmguard/cmd/swarmctl/status_test.go": {
+    "mtime": 1781805966.0572722,
+    "ast_hash": "dd7c73d5a85f587a483e06277a80c3d4",
+    "semantic_hash": "dd7c73d5a85f587a483e06277a80c3d4"
+  },
+  "/root/swarmguard/deploy/grafana/provisioning/dashboards/swarmguard-dashboard.json": {
+    "mtime": 1781620279.6611567,
+    "ast_hash": "793afdd531d9e1dd7e5d5eda27972014",
+    "semantic_hash": "793afdd531d9e1dd7e5d5eda27972014"
+  },
+  "/root/swarmguard/deploy/wordpress/cti-import.sh": {
+    "mtime": 1781612543.8371942,
+    "ast_hash": "0c0c957b72a6ab9bd9d7114d4d9825c2",
+    "semantic_hash": "0c0c957b72a6ab9bd9d7114d4d9825c2"
+  },
+  "/root/swarmguard/deploy/wordpress/effectiveness-report.sh": {
+    "mtime": 1781694310.950201,
+    "ast_hash": "ddf6c233276892f8e893a846a680d257",
+    "semantic_hash": "ddf6c233276892f8e893a846a680d257"
+  },
+  "/root/swarmguard/deploy/wordpress/swarmguard-exporter.sh": {
+    "mtime": 1781693568.263035,
+    "ast_hash": "528087f7cec885ad30fa62dc85f0a444",
+    "semantic_hash": "528087f7cec885ad30fa62dc85f0a444"
+  },
+  "/root/swarmguard/internal/api/handler_blocklist.go": {
+    "mtime": 1781599219.793224,
+    "ast_hash": "ab9e5702a0df7623c07567dda542af13",
+    "semantic_hash": "ab9e5702a0df7623c07567dda542af13"
+  },
+  "/root/swarmguard/internal/api/handler_blocklist_test.go": {
+    "mtime": 1781599045.9482224,
+    "ast_hash": "4c00ef189f1c69c47b90ece33d7c57be",
+    "semantic_hash": "4c00ef189f1c69c47b90ece33d7c57be"
+  },
+  "/root/swarmguard/internal/api/handler_events.go": {
+    "mtime": 1781599633.2372882,
+    "ast_hash": "19ca1535623e63eeacd0a30f6d78018b",
+    "semantic_hash": "19ca1535623e63eeacd0a30f6d78018b"
+  },
+  "/root/swarmguard/internal/api/handler_events_test.go": {
+    "mtime": 1781599633.2372882,
+    "ast_hash": "6abba8cdc55fc5713341de14ae5df187",
+    "semantic_hash": "6abba8cdc55fc5713341de14ae5df187"
+  },
+  "/root/swarmguard/internal/api/handler_score.go": {
+    "mtime": 1781599163.0498831,
+    "ast_hash": "83dcfe1c9e925906c001ddac8b333d4e",
+    "semantic_hash": "83dcfe1c9e925906c001ddac8b333d4e"
+  },
+  "/root/swarmguard/internal/api/handler_score_test.go": {
+    "mtime": 1781599207.6753652,
+    "ast_hash": "f01b574374434b1df09d08a05436fcc5",
+    "semantic_hash": "f01b574374434b1df09d08a05436fcc5"
+  },
+  "/root/swarmguard/internal/api/server.go": {
+    "mtime": 1781779089.115797,
+    "ast_hash": "d737a15154f320db6b3ea2551c27ea6f",
+    "semantic_hash": "d737a15154f320db6b3ea2551c27ea6f"
+  },
+  "/root/swarmguard/internal/api/server_test.go": {
+    "mtime": 1781598666.0922914,
+    "ast_hash": "9489f88dd43ed086264c157024a3334b",
+    "semantic_hash": "9489f88dd43ed086264c157024a3334b"
+  },
+  "/root/swarmguard/internal/api/taxonomy.go": {
+    "mtime": 1781598089.2956915,
+    "ast_hash": "e74f7f76729c4824df1f1886c5fbea77",
+    "semantic_hash": "e74f7f76729c4824df1f1886c5fbea77"
+  },
+  "/root/swarmguard/internal/api/taxonomy_test.go": {
+    "mtime": 1781598116.4393246,
+    "ast_hash": "79f1d1affc87ad458bfb484d502e6a83",
+    "semantic_hash": "79f1d1affc87ad458bfb484d502e6a83"
+  },
+  "/root/swarmguard/internal/dnsbl/server.go": {
+    "mtime": 1781779089.050798,
+    "ast_hash": "7ab000235540f24f12b68c461225e063",
+    "semantic_hash": "7ab000235540f24f12b68c461225e063"
+  },
+  "/root/swarmguard/internal/dnsbl/server_test.go": {
+    "mtime": 1781779089.054798,
+    "ast_hash": "10378648125be5010ddabc5a716e4bb6",
+    "semantic_hash": "10378648125be5010ddabc5a716e4bb6"
+  },
+  "/root/swarmguard/internal/enforce/crowdsec_test.go": {
+    "mtime": 1781779089.116797,
+    "ast_hash": "4ed6b591307f701d2ee0b40480f8b7e3",
+    "semantic_hash": "4ed6b591307f701d2ee0b40480f8b7e3"
+  },
+  "/root/swarmguard/internal/federation/invitation.go": {
+    "mtime": 1781804851.116167,
+    "ast_hash": "b58de93988990080861eea4a6a679367",
+    "semantic_hash": "b58de93988990080861eea4a6a679367"
+  },
+  "/root/swarmguard/internal/federation/invitation_test.go": {
+    "mtime": 1781804859.606063,
+    "ast_hash": "77e4170d97681004cedab0c87a571bd6",
+    "semantic_hash": "77e4170d97681004cedab0c87a571bd6"
+  },
+  "/root/swarmguard/internal/ingest/mailcow_logs_test.go": {
+    "mtime": 1781704504.0468216,
+    "ast_hash": "edd0f67489d7ac07b3b28e58b075d4d3",
+    "semantic_hash": "edd0f67489d7ac07b3b28e58b075d4d3"
+  },
+  "/root/swarmguard/internal/ingest/spamtrap_test.go": {
+    "mtime": 1781704627.4393144,
+    "ast_hash": "5eaa344bbe9f3a80ef5d148007e5cd27",
+    "semantic_hash": "5eaa344bbe9f3a80ef5d148007e5cd27"
+  },
+  "/root/swarmguard/internal/observability/observer.go": {
+    "mtime": 1781779089.0347981,
+    "ast_hash": "90606ee2465d5ec92191f9128e47708a",
+    "semantic_hash": "90606ee2465d5ec92191f9128e47708a"
+  },
+  "/root/swarmguard/internal/observability/observer_test.go": {
+    "mtime": 1781642882.1034327,
+    "ast_hash": "26810104cde5f07b0c470e8d4c12a1cd",
+    "semantic_hash": "26810104cde5f07b0c470e8d4c12a1cd"
+  },
+  "/root/swarmguard/internal/observability/prometheus.go": {
+    "mtime": 1781642334.0517967,
+    "ast_hash": "4ff1a30909736577040c339b3e07ffde",
+    "semantic_hash": "4ff1a30909736577040c339b3e07ffde"
+  },
+  "/root/swarmguard/internal/observability/prometheus_test.go": {
+    "mtime": 1781642309.438132,
+    "ast_hash": "e449a272bf70e4c629516cd8230c50b6",
+    "semantic_hash": "e449a272bf70e4c629516cd8230c50b6"
+  },
+  "/root/swarmguard/internal/observability/sqlite.go": {
+    "mtime": 1781465800.5448668,
+    "ast_hash": "e5b3253d46ea37d881afaeddd6b484f9",
+    "semantic_hash": "e5b3253d46ea37d881afaeddd6b484f9"
+  },
+  "/root/swarmguard/internal/observability/sqlite_test.go": {
+    "mtime": 1781465775.2221725,
+    "ast_hash": "f760a3a2cafe54422592226ea144703b",
+    "semantic_hash": "f760a3a2cafe54422592226ea144703b"
+  },
+  "/root/swarmguard/pkg/client/client.go": {
+    "mtime": 1781600983.6046925,
+    "ast_hash": "f61d73f211542f2e728a0f644b11fa0f",
+    "semantic_hash": "f61d73f211542f2e728a0f644b11fa0f"
+  },
+  "/root/swarmguard/pkg/client/client_test.go": {
+    "mtime": 1781600901.649803,
+    "ast_hash": "e7da3e4dd3ccca0a0ebd925559040edd",
+    "semantic_hash": "e7da3e4dd3ccca0a0ebd925559040edd"
+  },
+  "/root/swarmguard/tools.go": {
+    "mtime": 1781777876.0062096,
+    "ast_hash": "7d138b59bae35a7288835f7d22bb8b4d",
+    "semantic_hash": "7d138b59bae35a7288835f7d22bb8b4d"
+  },
+  "/root/swarmguard/deploy/grafana/provisioning/dashboards/swarmguard.yml": {
+    "mtime": 1781466781.400506,
+    "ast_hash": "4f5fdfd989c483d1a4844edca5875ff8",
+    "semantic_hash": "4f5fdfd989c483d1a4844edca5875ff8"
+  },
+  "/root/swarmguard/deploy/grafana/provisioning/datasources/swarmguard-sqlite.yml": {
+    "mtime": 1781620288.6380382,
+    "ast_hash": "67daea8ccf8dc3dd706e4a105af92475",
+    "semantic_hash": "67daea8ccf8dc3dd706e4a105af92475"
+  },
+  "/root/swarmguard/deploy/mailcow/config.yaml": {
+    "mtime": 1781778881.8369808,
+    "ast_hash": "f092ae20764c2d3e12d4ed92e6ede14d",
+    "semantic_hash": "f092ae20764c2d3e12d4ed92e6ede14d"
+  },
+  "/root/swarmguard/deploy/wordpress/config.yaml": {
+    "mtime": 1781778884.664936,
+    "ast_hash": "a4ac289c784a65bbeeeee983aea1513b",
+    "semantic_hash": "a4ac289c784a65bbeeeee983aea1513b"
+  },
+  "/root/swarmguard/docs/getting-started.md": {
+    "mtime": 1781806410.2510097,
+    "ast_hash": "fbe801ace9a46829a90bdfbfee350e0a",
+    "semantic_hash": "fbe801ace9a46829a90bdfbfee350e0a"
+  },
+  "/root/swarmguard/docs/superpowers/plans/2026-06-14-grafana-observability.md": {
+    "mtime": 1781463058.0690138,
+    "ast_hash": "8b8d6106fec8c512a58b367e1ccf4018",
+    "semantic_hash": "8b8d6106fec8c512a58b367e1ccf4018"
+  },
+  "/root/swarmguard/docs/superpowers/plans/2026-06-16-blocklist-effectiveness.md": {
+    "mtime": 1781642038.2748733,
+    "ast_hash": "cc3eb2d3ae0fa7202a1800a22471f449",
+    "semantic_hash": "cc3eb2d3ae0fa7202a1800a22471f449"
+  },
+  "/root/swarmguard/docs/superpowers/plans/2026-06-17-bootstrap-peers.md": {
+    "mtime": 1781726082.4566145,
+    "ast_hash": "5ea18c0fcb4c110f2d3822248394980c",
+    "semantic_hash": "5ea18c0fcb4c110f2d3822248394980c"
+  },
+  "/root/swarmguard/docs/superpowers/plans/2026-06-17-mailcow-sensor.md": {
+    "mtime": 1781704116.1985197,
+    "ast_hash": "04deb9697c9516500d7751b5048610a2",
+    "semantic_hash": "04deb9697c9516500d7751b5048610a2"
+  },
+  "/root/swarmguard/docs/superpowers/plans/2026-06-18-dnsbl.md": {
+    "mtime": 1781776342.4805918,
+    "ast_hash": "9dd6bcdb589f1136f91b847432a085c7",
+    "semantic_hash": "9dd6bcdb589f1136f91b847432a085c7"
+  },
+  "/root/swarmguard/docs/superpowers/plans/2026-06-18-federation-ux.md": {
+    "mtime": 1781803606.3086085,
+    "ast_hash": "07d35bce7ee74561c5aa063e42a011e9",
+    "semantic_hash": "07d35bce7ee74561c5aa063e42a011e9"
+  },
+  "/root/swarmguard/docs/superpowers/specs/2026-06-14-grafana-observability-design.md": {
+    "mtime": 1781462430.999816,
+    "ast_hash": "e9f5fe462eecdec583056c323b11fe1c",
+    "semantic_hash": "e9f5fe462eecdec583056c323b11fe1c"
+  },
+  "/root/swarmguard/docs/superpowers/specs/2026-06-16-blocklist-effectiveness-design.md": {
+    "mtime": 1781694835.8587701,
+    "ast_hash": "c3c57db94c50473d285e59f870ec4ece",
+    "semantic_hash": "c3c57db94c50473d285e59f870ec4ece"
+  },
+  "/root/swarmguard/docs/superpowers/specs/2026-06-17-bootstrap-peers-design.md": {
+    "mtime": 1781725463.649575,
+    "ast_hash": "5844d5d558e9fcd6562aaf7578dfb48b",
+    "semantic_hash": "5844d5d558e9fcd6562aaf7578dfb48b"
+  },
+  "/root/swarmguard/docs/superpowers/specs/2026-06-18-dnsbl-design.md": {
+    "mtime": 1781775725.89741,
+    "ast_hash": "46a8b62cdaafb9b4f9da8e60a9afaf36",
+    "semantic_hash": "46a8b62cdaafb9b4f9da8e60a9afaf36"
+  },
+  "/root/swarmguard/docs/superpowers/specs/2026-06-18-federation-ux-design.md": {
+    "mtime": 1781802627.7951162,
+    "ast_hash": "f3a414a26b57750b45447d0b4d456c7a",
+    "semantic_hash": "f3a414a26b57750b45447d0b4d456c7a"
   }
 }

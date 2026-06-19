@@ -16,14 +16,14 @@ type responseRecorder struct {
 	msg *dns.Msg
 }
 
-func (r *responseRecorder) LocalAddr() net.Addr          { return &net.UDPAddr{} }
-func (r *responseRecorder) RemoteAddr() net.Addr         { return &net.UDPAddr{} }
-func (r *responseRecorder) WriteMsg(m *dns.Msg) error    { r.msg = m; return nil }
-func (r *responseRecorder) Write(b []byte) (int, error)  { return 0, nil }
-func (r *responseRecorder) Close() error                 { return nil }
-func (r *responseRecorder) TsigStatus() error            { return nil }
-func (r *responseRecorder) TsigTimersOnly(bool)          {}
-func (r *responseRecorder) Hijack()                      {}
+func (r *responseRecorder) LocalAddr() net.Addr         { return &net.UDPAddr{} }
+func (r *responseRecorder) RemoteAddr() net.Addr        { return &net.UDPAddr{} }
+func (r *responseRecorder) WriteMsg(m *dns.Msg) error   { r.msg = m; return nil }
+func (r *responseRecorder) Write(b []byte) (int, error) { return 0, nil }
+func (r *responseRecorder) Close() error                { return nil }
+func (r *responseRecorder) TsigStatus() error           { return nil }
+func (r *responseRecorder) TsigTimersOnly(bool)         {}
+func (r *responseRecorder) Hijack()                     {}
 
 // testStore is a map-backed StoreReader for tests.
 type testStore struct {

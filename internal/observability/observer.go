@@ -22,7 +22,7 @@ type Observer struct {
 	prom              *prometheusOutput
 	sq                *sqliteOutput
 	mu                sync.Mutex
-	blockedByRule     map[string]string        // ip → rule that caused the block
+	blockedByRule     map[string]string         // ip → rule that caused the block
 	recentlyUnblocked map[string]unblockedEntry // ip → rule+time; pruned after 7 days
 }
 

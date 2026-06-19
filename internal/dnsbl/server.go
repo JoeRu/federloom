@@ -167,7 +167,7 @@ func (s *Server) handleDNS(w dns.ResponseWriter, r *dns.Msg) {
 			Hdr: dns.RR_Header{Name: q.Name, Rrtype: dns.TypeTXT, Class: dns.ClassINET, Ttl: 60},
 			Txt: []string{txtPayload},
 		})
-	// Other query types: NOERROR with empty answer section (RFC-compliant).
+		// Other query types: NOERROR with empty answer section (RFC-compliant).
 	}
 
 	_ = w.WriteMsg(m)

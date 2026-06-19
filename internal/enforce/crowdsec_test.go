@@ -196,4 +196,3 @@ func TestCrowdSecSink_StartFail(t *testing.T) {
 		t.Fatal("expected Start to return error when LAPI returns 401, got nil")
 	}
 }
-

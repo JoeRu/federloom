@@ -6,4 +6,6 @@ datasources:
     uid: swarmguard-sqlite
     jsonData:
       path: /var/lib/swarmguard/metrics.db
+      pathPrefix: "file:"
+      attachLimit: 0
     editable: true

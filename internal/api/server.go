@@ -122,4 +122,3 @@ func (s *Server) unsubscribe(ch chan EventMsg) {
 	s.mu.Unlock()
 	close(ch)
 }
-
