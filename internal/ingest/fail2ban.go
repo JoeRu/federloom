@@ -36,6 +36,7 @@ var builtinJailReasons = map[string]string{
 
 // builtinJailPrefixes maps jail name prefixes to reason strings.
 // Checked in order after exact matches; first match wins.
+// Slice preserves match priority; first prefix wins.
 var builtinJailPrefixes = []struct{ prefix, reason string }{
 	{"sshd-", "ssh-auth-bruteforce"},
 	{"postfix-", "smtp-auth-bruteforce"},
@@ -104,13 +105,13 @@ func (f *Fail2Ban) run(ctx context.Context, ch chan<- proto.Event) {
 func (f *Fail2Ban) poll(ctx context.Context, seen map[string]struct{}, ch chan<- proto.Event) {
 	data, err := f.fetcher(ctx, f.cfg.Container)
 	if err != nil {
-		log.Printf("fail2ban: fetch banned: %v", err)
+		log.Printf("ingest/fail2ban: fetch banned: %v", err)
 		return
 	}
 
 	current, err := parseBanned(data)
 	if err != nil {
-		log.Printf("fail2ban: parse banned: %v", err)
+		log.Printf("ingest/fail2ban: parse banned: %v", err)
 		return
 	}
 
@@ -119,6 +120,7 @@ func (f *Fail2Ban) poll(ctx context.Context, seen map[string]struct{}, ch chan<-
 		if _, alreadySeen := seen[ip]; alreadySeen {
 			continue
 		}
+		// Block rather than drop: seen must stay consistent with events emitted.
 		select {
 		case ch <- proto.Event{
 			IP:         ip,
@@ -126,10 +128,10 @@ func (f *Fail2Ban) poll(ctx context.Context, seen map[string]struct{}, ch chan<-
 			Timestamp:  time.Now(),
 			ReporterID: f.selfID,
 		}:
+			seen[ip] = struct{}{}
 		case <-ctx.Done():
 			return
 		}
-		seen[ip] = struct{}{}
 	}
 
 	// Prune IPs that are no longer banned so a re-ban triggers a new event.
