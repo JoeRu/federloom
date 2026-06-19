@@ -39,13 +39,14 @@ fi
 echo "==> [2/6] Syncing repo to $SERVER:$REMOTE_DIR"
 rsync -az --delete \
   --exclude='.git' --exclude='bin/' --exclude='data/' \
+  --exclude='deploy/wordpress/config.local.yaml' \
+  --exclude='deploy/mailcow/config.local.yaml' \
   -e "ssh -l $SSH_USER" \
   "$REPO_ROOT/" \
   "$SSH_USER@$SERVER:$REMOTE_DIR/"
 
-echo "==> [3/6] Building swarmguard image on server"
-sudo_run docker build -t swarmguard:latest \
-  -f "$REMOTE_DIR/deploy/docker/Dockerfile" "$REMOTE_DIR" -q
+echo "==> [3/6] Pulling swarmguard image"
+sudo_run docker pull ghcr.io/joeru/swarmguard:latest
 
 echo "==> [4/6] Writing config.local.yaml (contains api_key — never committed)"
 sudo_run bash -c "cat > $REMOTE_DIR/deploy/mailcow/config.local.yaml" <<EOF
@@ -105,7 +106,7 @@ EOF
 echo "==> [5/6] Starting SwarmGuard"
 sudo_run docker compose \
   -f "$REMOTE_DIR/deploy/mailcow/docker-compose.yml" \
-  up -d --build
+  up -d
 
 echo "==> [6/6] Waiting 10s for swarmd to print peer ID..."
 sleep 10

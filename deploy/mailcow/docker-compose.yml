@@ -5,7 +5,8 @@
 #   - ipset/iptables calls affect the host kernel directly (requires NET_ADMIN)
 #
 # Before starting:
-#   1. Open port 7700 in the NixOS firewall if you want peers to initiate connections here
+#   1. Run ./bootstrap-mailcow.sh — registers CrowdSec bouncer, writes config.local.yaml
+#   2. Open port 7700 in the NixOS firewall if you want peers to initiate connections here
 services:
   swarmguard:
     image: ghcr.io/joeru/swarmguard:latest

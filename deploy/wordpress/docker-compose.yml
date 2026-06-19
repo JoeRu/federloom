@@ -9,7 +9,8 @@
 # so network_mode: host lets SwarmGuard reach 172.21.0.3:8080 directly.
 #
 # Before starting:
-#   1. Open port 7700 in the NixOS firewall if you want peers to initiate connections here
+#   1. Run ./bootstrap-wordpress.sh — registers CrowdSec bouncer, writes config.local.yaml
+#   2. Open port 7700 in the NixOS firewall if you want peers to initiate connections here
 services:
   swarmguard:
     image: ghcr.io/joeru/swarmguard:latest
