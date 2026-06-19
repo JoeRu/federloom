@@ -64,7 +64,7 @@ Add a `dnsbl:` section to your `config.yaml`:
 ```yaml
 dnsbl:
   addr: ":5353"                    # listen address; "" = disabled
-  zone: "dnsbl.swarmguard.mail."  # your DNSBL zone name; trailing dot optional
+  zone: "dnsbl.swarmguard.mail."  # your DNSBL zone name; trailing dot recommended, omitting accepted
   # min_score: 0                  # 0 = use reputation.block_threshold
 ```
 
@@ -210,7 +210,12 @@ Look for `RBL_SWARMGUARD_LISTED` in the output for a listed IP.
 
 nginx does not perform real-time DNS lookups per request — there is no native DNSBL support equivalent to Postfix's `reject_rbl_client`. The practical approach is a short script run by cron that queries SwarmGuard's HTTP API, writes `deny` directives to an nginx include file, and reloads nginx.
 
-> This requires SwarmGuard's HTTP API (`api.addr` in config.yaml) to be enabled alongside the DNSBL.
+> This requires SwarmGuard's HTTP API to be enabled. Add to `config.yaml` if not already present:
+> ```yaml
+> api:
+>   addr: ":9102"
+> ```
+> Restart swarmd after enabling.
 
 ### Setup
 
@@ -257,11 +262,8 @@ chmod +x /usr/local/bin/swarmguard-blocklist-update
 
 **4. Add to cron** (every 5 minutes):
 
-```bash
-crontab -e
-```
+Create `/etc/cron.d/swarmguard-blocklist`:
 
-Add:
 ```
 */5 * * * * root /usr/local/bin/swarmguard-blocklist-update 2>/dev/null
 ```
@@ -327,6 +329,8 @@ actionban = listed=$(dig +short A $(echo <ip> | awk -F. '{print $4"."$3"."$2"."$
 
 actionunban = ipset del -exist f2b-<name> <ip>
 ```
+
+> If you applied the optional port-53 iptables redirect, remove `-p 5353` from the `actionban` dig command.
 
 Enable in your jail config (`/etc/fail2ban/jail.local`):
 
