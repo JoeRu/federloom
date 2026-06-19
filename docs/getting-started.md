@@ -125,3 +125,11 @@ A weight of 0 means events from that operator are silently ignored. Use `swarmct
 
 **Bootstrap peer not connecting**
 Check that port 7700/tcp is open in your firewall and that the peer ID in `bootstrap_peers` matches the ID printed by swarmd (`peer ID: 12D3Koo...` in the startup log).
+
+---
+
+## Integration guides
+
+Once your node is running, connect it to your existing tools:
+
+- **[DNSBL integration](dnsbl-integration.md)** — wire Postfix, Rspamd, nginx, and fail2ban against SwarmGuard's embedded DNSBL server
