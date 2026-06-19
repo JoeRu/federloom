@@ -107,6 +107,9 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 	if cfg.Ingest.Spamtrap.Enabled {
 		sources = append(sources, ingest.NewSpamtrap(cfg.Ingest.Spamtrap, selfID))
 	}
+	if cfg.Ingest.Fail2Ban.Enabled {
+		sources = append(sources, ingest.NewFail2Ban(cfg.Ingest.Fail2Ban, selfID))
+	}
 
 	obs, err := observability.New(cfg.Observability, cfg.Reputation, cfg.Store.Dir)
 	if err != nil {
