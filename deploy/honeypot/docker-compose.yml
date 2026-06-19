@@ -30,6 +30,7 @@ services:
       - "7700:7700"
       - "9101:9101"
       - "9102:9102"
+      - "5353:5353/udp"
     volumes:
       - ./config.yaml:/etc/swarmguard/config.yaml:ro
       - ./rules.yaml:/etc/swarmguard/rules.yaml:ro
@@ -39,7 +40,7 @@ services:
     command: >
       --config /etc/swarmguard/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
-      --advertise /ip4/213.199.36.212/tcp/7700
+      --advertise /dns4/swarmguard.jru.me/tcp/7700
     depends_on:
       - cowrie
       - opencanary

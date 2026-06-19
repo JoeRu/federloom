@@ -30,18 +30,17 @@ ssh_run '
 echo "==> [2/5] Syncing repo to $SERVER:$REMOTE_DIR"
 rsync -az --delete \
   --exclude='.git' --exclude='bin/' --exclude='data/' \
+  --exclude='deploy/wordpress/config.local.yaml' \
+  --exclude='deploy/mailcow/config.local.yaml' \
   -e "ssh -p $SSH_PORT" \
   "$REPO_ROOT/" \
   "$SSH_USER@$SERVER:$REMOTE_DIR/"
 
-echo "==> [3/5] Building swarmguard image on server (first run takes ~2 min)"
-ssh_run "cd $REMOTE_DIR && docker build -t swarmguard:latest -f deploy/docker/Dockerfile . -q"
+echo "==> [3/5] Pulling swarmguard image"
+ssh_run "docker pull ghcr.io/joeru/swarmguard:latest"
 
 echo "==> [4/5] Starting honeypot stack"
-ssh_run "
-  docker compose -f $REMOTE_DIR/deploy/honeypot/docker-compose.yml pull --ignore-pull-failures 2>/dev/null || true
-  docker compose -f $REMOTE_DIR/deploy/honeypot/docker-compose.yml up -d
-"
+ssh_run "docker compose -f $REMOTE_DIR/deploy/honeypot/docker-compose.yml up -d"
 
 echo "==> [5/5] Waiting 15s for swarmd to print peer ID..."
 sleep 15
