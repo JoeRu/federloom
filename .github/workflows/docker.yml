@@ -1,10 +1,13 @@
 name: docker
 on:
-  push:
+  workflow_run:
+    workflows: [ci]
+    types: [completed]
     branches: [main]
 
 jobs:
   build-push:
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -21,4 +24,6 @@ jobs:
           context: .
           file: deploy/docker/Dockerfile
           push: true
-          tags: ghcr.io/joeru/swarmguard:latest
+          tags: |
+            ghcr.io/joeru/swarmguard:latest
+            ghcr.io/joeru/swarmguard:${{ github.event.workflow_run.head_sha }}
