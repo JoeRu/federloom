@@ -17,6 +17,8 @@ services:
     ports:
       - "25:25"
       - "143:143"
+      - "80:80"
+      - "443:443"
     volumes:
       - opencanary-logs:/var/log/opencanary
       - ./opencanary.json:/etc/opencanaryd/opencanary.conf:ro
