@@ -261,3 +261,16 @@ dnsbl:
 		t.Errorf("MinScore: got %v, want 80", cfg.DNSBL.MinScore)
 	}
 }
+
+func TestFail2BanDefaults(t *testing.T) {
+	cfg := config.Defaults()
+	if cfg.Ingest.Fail2Ban.Container != "fail2ban" {
+		t.Errorf("fail2ban container default: got %q, want \"fail2ban\"", cfg.Ingest.Fail2Ban.Container)
+	}
+	if cfg.Ingest.Fail2Ban.PollInterval.Duration != 30*time.Second {
+		t.Errorf("fail2ban poll_interval default: got %v, want 30s", cfg.Ingest.Fail2Ban.PollInterval.Duration)
+	}
+	if cfg.Ingest.Fail2Ban.Enabled {
+		t.Error("fail2ban must default to disabled")
+	}
+}

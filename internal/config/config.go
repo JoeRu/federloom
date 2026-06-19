@@ -80,6 +80,7 @@ type IngestConfig struct {
 	CrowdSec    CrowdSecConfig   `yaml:"crowdsec"`
 	MailcowLogs MailcowConfig    `yaml:"mailcow_logs"`
 	Spamtrap    SpamtrapConfig   `yaml:"spamtrap"`
+	Fail2Ban    Fail2BanConfig   `yaml:"fail2ban"`
 }
 
 // OpenCanaryConfig configures the OpenCanary ingest adapter.
@@ -126,6 +127,15 @@ type SpamtrapConfig struct {
 	Enabled      bool     `yaml:"enabled"`
 	LogFile      string   `yaml:"log_file"`
 	PollInterval Duration `yaml:"poll_interval"`
+}
+
+// Fail2BanConfig configures the fail2ban Docker ingest adapter.
+// The adapter polls `docker exec <container> fail2ban-client banned` on each tick.
+type Fail2BanConfig struct {
+	Enabled      bool              `yaml:"enabled"`
+	Container    string            `yaml:"container"`     // default: "fail2ban"
+	PollInterval Duration          `yaml:"poll_interval"` // default: 30s
+	JailReasons  map[string]string `yaml:"jail_reasons"`  // operator overrides (exact match only)
 }
 
 // EnforceConfig selects and tunes the firewall backend.
@@ -210,6 +220,11 @@ func Defaults() *Config {
 			},
 			Spamtrap: SpamtrapConfig{
 				PollInterval: Duration{time.Second},
+			},
+			Fail2Ban: Fail2BanConfig{
+				Container:    "fail2ban",
+				PollInterval: Duration{30 * time.Second},
+				// Enabled: false (zero value — opt-in, same pattern as all adapters)
 			},
 		},
 		Trust: TrustConfig{
