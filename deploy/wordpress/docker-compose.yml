@@ -9,14 +9,10 @@
 # so network_mode: host lets SwarmGuard reach 172.21.0.3:8080 directly.
 #
 # Before starting:
-#   1. Run ./bootstrap-wordpress.sh — registers bouncer, writes config.local.yaml, builds image
-#   2. Open port 7700 in the NixOS firewall if you want peers to initiate connections here
+#   1. Open port 7700 in the NixOS firewall if you want peers to initiate connections here
 services:
   swarmguard:
-    image: swarmguard:latest
-    build:
-      context: ../..
-      dockerfile: deploy/docker/Dockerfile
+    image: ghcr.io/joeru/swarmguard:latest
     container_name: swarmguard-wordpress
     restart: unless-stopped
     cap_add: [NET_ADMIN, NET_RAW]

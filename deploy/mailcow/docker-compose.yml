@@ -5,14 +5,10 @@
 #   - ipset/iptables calls affect the host kernel directly (requires NET_ADMIN)
 #
 # Before starting:
-#   1. Run ./bootstrap-mailcow.sh — registers bouncer, writes config.local.yaml, builds image
-#   2. Open port 7700 in the NixOS firewall if you want peers to initiate connections here
+#   1. Open port 7700 in the NixOS firewall if you want peers to initiate connections here
 services:
   swarmguard:
-    image: swarmguard:latest
-    build:
-      context: ../..
-      dockerfile: deploy/docker/Dockerfile
+    image: ghcr.io/joeru/swarmguard:latest
     container_name: swarmguard-mailcow
     restart: unless-stopped
     cap_add: [NET_ADMIN, NET_RAW]

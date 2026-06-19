@@ -1,7 +1,7 @@
 # Standalone deployment (outside Mailcow).
 services:
   swarmguard:
-    build: { context: ../.., dockerfile: deploy/docker/Dockerfile }
+    image: ghcr.io/joeru/swarmguard:latest
     container_name: swarmguard
     restart: unless-stopped
     cap_add: [ NET_ADMIN, NET_RAW ]

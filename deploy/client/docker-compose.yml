@@ -4,10 +4,7 @@
 #     docker compose -f deploy/client/docker-compose.yml up
 services:
   swarmguard:
-    image: swarmguard:latest
-    build:
-      context: ../..
-      dockerfile: deploy/docker/Dockerfile
+    image: ghcr.io/joeru/swarmguard:latest
     container_name: swarmguard-client
     restart: unless-stopped
     cap_add: [NET_ADMIN, NET_RAW]
