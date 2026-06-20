@@ -219,6 +219,14 @@
         "regex": "",
         "sort": 1,
         "type": "query"
+      },
+      {
+        "hide": 0,
+        "label": "Block threshold",
+        "name": "block_threshold",
+        "query": "80",
+        "skipUrlSync": false,
+        "type": "constant"
       }
     ]
   },
