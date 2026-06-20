@@ -134,7 +134,7 @@
     },
     {
       "collapsed": false,
-      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 17},
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 25},
       "id": 11,
       "title": "History — SQLite (local node only)",
       "type": "row"
@@ -142,7 +142,7 @@
     {
       "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
       "fieldConfig": {"defaults": {}, "overrides": []},
-      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 18},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 26},
       "id": 6,
       "options": {"sortBy": [{"displayName": "time", "desc": true}]},
       "targets": [
@@ -161,7 +161,7 @@
     {
       "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
       "fieldConfig": {"defaults": {}, "overrides": []},
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 26},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 34},
       "id": 7,
       "options": {"sortBy": [{"displayName": "due_time", "desc": false}]},
       "targets": [
@@ -180,7 +180,7 @@
     {
       "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
       "fieldConfig": {"defaults": {}, "overrides": []},
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 26},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 34},
       "id": 8,
       "options": {"sortBy": [{"displayName": "time", "desc": true}]},
       "targets": [
@@ -194,6 +194,82 @@
         }
       ],
       "title": "Rule firings (latest 200)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "reporter_id"},
+            "properties": [{"id": "displayName", "value": "Peer ID"}]
+          },
+          {
+            "matcher": {"id": "byName", "options": "Value"},
+            "properties": [{"id": "displayName", "value": "Events"}]
+          }
+        ]
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 17},
+      "id": 12,
+      "options": {
+        "sortBy": [{"displayName": "Events", "desc": true}]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum by (reporter_id) (increase(swarmguard_events_received_total{job=~\"$node\"}[$__range]))",
+          "instant": true,
+          "legendFormat": "{{reporter_id}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Connected peers",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "ip"},
+            "properties": [{"id": "displayName", "value": "IP"}]
+          },
+          {
+            "matcher": {"id": "byName", "options": "Value"},
+            "properties": [{"id": "displayName", "value": "Score"}]
+          }
+        ]
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 17},
+      "id": 13,
+      "options": {
+        "sortBy": [{"displayName": "Score", "desc": true}]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "swarmguard_ip_score{job=~\"$node\"} < $block_threshold",
+          "instant": true,
+          "legendFormat": "{{ip}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Blocklist candidates (score < $block_threshold)",
       "type": "table"
     }
   ],
