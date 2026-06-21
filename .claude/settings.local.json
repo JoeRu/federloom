@@ -102,7 +102,8 @@
       "Read(//tmp/**)",
       "Bash(make test *)",
       "Bash(~/.claude/skills/swarmguard-env/scripts/smoke-test.sh wordpress *)",
-      "Read(//root/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0/skills/subagent-driven-development/**)"
+      "Read(//root/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0/skills/subagent-driven-development/**)",
+      "Bash(git merge *)"
     ]
   }
 }
