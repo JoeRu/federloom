@@ -78,7 +78,7 @@ func TestNeverBlockPoisoningRFC1918(t *testing.T) {
 // and link-local addresses (spec §6.2 / CLAUDE.md invariant 3).
 func TestNeverBlockPoisoningLoopback(t *testing.T) {
 	protected := []string{
-		"::1",    // IPv6 loopback
+		"::1",     // IPv6 loopback
 		"fe80::1", // IPv6 link-local
 	}
 

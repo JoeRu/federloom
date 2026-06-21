@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	"github.com/libp2p/go-libp2p"
-	"github.com/libp2p/go-libp2p/core/host"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
+	"github.com/libp2p/go-libp2p/core/host"
 
 	"github.com/JoeRu/swarmguard/pkg/proto"
 )

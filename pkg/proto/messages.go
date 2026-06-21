@@ -10,14 +10,14 @@ const SchemaVersion = 0 // 0 = pre-release, unstable
 
 // Event is a single observed attack report (spec §7.1).
 type Event struct {
-	IP         string    `json:"ip"`          // cleartext IPv4/IPv6 (hashing rejected, spec §9)
-	Reason     string    `json:"reason"`      // e.g. "smtp-auth-bruteforce", "dict-attack", "spam"
-	Timestamp  time.Time `json:"ts"`          // time of observation
-	PortClass  string    `json:"port_class"`  // target port class (for plausibility checks)
-	ReporterID string    `json:"reporter"`    // pseudonymous node ID (public key)
-	Signature  []byte    `json:"sig"`         // signature of the reporter
-	SubnetID   string    `json:"subnet"`      // origin trust domain (federation, spec §5)
-	OriginTrace []string `json:"origin"`      // provenance chain (anti feedback-loop, spec §5.2)
+	IP          string    `json:"ip"`         // cleartext IPv4/IPv6 (hashing rejected, spec §9)
+	Reason      string    `json:"reason"`     // e.g. "smtp-auth-bruteforce", "dict-attack", "spam"
+	Timestamp   time.Time `json:"ts"`         // time of observation
+	PortClass   string    `json:"port_class"` // target port class (for plausibility checks)
+	ReporterID  string    `json:"reporter"`   // pseudonymous node ID (public key)
+	Signature   []byte    `json:"sig"`        // signature of the reporter
+	SubnetID    string    `json:"subnet"`     // origin trust domain (federation, spec §5)
+	OriginTrace []string  `json:"origin"`     // provenance chain (anti feedback-loop, spec §5.2)
 }
 
 // ScoreEntry is the aggregated reputation for one IP within a trust domain (spec §7.2).
@@ -33,11 +33,11 @@ type ScoreEntry struct {
 
 // AnchorEntry is a trust anchor public key with local weight (spec §7.3).
 type AnchorEntry struct {
-	KeyID     string    `json:"key_id"`
-	Label     string    `json:"label"`
-	Weight    float64   `json:"weight"`
+	KeyID      string    `json:"key_id"`
+	Label      string    `json:"label"`
+	Weight     float64   `json:"weight"`
 	ValidUntil time.Time `json:"valid_until"`
-	Source    string    `json:"source"` // "project-default" | "self-added" | "subnet"
+	Source     string    `json:"source"` // "project-default" | "self-added" | "subnet"
 }
 
 // WhitelistEntry separates never-shared local truth from shared votes (spec §7.4).
