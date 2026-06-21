@@ -29,9 +29,9 @@ func TestBurstCount_WithinWindow(t *testing.T) {
 func TestBurstCount_Eviction(t *testing.T) {
 	b := NewBurstStore()
 	base := time.Now()
-	b.Record("1.2.3.4", "ssh-probe", base.Add(-2*time.Minute)) // outside 1m window
+	b.Record("1.2.3.4", "ssh-probe", base.Add(-2*time.Minute))  // outside 1m window
 	b.Record("1.2.3.4", "ssh-probe", base.Add(-30*time.Second)) // inside
-	b.Record("1.2.3.4", "ssh-probe", base)                       // inside
+	b.Record("1.2.3.4", "ssh-probe", base)                      // inside
 
 	got := b.Count("1.2.3.4", "ssh-probe", time.Minute, base)
 	if got != 2 {

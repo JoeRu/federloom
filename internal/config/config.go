@@ -91,9 +91,9 @@ type HoneypotConfig struct {
 type CrowdSecConfig struct {
 	Enabled         bool     `yaml:"enabled"`
 	LAPIURL         string   `yaml:"lapi_url"`
-	APIKey          string   `yaml:"api_key"`           // bouncer key — decisions only
-	MachineID       string   `yaml:"machine_id"`        // machine account — decisions + alerts
-	MachinePassword string   `yaml:"machine_password"`  // machine account password
+	APIKey          string   `yaml:"api_key"`          // bouncer key — decisions only
+	MachineID       string   `yaml:"machine_id"`       // machine account — decisions + alerts
+	MachinePassword string   `yaml:"machine_password"` // machine account password
 	PollInterval    Duration `yaml:"poll_interval"`
 	EnableDecisions bool     `yaml:"enable_decisions"`
 	EnableAlerts    bool     `yaml:"enable_alerts"`

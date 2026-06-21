@@ -14,9 +14,9 @@ import (
 // and an optional SQLite output. All methods are safe to call on a nil
 // *Observer — nil means observability is disabled.
 type Observer struct {
-	prom     *prometheusOutput
-	sq       *sqliteOutput
-	mu       sync.Mutex
+	prom       *prometheusOutput
+	sq         *sqliteOutput
+	mu         sync.Mutex
 	blockedSet map[string]struct{} // deduplicates Inc/Dec calls for the gauge
 }
 
