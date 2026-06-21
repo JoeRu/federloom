@@ -1,0 +1,8 @@
+apiVersion: 1
+datasources:
+  - name: "Prometheus — Honeypot"
+    type: prometheus
+    access: proxy
+    uid: prom-honeypot
+    url: http://167.233.115.41:9101
+    editable: false
