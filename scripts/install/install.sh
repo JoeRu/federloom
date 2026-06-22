@@ -9,7 +9,7 @@ echo "Step 1: detect local truth for the local-only whitelist"
 echo
 
 # Capture once so we can print for review AND iterate without re-running the script.
-detected=$("$HERE/detect_local_truth.sh")
+detected=$("$HERE/detect_local_truth.sh") || true
 echo "$detected"
 echo
 
@@ -25,7 +25,7 @@ case "${ans:-N}" in
     while IFS= read -r line; do
       # Skip blank lines, comment/header lines (start with #), and NOTE: lines.
       [[ -z "$line" || "$line" == \#* || "$line" == NOTE:* ]] && continue
-      if swarmctl whitelist add --scope local-only --source install-script "$line" 2>/dev/null; then
+      if swarmctl whitelist add --scope local-only --source install-script "$line"; then
         count=$((count + 1))
       else
         printf "  warning: skipped %s (not a valid IP/CIDR)\n" "$line" >&2
