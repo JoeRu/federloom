@@ -8,9 +8,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JoeRu/swarmguard/internal/config"
 	"github.com/JoeRu/swarmguard/internal/enforce"
+	"github.com/JoeRu/swarmguard/internal/node"
 	"github.com/JoeRu/swarmguard/internal/reputation"
 	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/swarmguard/internal/transport"
+	"github.com/JoeRu/swarmguard/pkg/proto"
 )
 
 // mockSink records Block/Unblock calls without touching any real firewall.
@@ -155,5 +159,43 @@ func TestNeverBlockPublicIPNotProtected(t *testing.T) {
 	}
 	if len(sink.blocked) == 1 && sink.blocked[0] != ip {
 		t.Errorf("blocked wrong IP: want %q, got %q", ip, sink.blocked[0])
+	}
+}
+
+// TestCIDRInjectionNeverRecorded verifies that a remote attacker publishing
+// a CIDR key (e.g. "0.0.0.0/0") cannot inject it into the reputation store.
+// The net.ParseIP gate in ProcessRemote rejects any string that is not a valid
+// single IP address (spec §6.1 / Vuln 1 adversarial scenario).
+func TestCIDRInjectionNeverRecorded(t *testing.T) {
+	const cidrKey = "0.0.0.0/0"
+
+	cfg := config.Defaults()
+	cfg.Store.Dir = t.TempDir()
+
+	n, err := node.New(cfg, nil)
+	if err != nil {
+		t.Fatalf("node.New: %v", err)
+	}
+	defer n.CloseStores()
+
+	// Remote attacker sends 20 events with CIDR as IP field.
+	for i := 0; i < 20; i++ {
+		n.ProcessRemote(transport.ReceivedEvent{
+			Event: proto.Event{
+				IP:         cidrKey,
+				Reason:     "ssh-probe",
+				ReporterID: "12D3KooWattacker",
+			},
+			From: "12D3KooWattacker",
+		})
+	}
+
+	// Attempt to retrieve the CIDR key from the store.
+	rec, _ := n.GetScore(cidrKey)
+
+	// Assert that the CIDR was never recorded: LastSeen should be zero.
+	if !rec.LastSeen.IsZero() {
+		t.Errorf("CIDR key %q must not be recorded in store; LastSeen=%v (non-zero)",
+			cidrKey, rec.LastSeen)
 	}
 }
