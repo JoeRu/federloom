@@ -222,7 +222,7 @@ func TestProcessLocalAcceptsValidIP(t *testing.T) {
 	}
 }
 
-func TestProcessLocalSetsOriginTrace(t *testing.T) {
+func TestProcessRemoteScoresValidEventWithOriginTrace(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Defaults()
 	cfg.Store.Dir = dir
