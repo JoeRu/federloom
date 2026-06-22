@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -50,6 +51,18 @@ func New(cfg config.APIConfig, s StoreReader, repCfg config.ReputationConfig) *S
 	}
 }
 
+// bearerTokenMiddleware wraps a handler to require a Bearer token in the
+// Authorization header. If the token does not match, it returns 401 Unauthorized.
+func bearerTokenMiddleware(token string, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer "+token {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 // Start binds the HTTP server and registers all API routes.
 // It is a no-op when s is nil or cfg.Addr is empty (server disabled).
 // The server shuts down gracefully when ctx is cancelled.
@@ -64,7 +77,14 @@ func (s *Server) Start(ctx context.Context) {
 	mux.HandleFunc("GET /api/v1/events", s.handleEvents)
 	mux.HandleFunc("GET /crowdsec/v1/decisions", s.handleCrowdSecCTI)
 
-	srv := &http.Server{Addr: s.cfg.Addr, Handler: mux}
+	var handler http.Handler = mux
+	if token := os.Getenv("SWARMGUARD_API_TOKEN"); token != "" {
+		log.Printf("api: bearer token authentication enabled")
+		handler = bearerTokenMiddleware(token, mux)
+	} else {
+		log.Printf("api: SWARMGUARD_API_TOKEN not set — API is unauthenticated")
+	}
+	srv := &http.Server{Addr: s.cfg.Addr, Handler: handler}
 
 	go func() {
 		log.Printf("api: listening on %s", s.cfg.Addr)
