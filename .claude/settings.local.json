@@ -107,7 +107,10 @@
       "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/task-brief $PLAN *)",
       "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package $BASE *)",
       "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/task-brief /root/swarmguard/docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md 2)",
-      "Bash(echo \"BASE: $\\(git -C /root/swarmguard rev-parse HEAD\\)\")"
+      "Bash(echo \"BASE: $\\(git -C /root/swarmguard rev-parse HEAD\\)\")",
+      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/task-brief /root/swarmguard/docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md 3)",
+      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/task-brief /root/swarmguard/docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md 4)",
+      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/task-brief /root/swarmguard/docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md 5)"
     ]
   }
 }

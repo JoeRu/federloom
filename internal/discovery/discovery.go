@@ -7,6 +7,7 @@ import (
 
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	"github.com/libp2p/go-libp2p/core/host"
+	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/libp2p/go-libp2p/core/peer"
 	drouting "github.com/libp2p/go-libp2p/p2p/discovery/routing"
 	dutil "github.com/libp2p/go-libp2p/p2p/discovery/util"
@@ -53,6 +54,8 @@ func (m *Manager) Start(ctx context.Context) {
 	if m.cfg.Discover {
 		go m.findPeers(ctx, rd)
 	}
+
+	<-ctx.Done()
 }
 
 // connectRelays dials the relay list peers to bootstrap DHT routing.
@@ -93,9 +96,9 @@ func (m *Manager) findPeers(ctx context.Context, rd *drouting.RoutingDiscovery) 
 			if ctx.Err() != nil {
 				return
 			}
-			log.Printf("discovery: FindPeers error: %v — retrying in 60s", err)
+			log.Printf("discovery: FindPeers error: %v — retrying in 30s", err)
 			select {
-			case <-time.After(60 * time.Second):
+			case <-time.After(30 * time.Second):
 			case <-ctx.Done():
 				return
 			}
@@ -105,7 +108,7 @@ func (m *Manager) findPeers(ctx context.Context, rd *drouting.RoutingDiscovery) 
 			if p.ID == m.host.ID() {
 				continue // skip self
 			}
-			if m.host.Network().Connectedness(p.ID) == 0 {
+			if m.host.Network().Connectedness(p.ID) == network.NotConnected {
 				if err := m.host.Connect(ctx, p); err != nil {
 					log.Printf("discovery: connect %s: %v", p.ID, err)
 				} else {
