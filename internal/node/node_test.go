@@ -377,12 +377,17 @@ func TestProcessRemoteRespectsWhitelistCIDR(t *testing.T) {
 	cfg := config.Defaults()
 	cfg.Store.Dir = dir
 
-	wl, _ := store.LoadWhitelist(cfg.WhitelistFile())
-	_ = wl.Add(proto.WhitelistEntry{
+	wl, err := store.LoadWhitelist(cfg.WhitelistFile())
+	if err != nil {
+		t.Fatalf("LoadWhitelist: %v", err)
+	}
+	if err := wl.Add(proto.WhitelistEntry{
 		IPOrRange: "198.51.100.0/24",
 		Scope:     "local-only",
 		Source:    "install-script",
-	})
+	}); err != nil {
+		t.Fatalf("whitelist Add: %v", err)
+	}
 
 	n, err := New(cfg, nil)
 	if err != nil {
