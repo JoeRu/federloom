@@ -396,6 +396,68 @@ SOC/Forschung optional zuschaltbar (Beobachtung von Angriffswellen).
 | P | **Traffic-Lawine** im großen Netz (Echtzeit-Gossip) | mitigiert via On-Demand/DNSBL, Aggregation, Relay-Hierarchie (§11.4) |
 | Q | **Enforcement-Backend O(n)** (Fail2Ban-Stil) schmilzt | gelöst via ipset/nftables O(1) (§11.3) |
 | R | **CPU-Last durch Signaturverifikation** im großen Netz | mitigiert via Batch-Verifikation + Lastabwurf (§11.4/§11.5) |
+| S | **Sybil via Discovery** – viele DHT-Phantome fluten den Stranger-Pool | mitigiert via bestehendem `strangerCap` pro IP (§4.2/§4.3) |
+| T | **Privacy des Advertisers** – DHT-Eintrag leakt IP + Peer-ID | mitigiert via `advertise: false` Opt-out (§14.1/§14.5); Onboarding-Pflicht |
+
+---
+
+## 14. Föderations-Entdeckung (Federation Discovery)
+
+Das Schwarm ist nur wirksam ab einer kritischen Masse. Das manuelle Invite/Join-Protokoll
+(§5.2) erzeugt hochvertrauenswürdige Föderationen, aber auch Bootstrapping-Reibung:
+Ein Knoten ohne bestehende Kontakte nimmt nicht am Netz teil. Discovery löst das, indem
+Knoten sich gegenseitig automatisch finden – **ohne eine vorhandene Vertrauensbeziehung
+vorauszusetzen** und ohne das Trust-Modell zu umgehen.
+
+### 14.1 Zwei Opt-out-Flags (beide Default: **an**)
+
+| Flag | Funktion |
+|------|----------|
+| `discovery.advertise` | Veröffentlicht diesen Knoten am DHT-Rendezvous-Punkt |
+| `discovery.discover` | Sucht aktiv im DHT nach weiteren Peers |
+
+Beide unabhängig konfigurierbar (lokale Souveränität, Leitprinzip 7). Betreiber,
+die vollständige Privatheit wollen (z. B. firmeneigene Netze), setzen `advertise: false`
+und verlassen sich auf manuelles Invite/Join.
+
+### 14.2 Entdeckungsmechanismus
+
+**Primär – DHT-Rendezvous (dezentral):**
+Knoten melden sich unter einem festen Schlüssel (`/swarmguard/v1/peers`) im bestehenden
+Kademlia-DHT an. Kein Projekt-Server nötig; nutzt die bereits aufgebaute Transport-Schicht.
+
+**Fallback – Signierte Relay-Liste (Kalt-Start):**
+Eine vom Projekt signierte, versionierte JSON-Datei mit bekannten Bootstrap-/Relay-Knoten
+(analog zu Tor-Directory-Authorities). Wird mit dem Release ausgeliefert, ist lokal
+überschreibbar. Wird nur verwendet, wenn der DHT noch nicht erreichbar ist (Erstinstallation,
+keine Peers vorhanden).
+
+Die Relay-Liste folgt dem Anchor-Prinzip (§5.1): projekt-signiert als sinnvoller **Default,
+kein Zwang**. Betreiber können eigene Bootstrap-Listen eintragen und die Projektliste
+entfernen.
+
+### 14.3 Trust neu entdeckter Knoten
+
+Neu entdeckte (nicht eingeladene) Knoten erhalten `trust.stranger_weight` – denselben
+Wert wie jeder nicht verankerte Melder. Das bestehende `strangerCap` pro IP begrenzt
+den koordinierten Sybil-Beitrag vieler entdeckter Fremder (Problem S, §12).
+
+Um einen entdeckten Knoten hochzustufen: `swarmctl trust import` (manuelles Verbürgen).
+Das Trust-Modell bleibt unverändert; Discovery erweitert nur den Pool erreichbarer Knoten.
+
+### 14.4 Zusammenspiel mit Föderations-Modus
+
+Der bestehende `federation.mode` (allowlist / blocklist, §5.2) gilt unverändert.
+Discovery liefert mehr Fremde in den Pool; ihr Gewicht ist durch die Stranger-Mechanik
+gedeckelt. Ein `allowlist`-Knoten verbindet sich mit entdeckten Peers, gewichtet deren
+Meldungen aber nur mit `stranger_weight`.
+
+### 14.5 Datenschutz-Hinweis
+
+`advertise: true` veröffentlicht die IP-Adresse und Peer-ID dieses Knotens im DHT –
+**öffentlich sichtbar für jeden DHT-Teilnehmer**. Betreiber in datenschutzsensiblen
+Umgebungen sollen `advertise: false` setzen. Die Onboarding-Dokumentation muss dies
+prominent erklären.
 
 ---
 
@@ -418,3 +480,5 @@ SOC/Forschung optional zuschaltbar (Beobachtung von Angriffswellen).
 13. **Observability-Plane** als Opt-in entwerfen (Angriffswellen-Monitoring, default aus) – §11.2.
 14. Prototyp-Reihenfolge: Ground-Truth + Diversitäts-Korroboration zuerst (80 %),
     danach Trust-Anchors, zuletzt Teilnetz-Föderation.
+15. **Föderations-Entdeckung** implementieren: DHT-Rendezvous + signierte Relay-Liste
+    als Fallback; zwei Opt-out-Flags (`advertise`/`discover`, beide default an) – §14.
