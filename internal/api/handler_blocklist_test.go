@@ -212,3 +212,43 @@ func countNonEmptyLines(s string) int {
 	}
 	return n
 }
+
+// malformedKeyStore returns one valid IP and one CIDR key to test sanitization.
+type malformedKeyStore struct{}
+
+func (s *malformedKeyStore) GetScore(ip string) (store.ScoreRecord, error) {
+	return store.ScoreRecord{}, nil
+}
+
+func (s *malformedKeyStore) ScanScores(fn func(ip string, r store.ScoreRecord) error) error {
+	now := time.Now()
+	_ = fn("203.0.113.1", store.ScoreRecord{Score: 90.0, LastSeen: now, Reasons: []string{"ssh-probe"}})
+	_ = fn("0.0.0.0/0", store.ScoreRecord{Score: 90.0, LastSeen: now, Reasons: []string{"ssh-probe"}})
+	return nil
+}
+
+// TestHandleCrowdSecCTI_SkipsMalformedKeys verifies that malformed store keys
+// (CIDRs, newline-embedded strings) are not emitted in the CTI plaintext feed.
+func TestHandleCrowdSecCTI_SkipsMalformedKeys(t *testing.T) {
+	srv := New(
+		config.APIConfig{Addr: ":0"},
+		&malformedKeyStore{},
+		config.ReputationConfig{BlockThreshold: 0},
+	)
+	r := httptest.NewRequest(http.MethodGet, "/crowdsec/v1/decisions?min_score=0", nil)
+	w := httptest.NewRecorder()
+
+	srv.handleCrowdSecCTI(w, r)
+
+	body := w.Body.String()
+	lines := countNonEmptyLines(body)
+	if lines != 1 {
+		t.Errorf("got %d lines, want 1 (malformed key must be skipped)\nbody: %q", lines, body)
+	}
+	if !strings.Contains(body, "203.0.113.1") {
+		t.Errorf("valid IP missing from CTI output; body: %q", body)
+	}
+	if strings.Contains(body, "0.0.0.0/0") {
+		t.Errorf("CIDR key leaked into CTI output; body: %q", body)
+	}
+}
