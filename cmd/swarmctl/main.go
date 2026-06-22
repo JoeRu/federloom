@@ -27,6 +27,8 @@ Usage:
   swarmctl trust list
   swarmctl trust export                  write this Person's bundle to stdout
   swarmctl trust import [--as NAME] [--weight W] FILE
+  swarmctl trust block PEER_ID
+  swarmctl trust unblock PEER_ID
 
 All commands accept -config PATH (same file swarmd uses).
 `)

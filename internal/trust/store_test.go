@@ -29,7 +29,7 @@ func fixture(t *testing.T) (dir string, st *trust.Store) {
 	if err := trust.SaveAnchors(filepath.Join(dir, "anchors.json"), anchors); err != nil {
 		t.Fatalf("save anchors: %v", err)
 	}
-	st = trust.NewStore(filepath.Join(dir, "anchors.json"), filepath.Join(dir, "imported-certs.json"), 0.3)
+	st = trust.NewStore(filepath.Join(dir, "anchors.json"), filepath.Join(dir, "imported-certs.json"), filepath.Join(dir, "blocked.json"), 0.3)
 	st.SetReloadInterval(0) // re-stat files on every Resolve in tests
 	cert := identity.IssueCert(priv, "12D3KooWpeerA", time.Now().Add(time.Hour))
 	if err := st.AddCert(cert, time.Now()); err != nil {
@@ -57,7 +57,7 @@ func TestResolveUnknownPeerIsStranger(t *testing.T) {
 func TestResolveValidCertUnanchoredIdentityIsStranger(t *testing.T) {
 	dir := t.TempDir()
 	priv, _ := identity.GeneratePersonKey(filepath.Join(dir, "other.key"))
-	st := trust.NewStore(filepath.Join(dir, "anchors.json"), filepath.Join(dir, "certs.json"), 0.3)
+	st := trust.NewStore(filepath.Join(dir, "anchors.json"), filepath.Join(dir, "certs.json"), filepath.Join(dir, "blocked.json"), 0.3)
 	st.SetReloadInterval(0)
 	cert := identity.IssueCert(priv, "12D3KooWpeerX", time.Now().Add(time.Hour))
 	if err := st.AddCert(cert, time.Now()); err != nil {
@@ -86,7 +86,7 @@ func TestExpiredCertIsStranger(t *testing.T) {
 	if err := trust.SaveAnchors(filepath.Join(dir, "anchors.json"), anchors); err != nil {
 		t.Fatalf("save: %v", err)
 	}
-	st := trust.NewStore(filepath.Join(dir, "anchors.json"), filepath.Join(dir, "certs.json"), 0.3)
+	st := trust.NewStore(filepath.Join(dir, "anchors.json"), filepath.Join(dir, "certs.json"), filepath.Join(dir, "blocked.json"), 0.3)
 	st.SetReloadInterval(0)
 	cert := identity.IssueCert(priv, "12D3KooWpeerA", time.Now().Add(50*time.Millisecond))
 	if err := st.AddCert(cert, time.Now()); err != nil {
@@ -105,7 +105,7 @@ func TestExpiredAnchorIsStranger(t *testing.T) {
 	if err := trust.SaveAnchors(filepath.Join(dir, "anchors.json"), anchors); err != nil {
 		t.Fatalf("save: %v", err)
 	}
-	st := trust.NewStore(filepath.Join(dir, "anchors.json"), filepath.Join(dir, "certs.json"), 0.3)
+	st := trust.NewStore(filepath.Join(dir, "anchors.json"), filepath.Join(dir, "certs.json"), filepath.Join(dir, "blocked.json"), 0.3)
 	st.SetReloadInterval(0)
 	cert := identity.IssueCert(priv, "12D3KooWpeerA", time.Now().Add(time.Hour))
 	_ = st.AddCert(cert, time.Now())
@@ -142,7 +142,7 @@ func TestCorruptFileKeepsLastGood(t *testing.T) {
 
 func TestMissingFileMeansStrangers(t *testing.T) {
 	dir := t.TempDir()
-	st := trust.NewStore(filepath.Join(dir, "anchors.json"), filepath.Join(dir, "certs.json"), 0.3)
+	st := trust.NewStore(filepath.Join(dir, "anchors.json"), filepath.Join(dir, "certs.json"), filepath.Join(dir, "blocked.json"), 0.3)
 	st.SetReloadInterval(0)
 	if _, _, anchored := st.Resolve("12D3KooWanyone"); anchored {
 		t.Error("missing anchors file must mean no anchors")
@@ -158,7 +158,7 @@ func TestAnchorWeightClampedToOne(t *testing.T) {
 	if err := trust.SaveAnchors(filepath.Join(dir, "anchors.json"), anchors); err != nil {
 		t.Fatalf("save: %v", err)
 	}
-	st := trust.NewStore(filepath.Join(dir, "anchors.json"), filepath.Join(dir, "certs.json"), 0.3)
+	st := trust.NewStore(filepath.Join(dir, "anchors.json"), filepath.Join(dir, "certs.json"), filepath.Join(dir, "blocked.json"), 0.3)
 	st.SetReloadInterval(0)
 	cert := identity.IssueCert(priv, "12D3KooWpeerA", time.Now().Add(time.Hour))
 	if err := st.AddCert(cert, time.Now()); err != nil {
@@ -179,7 +179,7 @@ func TestAnchorNonPositiveWeightDropped(t *testing.T) {
 	if err := trust.SaveAnchors(filepath.Join(dir, "anchors.json"), anchors); err != nil {
 		t.Fatalf("save: %v", err)
 	}
-	st := trust.NewStore(filepath.Join(dir, "anchors.json"), filepath.Join(dir, "certs.json"), 0.3)
+	st := trust.NewStore(filepath.Join(dir, "anchors.json"), filepath.Join(dir, "certs.json"), filepath.Join(dir, "blocked.json"), 0.3)
 	st.SetReloadInterval(0)
 	cert := identity.IssueCert(priv, "12D3KooWpeerA", time.Now().Add(time.Hour))
 	_ = st.AddCert(cert, time.Now())
@@ -198,7 +198,7 @@ func TestReloadKeepsLongerLivedCert(t *testing.T) {
 		t.Fatalf("save anchors: %v", err)
 	}
 	certsPath := filepath.Join(dir, "certs.json")
-	st := trust.NewStore(filepath.Join(dir, "anchors.json"), certsPath, 0.3)
+	st := trust.NewStore(filepath.Join(dir, "anchors.json"), certsPath, filepath.Join(dir, "blocked.json"), 0.3)
 	st.SetReloadInterval(0)
 
 	wire := identity.IssueCert(priv, "12D3KooWpeerA", time.Now().Add(time.Hour))

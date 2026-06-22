@@ -16,7 +16,7 @@ import (
 
 func cmdTrust(args []string) error {
 	if len(args) < 1 {
-		return fmt.Errorf("usage: swarmctl trust add|set|remove|list|export|import ...")
+		return fmt.Errorf("usage: swarmctl trust add|set|remove|list|export|import|block|unblock ...")
 	}
 	switch args[0] {
 	case "add":
@@ -31,6 +31,10 @@ func cmdTrust(args []string) error {
 		return trustExport(args[1:])
 	case "import":
 		return trustImport(args[1:])
+	case "block":
+		return trustBlock(args[1:])
+	case "unblock":
+		return trustUnblock(args[1:])
 	default:
 		return fmt.Errorf("unknown trust subcommand %q", args[0])
 	}
@@ -343,6 +347,75 @@ func trustImport(args []string) error {
 		return err
 	}
 	fmt.Printf("imported %d cert(s)\n", imported)
+	return nil
+}
+
+func trustBlock(args []string) error {
+	fset := flag.NewFlagSet("trust block", flag.ExitOnError)
+	loadCfg := addConfigFlag(fset)
+	if err := fset.Parse(args); err != nil {
+		return err
+	}
+	if fset.NArg() != 1 {
+		return fmt.Errorf("usage: swarmctl trust block PEER_ID")
+	}
+	peerID := fset.Arg(0)
+	cfg, err := loadCfg()
+	if err != nil {
+		return err
+	}
+	path := cfg.TrustBlockedPeersFile()
+	peers, err := trust.LoadBlockedPeers(path)
+	if err != nil {
+		return fmt.Errorf("load blocked peers: %w", err)
+	}
+	for _, p := range peers {
+		if p == peerID {
+			fmt.Printf("peer %s is already blocked\n", peerID)
+			return nil
+		}
+	}
+	peers = append(peers, peerID)
+	if err := trust.SaveBlockedPeers(path, peers); err != nil {
+		return fmt.Errorf("save blocked peers: %w", err)
+	}
+	fmt.Printf("blocked peer %s — swarmd will reload within 10s\n", peerID)
+	return nil
+}
+
+func trustUnblock(args []string) error {
+	fset := flag.NewFlagSet("trust unblock", flag.ExitOnError)
+	loadCfg := addConfigFlag(fset)
+	if err := fset.Parse(args); err != nil {
+		return err
+	}
+	if fset.NArg() != 1 {
+		return fmt.Errorf("usage: swarmctl trust unblock PEER_ID")
+	}
+	peerID := fset.Arg(0)
+	cfg, err := loadCfg()
+	if err != nil {
+		return err
+	}
+	path := cfg.TrustBlockedPeersFile()
+	peers, err := trust.LoadBlockedPeers(path)
+	if err != nil {
+		return fmt.Errorf("load blocked peers: %w", err)
+	}
+	filtered := peers[:0]
+	for _, p := range peers {
+		if p != peerID {
+			filtered = append(filtered, p)
+		}
+	}
+	if len(filtered) == len(peers) {
+		fmt.Printf("peer %s was not in the blocked list\n", peerID)
+		return nil
+	}
+	if err := trust.SaveBlockedPeers(path, filtered); err != nil {
+		return fmt.Errorf("save blocked peers: %w", err)
+	}
+	fmt.Printf("unblocked peer %s — swarmd will reload within 10s\n", peerID)
 	return nil
 }
 

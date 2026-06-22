@@ -16,15 +16,18 @@ import (
 type Store struct {
 	anchorsPath    string
 	certsPath      string
+	blockedPath    string
 	strangerWeight float64
 	reloadEvery    time.Duration
 
 	mu          sync.RWMutex
 	anchors     map[string]Anchor         // keyed by IdentityPubkey
 	certs       map[string]proto.PeerCert // peerID -> verified cert
+	blocked     map[string]struct{}
 	lastCheck   time.Time
 	anchorsStat fileStat
 	certsStat   fileStat
+	blockedStat fileStat
 	loadedOnce  bool
 }
 
@@ -37,16 +40,18 @@ type fileStat struct {
 	size  int64
 }
 
-// NewStore creates a Store reading anchorsPath and certsPath. strangerWeight
-// is returned for any peer without a valid, anchored vouch.
-func NewStore(anchorsPath, certsPath string, strangerWeight float64) *Store {
+// NewStore creates a Store reading anchorsPath, certsPath, and blockedPath.
+// strangerWeight is returned for any peer without a valid, anchored vouch.
+func NewStore(anchorsPath, certsPath, blockedPath string, strangerWeight float64) *Store {
 	s := &Store{
 		anchorsPath:    anchorsPath,
 		certsPath:      certsPath,
+		blockedPath:    blockedPath,
 		strangerWeight: strangerWeight,
 		reloadEvery:    10 * time.Second,
 		anchors:        map[string]Anchor{},
 		certs:          map[string]proto.PeerCert{},
+		blocked:        map[string]struct{}{},
 	}
 	// Eagerly load once so a later corrupt write has a last-good state to fall
 	// back to (Invariant 6: a bad file must not silently drop existing trust).
@@ -87,6 +92,17 @@ func (s *Store) Resolve(peerID string) (weight float64, group string, anchored b
 		return s.strangerWeight, "", false
 	}
 	return a.Weight, a.Person, true
+}
+
+// IsBlocked reports whether peerID is in the operator-managed blocked list
+// (hot-reloaded from blocked-peers.json, spec §5.2 defederation).
+func (s *Store) IsBlocked(peerID string) bool {
+	now := time.Now()
+	s.maybeReload(now)
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	_, blocked := s.blocked[peerID]
+	return blocked
 }
 
 // maybeReload re-reads anchors.json and imported certs when their mtime moved.
@@ -148,6 +164,22 @@ func (s *Store) maybeReload(now time.Time) {
 				}
 			}
 			s.certsStat = st
+		}
+	}
+
+	if s.blockedPath != "" {
+		if st, changed := statChanged(s.blockedPath, s.blockedStat); changed || !s.loadedOnce {
+			peers, err := LoadBlockedPeers(s.blockedPath)
+			if err != nil {
+				log.Printf("trust: reload %s failed, keeping last blocked list: %v", s.blockedPath, err)
+			} else {
+				m := make(map[string]struct{}, len(peers))
+				for _, p := range peers {
+					m[p] = struct{}{}
+				}
+				s.blocked = m
+				s.blockedStat = st
+			}
 		}
 	}
 

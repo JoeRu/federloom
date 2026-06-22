@@ -33,7 +33,7 @@ func testNode(t *testing.T) (*Node, string) {
 	}
 	t.Cleanup(func() { s.Close() })
 
-	ts := trust.NewStore(cfg.TrustAnchorsFile(), cfg.TrustCertsFile(), cfg.Trust.StrangerWeight)
+	ts := trust.NewStore(cfg.TrustAnchorsFile(), cfg.TrustCertsFile(), cfg.TrustBlockedPeersFile(), cfg.Trust.StrangerWeight)
 	ts.SetReloadInterval(0)
 
 	return &Node{

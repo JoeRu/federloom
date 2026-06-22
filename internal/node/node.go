@@ -81,7 +81,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		selfID = t.Host().ID().String()
 	}
 
-	ts := trust.NewStore(cfg.TrustAnchorsFile(), cfg.TrustCertsFile(), cfg.Trust.StrangerWeight)
+	ts := trust.NewStore(cfg.TrustAnchorsFile(), cfg.TrustCertsFile(), cfg.TrustBlockedPeersFile(), cfg.Trust.StrangerWeight)
 
 	var vouch *proto.PeerCert
 	if data, err := os.ReadFile(cfg.TrustPeerCertFile()); err == nil {
@@ -289,6 +289,10 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 	}
 	if e.ReporterID != re.From {
 		log.Printf("node: drop spoofed event: reporter %q != verified publisher %q", e.ReporterID, re.From)
+		return
+	}
+	if n.trust.IsBlocked(re.From) {
+		log.Printf("node: drop event from blocked peer %s", re.From)
 		return
 	}
 	if len(e.Signature) > 0 {
