@@ -86,11 +86,15 @@ func (w *WhitelistStore) Add(entry proto.WhitelistEntry) error {
 // exists it returns nil — not an error. Persists the updated list to disk.
 func (w *WhitelistStore) Remove(ipOrRange string) error {
 	w.mu.Lock()
-	filtered := w.entries[:0]
+	filtered := make([]proto.WhitelistEntry, 0, len(w.entries))
 	for _, e := range w.entries {
 		if e.IPOrRange != ipOrRange {
 			filtered = append(filtered, e)
 		}
+	}
+	if len(filtered) == len(w.entries) {
+		w.mu.Unlock()
+		return nil
 	}
 	w.entries = filtered
 	snap := make([]proto.WhitelistEntry, len(w.entries))
