@@ -14,11 +14,11 @@ ingest:
     poll_interval: 30s
     enable_decisions: true
     enable_alerts: true
-# Federation discovery (spec §14) — opt-out flags, both default true.
-discovery:
-  advertise: true
-  discover: true
-  # relay_list_path: ""  # leave empty to use the bundled relay list
+# Federation discovery (spec §14) — has no effect in solo mode (no transport).
+# Uncomment and set federation_mode to enable once adding transport config.
+# discovery:
+#   advertise: true
+#   discover: true
 
 # Optional observability plane (disabled by default, spec §11.2).
 # Uncomment to enable:
