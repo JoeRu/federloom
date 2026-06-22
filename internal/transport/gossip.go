@@ -91,6 +91,9 @@ func New(ctx context.Context, opts Options) (*Node, error) {
 // Host returns the underlying libp2p host (for direct peer wiring in tests and Bootstrap).
 func (n *Node) Host() host.Host { return n.host }
 
+// DHT returns the underlying Kademlia DHT (needed by the discovery manager).
+func (n *Node) DHT() *dht.IpfsDHT { return n.dht }
+
 // Publish JSON-encodes e and publishes it to the gossipsub topic.
 func (n *Node) Publish(ctx context.Context, e proto.Event) error {
 	data, err := json.Marshal(e)

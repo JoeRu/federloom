@@ -5,3 +5,7 @@ federation:
   import_discount: 0.0    # import nothing
 anchors:
   - source: self-added
+# Isolated deployment: no outbound peer discovery, no advertisement.
+discovery:
+  advertise: false
+  discover: false
