@@ -53,6 +53,7 @@ func whitelistAdd(args []string) error {
 	if err != nil {
 		return fmt.Errorf("load whitelist: %w", err)
 	}
+	before := len(wl.List())
 	if err := wl.Add(proto.WhitelistEntry{
 		IPOrRange: ipOrRange,
 		Scope:     *scope,
@@ -60,7 +61,11 @@ func whitelistAdd(args []string) error {
 	}); err != nil {
 		return fmt.Errorf("add to whitelist: %w", err)
 	}
-	fmt.Printf("added %s (scope: %s) — restart swarmd to activate\n", ipOrRange, *scope)
+	if len(wl.List()) > before {
+		fmt.Printf("added %s (scope: %s) — restart swarmd to activate\n", ipOrRange, *scope)
+	} else {
+		fmt.Printf("%s already in whitelist (no change)\n", ipOrRange)
+	}
 	return nil
 }
 
