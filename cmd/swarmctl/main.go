@@ -29,6 +29,9 @@ Usage:
   swarmctl trust import [--as NAME] [--weight W] FILE
   swarmctl trust block PEER_ID
   swarmctl trust unblock PEER_ID
+  swarmctl whitelist add [--scope local-only] [--source manual] IP_OR_CIDR
+  swarmctl whitelist remove IP_OR_CIDR
+  swarmctl whitelist list
 
 All commands accept -config PATH (same file swarmd uses).
 `)
@@ -53,6 +56,8 @@ func main() {
 		err = cmdPeerCert(os.Args[2:])
 	case "trust":
 		err = cmdTrust(os.Args[2:])
+	case "whitelist":
+		err = cmdWhitelist(os.Args[2:])
 	case "-h", "--help", "help":
 		usage()
 	default:
