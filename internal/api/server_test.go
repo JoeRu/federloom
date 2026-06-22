@@ -1,6 +1,8 @@
 package api
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -94,5 +96,68 @@ func TestUnsubscribeClosesChan(t *testing.T) {
 		}
 	case <-time.After(time.Second):
 		t.Fatal("timed out — channel was not closed")
+	}
+}
+
+// TestBearerTokenMiddleware_MissingHeader verifies that a request without
+// an Authorization header is rejected with 401.
+func TestBearerTokenMiddleware_MissingHeader(t *testing.T) {
+	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	h := bearerTokenMiddleware("secret", next)
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("got %d, want 401", w.Code)
+	}
+}
+
+// TestBearerTokenMiddleware_WrongToken verifies that a request with an
+// incorrect bearer token is rejected with 401.
+func TestBearerTokenMiddleware_WrongToken(t *testing.T) {
+	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	h := bearerTokenMiddleware("secret", next)
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	r.Header.Set("Authorization", "Bearer wrong")
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("got %d, want 401", w.Code)
+	}
+}
+
+// TestBearerTokenMiddleware_CorrectToken verifies that a request with the
+// correct bearer token is allowed through to the next handler.
+func TestBearerTokenMiddleware_CorrectToken(t *testing.T) {
+	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	h := bearerTokenMiddleware("secret", next)
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	r.Header.Set("Authorization", "Bearer secret")
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+	if w.Code != http.StatusOK {
+		t.Errorf("got %d, want 200", w.Code)
+	}
+}
+
+// TestBearerTokenMiddleware_EmptyAuthHeader verifies that a request with an
+// empty Authorization header is rejected with 401.
+func TestBearerTokenMiddleware_EmptyAuthHeader(t *testing.T) {
+	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	h := bearerTokenMiddleware("secret", next)
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	r.Header.Set("Authorization", "")
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("got %d, want 401", w.Code)
 	}
 }
