@@ -13,6 +13,7 @@ import (
 // eventMessage is the canonical byte string signed to authenticate an event.
 // Domain-separated with "swarmguard-event-v1" so signatures cannot be replayed
 // across protocols. Fields joined by "|"; none of them can contain "|".
+// NOTE: Vouch is intentionally excluded; PeerCert integrity is enforced independently by identity.VerifyCert.
 func eventMessage(e proto.Event) []byte {
 	return []byte("swarmguard-event-v1|" +
 		e.IP + "|" +

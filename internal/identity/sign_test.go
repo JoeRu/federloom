@@ -21,8 +21,6 @@ func makeTestKey(t *testing.T) libp2pcrypto.PrivKey {
 
 func makeTestEvent(t *testing.T, priv libp2pcrypto.PrivKey) proto.Event {
 	t.Helper()
-	pid, err := libp2pcrypto.PublicKeyToProto(priv.GetPublic())
-	_ = pid
 	// ReporterID must be the libp2p peer ID derived from the key.
 	peerID, err := identity.PeerIDFromPrivKey(priv)
 	if err != nil {
