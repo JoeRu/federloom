@@ -27,6 +27,10 @@ import (
 	"github.com/JoeRu/swarmguard/pkg/proto"
 )
 
+// maxOriginTraceLen is the maximum number of hops we accept in OriginTrace.
+// Events with longer traces are dropped to prevent unbounded trace growth.
+const maxOriginTraceLen = 8
+
 // Node is the composition root that connects ingest, reputation, enforce, and transport.
 type Node struct {
 	cfg        *config.Config
@@ -233,6 +237,9 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 	}
 	e.ReporterID = n.selfID
 	e.Vouch = n.vouch
+	if n.selfID != "" {
+		e.OriginTrace = []string{n.selfID}
+	}
 	if n.identityKey != nil {
 		if err := identity.SignEvent(&e, n.identityKey); err != nil {
 			log.Printf("node: sign event for %s: %v", e.IP, err)
@@ -294,6 +301,20 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 		log.Printf("node: drop event with invalid IP %q", e.IP)
 		return
 	}
+	// Feedback loop guard: drop events that have already passed through this node.
+	if n.selfID != "" {
+		for _, hop := range e.OriginTrace {
+			if hop == n.selfID {
+				log.Printf("node: drop feedback-loop event from %s (selfID in OriginTrace)", re.From)
+				return
+			}
+		}
+	}
+	// Trace length cap: prevent unbounded growth on misbehaving relays.
+	if len(e.OriginTrace) > maxOriginTraceLen {
+		log.Printf("node: drop event from %s: OriginTrace length %d exceeds limit %d", re.From, len(e.OriginTrace), maxOriginTraceLen)
+		return
+	}
 	if n.neverblock.Contains(e.IP) {
 		return
 	}
@@ -309,6 +330,17 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 	}
 
 	weight, group, anchored := n.trust.Resolve(e.ReporterID)
+	// Federation discount: non-anchored reporters lose weight per hop (spec §5.2).
+	// Anchored reporters are exempt — their trust is explicitly established.
+	if !anchored && len(e.OriginTrace) > 0 {
+		discount := n.cfg.Trust.FederationDiscount
+		if discount <= 0 || discount > 1 {
+			discount = 0.5 // safe fallback for misconfigured values
+		}
+		for i := 0; i < len(e.OriginTrace); i++ {
+			weight *= discount
+		}
+	}
 	if _, err := n.rep.Record(e.IP, e.Reason, e.ReporterID, weight, group, anchored); err != nil {
 		log.Printf("node: record remote %s: %v", e.IP, err)
 		return
@@ -369,6 +401,9 @@ func (n *Node) SetTrustReloadInterval(d time.Duration) {
 func (n *Node) CloseStores() {
 	_ = n.store.Close()
 }
+
+// SelfID returns this node's libp2p peer ID string (empty in solo mode).
+func (n *Node) SelfID() string { return n.selfID }
 
 // fanIn merges multiple event channels into one.
 func fanIn(ctx context.Context, chans ...<-chan proto.Event) <-chan proto.Event {
