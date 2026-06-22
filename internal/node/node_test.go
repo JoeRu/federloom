@@ -1,6 +1,7 @@
 package node
 
 import (
+	"context"
 	"path/filepath"
 	"testing"
 	"time"
@@ -157,5 +158,65 @@ func TestVouchReplayedCertIsStranger(t *testing.T) {
 	}
 	if !rec.StrangerSeen {
 		t.Error("event was dropped entirely; replayed-cert events should score as stranger")
+	}
+}
+
+// TestProcessLocalDropsInvalidIP verifies that processLocal silently drops events
+// whose IP field is not a bare IPv4/IPv6 address (CIDR, hostname, newline-embedded).
+func TestProcessLocalDropsInvalidIP(t *testing.T) {
+	cases := []string{
+		"0.0.0.0/0",        // CIDR — block-all nftables attack
+		"1.2.3.4\n5.6.7.8", // newline injection
+		"example.com",      // hostname
+		"",                 // empty
+	}
+	for _, ip := range cases {
+		ip := ip
+		t.Run(ip, func(t *testing.T) {
+			n, _ := testNode(t)
+			n.processLocal(context.Background(), proto.Event{IP: ip, Reason: "ssh-probe"})
+			rec, _ := n.rep.GetRecord(ip)
+			if !rec.LastSeen.IsZero() {
+				t.Errorf("invalid IP %q was recorded in reputation store", ip)
+			}
+		})
+	}
+}
+
+// TestProcessRemoteDropsInvalidIP verifies that ProcessRemote silently drops events
+// whose IP field is not a bare IPv4/IPv6 address.
+func TestProcessRemoteDropsInvalidIP(t *testing.T) {
+	cases := []string{
+		"0.0.0.0/0",
+		"1.2.3.4\n5.6.7.8",
+		"example.com",
+		"",
+	}
+	for _, ip := range cases {
+		ip := ip
+		t.Run(ip, func(t *testing.T) {
+			n, _ := testNode(t)
+			n.ProcessRemote(transport.ReceivedEvent{
+				Event: proto.Event{IP: ip, Reason: "ssh-probe", ReporterID: "12D3KooWpeer"},
+				From:  "12D3KooWpeer",
+			})
+			rec, _ := n.rep.GetRecord(ip)
+			if !rec.LastSeen.IsZero() {
+				t.Errorf("invalid IP %q was recorded in reputation store", ip)
+			}
+		})
+	}
+}
+
+// TestProcessLocalAcceptsValidIP is the control: a valid bare IP must be recorded.
+func TestProcessLocalAcceptsValidIP(t *testing.T) {
+	n, _ := testNode(t)
+	n.processLocal(context.Background(), proto.Event{IP: "203.0.113.1", Reason: "ssh-probe"})
+	rec, err := n.rep.GetRecord("203.0.113.1")
+	if err != nil {
+		t.Fatalf("GetRecord: %v", err)
+	}
+	if rec.LastSeen.IsZero() {
+		t.Error("valid IP was not recorded in reputation store")
 	}
 }

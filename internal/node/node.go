@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"sync"
 	"time"
@@ -210,6 +211,10 @@ func (n *Node) Run(ctx context.Context) error {
 }
 
 func (n *Node) processLocal(ctx context.Context, e proto.Event) {
+	if net.ParseIP(e.IP) == nil {
+		log.Printf("node: drop event with invalid IP %q", e.IP)
+		return
+	}
 	if n.neverblock.Contains(e.IP) {
 		return
 	}
@@ -258,6 +263,10 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 	}
 	if e.ReporterID != re.From {
 		log.Printf("node: drop spoofed event: reporter %q != verified publisher %q", e.ReporterID, re.From)
+		return
+	}
+	if net.ParseIP(e.IP) == nil {
+		log.Printf("node: drop event with invalid IP %q", e.IP)
 		return
 	}
 	if n.neverblock.Contains(e.IP) {
