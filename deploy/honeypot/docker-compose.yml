@@ -27,11 +27,13 @@ services:
     image: ghcr.io/joeru/swarmguard:latest
     container_name: swarmguard
     restart: unless-stopped
+    env_file:
+      - .env
     cap_add: [NET_ADMIN, NET_RAW]
     ports:
       - "7700:7700"
-      - "9101:9101"
-      - "9102:9102"
+      - "100.71.239.1:9101:9101"
+      - "100.71.239.1:9102:9102"
       - "5353:5353/udp"
     volumes:
       - ./config.yaml:/etc/swarmguard/config.yaml:ro
