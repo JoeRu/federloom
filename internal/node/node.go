@@ -41,6 +41,7 @@ type Node struct {
 	sources    []ingest.Source
 	sink       enforce.Sink
 	neverblock *enforce.NeverBlockList
+	whitelist  *store.WhitelistStore // local-only allowlist; never nil (may be empty)
 	selfID     string
 	trust      *trust.Store
 	vouch       *proto.PeerCert   // this node's own peer-cert, attached to published events
@@ -77,6 +78,12 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 	}
 
 	nbl := enforce.NewNeverBlockList(cfg.Enforce.ExtraWhitelist)
+
+	wl, err := store.LoadWhitelist(cfg.WhitelistFile())
+	if err != nil {
+		_ = s.Close()
+		return nil, fmt.Errorf("node: load whitelist: %w", err)
+	}
 
 	selfID := ""
 	if t != nil {
@@ -151,6 +158,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		sources:     sources,
 		sink:        sink,
 		neverblock:  nbl,
+		whitelist:   wl,
 		selfID:      selfID,
 		trust:       ts,
 		vouch:       vouch,
@@ -246,6 +254,9 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 	if n.neverblock.Contains(e.IP) {
 		return
 	}
+	if n.whitelist.Contains(e.IP) {
+		return
+	}
 	e.ReporterID = n.selfID
 	e.Vouch = n.vouch
 	if n.selfID != "" {
@@ -331,6 +342,9 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 		return
 	}
 	if n.neverblock.Contains(e.IP) {
+		return
+	}
+	if n.whitelist.Contains(e.IP) {
 		return
 	}
 

@@ -313,6 +313,11 @@ func (c *Config) TrustBlockedPeersFile() string {
 	return filepath.Join(c.Store.Dir, "blocked-peers.json")
 }
 
+// WhitelistFile returns the path of the operator local-only whitelist JSON file.
+func (c *Config) WhitelistFile() string {
+	return filepath.Join(c.Store.Dir, "whitelist.json")
+}
+
 // RulesFilePath returns the path of the operator rule file. If rules_file is
 // not set, it defaults to <store.dir>/rules.yaml (absent = legacy mode).
 func (c *Config) RulesFilePath() string {

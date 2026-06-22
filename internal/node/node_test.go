@@ -36,11 +36,17 @@ func testNode(t *testing.T) (*Node, string) {
 	ts := trust.NewStore(cfg.TrustAnchorsFile(), cfg.TrustCertsFile(), cfg.TrustBlockedPeersFile(), cfg.Trust.StrangerWeight)
 	ts.SetReloadInterval(0)
 
+	wl, err := store.LoadWhitelist(cfg.WhitelistFile())
+	if err != nil {
+		t.Fatalf("LoadWhitelist: %v", err)
+	}
+
 	return &Node{
 		cfg:        cfg,
 		store:      s,
 		rep:        reputation.New(s, 7*24*time.Hour, cfg.Trust.StrangerScoreCap),
 		neverblock: enforce.NewNeverBlockList(nil),
+		whitelist:  wl,
 		trust:      ts,
 		selfID:     "12D3KooWself",
 		rules:      rules.Load("", cfg.Reputation.BlockThreshold),
@@ -310,5 +316,90 @@ func TestProcessRemoteDropsOverlongOriginTrace(t *testing.T) {
 	rec, _ := n.GetScore("203.0.113.3")
 	if !rec.LastSeen.IsZero() {
 		t.Error("event with overlong OriginTrace should have been dropped")
+	}
+}
+
+func TestProcessRemoteRespectsWhitelist(t *testing.T) {
+	dir := t.TempDir()
+	cfg := config.Defaults()
+	cfg.Store.Dir = dir
+
+	// Pre-populate whitelist before node creation (no hot-reload in this phase).
+	wl, err := store.LoadWhitelist(cfg.WhitelistFile())
+	if err != nil {
+		t.Fatalf("LoadWhitelist: %v", err)
+	}
+	if err := wl.Add(proto.WhitelistEntry{
+		IPOrRange: "203.0.113.1",
+		Scope:     "local-only",
+		Source:    "manual",
+	}); err != nil {
+		t.Fatalf("whitelist Add: %v", err)
+	}
+
+	n, err := New(cfg, nil)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	defer n.CloseStores()
+
+	// Whitelisted IP: ProcessRemote must not score it.
+	n.ProcessRemote(transport.ReceivedEvent{
+		Event: proto.Event{
+			IP:         "203.0.113.1",
+			Reason:     "ssh-probe",
+			ReporterID: "12D3KooWtestpeer",
+		},
+		From: "12D3KooWtestpeer",
+	})
+	rec, _ := n.GetScore("203.0.113.1")
+	if !rec.LastSeen.IsZero() {
+		t.Error("whitelisted IP should not be scored")
+	}
+
+	// Non-whitelisted IP in same /24: must be scored normally.
+	n.ProcessRemote(transport.ReceivedEvent{
+		Event: proto.Event{
+			IP:         "203.0.113.2",
+			Reason:     "ssh-probe",
+			ReporterID: "12D3KooWtestpeer",
+		},
+		From: "12D3KooWtestpeer",
+	})
+	rec, _ = n.GetScore("203.0.113.2")
+	if rec.LastSeen.IsZero() {
+		t.Error("non-whitelisted IP should be scored normally")
+	}
+}
+
+func TestProcessRemoteRespectsWhitelistCIDR(t *testing.T) {
+	dir := t.TempDir()
+	cfg := config.Defaults()
+	cfg.Store.Dir = dir
+
+	wl, _ := store.LoadWhitelist(cfg.WhitelistFile())
+	_ = wl.Add(proto.WhitelistEntry{
+		IPOrRange: "198.51.100.0/24",
+		Scope:     "local-only",
+		Source:    "install-script",
+	})
+
+	n, err := New(cfg, nil)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	defer n.CloseStores()
+
+	n.ProcessRemote(transport.ReceivedEvent{
+		Event: proto.Event{
+			IP:         "198.51.100.42",
+			Reason:     "smtp-auth",
+			ReporterID: "12D3KooWtestpeer",
+		},
+		From: "12D3KooWtestpeer",
+	})
+	rec, _ := n.GetScore("198.51.100.42")
+	if !rec.LastSeen.IsZero() {
+		t.Error("IP in whitelisted CIDR must not be scored")
 	}
 }
