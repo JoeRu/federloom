@@ -10,6 +10,8 @@ import (
 	"sync"
 	"time"
 
+	libp2pcrypto "github.com/libp2p/go-libp2p/core/crypto"
+
 	"github.com/JoeRu/swarmguard/internal/api"
 	"github.com/JoeRu/swarmguard/internal/config"
 	"github.com/JoeRu/swarmguard/internal/dnsbl"
@@ -36,9 +38,10 @@ type Node struct {
 	neverblock *enforce.NeverBlockList
 	selfID     string
 	trust      *trust.Store
-	vouch      *proto.PeerCert   // this node's own peer-cert, attached to published events
-	rules      *rules.RuleSet    // NEW
-	burst      *rules.BurstStore // NEW
+	vouch       *proto.PeerCert   // this node's own peer-cert, attached to published events
+	identityKey libp2pcrypto.PrivKey // nil in solo mode (no transport); set for signing events
+	rules       *rules.RuleSet    // NEW
+	burst       *rules.BurstStore // NEW
 	obs        *observability.Observer
 	api        *api.Server   // nil-safe: all methods no-op when cfg.API.Addr == ""
 	dnsbl      *dnsbl.Server // nil-safe: Start is no-op when addr/zone are empty
@@ -92,6 +95,15 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		}
 	}
 
+	var identityKey libp2pcrypto.PrivKey
+	if t != nil {
+		identityKey, err = identity.LoadOrCreateNodeKey(cfg.NodeKeyFile())
+		if err != nil {
+			_ = s.Close()
+			return nil, fmt.Errorf("node: load identity key for signing: %w", err)
+		}
+	}
+
 	var sources []ingest.Source
 	if cfg.Ingest.Honeypot.Enabled {
 		sources = append(sources, ingest.NewHoneypot(cfg.Ingest.Honeypot, selfID))
@@ -121,21 +133,22 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 	dnsblSrv := dnsbl.New(cfg.DNSBL, s, cfg.Reputation)
 
 	return &Node{
-		cfg:        cfg,
-		transport:  t,
-		store:      s,
-		rep:        eng,
-		sources:    sources,
-		sink:       sink,
-		neverblock: nbl,
-		selfID:     selfID,
-		trust:      ts,
-		vouch:      vouch,
-		rules:      rules.Load(cfg.RulesFilePath(), cfg.Reputation.BlockThreshold),
-		burst:      rules.NewBurstStore(),
-		obs:        obs,
-		api:        apiSrv,
-		dnsbl:      dnsblSrv,
+		cfg:         cfg,
+		transport:   t,
+		store:       s,
+		rep:         eng,
+		sources:     sources,
+		sink:        sink,
+		neverblock:  nbl,
+		selfID:      selfID,
+		trust:       ts,
+		vouch:       vouch,
+		identityKey: identityKey,
+		rules:       rules.Load(cfg.RulesFilePath(), cfg.Reputation.BlockThreshold),
+		burst:       rules.NewBurstStore(),
+		obs:         obs,
+		api:         apiSrv,
+		dnsbl:       dnsblSrv,
 	}, nil
 }
 
@@ -220,6 +233,12 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 	}
 	e.ReporterID = n.selfID
 	e.Vouch = n.vouch
+	if n.identityKey != nil {
+		if err := identity.SignEvent(&e, n.identityKey); err != nil {
+			log.Printf("node: sign event for %s: %v", e.IP, err)
+			// non-fatal: publish unsigned rather than drop local observation
+		}
+	}
 	if _, err := n.rep.Record(e.IP, e.Reason, n.selfID, 1.0, n.selfID, true); err != nil {
 		log.Printf("node: record local %s: %v", e.IP, err)
 		return
@@ -264,6 +283,12 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 	if e.ReporterID != re.From {
 		log.Printf("node: drop spoofed event: reporter %q != verified publisher %q", e.ReporterID, re.From)
 		return
+	}
+	if len(e.Signature) > 0 {
+		if err := identity.VerifyEventSig(e); err != nil {
+			log.Printf("node: drop event with bad signature from %s: %v", re.From, err)
+			return
+		}
 	}
 	if net.ParseIP(e.IP) == nil {
 		log.Printf("node: drop event with invalid IP %q", e.IP)
