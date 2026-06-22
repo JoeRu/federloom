@@ -57,6 +57,7 @@ type Config struct {
 	API            APIConfig           `yaml:"api"`
 	BootstrapPeers []string            `yaml:"bootstrap_peers"`
 	DNSBL          DNSBLConfig         `yaml:"dnsbl"`
+	Discovery      DiscoveryConfig     `yaml:"discovery"`
 }
 
 // StoreConfig configures the BadgerDB reputation store.
@@ -168,12 +169,14 @@ func (e EnforceConfig) EffectiveChains() []string {
 // docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md).
 // Every value is operator-overridable (Invariant 1).
 type TrustConfig struct {
-	AnchorsFile      string  `yaml:"anchors_file"`       // default <store.dir>/anchors.json
-	PersonKeyFile    string  `yaml:"person_key_file"`    // default <store.dir>/person.key
-	PeerCertFile     string  `yaml:"peer_cert_file"`     // default <store.dir>/peer.cert
-	AnchorWeight     float64 `yaml:"anchor_weight"`      // default weight for a newly anchored Person
-	StrangerWeight   float64 `yaml:"stranger_weight"`    // trust for un-vouched reporters
-	StrangerScoreCap float64 `yaml:"stranger_score_cap"` // max total score strangers add per IP
+	AnchorsFile        string  `yaml:"anchors_file"`        // default <store.dir>/anchors.json
+	PersonKeyFile      string  `yaml:"person_key_file"`     // default <store.dir>/person.key
+	PeerCertFile       string  `yaml:"peer_cert_file"`      // default <store.dir>/peer.cert
+	AnchorWeight       float64 `yaml:"anchor_weight"`       // default weight for a newly anchored Person
+	StrangerWeight     float64 `yaml:"stranger_weight"`     // trust for un-vouched reporters
+	StrangerScoreCap   float64 `yaml:"stranger_score_cap"`  // max total score strangers add per IP
+	FederationDiscount float64 `yaml:"federation_discount"` // weight multiplier per hop for non-anchored reporters (default 0.5)
+	BlockedPeersFile   string  `yaml:"blocked_peers_file"`  // default <store.dir>/blocked-peers.json
 }
 
 // ObservabilityConfig controls the optional observability plane (spec §11.2).
@@ -183,6 +186,15 @@ type ObservabilityConfig struct {
 	SQLitePath          string   `yaml:"sqlite_path"`           // path to metrics.db; "" = disabled
 	SQLiteRetention     Duration `yaml:"sqlite_retention"`      // rows older than this are pruned
 	ScoreGaugeThreshold float64  `yaml:"score_gauge_threshold"` // 0 = half of block_threshold
+}
+
+// DiscoveryConfig controls automated peer discovery (spec §14).
+// Both flags default to true (opt-out); operators in private networks
+// set advertise: false to avoid publishing their IP to the DHT.
+type DiscoveryConfig struct {
+	Advertise     bool   `yaml:"advertise"`       // publish this node to the DHT rendezvous
+	Discover      bool   `yaml:"discover"`        // search the DHT for other swarm peers
+	RelayListPath string `yaml:"relay_list_path"` // override bundled relay list; "" = use embedded list
 }
 
 // Defaults returns a Config with sensible production defaults.
@@ -228,9 +240,14 @@ func Defaults() *Config {
 			},
 		},
 		Trust: TrustConfig{
-			AnchorWeight:     0.9,
-			StrangerWeight:   0.3,
-			StrangerScoreCap: 15,
+			AnchorWeight:       0.9,
+			StrangerWeight:     0.3,
+			StrangerScoreCap:   15,
+			FederationDiscount: 0.5,
+		},
+		Discovery: DiscoveryConfig{
+			Advertise: true,
+			Discover:  true,
 		},
 	}
 }
@@ -286,6 +303,14 @@ func (c *Config) TrustPeerCertFile() string {
 // (seeded by `swarmctl trust import`; internal file, no config key).
 func (c *Config) TrustCertsFile() string {
 	return filepath.Join(c.Store.Dir, "imported-certs.json")
+}
+
+// TrustBlockedPeersFile returns the path of the blocked-peers list.
+func (c *Config) TrustBlockedPeersFile() string {
+	if c.Trust.BlockedPeersFile != "" {
+		return c.Trust.BlockedPeersFile
+	}
+	return filepath.Join(c.Store.Dir, "blocked-peers.json")
 }
 
 // RulesFilePath returns the path of the operator rule file. If rules_file is

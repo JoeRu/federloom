@@ -274,3 +274,37 @@ func TestFail2BanDefaults(t *testing.T) {
 		t.Error("fail2ban must default to disabled")
 	}
 }
+
+func TestDiscoveryDefaults(t *testing.T) {
+	cfg := config.Defaults()
+	if !cfg.Discovery.Advertise {
+		t.Error("discovery.advertise must default to true")
+	}
+	if !cfg.Discovery.Discover {
+		t.Error("discovery.discover must default to true")
+	}
+}
+
+func TestFederationDiscountDefault(t *testing.T) {
+	cfg := config.Defaults()
+	if cfg.Trust.FederationDiscount != 0.5 {
+		t.Errorf("trust.federation_discount want 0.5 got %v", cfg.Trust.FederationDiscount)
+	}
+}
+
+func TestTrustBlockedPeersFile(t *testing.T) {
+	cfg := config.Defaults()
+	cfg.Store.Dir = "/tmp/sg-test"
+	want := "/tmp/sg-test/blocked-peers.json"
+	if got := cfg.TrustBlockedPeersFile(); got != want {
+		t.Errorf("TrustBlockedPeersFile() = %q want %q", got, want)
+	}
+}
+
+func TestBlockedPeersFileOverride(t *testing.T) {
+	cfg := config.Defaults()
+	cfg.Trust.BlockedPeersFile = "/custom/blocked.json"
+	if got := cfg.TrustBlockedPeersFile(); got != "/custom/blocked.json" {
+		t.Errorf("TrustBlockedPeersFile() = %q want /custom/blocked.json", got)
+	}
+}
