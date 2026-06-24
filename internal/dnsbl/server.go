@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/netip"
 	"strings"
 	"time"
 
@@ -117,7 +118,8 @@ func (s *Server) handleDNS(w dns.ResponseWriter, r *dns.Msg) {
 	}
 	ip := strings.Join(parts, ".")
 
-	if net.ParseIP(ip) == nil || net.ParseIP(ip).To4() == nil {
+	addr, err := netip.ParseAddr(ip)
+	if err != nil || !addr.Unmap().Is4() {
 		m.SetRcode(r, dns.RcodeNameError)
 		_ = w.WriteMsg(m)
 		return

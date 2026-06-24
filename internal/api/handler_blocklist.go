@@ -3,8 +3,8 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"net"
 	"net/http"
+	"net/netip"
 	"sort"
 	"strconv"
 	"strings"
@@ -131,7 +131,7 @@ func (s *Server) handleCrowdSecCTI(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain")
 	_ = s.store.ScanScores(func(ip string, rec store.ScoreRecord) error {
-		if net.ParseIP(ip) == nil {
+		if _, err := netip.ParseAddr(ip); err != nil {
 			return nil
 		}
 		if s.passRecord(rec, f, purposePatterns) {
