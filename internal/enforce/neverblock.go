@@ -1,6 +1,6 @@
 package enforce
 
-import "net"
+import "net/netip"
 
 // defaultNeverBlock contains CIDRs that must never be blocked (spec §6.2, invariant 3).
 var defaultNeverBlock = []string{
@@ -18,32 +18,33 @@ var defaultNeverBlock = []string{
 
 // NeverBlockList is an immutable set of CIDRs that must never be blocked.
 type NeverBlockList struct {
-	nets []*net.IPNet
+	prefixes []netip.Prefix
 }
 
 // NewNeverBlockList builds a NeverBlockList from the default RFC1918 ranges plus any
 // operator-provided extra CIDRs. Invalid entries in extra are silently skipped.
 func NewNeverBlockList(extra []string) *NeverBlockList {
 	all := append(defaultNeverBlock, extra...)
-	var nets []*net.IPNet
+	var prefixes []netip.Prefix
 	for _, cidr := range all {
-		_, n, err := net.ParseCIDR(cidr)
+		prefix, err := netip.ParsePrefix(cidr)
 		if err != nil {
 			continue
 		}
-		nets = append(nets, n)
+		prefixes = append(prefixes, prefix.Masked())
 	}
-	return &NeverBlockList{nets: nets}
+	return &NeverBlockList{prefixes: prefixes}
 }
 
 // Contains returns true if ip is covered by any CIDR in the list.
 func (l *NeverBlockList) Contains(ip string) bool {
-	parsed := net.ParseIP(ip)
-	if parsed == nil {
+	addr, err := netip.ParseAddr(ip)
+	if err != nil {
 		return false
 	}
-	for _, n := range l.nets {
-		if n.Contains(parsed) {
+	addr = addr.Unmap()
+	for _, p := range l.prefixes {
+		if p.Contains(addr) {
 			return true
 		}
 	}

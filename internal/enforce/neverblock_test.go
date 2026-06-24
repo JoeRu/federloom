@@ -31,3 +31,18 @@ func TestNeverBlockExtraWhitelist(t *testing.T) {
 		t.Error("203.0.114.1 should not be in extra whitelist")
 	}
 }
+
+func TestNeverBlockIPv6Loopback(t *testing.T) {
+	nbl := enforce.NewNeverBlockList(nil)
+	if !nbl.Contains("::1") {
+		t.Error("::1 should be in neverblock (::1/128 default entry)")
+	}
+}
+
+func TestNeverBlockIPv4MappedRFC1918(t *testing.T) {
+	nbl := enforce.NewNeverBlockList(nil)
+	// ::ffff:10.0.0.1 is IPv4-mapped RFC1918 — Unmap() must reveal 10.0.0.1
+	if !nbl.Contains("::ffff:10.0.0.1") {
+		t.Error("::ffff:10.0.0.1 (IPv4-mapped RFC1918) should be caught by 10.0.0.0/8")
+	}
+}
