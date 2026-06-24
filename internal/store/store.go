@@ -25,17 +25,24 @@ type ScoreRecord struct {
 
 // BadgerStore wraps BadgerDB for reputation persistence.
 type BadgerStore struct {
-	db *badger.DB
+	db    *badger.DB
+	bloom *repBloom
 }
 
-// Open opens (or creates) a BadgerDB at dir.
+// Open opens (or creates) a BadgerDB at dir and rebuilds the bloom pre-filter
+// from existing entries.
 func Open(dir string) (*BadgerStore, error) {
 	opts := badger.DefaultOptions(dir).WithLogger(nil)
 	db, err := badger.Open(opts)
 	if err != nil {
 		return nil, fmt.Errorf("store: open badger at %q: %w", dir, err)
 	}
-	return &BadgerStore{db: db}, nil
+	s := &BadgerStore{db: db, bloom: newBloom()}
+	_ = s.ScanScores(func(ip string, _ ScoreRecord) error {
+		s.bloom.Add(ip)
+		return nil
+	})
+	return s, nil
 }
 
 // Close releases the BadgerDB resources.
@@ -44,6 +51,9 @@ func (s *BadgerStore) Close() error { return s.db.Close() }
 // GetScore returns the ScoreRecord for ip, or a zero ScoreRecord if not found.
 // Callers check rec.LastSeen.IsZero() to detect missing entries.
 func (s *BadgerStore) GetScore(ip string) (ScoreRecord, error) {
+	if !s.bloom.MightContain(ip) {
+		return ScoreRecord{}, nil // definitely absent; skip DB read
+	}
 	var rec ScoreRecord
 	err := s.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte(ip))
@@ -69,10 +79,14 @@ func (s *BadgerStore) PutScore(ip string, rec ScoreRecord, ttl time.Duration) er
 	if err != nil {
 		return fmt.Errorf("store: marshal %q: %w", ip, err)
 	}
-	return s.db.Update(func(txn *badger.Txn) error {
+	if err := s.db.Update(func(txn *badger.Txn) error {
 		entry := badger.NewEntry([]byte(ip), val).WithTTL(ttl)
 		return txn.SetEntry(entry)
-	})
+	}); err != nil {
+		return err
+	}
+	s.bloom.Add(ip)
+	return nil
 }
 
 // DeleteScore removes the record for ip.

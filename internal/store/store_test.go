@@ -115,3 +115,64 @@ func TestScoreRecordTrustFieldsRoundTrip(t *testing.T) {
 		t.Errorf("StrangerContrib = %v, want 7.5", got.StrangerContrib)
 	}
 }
+
+func TestBloom_UnknownIPReturnsZero(t *testing.T) {
+	s := openTestStore(t)
+	rec, err := s.GetScore("203.0.113.1")
+	if err != nil {
+		t.Fatalf("GetScore: %v", err)
+	}
+	if rec.Score != 0 || !rec.LastSeen.IsZero() {
+		t.Errorf("expected zero ScoreRecord for unknown IP, got %+v", rec)
+	}
+}
+
+func TestBloom_NoFalseNegative(t *testing.T) {
+	s := openTestStore(t)
+	want := store.ScoreRecord{
+		Score:    55,
+		LastSeen: time.Now().Truncate(time.Second),
+	}
+	if err := s.PutScore("198.51.100.7", want, 24*time.Hour); err != nil {
+		t.Fatalf("PutScore: %v", err)
+	}
+	got, err := s.GetScore("198.51.100.7")
+	if err != nil {
+		t.Fatalf("GetScore: %v", err)
+	}
+	if got.Score != want.Score {
+		t.Errorf("Score: got %v, want %v — bloom false negative", got.Score, want.Score)
+	}
+}
+
+func TestBloom_RebuildOnReopen(t *testing.T) {
+	dir := t.TempDir()
+
+	// First instance: write an entry and close.
+	s1, err := store.Open(dir)
+	if err != nil {
+		t.Fatalf("open s1: %v", err)
+	}
+	rec := store.ScoreRecord{Score: 99, LastSeen: time.Now().Truncate(time.Second)}
+	if err := s1.PutScore("10.0.0.1", rec, 24*time.Hour); err != nil {
+		t.Fatalf("PutScore: %v", err)
+	}
+	if err := s1.Close(); err != nil {
+		t.Fatalf("close s1: %v", err)
+	}
+
+	// Second instance: bloom must be rebuilt from the startup scan.
+	s2, err := store.Open(dir)
+	if err != nil {
+		t.Fatalf("open s2: %v", err)
+	}
+	defer s2.Close()
+
+	got, err := s2.GetScore("10.0.0.1")
+	if err != nil {
+		t.Fatalf("GetScore after reopen: %v", err)
+	}
+	if got.Score != 99 {
+		t.Errorf("Score: got %v, want 99 — bloom not rebuilt from DB on reopen", got.Score)
+	}
+}
