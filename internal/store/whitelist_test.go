@@ -119,3 +119,18 @@ func TestWhitelistList_ReturnsCopy(t *testing.T) {
 		t.Error("List must return a copy, not a reference to internal state")
 	}
 }
+
+func TestWhitelistContains_IPv4MappedMatchesV4CIDREntry(t *testing.T) {
+	dir := t.TempDir()
+	wl, err := store.LoadWhitelist(filepath.Join(dir, "whitelist.json"))
+	if err != nil {
+		t.Fatalf("LoadWhitelist: %v", err)
+	}
+	if err := wl.Add(proto.WhitelistEntry{IPOrRange: "1.2.3.0/24", Scope: "local-only", Source: "manual"}); err != nil {
+		t.Fatalf("Add: %v", err)
+	}
+	// IPv4-mapped form of a host in 1.2.3.0/24 must match after Unmap()
+	if !wl.Contains("::ffff:1.2.3.4") {
+		t.Error("whitelist CIDR 1.2.3.0/24 must match incoming ::ffff:1.2.3.4 after Unmap()")
+	}
+}

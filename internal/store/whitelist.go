@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net"
+	"net/netip"
 	"os"
 	"sync"
 
@@ -41,23 +41,24 @@ func LoadWhitelist(path string) (*WhitelistStore, error) {
 }
 
 // Contains returns true if ip is covered by any entry in the store.
-// Handles both exact IP matches and CIDR containment. IPv4 and IPv6 are both supported.
+// Handles exact IP matches, CIDR containment, IPv4 and IPv6, and IPv4-mapped IPv6.
 func (w *WhitelistStore) Contains(ip string) bool {
-	parsed := net.ParseIP(ip)
-	if parsed == nil {
+	addr, err := netip.ParseAddr(ip)
+	if err != nil {
 		return false
 	}
+	addr = addr.Unmap()
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 	for _, entry := range w.entries {
-		if entryIP := net.ParseIP(entry.IPOrRange); entryIP != nil {
-			if entryIP.Equal(parsed) {
+		if entryAddr, err := netip.ParseAddr(entry.IPOrRange); err == nil {
+			if entryAddr.Unmap().Compare(addr) == 0 {
 				return true
 			}
 			continue
 		}
-		if _, ipNet, err := net.ParseCIDR(entry.IPOrRange); err == nil {
-			if ipNet.Contains(parsed) {
+		if prefix, err := netip.ParsePrefix(entry.IPOrRange); err == nil {
+			if prefix.Masked().Contains(addr) {
 				return true
 			}
 		}
