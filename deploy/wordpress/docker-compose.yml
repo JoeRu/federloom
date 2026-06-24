@@ -13,6 +13,9 @@
 #   2. Open port 7700 in the NixOS firewall if you want peers to initiate connections here
 services:
   swarmguard:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
     image: ghcr.io/joeru/swarmguard:latest
     container_name: swarmguard-wordpress
     restart: unless-stopped

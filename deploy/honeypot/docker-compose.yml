@@ -24,6 +24,9 @@ services:
       - ./opencanary.json:/etc/opencanaryd/opencanary.conf:ro
 
   swarmguard:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
     image: ghcr.io/joeru/swarmguard:latest
     container_name: swarmguard
     restart: unless-stopped
