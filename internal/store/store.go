@@ -38,6 +38,9 @@ func Open(dir string) (*BadgerStore, error) {
 		return nil, fmt.Errorf("store: open badger at %q: %w", dir, err)
 	}
 	s := &BadgerStore{db: db, bloom: newBloom()}
+	// Error intentionally ignored: a partial scan still warms the bloom, and a
+	// scan failure must not prevent the store from opening. Worst case a missed
+	// IP causes one redundant DB read, never a false negative.
 	_ = s.ScanScores(func(ip string, _ ScoreRecord) error {
 		s.bloom.Add(ip)
 		return nil
