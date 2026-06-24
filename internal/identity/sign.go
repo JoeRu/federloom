@@ -7,15 +7,15 @@ import (
 	libp2pcrypto "github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // eventMessage is the canonical byte string signed to authenticate an event.
-// Domain-separated with "swarmguard-event-v1" so signatures cannot be replayed
+// Domain-separated with "federloom-event-v1" so signatures cannot be replayed
 // across protocols. Fields joined by "|"; none of them can contain "|".
 // NOTE: Vouch is intentionally excluded; PeerCert integrity is enforced independently by identity.VerifyCert.
 func eventMessage(e proto.Event) []byte {
-	return []byte("swarmguard-event-v1|" +
+	return []byte("federloom-event-v1|" +
 		e.IP + "|" +
 		e.Reason + "|" +
 		e.Timestamp.UTC().Format(time.RFC3339Nano) + "|" +

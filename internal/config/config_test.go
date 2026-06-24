@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
+	"github.com/JoeRu/federloom/internal/config"
 )
 
 func TestDefaultsAreValid(t *testing.T) {
@@ -94,27 +94,27 @@ func TestDefaultsTrust(t *testing.T) {
 
 func TestTrustPathDefaultsDeriveFromStoreDir(t *testing.T) {
 	cfg := config.Defaults()
-	cfg.Store.Dir = "/var/lib/swarmguard"
-	if got := cfg.TrustAnchorsFile(); got != "/var/lib/swarmguard/anchors.json" {
+	cfg.Store.Dir = "/var/lib/federloom"
+	if got := cfg.TrustAnchorsFile(); got != "/var/lib/federloom/anchors.json" {
 		t.Errorf("TrustAnchorsFile = %q", got)
 	}
-	if got := cfg.TrustPersonKeyFile(); got != "/var/lib/swarmguard/person.key" {
+	if got := cfg.TrustPersonKeyFile(); got != "/var/lib/federloom/person.key" {
 		t.Errorf("TrustPersonKeyFile = %q", got)
 	}
-	if got := cfg.TrustPeerCertFile(); got != "/var/lib/swarmguard/peer.cert" {
+	if got := cfg.TrustPeerCertFile(); got != "/var/lib/federloom/peer.cert" {
 		t.Errorf("TrustPeerCertFile = %q", got)
 	}
-	if got := cfg.TrustCertsFile(); got != "/var/lib/swarmguard/imported-certs.json" {
+	if got := cfg.TrustCertsFile(); got != "/var/lib/federloom/imported-certs.json" {
 		t.Errorf("TrustCertsFile = %q", got)
 	}
 }
 
 func TestTrustPathOverrides(t *testing.T) {
-	cfg, err := config.LoadYAML([]byte("trust:\n  anchors_file: /etc/swarmguard/anchors.json\n  stranger_score_cap: 5\n"))
+	cfg, err := config.LoadYAML([]byte("trust:\n  anchors_file: /etc/federloom/anchors.json\n  stranger_score_cap: 5\n"))
 	if err != nil {
 		t.Fatalf("LoadYAML: %v", err)
 	}
-	if got := cfg.TrustAnchorsFile(); got != "/etc/swarmguard/anchors.json" {
+	if got := cfg.TrustAnchorsFile(); got != "/etc/federloom/anchors.json" {
 		t.Errorf("TrustAnchorsFile override = %q", got)
 	}
 	if cfg.Trust.StrangerScoreCap != 5 {

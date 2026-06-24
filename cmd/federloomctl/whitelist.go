@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/JoeRu/swarmguard/internal/store"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/store"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 func cmdWhitelist(args []string) error {
 	if len(args) < 1 {
-		return fmt.Errorf("usage: swarmctl whitelist add|remove|list ...")
+		return fmt.Errorf("usage: federloomctl whitelist add|remove|list ...")
 	}
 	switch args[0] {
 	case "add":
@@ -34,7 +34,7 @@ func whitelistAdd(args []string) error {
 		return err
 	}
 	if fs.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl whitelist add [--scope local-only] IP_OR_CIDR")
+		return fmt.Errorf("usage: federloomctl whitelist add [--scope local-only] IP_OR_CIDR")
 	}
 	ipOrRange := fs.Arg(0)
 	if net.ParseIP(ipOrRange) == nil {
@@ -62,7 +62,7 @@ func whitelistAdd(args []string) error {
 		return fmt.Errorf("add to whitelist: %w", err)
 	}
 	if len(wl.List()) > before {
-		fmt.Printf("added %s (scope: %s) — restart swarmd to activate\n", ipOrRange, *scope)
+		fmt.Printf("added %s (scope: %s) — restart federloomd to activate\n", ipOrRange, *scope)
 	} else {
 		fmt.Printf("%s already in whitelist (no change)\n", ipOrRange)
 	}
@@ -76,7 +76,7 @@ func whitelistRemove(args []string) error {
 		return err
 	}
 	if fs.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl whitelist remove IP_OR_CIDR")
+		return fmt.Errorf("usage: federloomctl whitelist remove IP_OR_CIDR")
 	}
 	cfg, err := loadCfg()
 	if err != nil {
@@ -89,7 +89,7 @@ func whitelistRemove(args []string) error {
 	if err := wl.Remove(fs.Arg(0)); err != nil {
 		return fmt.Errorf("remove from whitelist: %w", err)
 	}
-	fmt.Printf("removed %s — restart swarmd to activate\n", fs.Arg(0))
+	fmt.Printf("removed %s — restart federloomd to activate\n", fs.Arg(0))
 	return nil
 }
 
@@ -109,7 +109,7 @@ func whitelistList(args []string) error {
 	}
 	entries := wl.List()
 	if len(entries) == 0 {
-		fmt.Println("no whitelist entries — see `swarmctl whitelist add`")
+		fmt.Println("no whitelist entries — see `federloomctl whitelist add`")
 		return nil
 	}
 	fmt.Printf("%-40s %-12s %s\n", "IP/CIDR", "SCOPE", "SOURCE")

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 func openTestStore(t *testing.T) *store.BadgerStore {

@@ -11,13 +11,13 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/multiformats/go-multiaddr"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/trust"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/trust"
 )
 
-// Invitation is the offline bootstrap token produced by `swarmctl federation invite`
-// and consumed by a new peer's `swarmctl federation join`. It carries enough
+// Invitation is the offline bootstrap token produced by `federloomctl federation invite`
+// and consumed by a new peer's `federloomctl federation join`. It carries enough
 // information to bootstrap trust without any out-of-band coordination.
 type Invitation struct {
 	Version    int          `json:"version"`      // always 1
@@ -71,13 +71,13 @@ func NewInvitation(cfg *config.Config, label string, transportAddr string) (*Inv
 	}
 	fullAddr := ma.Encapsulate(p2pComp)
 
-	// Step 6: load the Person key (must already exist — operator runs `swarmctl setup`).
+	// Step 6: load the Person key (must already exist — operator runs `federloomctl setup`).
 	personPriv, err := identity.LoadPersonKey(cfg.TrustPersonKeyFile())
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return nil, fmt.Errorf("federation: no person identity — run `swarmctl setup` first")
+			return nil, fmt.Errorf("federation: no person identity — run `federloomctl setup` first")
 		}
-		return nil, fmt.Errorf("federation: load person key: %w — run `swarmctl setup` first", err)
+		return nil, fmt.Errorf("federation: load person key: %w — run `federloomctl setup` first", err)
 	}
 
 	// Step 7: load issued certs from "<person_key_file>.issued.json".

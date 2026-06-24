@@ -8,7 +8,7 @@ decay:
   half_life: 168h         # TODO: tune (spec problem D)
 ingest:
   crowdsec:
-    enabled: false          # set to true after: cscli bouncers add swarmguard
+    enabled: false          # set to true after: cscli bouncers add federloom
     lapi_url: "http://localhost:8080"
     api_key: ""             # paste bouncer key here — never commit; use config.local.yaml
     poll_interval: 30s

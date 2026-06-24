@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add per-rule effectiveness metrics (blocks, latency, corroboration, recurrence) to SwarmGuard's Prometheus output, a textfile exporter for cross-system metrics, and an on-demand CLI effectiveness report for the WordPress node.
+**Goal:** Add per-rule effectiveness metrics (blocks, latency, corroboration, recurrence) to FederLoom's Prometheus output, a textfile exporter for cross-system metrics, and an on-demand CLI effectiveness report for the WordPress node.
 
 **Architecture:** Three independent deliverables sharing the same `{rule}` label namespace: (1) new native Go Prometheus metrics emitted at block/unblock time in `internal/observability/`; (2) a cron-driven bash textfile exporter querying SQLite + CrowdSec; (3) an on-demand bash CLI report with nginx log correlation. The Go changes extend the existing `Observer.RecordBlock`/`RecordUnblock` signatures to thread rule context through.
 
@@ -19,7 +19,7 @@
 | `internal/observability/observer.go` | Modify | Update `RecordBlock` signature, add rule-tracking maps, recurrence logic |
 | `internal/node/node.go` | Modify | Update 2 `RecordBlock` call sites to pass rule + firstSeen + corroboration |
 | `deploy/wordpress/config.yaml` | Modify | Add `sqlite_path` + `sqlite_retention` to observability section |
-| `deploy/wordpress/swarmguard-exporter.sh` | Create | Textfile exporter: SQLite + CrowdSec → node_exporter prom file |
+| `deploy/wordpress/federloom-exporter.sh` | Create | Textfile exporter: SQLite + CrowdSec → node_exporter prom file |
 | `deploy/wordpress/effectiveness-report.sh` | Create | CLI on-demand report with nginx log correlation |
 
 ---
@@ -43,13 +43,13 @@ func TestPrometheusOutput_RecordBlock_EmitsCounterAndHistograms(t *testing.T) {
 	p.recordBlock("ssh-burst", firstSeen, 3)
 
 	body := scrape(t, p)
-	if !strings.Contains(body, `swarmguard_blocks_total{rule="ssh-burst"} 1`) {
+	if !strings.Contains(body, `federloom_blocks_total{rule="ssh-burst"} 1`) {
 		t.Errorf("missing blocks_total in:\n%s", body)
 	}
-	if !strings.Contains(body, `swarmguard_time_to_block_seconds_count{rule="ssh-burst"} 1`) {
+	if !strings.Contains(body, `federloom_time_to_block_seconds_count{rule="ssh-burst"} 1`) {
 		t.Errorf("missing time_to_block histogram in:\n%s", body)
 	}
-	if !strings.Contains(body, `swarmguard_corroboration_at_block_count{rule="ssh-burst"} 1`) {
+	if !strings.Contains(body, `federloom_corroboration_at_block_count{rule="ssh-burst"} 1`) {
 		t.Errorf("missing corroboration histogram in:\n%s", body)
 	}
 }
@@ -59,7 +59,7 @@ func TestPrometheusOutput_RecordUnblock_EmitsCounter(t *testing.T) {
 	p.recordUnblock("http-probe-consensus")
 
 	body := scrape(t, p)
-	if !strings.Contains(body, `swarmguard_unblocks_total{rule="http-probe-consensus"} 1`) {
+	if !strings.Contains(body, `federloom_unblocks_total{rule="http-probe-consensus"} 1`) {
 		t.Errorf("missing unblocks_total in:\n%s", body)
 	}
 }
@@ -69,7 +69,7 @@ func TestPrometheusOutput_RecordRecurrence_EmitsCounter(t *testing.T) {
 	p.recordRecurrence("score-fallback")
 
 	body := scrape(t, p)
-	if !strings.Contains(body, `swarmguard_block_recurrence_total{rule="score-fallback"} 1`) {
+	if !strings.Contains(body, `federloom_block_recurrence_total{rule="score-fallback"} 1`) {
 		t.Errorf("missing block_recurrence_total in:\n%s", body)
 	}
 }
@@ -78,7 +78,7 @@ func TestPrometheusOutput_RecordRecurrence_EmitsCounter(t *testing.T) {
 - [ ] **Step 2: Run tests to verify they fail**
 
 ```bash
-cd /root/swarmguard
+cd /root/federloom
 go test ./internal/observability/ -run "TestPrometheusOutput_RecordBlock_EmitsCounterAndHistograms|TestPrometheusOutput_RecordUnblock_EmitsCounter|TestPrometheusOutput_RecordRecurrence_EmitsCounter" -v
 ```
 
@@ -111,25 +111,25 @@ type prometheusOutput struct {
 In `newPrometheusOutput`, add to the struct literal (after the `federated` field):
 ```go
 		blocks: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "swarmguard_blocks_total",
+			Name: "federloom_blocks_total",
 			Help: "Total IPs moved into the block set, by rule.",
 		}, []string{"rule"}),
 		timeToBlock: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-			Name:    "swarmguard_time_to_block_seconds",
+			Name:    "federloom_time_to_block_seconds",
 			Help:    "Duration from first event to block decision, by rule.",
 			Buckets: []float64{0, 30, 60, 120, 300, 600, 1800, 3600, 14400},
 		}, []string{"rule"}),
 		corroboration: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-			Name:    "swarmguard_corroboration_at_block",
+			Name:    "federloom_corroboration_at_block",
 			Help:    "Number of distinct reporters at block time, by rule.",
 			Buckets: []float64{1, 2, 3, 4, 5, 10},
 		}, []string{"rule"}),
 		unblocks: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "swarmguard_unblocks_total",
+			Name: "federloom_unblocks_total",
 			Help: "Total IPs removed from the block set by score decay, by rule.",
 		}, []string{"rule"}),
 		recurrences: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "swarmguard_block_recurrence_total",
+			Name: "federloom_block_recurrence_total",
 			Help: "Previously-unblocked IPs re-blocked within 7 days, by original rule.",
 		}, []string{"rule"}),
 ```
@@ -166,7 +166,7 @@ Add `"time"` to the import block if not already present (it is — used by `reco
 - [ ] **Step 5: Run tests to verify they pass**
 
 ```bash
-cd /root/swarmguard
+cd /root/federloom
 go test ./internal/observability/ -v
 ```
 
@@ -178,7 +178,7 @@ Expected: all tests PASS, including the 3 new ones.
 git add internal/observability/prometheus.go internal/observability/prometheus_test.go
 git commit -m "feat(observability): add per-rule effectiveness metrics to Prometheus output
 
-Adds swarmguard_blocks_total, time_to_block_seconds, corroboration_at_block,
+Adds federloom_blocks_total, time_to_block_seconds, corroboration_at_block,
 unblocks_total, block_recurrence_total — all labeled by rule for tuning decisions.
 
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
@@ -204,8 +204,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 func newTestObserver(t *testing.T) *Observer {
@@ -291,7 +291,7 @@ func TestObserver_NilSafe(t *testing.T) {
 - [ ] **Step 2: Run tests to verify they fail**
 
 ```bash
-cd /root/swarmguard
+cd /root/federloom
 go test ./internal/observability/ -run "TestObserver_" -v
 ```
 
@@ -310,8 +310,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 type unblockedEntry struct {
@@ -491,7 +491,7 @@ func (o *Observer) RecordFederated(direction string) {
 - [ ] **Step 4: Run all observability tests**
 
 ```bash
-cd /root/swarmguard
+cd /root/federloom
 go test ./internal/observability/ -v
 ```
 
@@ -542,7 +542,7 @@ n.obs.RecordBlock(e.IP, ruleName, rec.Score, rec.FirstSeen, rec.Corroboration)
 - [ ] **Step 2: Build and test**
 
 ```bash
-cd /root/swarmguard
+cd /root/federloom
 make build
 make test
 ```
@@ -584,7 +584,7 @@ observability:
 - [ ] **Step 2: Deploy to wordpress node**
 
 ```bash
-/swarmguard-env wordpress
+/federloom-env wordpress
 ```
 
 Expected output ends with: `==> [wordpress] waiting for metrics endpoint. OK`
@@ -593,7 +593,7 @@ Expected output ends with: `==> [wordpress] waiting for metrics endpoint. OK`
 
 ```bash
 ssh -p 2222 root@d.jru.me \
-  "ls -lh /var/lib/docker/volumes/wordpress_swarmguard-data/_data/metrics.db"
+  "ls -lh /var/lib/docker/volumes/wordpress_federloom-data/_data/metrics.db"
 ```
 
 Expected: file exists, size > 0 (events start accumulating immediately from CrowdSec ingest).
@@ -615,7 +615,7 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 
 ## Task 5: Set up node_exporter textfile directory on WordPress
 
-**Context:** node_exporter on wordpress runs from `/opt/node-exporter/docker-compose.yml` (not in the swarmguard repo). It currently mounts only its config file. We need to: (1) install sqlite3 + jq on the host, (2) add a textfile directory mount, (3) add `--collector.textfile.directory` flag to node_exporter.
+**Context:** node_exporter on wordpress runs from `/opt/node-exporter/docker-compose.yml` (not in the federloom repo). It currently mounts only its config file. We need to: (1) install sqlite3 + jq on the host, (2) add a textfile directory mount, (3) add `--collector.textfile.directory` flag to node_exporter.
 
 This task makes changes directly on the WordPress server.
 
@@ -697,25 +697,25 @@ Expected: `test_metric 1` appears in curl output.
 ## Task 6: Textfile exporter script
 
 **Files:**
-- Create: `deploy/wordpress/swarmguard-exporter.sh`
+- Create: `deploy/wordpress/federloom-exporter.sh`
 
-Context: Runs every 5 minutes via cron on the WordPress server. Queries SwarmGuard's `metrics.db` and CrowdSec to emit cross-system effectiveness metrics. Uses a rolling 24h window. Writes atomically to `/var/lib/node_exporter/textfile/swarmguard_effectiveness.prom`.
+Context: Runs every 5 minutes via cron on the WordPress server. Queries FederLoom's `metrics.db` and CrowdSec to emit cross-system effectiveness metrics. Uses a rolling 24h window. Writes atomically to `/var/lib/node_exporter/textfile/federloom_effectiveness.prom`.
 
 - [ ] **Step 1: Create the exporter script**
 
-Create `deploy/wordpress/swarmguard-exporter.sh`:
+Create `deploy/wordpress/federloom-exporter.sh`:
 
 ```bash
 #!/usr/bin/env bash
-# swarmguard-exporter.sh — textfile exporter for node_exporter (5-min cron)
-# Queries SwarmGuard SQLite + CrowdSec and writes effectiveness metrics.
+# federloom-exporter.sh — textfile exporter for node_exporter (5-min cron)
+# Queries FederLoom SQLite + CrowdSec and writes effectiveness metrics.
 set -euo pipefail
 
-SQLITE_DB="/var/lib/docker/volumes/wordpress_swarmguard-data/_data/metrics.db"
+SQLITE_DB="/var/lib/docker/volumes/wordpress_federloom-data/_data/metrics.db"
 NGINX_CTR="wordpress_docker_stack-nginx_webmail-1"
 CROWDSEC_CTR="crowdsec"
 OUTDIR="/var/lib/node_exporter/textfile"
-OUTFILE="$OUTDIR/swarmguard_effectiveness.prom"
+OUTFILE="$OUTDIR/federloom_effectiveness.prom"
 TMPFILE="$OUTFILE.tmp"
 WINDOW_HOURS=24
 
@@ -723,7 +723,7 @@ SINCE=$(date -d "$WINDOW_HOURS hours ago" +%s)
 
 # Abort cleanly if DB doesn't exist yet.
 if [[ ! -f "$SQLITE_DB" ]]; then
-  echo "# swarmguard_exporter: metrics.db not found at $SQLITE_DB" > "$TMPFILE"
+  echo "# federloom_exporter: metrics.db not found at $SQLITE_DB" > "$TMPFILE"
   mv "$TMPFILE" "$OUTFILE"
   exit 0
 fi
@@ -747,7 +747,7 @@ single_source=$(q "
       WHERE e.ip = b.ip AND e.ts <= b.blocked_at
     ) = 1
   GROUP BY rf.rule;
-" | awk -F'|' '{print "swarmguard_blocks_single_source_total{rule=\""$1"\"} "$2}')
+" | awk -F'|' '{print "federloom_blocks_single_source_total{rule=\""$1"\"} "$2}')
 
 # ── Slip-through: nginx IPs that are also in the block list ──────────────────
 # Approximate: intersection of nginx source IPs and currently-blocked IPs.
@@ -779,7 +779,7 @@ if [[ -n "$nginx_ips" ]]; then
       AND b.unblocked_at IS NULL
       AND b.ip IN ($(echo "$nginx_ips" | awk '{printf "\"%s\",",$0}' | sed 's/,$//'))
     GROUP BY rf.rule;
-  " 2>/dev/null | awk -F'|' '{print "swarmguard_nginx_slip_through_total{rule=\""$1"\"} "$2}') || slip_by_rule=""
+  " 2>/dev/null | awk -F'|' '{print "federloom_nginx_slip_through_total{rule=\""$1"\"} "$2}') || slip_by_rule=""
 fi
 
 # ── Recurrence ratio per rule ─────────────────────────────────────────────────
@@ -803,7 +803,7 @@ recurrence=$(q "
   GROUP BY rf.rule;
 " | awk -F'|' '{
     ratio = ($2 > 0) ? $3/$2 : 0
-    print "swarmguard_block_recurrence_ratio{rule=\""$1"\"} "ratio
+    print "federloom_block_recurrence_ratio{rule=\""$1"\"} "ratio
 }')
 
 # ── CrowdSec overlap ──────────────────────────────────────────────────────────
@@ -824,24 +824,24 @@ fi
 
 # ── Write output atomically ───────────────────────────────────────────────────
 cat > "$TMPFILE" << EOF
-# HELP swarmguard_blocks_single_source_total Blocks with only 1 corroborating reporter (higher false-positive risk), by rule.
-# TYPE swarmguard_blocks_single_source_total gauge
+# HELP federloom_blocks_single_source_total Blocks with only 1 corroborating reporter (higher false-positive risk), by rule.
+# TYPE federloom_blocks_single_source_total gauge
 ${single_source}
-# HELP swarmguard_nginx_slip_through_total Blocked IPs that also appear in nginx access log (approximate slip-through), by rule.
-# TYPE swarmguard_nginx_slip_through_total gauge
+# HELP federloom_nginx_slip_through_total Blocked IPs that also appear in nginx access log (approximate slip-through), by rule.
+# TYPE federloom_nginx_slip_through_total gauge
 ${slip_by_rule}
-# HELP swarmguard_block_recurrence_ratio Fraction of auto-unblocked IPs re-blocked within 7 days, by rule.
-# TYPE swarmguard_block_recurrence_ratio gauge
+# HELP federloom_block_recurrence_ratio Fraction of auto-unblocked IPs re-blocked within 7 days, by rule.
+# TYPE federloom_block_recurrence_ratio gauge
 ${recurrence}
-# HELP swarmguard_crowdsec_overlap_ratio Fraction of CrowdSec decisions also present in SwarmGuard block list.
-# TYPE swarmguard_crowdsec_overlap_ratio gauge
-swarmguard_crowdsec_overlap_ratio ${overlap_ratio}
-# HELP swarmguard_crowdsec_only_total IPs banned by CrowdSec but not in SwarmGuard block list.
-# TYPE swarmguard_crowdsec_only_total gauge
-swarmguard_crowdsec_only_total ${cs_only}
-# HELP swarmguard_exporter_last_run_timestamp_seconds Unix timestamp of last successful exporter run.
-# TYPE swarmguard_exporter_last_run_timestamp_seconds gauge
-swarmguard_exporter_last_run_timestamp_seconds $(date +%s)
+# HELP federloom_crowdsec_overlap_ratio Fraction of CrowdSec decisions also present in FederLoom block list.
+# TYPE federloom_crowdsec_overlap_ratio gauge
+federloom_crowdsec_overlap_ratio ${overlap_ratio}
+# HELP federloom_crowdsec_only_total IPs banned by CrowdSec but not in FederLoom block list.
+# TYPE federloom_crowdsec_only_total gauge
+federloom_crowdsec_only_total ${cs_only}
+# HELP federloom_exporter_last_run_timestamp_seconds Unix timestamp of last successful exporter run.
+# TYPE federloom_exporter_last_run_timestamp_seconds gauge
+federloom_exporter_last_run_timestamp_seconds $(date +%s)
 EOF
 
 mv "$TMPFILE" "$OUTFILE"
@@ -850,19 +850,19 @@ mv "$TMPFILE" "$OUTFILE"
 - [ ] **Step 2: Make executable and test manually on wordpress**
 
 ```bash
-git add deploy/wordpress/swarmguard-exporter.sh
-chmod +x deploy/wordpress/swarmguard-exporter.sh
+git add deploy/wordpress/federloom-exporter.sh
+chmod +x deploy/wordpress/federloom-exporter.sh
 ```
 
 Copy and run on wordpress:
 ```bash
-rsync -az deploy/wordpress/swarmguard-exporter.sh root@d.jru.me:/opt/swarmguard/deploy/wordpress/
-ssh -p 2222 root@d.jru.me "/opt/swarmguard/deploy/wordpress/swarmguard-exporter.sh"
+rsync -az deploy/wordpress/federloom-exporter.sh root@d.jru.me:/opt/federloom/deploy/wordpress/
+ssh -p 2222 root@d.jru.me "/opt/federloom/deploy/wordpress/federloom-exporter.sh"
 ```
 
 Verify output:
 ```bash
-ssh -p 2222 root@d.jru.me "cat /var/lib/node_exporter/textfile/swarmguard_effectiveness.prom"
+ssh -p 2222 root@d.jru.me "cat /var/lib/node_exporter/textfile/federloom_effectiveness.prom"
 ```
 
 Expected: file with correct metric lines, no bash errors.
@@ -871,7 +871,7 @@ Expected: file with correct metric lines, no bash errors.
 
 ```bash
 ssh -p 2222 root@d.jru.me \
-  "curl -s http://localhost:9100/metrics | grep swarmguard_"
+  "curl -s http://localhost:9100/metrics | grep federloom_"
 ```
 
 Expected: all 6 metric families appear.
@@ -880,7 +880,7 @@ Expected: all 6 metric families appear.
 
 ```bash
 ssh -p 2222 root@d.jru.me "
-  (crontab -l; echo '*/5 * * * * /opt/swarmguard/deploy/wordpress/swarmguard-exporter.sh >> /var/log/swarmguard-exporter.log 2>&1') | crontab -
+  (crontab -l; echo '*/5 * * * * /opt/federloom/deploy/wordpress/federloom-exporter.sh >> /var/log/federloom-exporter.log 2>&1') | crontab -
   crontab -l
 "
 ```
@@ -890,7 +890,7 @@ Expected: new cron line visible in output.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add deploy/wordpress/swarmguard-exporter.sh
+git add deploy/wordpress/federloom-exporter.sh
 git commit -m "feat(wordpress): add Prometheus textfile exporter for effectiveness metrics
 
 Emits per-rule single-source blocks, nginx slip-through (approximate),
@@ -915,12 +915,12 @@ Create `deploy/wordpress/effectiveness-report.sh`:
 
 ```bash
 #!/usr/bin/env bash
-# effectiveness-report.sh — on-demand SwarmGuard effectiveness report
+# effectiveness-report.sh — on-demand FederLoom effectiveness report
 # Run directly on the WordPress server.
 # Usage: ./effectiveness-report.sh [--hours N | --days N | --since YYYY-MM-DD]
 set -euo pipefail
 
-SQLITE_DB="/var/lib/docker/volumes/wordpress_swarmguard-data/_data/metrics.db"
+SQLITE_DB="/var/lib/docker/volumes/wordpress_federloom-data/_data/metrics.db"
 NGINX_CTR="wordpress_docker_stack-nginx_webmail-1"
 CROWDSEC_CTR="crowdsec"
 
@@ -965,7 +965,7 @@ fi
 
 q() { sqlite3 "$SQLITE_DB" "$1"; }
 
-echo "=== SwarmGuard Effectiveness Report ==="
+echo "=== FederLoom Effectiveness Report ==="
 echo "Node: wordpress  |  Window: $SINCE_HR → $NOW_HR ($WINDOW_LABEL)"
 echo ""
 
@@ -1120,10 +1120,10 @@ fi
 echo "── CrowdSec Insights ─────────────────────────────────────────────────────────"
 printf "CrowdSec decisions in window:        %d\n" "$cs_count"
 if [[ "$cs_count" -gt 0 ]]; then
-  printf "  overlap with SwarmGuard:           %d  (%d%%)\n" \
+  printf "  overlap with FederLoom:           %d  (%d%%)\n" \
     "$overlap" "$((cs_count>0 ? overlap*100/cs_count : 0))"
-  printf "  CrowdSec-only (SwarmGuard missed): %d\n" "$cs_only"
-  printf "  SwarmGuard-only (federation):      %d\n" "$swarm_only"
+  printf "  CrowdSec-only (FederLoom missed): %d\n" "$cs_only"
+  printf "  FederLoom-only (federation):      %d\n" "$swarm_only"
 fi
 
 # Top scenarios
@@ -1200,14 +1200,14 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 Deploy to wordpress:
 ```bash
 rsync -az deploy/wordpress/effectiveness-report.sh \
-  root@d.jru.me:/opt/swarmguard/deploy/wordpress/
+  root@d.jru.me:/opt/federloom/deploy/wordpress/
 ```
 
 - [ ] **Step 3: Run the report on wordpress and verify output**
 
 ```bash
 ssh -p 2222 root@d.jru.me \
-  "/opt/swarmguard/deploy/wordpress/effectiveness-report.sh --hours 24"
+  "/opt/federloom/deploy/wordpress/effectiveness-report.sh --hours 24"
 ```
 
 Expected: full report printed with all sections populated. The rule breakdown table should show at least `crowdsec-decision` or `score-fallback` rows. Verify no bash errors (`set -euo pipefail` will abort on any error).
@@ -1219,15 +1219,15 @@ Expected: full report printed with all sections populated. The rule breakdown ta
 After all tasks complete, verify end-to-end:
 
 ```bash
-# 1. Go metrics appear in SwarmGuard /metrics on wordpress
-curl -s http://d.jru.me:9101/metrics | grep "swarmguard_blocks_total\|swarmguard_time_to_block\|swarmguard_corroboration\|swarmguard_unblocks_total\|swarmguard_block_recurrence"
+# 1. Go metrics appear in FederLoom /metrics on wordpress
+curl -s http://d.jru.me:9101/metrics | grep "federloom_blocks_total\|federloom_time_to_block\|federloom_corroboration\|federloom_unblocks_total\|federloom_block_recurrence"
 
 # 2. Textfile exporter metrics appear in node_exporter
-ssh -p 2222 root@d.jru.me "curl -s http://localhost:9100/metrics | grep swarmguard_"
+ssh -p 2222 root@d.jru.me "curl -s http://localhost:9100/metrics | grep federloom_"
 
 # 3. CLI report runs without errors
-ssh -p 2222 root@d.jru.me "/opt/swarmguard/deploy/wordpress/effectiveness-report.sh --days 7"
+ssh -p 2222 root@d.jru.me "/opt/federloom/deploy/wordpress/effectiveness-report.sh --days 7"
 
 # 4. All existing tests still pass
-cd /root/swarmguard && make test
+cd /root/federloom && make test
 ```

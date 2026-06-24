@@ -6,13 +6,13 @@
 
 ## Problem
 
-SwarmGuard has no adapter for fail2ban, the most widely deployed intrusion prevention system on self-hosted Linux servers. Operators running fail2ban alongside Mailcow or WordPress already have local ban decisions that SwarmGuard cannot see or federate. Adding fail2ban as an ingest source lets SwarmGuard incorporate locally-observed ban events without requiring operators to replace their existing tooling.
+FederLoom has no adapter for fail2ban, the most widely deployed intrusion prevention system on self-hosted Linux servers. Operators running fail2ban alongside Mailcow or WordPress already have local ban decisions that FederLoom cannot see or federate. Adding fail2ban as an ingest source lets FederLoom incorporate locally-observed ban events without requiring operators to replace their existing tooling.
 
 ## Goal
 
-Add `internal/ingest/fail2ban.go` implementing `ingest.Source`. The adapter polls a fail2ban Docker container via `docker exec fail2ban-client banned`, diffs against a prior state to detect new bans, maps jail names to SwarmGuard reason codes, and emits `proto.Event`s — one per newly-banned IP.
+Add `internal/ingest/fail2ban.go` implementing `ingest.Source`. The adapter polls a fail2ban Docker container via `docker exec fail2ban-client banned`, diffs against a prior state to detect new bans, maps jail names to FederLoom reason codes, and emits `proto.Event`s — one per newly-banned IP.
 
-Scope is Docker-first (matching the deployment model of all other SwarmGuard ingest adapters). Non-Docker fail2ban is out of scope.
+Scope is Docker-first (matching the deployment model of all other FederLoom ingest adapters). Non-Docker fail2ban is out of scope.
 
 ---
 
@@ -121,7 +121,7 @@ Prefix patterns (`sshd-*`) match jail names that start with the prefix, catching
 
 ### Fallback
 
-Unknown jails produce reason `"fail2ban-<jailname>"`. Events are still emitted and visible in `swarmctl status` and the API, so operators can discover what fail2ban is detecting before they classify it in `jail_reasons`.
+Unknown jails produce reason `"fail2ban-<jailname>"`. Events are still emitted and visible in `federloomctl status` and the API, so operators can discover what fail2ban is detecting before they classify it in `jail_reasons`.
 
 ### Implementation
 
@@ -179,7 +179,7 @@ Four test cases in `internal/ingest/fail2ban_test.go` using a stub fetcher:
 | `TestFail2Ban_Reban` | IP appears, disappears, re-appears | Event emitted on first and third poll, not second |
 | `TestFail2Ban_UnknownJail` | Stub returns `[{"my-jail": ["2.2.2.2"]}]` | Reason is `"fail2ban-my-jail"` |
 
-No adversarial test: fail2ban is a local-only source. Poisoning it requires compromising the local Docker daemon, which is outside SwarmGuard's threat model.
+No adversarial test: fail2ban is a local-only source. Poisoning it requires compromising the local Docker daemon, which is outside FederLoom's threat model.
 
 ---
 

@@ -1,15 +1,19 @@
-# SwarmGuard config for the local federated peer (smoke test client).
+# FederLoom config for the local federated peer (smoke test client).
 # No ingest sources — this node only receives events via gossipsub.
 federation_mode: federated
 store:
-  dir: /var/lib/swarmguard
+  dir: /var/lib/federloom
 enforce:
   backend: ipset
-  set_name: swarmguard-client
+  set_name: federloom-client
   chain: INPUT
 reputation:
   block_threshold: 1000
   unblock_threshold: 900
   half_life: 168h
   decay_interval: 1h
-  rules_file: /etc/swarmguard/rules.yaml
+  rules_file: /etc/federloom/rules.yaml
+observability:
+  prometheus_addr: ":9101"
+bootstrap_peers:
+  - /ip4/167.233.115.41/tcp/7700/p2p/12D3KooWBvpzbEBgcFbHrw3kEFjfdFB2AwimGMhMrVGQBHMpZNjD

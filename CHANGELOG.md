@@ -7,12 +7,12 @@ All notable changes are documented here. Format: Keep a Changelog; versioning: S
 ### Added
 - `internal/observability`: dual-output Observer — Prometheus `/metrics` (port 9101) + SQLite
   event history with configurable retention (default 15 days). Both disabled by default.
-- Six Prometheus metrics: `swarmguard_events_received_total`, `swarmguard_rules_fired_total`,
-  `swarmguard_blocked_ips`, `swarmguard_ip_score`, `swarmguard_federation_peers`,
-  `swarmguard_events_federated_total`.
+- Six Prometheus metrics: `federloom_events_received_total`, `federloom_rules_fired_total`,
+  `federloom_blocked_ips`, `federloom_ip_score`, `federloom_federation_peers`,
+  `federloom_events_federated_total`.
 - SQLite tables: `events`, `rule_firings`, `blocks` with precomputed `expected_unblock`
   (due-time for active blocks).
-- `deploy/grafana/swarmguard-dashboard.json`: importable Grafana dashboard covering live
+- `deploy/grafana/federloom-dashboard.json`: importable Grafana dashboard covering live
   Prometheus panels and local SQLite history panels.
 - `rules.Evaluate` now returns `(Action, string)` — matched rule name available for metrics.
 - Honeypot, mailcow, and wordpress deploy configs updated to enable observability.
@@ -23,7 +23,7 @@ All notable changes are documented here. Format: Keep a Changelog; versioning: S
 ### Added
 - **CrowdSec ingest adapter** (`internal/ingest/crowdsec.go`): polls `/v1/decisions/stream`
   and `/v1/alerts` from a local CrowdSec LAPI instance; decisions emit
-  `crowdsec-decision` events, alerts map via `scenarioMap` to existing SwarmGuard
+  `crowdsec-decision` events, alerts map via `scenarioMap` to existing FederLoom
   reason strings or fall back to `crowdsec-alert`. Opt-in via `ingest.crowdsec.enabled`.
 - Three CrowdSec rules in `deploy/examples/rules.yaml`: `crowdsec-decision` (block),
   `crowdsec-alert-corroborated` (block ≥ 2 sources), `crowdsec-alert-watch` (watch).
@@ -62,7 +62,7 @@ All notable changes are documented here. Format: Keep a Changelog; versioning: S
     count once each); stranger flood capped at `stranger_score_cap` (default 15 pts).
   - `internal/config` — `TrustConfig` (anchor/person-key/peer-cert paths,
     `anchor_weight`, `stranger_weight`, `stranger_score_cap`).
-  - `cmd/swarmctl` — full trust CLI: `identity init/show`, `peer-cert`,
+  - `cmd/federloomctl` — full trust CLI: `identity init/show`, `peer-cert`,
     `trust add/set/remove/list/export/import`.
   - Adversarial suite (`make adversarial`) gains six new vouch scenarios:
     Sybil flood cap, anchored person counts once, forged signature, cert replay,

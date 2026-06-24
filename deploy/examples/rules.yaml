@@ -1,4 +1,4 @@
-# SwarmGuard — example block rules
+# FederLoom — example block rules
 #
 # Copy this file to your store directory (e.g. data/reputation/rules.yaml)
 # and set `reputation.rules_file` in config.yaml, or rely on the default

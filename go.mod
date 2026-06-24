@@ -1,4 +1,4 @@
-module github.com/JoeRu/swarmguard
+module github.com/JoeRu/federloom
 
 go 1.25.7
 

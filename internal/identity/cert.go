@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // certMessage is the canonical, domain-separated byte string a Person identity
 // signs to vouch for a peer. Any field change invalidates the signature.
 func certMessage(peerID string, personKey []byte, validUntil time.Time) []byte {
-	return []byte("swarmguard-peer-cert-v1|" + peerID + "|" +
+	return []byte("federloom-peer-cert-v1|" + peerID + "|" +
 		base64.StdEncoding.EncodeToString(personKey) + "|" +
 		validUntil.UTC().Format(time.RFC3339))
 }

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/reputation"
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 // TestSybilFloodScoreCapped verifies that 50 Sybil strangers all reporting the

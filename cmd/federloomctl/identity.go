@@ -12,9 +12,9 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/trust"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/trust"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // labelPath stores the operator-chosen label next to the person key.
@@ -81,10 +81,10 @@ func identityInit(args []string) error {
 	fmt.Println("fingerprint:", identity.Fingerprint(pub))
 
 	// If this machine already has a node key, self-certify it so the local
-	// swarmd publishes vouched events immediately.
+	// federloomd publishes vouched events immediately.
 	nodePriv, err := identity.LoadOrCreateNodeKey(cfg.NodeKeyFile())
 	if err != nil {
-		fmt.Println("note: no node key yet — run `swarmctl peer-cert` after swarmd first start")
+		fmt.Println("note: no node key yet — run `federloomctl peer-cert` after federloomd first start")
 		return nil
 	}
 	pid, err := peer.IDFromPrivateKey(nodePriv)
@@ -133,7 +133,7 @@ func cmdPeerCert(args []string) error {
 		return err
 	}
 	if fs.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl peer-cert PEER_ID")
+		return fmt.Errorf("usage: federloomctl peer-cert PEER_ID")
 	}
 	peerID := fs.Arg(0)
 	if _, err := peer.Decode(peerID); err != nil {
@@ -165,7 +165,7 @@ func writeCert(path string, cert proto.PeerCert) error {
 	if err != nil {
 		return err
 	}
-	// Atomic write: swarmd reads peer.cert at boot; a truncated read during a
+	// Atomic write: federloomd reads peer.cert at boot; a truncated read during a
 	// racing `identity init` would drop the node's vouch.
 	tmp := path + ".tmp"
 	if err := os.WriteFile(tmp, data, 0o644); err != nil {

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
+	"github.com/JoeRu/federloom/internal/identity"
 )
 
 // TestPersonKeyRejectsLooseperms mirrors the node-key guard: a group/world

@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/ingest"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/ingest"
 )
 
 func makeFail2BanCfg(poll time.Duration) config.Fail2BanConfig {

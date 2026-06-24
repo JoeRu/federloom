@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 func newTestObserver(t *testing.T) *Observer {
@@ -107,7 +107,7 @@ func TestObserver_Recurrence_EmitsPrometheusMetric(t *testing.T) {
 	o.RecordBlock("5.6.7.8", "ssh-burst", 90.0, time.Now().Add(-30*time.Second), 1)
 
 	body := scrape(t, p)
-	if !strings.Contains(body, `swarmguard_block_recurrence_total{rule="ssh-burst"} 1`) {
+	if !strings.Contains(body, `federloom_block_recurrence_total{rule="ssh-burst"} 1`) {
 		t.Errorf("missing block_recurrence_total in:\n%s", body)
 	}
 }

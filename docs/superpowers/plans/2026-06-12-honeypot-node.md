@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Deploy a first real-life SwarmGuard honeypot node on `167.233.115.41` that ingests SSH (Cowrie), SMTP, and IMAP (OpenCanary) attack signals and federates them to a local peer via gossipsub.
+**Goal:** Deploy a first real-life FederLoom honeypot node on `167.233.115.41` that ingests SSH (Cowrie), SMTP, and IMAP (OpenCanary) attack signals and federates them to a local peer via gossipsub.
 
-**Architecture:** A new `internal/ingest/opencanary.go` adapter mirrors `honeypot.go` — it tails OpenCanary's JSONL log and emits `proto.Event`s. Two Docker Compose files deploy the honeypot stack (Cowrie + OpenCanary + SwarmGuard) to the server and a client peer locally. A bootstrap script handles the fresh-server setup.
+**Architecture:** A new `internal/ingest/opencanary.go` adapter mirrors `honeypot.go` — it tails OpenCanary's JSONL log and emits `proto.Event`s. Two Docker Compose files deploy the honeypot stack (Cowrie + OpenCanary + FederLoom) to the server and a client peer locally. A bootstrap script handles the fresh-server setup.
 
 **Tech Stack:** Go 1.22, Docker Compose v2, Cowrie SSH honeypot, OpenCanary SMTP/IMAP honeypot, libp2p gossipsub.
 
@@ -18,12 +18,12 @@
 | Create | `internal/ingest/opencanary.go` | OpenCanary JSONL log adapter (implements `ingest.Source`) |
 | Create | `internal/ingest/opencanary_test.go` | Unit tests for the adapter |
 | Modify | `internal/node/node.go` | Wire the OpenCanary source into the node's source list |
-| Create | `deploy/honeypot/docker-compose.yml` | Cowrie + OpenCanary + SwarmGuard stack |
-| Create | `deploy/honeypot/config.yaml` | SwarmGuard config for honeypot node (sensor-only) |
+| Create | `deploy/honeypot/docker-compose.yml` | Cowrie + OpenCanary + FederLoom stack |
+| Create | `deploy/honeypot/config.yaml` | FederLoom config for honeypot node (sensor-only) |
 | Create | `deploy/honeypot/opencanary.json` | OpenCanary module config (smtp + imap enabled) |
 | Create | `deploy/honeypot/bootstrap.sh` | Install Docker on server, rsync repo, build image, start stack |
-| Create | `deploy/client/docker-compose.yml` | Local SwarmGuard peer |
-| Create | `deploy/client/config.yaml` | Client SwarmGuard config (federated, no ingest) |
+| Create | `deploy/client/docker-compose.yml` | Local FederLoom peer |
+| Create | `deploy/client/config.yaml` | Client FederLoom config (federated, no ingest) |
 
 ---
 
@@ -146,8 +146,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/ingest"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/ingest"
 )
 
 func TestOpenCanaryParsesSMTPProbe(t *testing.T) {
@@ -321,8 +321,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // openCanaryEvent is one JSON line from OpenCanary's log.
@@ -332,7 +332,7 @@ type openCanaryEvent struct {
 	LocalTime string `json:"local_time"`
 }
 
-// openCanaryReasons maps OpenCanary logtype to SwarmGuard reason strings.
+// openCanaryReasons maps OpenCanary logtype to FederLoom reason strings.
 // Verify these values against the running OpenCanary version if logtypes change:
 //
 //	docker exec opencanary grep -r "logtype" /usr/local/lib/python*/dist-packages/opencanary/modules/
@@ -530,7 +530,7 @@ git commit -m "feat(node): wire OpenCanary ingest source when enabled in config"
 - [ ] **Step 1: Create deploy/honeypot/docker-compose.yml**
 
 ```yaml
-# Honeypot stack: Cowrie (SSH) + OpenCanary (SMTP/IMAP) + SwarmGuard node.
+# Honeypot stack: Cowrie (SSH) + OpenCanary (SMTP/IMAP) + FederLoom node.
 # Deploy via deploy/honeypot/bootstrap.sh — do not run directly without reading that script.
 services:
   cowrie:
@@ -553,23 +553,23 @@ services:
       - opencanary-logs:/var/log/opencanary
       - ./opencanary.json:/etc/opencanaryd/opencanary.conf:ro
 
-  swarmguard:
-    image: swarmguard:latest
+  federloom:
+    image: federloom:latest
     build:
       context: ../..
       dockerfile: deploy/docker/Dockerfile
-    container_name: swarmguard
+    container_name: federloom
     restart: unless-stopped
     cap_add: [NET_ADMIN, NET_RAW]
     ports:
       - "7700:7700"
     volumes:
-      - ./config.yaml:/etc/swarmguard/config.yaml:ro
+      - ./config.yaml:/etc/federloom/config.yaml:ro
       - cowrie-logs:/var/log/cowrie:ro
       - opencanary-logs:/var/log/opencanary:ro
-      - swarmguard-data:/var/lib/swarmguard
+      - federloom-data:/var/lib/federloom
     command: >
-      --config /etc/swarmguard/config.yaml
+      --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
       --advertise /ip4/167.233.115.41/tcp/7700
     depends_on:
@@ -579,20 +579,20 @@ services:
 volumes:
   cowrie-logs:
   opencanary-logs:
-  swarmguard-data:
+  federloom-data:
 ```
 
 - [ ] **Step 2: Create deploy/honeypot/config.yaml**
 
 ```yaml
-# SwarmGuard config for the honeypot node.
+# FederLoom config for the honeypot node.
 # block_threshold is set high: this is a sensor node, not a firewall.
 federation_mode: federated
 store:
-  dir: /var/lib/swarmguard
+  dir: /var/lib/federloom
 enforce:
   backend: ipset
-  set_name: swarmguard
+  set_name: federloom
 reputation:
   block_threshold: 1000
   unblock_threshold: 900
@@ -613,7 +613,7 @@ ingest:
 
 ```json
 {
-    "device.node_id": "swarmguard-honeypot-1",
+    "device.node_id": "federloom-honeypot-1",
     "git.enabled": false,
     "ftp.enabled": false,
     "http.enabled": false,
@@ -648,7 +648,7 @@ ingest:
 
 ```bash
 git add deploy/honeypot/
-git commit -m "feat(deploy): honeypot stack compose + swarmguard config + opencanary config"
+git commit -m "feat(deploy): honeypot stack compose + federloom config + opencanary config"
 ```
 
 ---
@@ -670,7 +670,7 @@ set -euo pipefail
 SERVER="167.233.115.41"
 SSH_PORT="2244"
 SSH_USER="root"
-REMOTE_DIR="/opt/swarmguard"
+REMOTE_DIR="/opt/federloom"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -697,8 +697,8 @@ rsync -az --delete \
   "$REPO_ROOT/" \
   "$SSH_USER@$SERVER:$REMOTE_DIR/"
 
-echo "==> [3/5] Building swarmguard image on server (first run takes ~2 min)"
-ssh_run "cd $REMOTE_DIR && docker build -t swarmguard:latest -f deploy/docker/Dockerfile . -q"
+echo "==> [3/5] Building federloom image on server (first run takes ~2 min)"
+ssh_run "cd $REMOTE_DIR && docker build -t federloom:latest -f deploy/docker/Dockerfile . -q"
 
 echo "==> [4/5] Starting honeypot stack"
 ssh_run "
@@ -706,15 +706,15 @@ ssh_run "
   docker compose -f $REMOTE_DIR/deploy/honeypot/docker-compose.yml up -d
 "
 
-echo "==> [5/5] Waiting 15s for swarmd to print peer ID..."
+echo "==> [5/5] Waiting 15s for federloomd to print peer ID..."
 sleep 15
 
-PEER_ID=$(ssh_run "docker logs swarmguard 2>/dev/null | grep 'peer ID:' | tail -1 | awk '{print \$NF}'" || true)
+PEER_ID=$(ssh_run "docker logs federloom 2>/dev/null | grep 'peer ID:' | tail -1 | awk '{print \$NF}'" || true)
 
 echo ""
 if [[ -z "$PEER_ID" ]]; then
   echo "WARNING: could not read peer ID from logs yet."
-  echo "  Check: ssh -p $SSH_PORT $SSH_USER@$SERVER 'docker logs swarmguard 2>&1 | head -30'"
+  echo "  Check: ssh -p $SSH_PORT $SSH_USER@$SERVER 'docker logs federloom 2>&1 | head -30'"
 else
   echo "Honeypot stack running on $SERVER"
   echo "  Peer ID : $PEER_ID"
@@ -747,49 +747,49 @@ git commit -m "feat(deploy): bootstrap script — installs Docker, syncs repo, s
 - Create: `deploy/client/docker-compose.yml`
 - Create: `deploy/client/config.yaml`
 
-The bootstrap peer address is passed as the `HONEYPOT_PEER_ADDR` environment variable rather than the config file, because `--bootstrap` is a CLI flag in `cmd/swarmd/main.go`, not a YAML config key.
+The bootstrap peer address is passed as the `HONEYPOT_PEER_ADDR` environment variable rather than the config file, because `--bootstrap` is a CLI flag in `cmd/federloomd/main.go`, not a YAML config key.
 
 - [ ] **Step 1: Create deploy/client/docker-compose.yml**
 
 ```yaml
-# Local SwarmGuard peer for smoke-testing federation with the honeypot node.
+# Local FederLoom peer for smoke-testing federation with the honeypot node.
 # Usage:
 #   HONEYPOT_PEER_ADDR=/ip4/167.233.115.41/tcp/7700/p2p/<PEER_ID> \
 #     docker compose -f deploy/client/docker-compose.yml up
 services:
-  swarmguard:
-    image: swarmguard:latest
+  federloom:
+    image: federloom:latest
     build:
       context: ../..
       dockerfile: deploy/docker/Dockerfile
-    container_name: swarmguard-client
+    container_name: federloom-client
     restart: unless-stopped
     cap_add: [NET_ADMIN, NET_RAW]
     ports:
       - "7701:7700"
     volumes:
-      - ./config.yaml:/etc/swarmguard/config.yaml:ro
-      - swarmguard-client-data:/var/lib/swarmguard
+      - ./config.yaml:/etc/federloom/config.yaml:ro
+      - federloom-client-data:/var/lib/federloom
     command: >
-      --config /etc/swarmguard/config.yaml
+      --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
       --bootstrap ${HONEYPOT_PEER_ADDR}
 
 volumes:
-  swarmguard-client-data:
+  federloom-client-data:
 ```
 
 - [ ] **Step 2: Create deploy/client/config.yaml**
 
 ```yaml
-# SwarmGuard config for the local federated peer (smoke test client).
+# FederLoom config for the local federated peer (smoke test client).
 # No ingest sources — this node only receives events via gossipsub.
 federation_mode: federated
 store:
-  dir: /var/lib/swarmguard
+  dir: /var/lib/federloom
 enforce:
   backend: ipset
-  set_name: swarmguard-client
+  set_name: federloom-client
 reputation:
   block_threshold: 1000
   unblock_threshold: 900
@@ -800,10 +800,10 @@ reputation:
 - [ ] **Step 3: Build the local client image**
 
 ```bash
-docker build -t swarmguard:latest -f deploy/docker/Dockerfile .
+docker build -t federloom:latest -f deploy/docker/Dockerfile .
 ```
 
-Expected: build succeeds. Both `bin/swarmd` and `bin/swarmctl` produced inside container.
+Expected: build succeeds. Both `bin/federloomd` and `bin/federloomctl` produced inside container.
 
 - [ ] **Step 4: Commit**
 
@@ -833,7 +833,7 @@ Honeypot stack running on 167.233.115.41
 
 If the peer ID is missing, check logs manually:
 ```bash
-ssh -p 2244 root@167.233.115.41 'docker logs swarmguard 2>&1 | head -30'
+ssh -p 2244 root@167.233.115.41 'docker logs federloom 2>&1 | head -30'
 ```
 
 - [ ] **Step 2: Start the local client**
@@ -861,12 +861,12 @@ node: record remote <IP>: ...
 
 or alternatively, watch the honeypot node's own logs for ingest events:
 ```bash
-ssh -p 2244 root@167.233.115.41 'docker logs -f swarmguard 2>&1'
+ssh -p 2244 root@167.233.115.41 'docker logs -f federloom 2>&1'
 ```
 
 You should see lines like:
 ```
-swarmd running (enforce=ipset, honeypot=true)
+federloomd running (enforce=ipset, honeypot=true)
 node: record local <attacker-IP>: ...
 ```
 
@@ -894,7 +894,7 @@ Check the `logtype` field in the output. If it differs from 3000/2100, update `o
 **PASS:** At least one `node: record remote` log line appears in the local client within 5 minutes of connecting.
 
 **FAIL:** If no remote events appear, check:
-1. `docker logs swarmguard` on the server — are local events being recorded?
+1. `docker logs federloom` on the server — are local events being recorded?
 2. `docker logs cowrie` / `docker logs opencanary` — are honeypot logs being written?
 3. Network: is port 7700 reachable? `nc -zv 167.233.115.41 7700`
-4. Gossipsub: is the peer connected? (libp2p connection log in swarmd output)
+4. Gossipsub: is the peer connected? (libp2p connection log in federloomd output)

@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/reputation"
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 // TestEngineRecordAndGetScore verifies that a single Record call persists a

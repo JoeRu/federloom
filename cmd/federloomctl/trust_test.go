@@ -7,13 +7,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/trust"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/trust"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // writeCfg writes a minimal config.yaml pointing the store dir at dir and
-// returns its path. swarmctl derives every trust file path from store.dir.
+// returns its path. federloomctl derives every trust file path from store.dir.
 func writeCfg(t *testing.T, dir string) string {
 	t.Helper()
 	p := filepath.Join(dir, "cfg.yaml")

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -28,10 +28,10 @@ func TestPrometheusOutput_RecordEvent_Counter(t *testing.T) {
 	p.recordEvent(e, 50.0, "my-rule", "block")
 
 	body := scrape(t, p)
-	if !strings.Contains(body, `swarmguard_events_received_total{reason="ssh-probe",reporter_id="peer1"} 1`) {
+	if !strings.Contains(body, `federloom_events_received_total{reason="ssh-probe",reporter_id="peer1"} 1`) {
 		t.Errorf("missing events counter in:\n%s", body)
 	}
-	if !strings.Contains(body, `swarmguard_rules_fired_total{action="block",rule="my-rule"} 1`) {
+	if !strings.Contains(body, `federloom_rules_fired_total{action="block",rule="my-rule"} 1`) {
 		t.Errorf("missing rules counter in:\n%s", body)
 	}
 }
@@ -42,7 +42,7 @@ func TestPrometheusOutput_ScoreGauge_AboveThreshold(t *testing.T) {
 	p.recordEvent(e, 50.0, "", "")
 
 	body := scrape(t, p)
-	if !strings.Contains(body, `swarmguard_ip_score{ip="1.2.3.4"} 50`) {
+	if !strings.Contains(body, `federloom_ip_score{ip="1.2.3.4"} 50`) {
 		t.Errorf("expected ip_score gauge above threshold in:\n%s", body)
 	}
 }
@@ -53,7 +53,7 @@ func TestPrometheusOutput_ScoreGauge_BelowThreshold(t *testing.T) {
 	p.recordEvent(e, 30.0, "", "") // below threshold
 
 	body := scrape(t, p)
-	if strings.Contains(body, `swarmguard_ip_score{ip="1.2.3.4"}`) {
+	if strings.Contains(body, `federloom_ip_score{ip="1.2.3.4"}`) {
 		t.Errorf("ip_score should not appear below threshold in:\n%s", body)
 	}
 }
@@ -65,7 +65,7 @@ func TestPrometheusOutput_BlockedGauge(t *testing.T) {
 	p.blockedIPs.Dec()
 
 	body := scrape(t, p)
-	if !strings.Contains(body, "swarmguard_blocked_ips 1") {
+	if !strings.Contains(body, "federloom_blocked_ips 1") {
 		t.Errorf("expected blocked_ips=1 in:\n%s", body)
 	}
 }
@@ -76,7 +76,7 @@ func TestPrometheusOutput_NoRuleName_SkipsRuleCounter(t *testing.T) {
 	p.recordEvent(e, 50.0, "", "") // no rule matched
 
 	body := scrape(t, p)
-	if strings.Contains(body, "swarmguard_rules_fired_total") {
+	if strings.Contains(body, "federloom_rules_fired_total") {
 		t.Errorf("rules counter should not appear when no rule matched in:\n%s", body)
 	}
 }
@@ -87,13 +87,13 @@ func TestPrometheusOutput_RecordBlock_EmitsCounterAndHistograms(t *testing.T) {
 	p.recordBlock("ssh-burst", firstSeen, 3)
 
 	body := scrape(t, p)
-	if !strings.Contains(body, `swarmguard_blocks_total{rule="ssh-burst"} 1`) {
+	if !strings.Contains(body, `federloom_blocks_total{rule="ssh-burst"} 1`) {
 		t.Errorf("missing blocks_total in:\n%s", body)
 	}
-	if !strings.Contains(body, `swarmguard_time_to_block_seconds_count{rule="ssh-burst"} 1`) {
+	if !strings.Contains(body, `federloom_time_to_block_seconds_count{rule="ssh-burst"} 1`) {
 		t.Errorf("missing time_to_block histogram in:\n%s", body)
 	}
-	if !strings.Contains(body, `swarmguard_corroboration_at_block_count{rule="ssh-burst"} 1`) {
+	if !strings.Contains(body, `federloom_corroboration_at_block_count{rule="ssh-burst"} 1`) {
 		t.Errorf("missing corroboration histogram in:\n%s", body)
 	}
 }
@@ -103,7 +103,7 @@ func TestPrometheusOutput_RecordUnblock_EmitsCounter(t *testing.T) {
 	p.recordUnblock("http-probe-consensus")
 
 	body := scrape(t, p)
-	if !strings.Contains(body, `swarmguard_unblocks_total{rule="http-probe-consensus"} 1`) {
+	if !strings.Contains(body, `federloom_unblocks_total{rule="http-probe-consensus"} 1`) {
 		t.Errorf("missing unblocks_total in:\n%s", body)
 	}
 }
@@ -113,7 +113,7 @@ func TestPrometheusOutput_RecordRecurrence_EmitsCounter(t *testing.T) {
 	p.recordRecurrence("score-fallback")
 
 	body := scrape(t, p)
-	if !strings.Contains(body, `swarmguard_block_recurrence_total{rule="score-fallback"} 1`) {
+	if !strings.Contains(body, `federloom_block_recurrence_total{rule="score-fallback"} 1`) {
 		t.Errorf("missing block_recurrence_total in:\n%s", body)
 	}
 }

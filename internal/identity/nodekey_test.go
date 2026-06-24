@@ -7,7 +7,7 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
+	"github.com/JoeRu/federloom/internal/identity"
 )
 
 func TestNodeKeyStableAcrossLoads(t *testing.T) {

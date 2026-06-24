@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/store"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/store"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // helpers

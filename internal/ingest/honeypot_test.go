@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/ingest"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/ingest"
 )
 
 func writeLines(t *testing.T, path string, lines []string) {

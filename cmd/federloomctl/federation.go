@@ -9,15 +9,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/federation"
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/trust"
+	"github.com/JoeRu/federloom/internal/federation"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/trust"
 )
 
 // cmdFederation dispatches to federation sub-commands (spec §5.1 / §6.1).
 func cmdFederation(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: swarmctl federation invite|join ...")
+		return fmt.Errorf("usage: federloomctl federation invite|join ...")
 	}
 	switch args[0] {
 	case "invite":
@@ -52,7 +52,7 @@ func federationInvite(args []string) error {
 
 	labelData, err := os.ReadFile(labelPath(cfg.TrustPersonKeyFile()))
 	if err != nil {
-		return fmt.Errorf("no person identity (%w) — run `swarmctl setup` first", err)
+		return fmt.Errorf("no person identity (%w) — run `federloomctl setup` first", err)
 	}
 	label := strings.TrimSpace(string(labelData))
 
@@ -110,7 +110,7 @@ func federationJoin(args []string) error {
 	}
 
 	if fset.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl federation join INVITE_FILE [--as NAME] [--weight W]")
+		return fmt.Errorf("usage: federloomctl federation join INVITE_FILE [--as NAME] [--weight W]")
 	}
 	invFile := fset.Arg(0)
 
@@ -232,9 +232,9 @@ func federationJoin(args []string) error {
 
 	// Print reciprocal export hint.
 	fmt.Printf("\nNow send your bundle so they can anchor you back:\n")
-	fmt.Printf("  swarmctl trust export > my.bundle\n")
+	fmt.Printf("  federloomctl trust export > my.bundle\n")
 	fmt.Printf("  # send my.bundle to %s\n", person)
-	fmt.Printf("  # they run: swarmctl trust import my.bundle --as bob --weight 0.8\n")
+	fmt.Printf("  # they run: federloomctl trust import my.bundle --as bob --weight 0.8\n")
 
 	return nil
 }

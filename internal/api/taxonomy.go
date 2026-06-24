@@ -3,7 +3,7 @@ package api
 import (
 	"strings"
 
-	"github.com/JoeRu/swarmguard/internal/config"
+	"github.com/JoeRu/federloom/internal/config"
 )
 
 // DefaultTaxonomy maps built-in purpose labels to reason-code patterns.

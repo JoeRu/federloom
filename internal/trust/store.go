@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // Store answers "how much do I trust this peer?" by combining the anchored
@@ -132,7 +132,7 @@ func (s *Store) maybeReload(now time.Time) {
 				// must stay in (0,1]. Clamp over-weight to 1.0 (never let a file
 				// edit grant MORE than full trust); drop non-positive weights
 				// (a zero-trust anchor is pointless). LoadAnchors stays pure so
-				// swarmctl's read-modify-write doesn't lose entries.
+				// federloomctl's read-modify-write doesn't lose entries.
 				if a.Weight <= 0 {
 					log.Printf("trust: dropping anchor %q with non-positive weight %v", a.Person, a.Weight)
 					continue

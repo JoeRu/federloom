@@ -1,7 +1,7 @@
 ---
 name: add-ingest-plugin
 description: >
-  Use this skill whenever adding, wiring, or debugging a SwarmGuard ingest source
+  Use this skill whenever adding, wiring, or debugging a FederLoom ingest source
   — i.e. any integration that turns an external attack signal into reports. Trigger
   it for requests like "add support for Cowrie / Dionaea / OpenCanary / T-Pot",
   "ingest CrowdSec or Fail2Ban", "read Mailcow/Postfix/Dovecot logs", "wire up a

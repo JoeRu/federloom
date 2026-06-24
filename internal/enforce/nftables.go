@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const nftTable = "swarmguard"
+const nftTable = "federloom"
 const nftSetName = "blocked"
 
 // NftablesSink enforces blocks via nftables. Shells out to /sbin/nft. Requires root.

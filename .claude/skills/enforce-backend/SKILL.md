@@ -1,7 +1,7 @@
 ---
 name: enforce-backend
 description: >
-  Use this skill whenever working on SwarmGuard enforcement — adding or changing an
+  Use this skill whenever working on FederLoom enforcement — adding or changing an
   enforce.Sink, touching ipset/nftables/iptables logic, emitting a CrowdSec or
   Fail2Ban-compatible blocklist, or anything that writes block decisions to the
   firewall. Trigger for "add an nftables backend", "block via ipset", "produce a

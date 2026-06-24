@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Guidance for Claude when working in the **SwarmGuard** repository.
+Guidance for Claude when working in the **FederLoom** repository.
 
 ## What this project is
 
@@ -24,7 +24,7 @@ accurate if you change behaviour.
 
 ## Tech stack
 
-- **Go 1.22**, single static binary per command (`cmd/swarmd`, `cmd/swarmctl`).
+- **Go 1.22**, single static binary per command (`cmd/federloomd`, `cmd/federloomctl`).
 - **libp2p** for transport (gossipsub + kademlia DHT), **BadgerDB** for the
   reputation store (TTL = decay GC), **bloom filter** as the negative pre-filter.
 - Config: YAML + ENV override (`internal/config`, examples in `deploy/examples/`).
@@ -77,7 +77,7 @@ See `.claude/skills/add-ingest-plugin` and `.claude/skills/enforce-backend`.
 ## Build & test
 
 ```bash
-make build        # bin/swarmd, bin/swarmctl
+make build        # bin/federloomd, bin/federloomctl
 make test         # go test ./...
 make adversarial  # poisoning/sybil scenarios — runs in CI on every PR
 make fmt lint     # gofmt + go vet

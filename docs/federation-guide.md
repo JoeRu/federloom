@@ -17,7 +17,7 @@ How to set up, join, federate, and defederate trust domains (subnets). Backgroun
 ## Joining a federation
 
 1. Obtain the federation's trust anchor(s) and add them
-   (`swarmctl anchor add --source subnet ...`). Anchors stay locally removable.
+   (`federloomctl anchor add --source subnet ...`). Anchors stay locally removable.
 2. Pick the federation mode: `allowlist` (default-deny) or `blocklist`
    (default-allow). Allowlist is the safer default.
 3. Set `import_discount` — start conservative; foreign consensus should weigh less
@@ -38,22 +38,22 @@ lighter-weight than a full subnet federation and works peer-to-peer.
 
 ### Exchange identity bundles
 
-Both operators run `swarmctl trust export` and share the resulting JSON bundle
+Both operators run `federloomctl trust export` and share the resulting JSON bundle
 over a channel they already trust (Signal, signed email, in person):
 
 ```bash
 # Alice exports her bundle and sends it to Bob out-of-band.
-swarmctl trust export > alice.bundle
+federloomctl trust export > alice.bundle
 
 # Bob verifies Alice's fingerprint, then imports.
-swarmctl trust import alice.bundle --as alice --weight 0.8
+federloomctl trust import alice.bundle --as alice --weight 0.8
 # → "identity:    ed25519:AAAA..."
 # → "fingerprint: ab12 cd34 ef56 78gh"
 # → "→ verify this fingerprint with alice over a channel you already trust"
 ```
 
 Bob reads the fingerprint aloud (or pastes it into a secure channel) and Alice
-confirms it matches `swarmctl identity show` on her end. Only then does Bob
+confirms it matches `federloomctl identity show` on her end. Only then does Bob
 press Enter to confirm.
 
 ### What pairing does
@@ -70,7 +70,7 @@ peers participate.
 ### Remove a pairing
 
 ```bash
-swarmctl trust remove alice
+federloomctl trust remove alice
 ```
 
 Takes effect within the trust reload interval (≤10 s by default). Alice's
@@ -81,5 +81,5 @@ machines immediately resolve as strangers on the next event.
 ## Defederation (the security lever)
 
 A malicious or compromised subnet is cut off like a bad Mastodon instance:
-`swarmctl defederate <subnet_id>`. This is the Sybil answer at the subnet level
+`federloomctl defederate <subnet_id>`. This is the Sybil answer at the subnet level
 (problem L).

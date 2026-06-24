@@ -103,7 +103,7 @@ func TestSMTPWeightsHigherThanDefault(t *testing.T) {
 - [ ] **Step 2: Run test to confirm it fails**
 
 ```bash
-cd /root/swarmguard && go test ./internal/reputation/ -run TestSMTPWeights -v
+cd /root/federloom && go test ./internal/reputation/ -run TestSMTPWeights -v
 ```
 Expected: FAIL — `smtp-auth-bruteforce` scores only ~2 (default weight).
 
@@ -314,8 +314,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/ingest"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/ingest"
 )
 
 // makeMailcow returns a MailcowLogs adapter with a stub log fetcher.
@@ -485,8 +485,8 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // logFetcher retrieves container log lines since a given RFC3339 timestamp.
@@ -658,7 +658,7 @@ git commit -m "feat(ingest): implement Mailcow native log adapter (Postfix + Dov
 One IPv4 address per line. Lines starting with `#` and blank lines are skipped. The operator writes to this file however they like (Postfix `local_recipient_maps` script, milter, manual). Example:
 
 ```
-# SwarmGuard spamtrap hits
+# FederLoom spamtrap hits
 198.51.100.99
 203.0.113.44
 ```
@@ -678,8 +678,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/ingest"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/ingest"
 )
 
 func TestSpamtrapEmitsEvent(t *testing.T) {
@@ -845,8 +845,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // Spamtrap tails a log file written by the operator when a never-used mailbox
@@ -1126,7 +1126,7 @@ Expected: all PASS.
 ```bash
 make build
 ```
-Expected: clean compile, `bin/swarmd` and `bin/swarmctl` produced.
+Expected: clean compile, `bin/federloomd` and `bin/federloomctl` produced.
 
 - [ ] **Step 7: Commit**
 
@@ -1159,10 +1159,10 @@ ingest:
     poll_interval: 30s
   spamtrap:
     enabled: false          # enable after creating spamtrap mailboxes and writing IPs to log_file
-    log_file: /var/log/swarmguard-spamtrap.log
+    log_file: /var/log/federloom-spamtrap.log
     poll_interval: 5s
   crowdsec:
-    enabled: false          # enable after: cscli bouncers add swarmguard
+    enabled: false          # enable after: cscli bouncers add federloom
     lapi_url: "http://127.0.0.1:8080"
     api_key: ""             # set in config.local.yaml — never commit
     poll_interval: 30s
@@ -1175,7 +1175,7 @@ ingest:
 The existing file has `reason: crowdsec-decision` (stale since commit bc13180 changed ingest to emit real scenario names). Replace with:
 
 ```yaml
-# SwarmGuard rules for the Mailcow production node.
+# FederLoom rules for the Mailcow production node.
 # Rules are evaluated top-to-bottom; first match wins.
 # Reason patterns: exact string OR prefix wildcard ending in "*" (e.g. "smtp-*").
 
@@ -1247,11 +1247,11 @@ Three fixes:
 
 ```bash
 # DELETE OLD VERSION (find this block):
-RAW=$(sudo_run docker exec "$CROWDSEC_CTR" cscli bouncers add swarmguard 2>&1 || true)
+RAW=$(sudo_run docker exec "$CROWDSEC_CTR" cscli bouncers add federloom 2>&1 || true)
 
 # REPLACE WITH:
-sudo_run docker exec "$CROWDSEC_CTR" cscli bouncers delete swarmguard 2>/dev/null || true
-RAW=$(sudo_run docker exec "$CROWDSEC_CTR" cscli bouncers add swarmguard 2>&1 || true)
+sudo_run docker exec "$CROWDSEC_CTR" cscli bouncers delete federloom 2>/dev/null || true
+RAW=$(sudo_run docker exec "$CROWDSEC_CTR" cscli bouncers add federloom 2>&1 || true)
 ```
 
 **Fix 2** — In the heredoc that writes `config.local.yaml`, change `enable_alerts: true` → `enable_alerts: false`:
@@ -1271,7 +1271,7 @@ ingest:
     poll_interval: 30s
   spamtrap:
     enabled: false
-    log_file: /var/log/swarmguard-spamtrap.log
+    log_file: /var/log/federloom-spamtrap.log
     poll_interval: 5s
   crowdsec:
     enabled: ${CROWDSEC_ENABLED}
@@ -1287,7 +1287,7 @@ ingest:
 ```bash
 enforce:
   backend: ipset
-  set_name: swarmguard
+  set_name: federloom
   chains:
     - DOCKER-USER
     - INPUT
@@ -1323,22 +1323,22 @@ After all 6 tasks are committed:
 make build && make test
 
 # Confirm new sources appear in the binary help/version
-./bin/swarmd --help 2>&1 | head -5
+./bin/federloomd --help 2>&1 | head -5
 
 # Confirm the mailcow config parses cleanly
-./bin/swarmd --config deploy/mailcow/config.yaml --dry-run 2>/dev/null || true
+./bin/federloomd --config deploy/mailcow/config.yaml --dry-run 2>/dev/null || true
 ```
 
 To verify on the actual mailcow server after running `bootstrap-mailcow.sh`:
 
 ```bash
 # Watch for smtp-auth-bruteforce events in metrics
-curl -s http://MAILCOW_SERVER:9101/metrics | grep swarmguard_events_received
+curl -s http://MAILCOW_SERVER:9101/metrics | grep federloom_events_received
 
 # Confirm both chains have the ipset DROP rule
-iptables -L DOCKER-USER -n | grep swarmguard
-iptables -L INPUT -n | grep swarmguard
+iptables -L DOCKER-USER -n | grep federloom
+iptables -L INPUT -n | grep federloom
 
 # Tail container logs to see parsed events
-ssh joe@nixos-mailcow "sudo docker logs swarmguard-mailcow 2>&1 | grep -E 'block|smtp|imap' | tail -20"
+ssh joe@nixos-mailcow "sudo docker logs federloom-mailcow 2>&1 | grep -E 'block|smtp|imap' | tail -20"
 ```

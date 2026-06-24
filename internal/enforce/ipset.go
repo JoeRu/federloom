@@ -22,7 +22,7 @@ type IpsetSink struct {
 // Defaults to ["DOCKER-USER"] when chains is empty.
 func NewIpset(setName string, chains []string) *IpsetSink {
 	if setName == "" {
-		setName = "swarmguard"
+		setName = "federloom"
 	}
 	if len(chains) == 0 {
 		chains = []string{"DOCKER-USER"}

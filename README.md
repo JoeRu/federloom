@@ -1,4 +1,4 @@
-# SwarmGuard
+# FederLoom
 
 > **Status: early scaffold / design phase.** This repository contains the
 > specification, architecture, plugin interfaces and skeleton — not yet a working
@@ -10,7 +10,7 @@ sovereignty** at its core. Built first as a non-invasive **Mailcow** add-on, and
 designed to complement existing tools like Fail2Ban and CrowdSec rather than
 replace them.
 
-Where CrowdSec shares intel through a *central* community network, SwarmGuard is
+Where CrowdSec shares intel through a *central* community network, FederLoom is
 the *decentralised* counterpart: trust is **federated** (Mastodon-style trust
 domains), block/allow lists are only **aids** the operator can always override,
 and IP reputation **decays** over time — which doubles as the GDPR
@@ -36,7 +36,7 @@ storage-limitation mechanism.
 
 ## Operating a federation? Read this first.
 
-See `docs/getting-started.md` for step-by-step instructions. Use `swarmctl setup` to initialise identity, then `swarmctl federation invite` (existing operators) or `swarmctl federation join` (joining operators) to exchange trust bundles.
+See `docs/getting-started.md` for step-by-step instructions. Use `federloomctl setup` to initialise identity, then `federloomctl federation invite` (existing operators) or `federloomctl federation join` (joining operators) to exchange trust bundles.
 
 If you run (not just join) a trust domain, you must establish three things up
 front. **This is mandatory reading**, documented in
@@ -63,7 +63,7 @@ rationale. In short: `cmd/` binaries, `internal/` logic (three planes: data =
 
 ## Extending it: plugins
 
-SwarmGuard is built around two small plugin interfaces so it can wrap existing
+FederLoom is built around two small plugin interfaces so it can wrap existing
 tools (see [`docs/plugins.md`](docs/plugins.md)):
 
 - **`ingest.Source`** — attack-signal producers: Mailcow logs, spamtraps,
@@ -75,8 +75,8 @@ tools (see [`docs/plugins.md`](docs/plugins.md)):
 
 ```bash
 make build
-./bin/swarmd -config config.yaml   # first run generates the node key
-./bin/swarmctl setup               # initialise identity and self-certify
+./bin/federloomd -config config.yaml   # first run generates the node key
+./bin/federloomctl setup               # initialise identity and self-certify
 ```
 
 See **[docs/getting-started.md](docs/getting-started.md)** for the full guide (solo node, starting a federation, or joining one).

@@ -1,6 +1,6 @@
-# SwarmGuard Effectiveness Dashboard Design
+# FederLoom Effectiveness Dashboard Design
 
-**Goal:** Add a "SwarmGuard — Effectiveness" Grafana dashboard that shows all three nodes (honeypot, mailcow, wordpress) side-by-side on a metric-first layout, enabling instant comparison of blocking effectiveness, event rates, federation health, and recidivism across the swarm.
+**Goal:** Add a "FederLoom — Effectiveness" Grafana dashboard that shows all three nodes (honeypot, mailcow, wordpress) side-by-side on a metric-first layout, enabling instant comparison of blocking effectiveness, event rates, federation health, and recidivism across the swarm.
 
 ---
 
@@ -9,9 +9,9 @@
 Two types of changes — no Go code:
 
 1. Three new Prometheus datasource YAML files (one per node)
-2. One new Grafana dashboard JSON file (`swarmguard-effectiveness.json`)
+2. One new Grafana dashboard JSON file (`federloom-effectiveness.json`)
 
-The existing `swarmguard-dashboard.json` and its SQLite datasource are untouched.
+The existing `federloom-dashboard.json` and its SQLite datasource are untouched.
 
 ---
 
@@ -44,9 +44,9 @@ datasources:
 
 ## Dashboard
 
-**File:** `deploy/grafana/provisioning/dashboards/swarmguard-effectiveness.json`
-**Title:** `SwarmGuard — Effectiveness`
-**UID:** `swarmguard-effectiveness`
+**File:** `deploy/grafana/provisioning/dashboards/federloom-effectiveness.json`
+**Title:** `FederLoom — Effectiveness`
+**UID:** `federloom-effectiveness`
 
 ### Template variable
 
@@ -93,7 +93,7 @@ Row: Recidivism
 Three stat panels, one per node datasource.
 
 ```
-Query:   sum(swarmguard_blocked_ips)
+Query:   sum(federloom_blocked_ips)
 Display: last value, color threshold green→red at 1
 Title:   "Blocked IPs — <Node>"
 ```
@@ -103,7 +103,7 @@ Title:   "Blocked IPs — <Node>"
 Three timeseries panels showing how fast each node is blocking over time.
 
 ```
-Query:   sum(increase(swarmguard_blocks_total[$__interval]))
+Query:   sum(increase(federloom_blocks_total[$__interval]))
 Display: bars, 1-minute step
 Title:   "Block rate — <Node>"
 ```
@@ -113,7 +113,7 @@ Title:   "Block rate — <Node>"
 Three timeseries panels showing total ingest event rate (local + federated combined).
 
 ```
-Query:   sum(rate(swarmguard_events_received_total[$__interval])) * 60
+Query:   sum(rate(federloom_events_received_total[$__interval])) * 60
 Display: lines, unit: events/min
 Title:   "Events/min — <Node>"
 ```
@@ -123,19 +123,19 @@ Title:   "Events/min — <Node>"
 Three timeseries panels showing the rate of inbound gossip messages from remote peers. A flat line at zero means federation has stopped flowing to that node.
 
 ```
-Query:   rate(swarmguard_events_federated_total{direction="in"}[$__interval]) * 60
+Query:   rate(federloom_events_federated_total{direction="in"}[$__interval]) * 60
 Display: lines, unit: messages/min
 Title:   "Federation in — <Node>"
 ```
 
-`swarmguard_events_federated_total{direction="in"}` is incremented by the node on each inbound gossip message processed. It is a reliable signal of live federation activity without needing to know the local peer ID.
+`federloom_events_federated_total{direction="in"}` is incremented by the node on each inbound gossip message processed. It is a reliable signal of live federation activity without needing to know the local peer ID.
 
 #### Row 5 — Candidates
 
 Three table panels listing IPs currently above the gauge threshold but below block threshold on each node. Each table is narrow (w=8) so only shows IP and Score columns.
 
 ```
-Query:   swarmguard_ip_score < $block_threshold
+Query:   federloom_ip_score < $block_threshold
 Format:  table, instant: true
 Columns: ip → "IP", Value → "Score"
 Sort:    Score descending
@@ -147,7 +147,7 @@ Title:   "Candidates — <Node>"
 Three stat panels showing the total count of previously-unblocked IPs that were re-blocked within 7 days. High values indicate persistent attackers that keep returning after decaying below threshold.
 
 ```
-Query:   sum(swarmguard_block_recurrence_total)
+Query:   sum(federloom_block_recurrence_total)
 Display: last value, no threshold colouring (informational)
 Title:   "Recidivism — <Node>"
 ```
@@ -208,11 +208,11 @@ After provisioning:
 docker compose -f /container/compose/grafana/docker-compose.yml restart grafana
 
 # 2. Confirm datasources are reachable (from the host, not container)
-curl -sf http://167.233.115.41:9101/metrics | grep swarmguard_blocked_ips
-curl -sf http://100.120.31.14:9101/metrics | grep swarmguard_blocked_ips
-curl -sf http://100.92.58.24:9101/metrics  | grep swarmguard_blocked_ips
+curl -sf http://167.233.115.41:9101/metrics | grep federloom_blocked_ips
+curl -sf http://100.120.31.14:9101/metrics | grep federloom_blocked_ips
+curl -sf http://100.92.58.24:9101/metrics  | grep federloom_blocked_ips
 
-# 3. Open http://grafana.joesnuc:3030 → "SwarmGuard — Effectiveness"
+# 3. Open http://grafana.joesnuc:3030 → "FederLoom — Effectiveness"
 #    Confirm: six rows, three columns, all panels loading data
 #    Confirm: mailcow and wordpress blocked IPs > 0 (they have lower thresholds)
 #    Confirm: federation timeseries shows activity on mailcow and wordpress

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -35,49 +35,49 @@ func newPrometheusOutput(addr string, scoreThreshold float64) (*prometheusOutput
 		threshold: scoreThreshold,
 		registry:  reg,
 		events: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "swarmguard_events_received_total",
+			Name: "federloom_events_received_total",
 			Help: "Total events processed by the reputation engine.",
 		}, []string{"reason", "reporter_id"}),
 		rules: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "swarmguard_rules_fired_total",
+			Name: "federloom_rules_fired_total",
 			Help: "Total rule evaluations that produced a match.",
 		}, []string{"rule", "action"}),
 		blockedIPs: prometheus.NewGauge(prometheus.GaugeOpts{
-			Name: "swarmguard_blocked_ips",
+			Name: "federloom_blocked_ips",
 			Help: "Current number of IPs in the enforced block set.",
 		}),
 		score: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "swarmguard_ip_score",
+			Name: "federloom_ip_score",
 			Help: "Current reputation score for IPs at or above the gauge threshold.",
 		}, []string{"ip"}),
 		peers: prometheus.NewGauge(prometheus.GaugeOpts{
-			Name: "swarmguard_federation_peers",
+			Name: "federloom_federation_peers",
 			Help: "Number of connected libp2p peers.",
 		}),
 		federated: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "swarmguard_events_federated_total",
+			Name: "federloom_events_federated_total",
 			Help: "Gossip messages exchanged with peers.",
 		}, []string{"direction"}),
 		blocks: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "swarmguard_blocks_total",
+			Name: "federloom_blocks_total",
 			Help: "Total IPs moved into the block set, by rule.",
 		}, []string{"rule"}),
 		timeToBlock: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-			Name:    "swarmguard_time_to_block_seconds",
+			Name:    "federloom_time_to_block_seconds",
 			Help:    "Duration from first event to block decision, by rule.",
 			Buckets: []float64{0, 30, 60, 120, 300, 600, 1800, 3600, 14400},
 		}, []string{"rule"}),
 		corroboration: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-			Name:    "swarmguard_corroboration_at_block",
+			Name:    "federloom_corroboration_at_block",
 			Help:    "Number of distinct reporters at block time, by rule.",
 			Buckets: []float64{1, 2, 3, 4, 5, 10},
 		}, []string{"rule"}),
 		unblocks: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "swarmguard_unblocks_total",
+			Name: "federloom_unblocks_total",
 			Help: "Total IPs removed from the block set by score decay, by rule.",
 		}, []string{"rule"}),
 		recurrences: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "swarmguard_block_recurrence_total",
+			Name: "federloom_block_recurrence_total",
 			Help: "Previously-unblocked IPs re-blocked within 7 days, by original rule.",
 		}, []string{"rule"}),
 	}

@@ -7,7 +7,7 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/JoeRu/swarmguard/internal/transport"
+	"github.com/JoeRu/federloom/internal/transport"
 )
 
 // TestDHTFindPeerViaRelay proves a leaf can resolve another leaf's address

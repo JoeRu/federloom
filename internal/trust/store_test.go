@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/trust"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/trust"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // fixture: a Person key, an anchor for it, and a cached cert for peer "12D3KooWpeerA".

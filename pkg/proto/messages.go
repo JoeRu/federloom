@@ -1,5 +1,5 @@
 // Package proto defines the on-the-wire message types exchanged between
-// SwarmGuard nodes. This is the stable public contract (spec §7). Changes here
+// FederLoom nodes. This is the stable public contract (spec §7). Changes here
 // ripple through the whole network — see .claude/skills/wire-protocol.
 package proto
 

@@ -1,6 +1,6 @@
 # Spezifikation: Dezentrale P2P-Reputations-Blockliste
 
-**Arbeitstitel:** (offen – z. B. *SwarmGuard*, *HiveBlock*, *MeshBan*)
+**Arbeitstitel:** (offen – z. B. *FederLoom*, *HiveBlock*, *MeshBan*)
 **Status:** Entwurf / Brainstorming-Ergebnis
 **Primärer Anwendungsfall:** Add-On-Komponente für das Mailcow-Projekt
 **Datum:** 2026-06-05
@@ -423,7 +423,7 @@ und verlassen sich auf manuelles Invite/Join.
 ### 14.2 Entdeckungsmechanismus
 
 **Primär – DHT-Rendezvous (dezentral):**
-Knoten melden sich unter einem festen Schlüssel (`/swarmguard/v1/peers`) im bestehenden
+Knoten melden sich unter einem festen Schlüssel (`/federloom/v1/peers`) im bestehenden
 Kademlia-DHT an. Kein Projekt-Server nötig; nutzt die bereits aufgebaute Transport-Schicht.
 
 **Fallback – Signierte Relay-Liste (Kalt-Start):**
@@ -442,7 +442,7 @@ Neu entdeckte (nicht eingeladene) Knoten erhalten `trust.stranger_weight` – de
 Wert wie jeder nicht verankerte Melder. Das bestehende `strangerCap` pro IP begrenzt
 den koordinierten Sybil-Beitrag vieler entdeckter Fremder (Problem S, §12).
 
-Um einen entdeckten Knoten hochzustufen: `swarmctl trust import` (manuelles Verbürgen).
+Um einen entdeckten Knoten hochzustufen: `federloomctl trust import` (manuelles Verbürgen).
 Das Trust-Modell bleibt unverändert; Discovery erweitert nur den Pool erreichbarer Knoten.
 
 ### 14.4 Zusammenspiel mit Föderations-Modus

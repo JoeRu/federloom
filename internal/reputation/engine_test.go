@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/reputation"
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 func openEngineCap(t *testing.T, cap float64) *reputation.Engine {

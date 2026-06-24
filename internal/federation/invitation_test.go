@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/federation"
-	"github.com/JoeRu/swarmguard/internal/identity"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/federation"
+	"github.com/JoeRu/federloom/internal/identity"
 )
 
 // makeTestConfig returns a Defaults config with Store.Dir pointing to a temp directory.
@@ -81,8 +81,8 @@ func TestNewInvitationMissingPersonKey(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for missing person key, got nil")
 	}
-	if !strings.Contains(err.Error(), "swarmctl setup") {
-		t.Errorf("error should mention 'swarmctl setup', got: %v", err)
+	if !strings.Contains(err.Error(), "federloomctl setup") {
+		t.Errorf("error should mention 'federloomctl setup', got: %v", err)
 	}
 }
 

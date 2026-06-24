@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/node"
-	"github.com/JoeRu/swarmguard/internal/transport"
-	"github.com/JoeRu/swarmguard/internal/trust"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/node"
+	"github.com/JoeRu/federloom/internal/transport"
+	"github.com/JoeRu/federloom/internal/trust"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // newReceiverNode builds a node.Node wired for integration tests: temp BadgerDB,

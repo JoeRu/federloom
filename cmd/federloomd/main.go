@@ -1,4 +1,4 @@
-// Command swarmd is the long-running SwarmGuard P2P node daemon.
+// Command federloomd is the long-running FederLoom P2P node daemon.
 package main
 
 import (
@@ -13,10 +13,10 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/multiformats/go-multiaddr"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/node"
-	"github.com/JoeRu/swarmguard/internal/transport"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/node"
+	"github.com/JoeRu/federloom/internal/transport"
 )
 
 func main() {
@@ -126,7 +126,7 @@ func main() {
 		log.Fatalf("create node: %v", err)
 	}
 
-	log.Printf("swarmd running (enforce=%s, honeypot=%v)",
+	log.Printf("federloomd running (enforce=%s, honeypot=%v)",
 		cfg.Enforce.Backend, cfg.Ingest.Honeypot.Enabled)
 
 	if err := n.Run(ctx); err != nil && err != context.Canceled {

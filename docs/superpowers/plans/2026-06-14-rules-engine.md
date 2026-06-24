@@ -100,11 +100,11 @@ func TestBurstCount_DifferentReasonIsolated(t *testing.T) {
 - [ ] **Step 2: Run tests — verify they fail**
 
 ```bash
-cd /root/swarmguard
+cd /root/federloom
 go test ./internal/rules/... 2>&1 | head -5
 ```
 
-Expected: `cannot find package "github.com/JoeRu/swarmguard/internal/rules"` or similar compile error.
+Expected: `cannot find package "github.com/JoeRu/federloom/internal/rules"` or similar compile error.
 
 - [ ] **Step 3: Implement BurstStore**
 
@@ -210,8 +210,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/store"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/store"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // helpers
@@ -435,8 +435,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/JoeRu/swarmguard/internal/store"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/store"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // Action is the outcome of a matched rule.
@@ -733,7 +733,7 @@ In `internal/node/node.go`:
 
 Add import:
 ```go
-"github.com/JoeRu/swarmguard/internal/rules"
+"github.com/JoeRu/federloom/internal/rules"
 ```
 
 Replace the `Node` struct definition:
@@ -878,7 +878,7 @@ git commit -m "feat(node): wire rules engine — replace score-threshold block w
 Create `deploy/examples/rules.yaml`:
 
 ```yaml
-# SwarmGuard — example block rules
+# FederLoom — example block rules
 #
 # Copy this file to your store directory (e.g. data/reputation/rules.yaml)
 # and set `reputation.rules_file` in config.yaml, or rely on the default

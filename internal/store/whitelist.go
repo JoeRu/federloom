@@ -8,12 +8,12 @@ import (
 	"os"
 	"sync"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // WhitelistStore is the local operator-managed IP/CIDR allowlist (spec §6.2 / §7.4).
 // Loaded once at node startup from a JSON file; call Add/Remove to mutate the file.
-// swarmd reads the file at startup only — no hot-reload in this phase.
+// federloomd reads the file at startup only — no hot-reload in this phase.
 type WhitelistStore struct {
 	path    string
 	mu      sync.RWMutex

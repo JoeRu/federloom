@@ -126,7 +126,7 @@ Unblock(ip string) error
 ```yaml
 enforce:
   backend: ipset          # ipset | nftables
-  set_name: swarmguard
+  set_name: federloom
   block_threshold: 75
   unblock_threshold: 60
   chain: DOCKER-USER      # ipset backend: INPUT | DOCKER-USER | FORWARD
@@ -184,7 +184,7 @@ type Node struct {
 
 **Decay unblock ticker** (default 1h): scan all scores, apply decay, call `enforce.Unblock(ip)` for any IP that drops below `unblock_threshold`.
 
-**`cmd/swarmd/main.go`:** replace synthetic event loop with `node.New(cfg).Run(ctx)`. `--config` flag selects YAML config file (default `config.yaml`).
+**`cmd/federloomd/main.go`:** replace synthetic event loop with `node.New(cfg).Run(ctx)`. `--config` flag selects YAML config file (default `config.yaml`).
 
 ## 7. Testing Strategy
 
@@ -206,13 +206,13 @@ type Node struct {
 
 ### Smoke test extension
 
-Extend `scripts/dev/smoke-test.sh`: mount synthetic `cowrie.json` into leaf1; assert leaf2/leaf3 both block `198.51.100.1` via `ipset list swarmguard` inside the container.
+Extend `scripts/dev/smoke-test.sh`: mount synthetic `cowrie.json` into leaf1; assert leaf2/leaf3 both block `198.51.100.1` via `ipset list federloom` inside the container.
 
 ### Phase 2: Real-life validation
 
 Operator-provided remote machine running a real Cowrie honeypot. Validate that:
 - `cowrie.json` is written in the expected JSONL format
-- SwarmGuard ingest plugin tails and parses it correctly under live traffic
+- FederLoom ingest plugin tails and parses it correctly under live traffic
 - Scores accumulate and IPs are blocked as expected
 
 Setup instructions and remote machine provisioning to be covered when the machine is available.

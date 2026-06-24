@@ -13,12 +13,12 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // cmdSetup runs the interactive first-time setup wizard (spec §5.1):
-//  1. Ensures a node key exists (swarmd must have run once)
+//  1. Ensures a node key exists (federloomd must have run once)
 //  2. Creates or loads a Person identity
 //  3. Installs a self peer-cert binding the node key to the Person identity
 func cmdSetup(args []string) error {
@@ -35,9 +35,9 @@ func cmdSetup(args []string) error {
 
 	fmt.Println("[1/3] Node key")
 	// Check whether the node key exists before trying to load/create it.
-	// swarmd creates it on first boot; we must not create it ourselves.
+	// federloomd creates it on first boot; we must not create it ourselves.
 	if _, err := os.Stat(cfg.NodeKeyFile()); os.IsNotExist(err) {
-		fmt.Println("      swarmd must run once first to generate the node key — then re-run setup.")
+		fmt.Println("      federloomd must run once first to generate the node key — then re-run setup.")
 		return fmt.Errorf("node key not found at %s", cfg.NodeKeyFile())
 	}
 	nodePriv, err := identity.LoadOrCreateNodeKey(cfg.NodeKeyFile())
@@ -123,7 +123,7 @@ func cmdSetup(args []string) error {
 Setup complete.
 
 Share your fingerprint (%s) with operators you want to federate with.
-Next: swarmctl federation invite --addr /ip4/YOUR_IP/tcp/7700 > invite.json
+Next: federloomctl federation invite --addr /ip4/YOUR_IP/tcp/7700 > invite.json
 `, fp)
 	return nil
 }

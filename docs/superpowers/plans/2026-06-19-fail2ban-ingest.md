@@ -145,8 +145,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/ingest"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/ingest"
 )
 
 func makeFail2BanCfg(poll time.Duration) config.Fail2BanConfig {
@@ -307,8 +307,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // fail2banFetcher retrieves the current ban set from a fail2ban container.
@@ -320,7 +320,7 @@ func dockerBanned(ctx context.Context, container string) ([]byte, error) {
 	return exec.CommandContext(ctx, "docker", "exec", container, "fail2ban-client", "banned").Output()
 }
 
-// builtinJailReasons maps common fail2ban jail names (exact) to SwarmGuard reason strings.
+// builtinJailReasons maps common fail2ban jail names (exact) to FederLoom reason strings.
 var builtinJailReasons = map[string]string{
 	"sshd":             "ssh-auth-bruteforce",
 	"ssh":              "ssh-auth-bruteforce",
@@ -439,7 +439,7 @@ func (f *Fail2Ban) poll(ctx context.Context, seen map[string]struct{}, ch chan<-
 	}
 }
 
-// resolveReason maps a fail2ban jail name to a SwarmGuard reason string.
+// resolveReason maps a fail2ban jail name to a FederLoom reason string.
 // Resolution order: operator config override → exact built-in → prefix built-in → fallback.
 func (f *Fail2Ban) resolveReason(jail string) string {
 	if r, ok := f.cfg.JailReasons[jail]; ok {
@@ -546,7 +546,7 @@ if cfg.Ingest.Fail2Ban.Enabled {
 make build
 ```
 
-Expected: `bin/swarmd` and `bin/swarmctl` build without errors.
+Expected: `bin/federloomd` and `bin/federloomctl` build without errors.
 
 - [ ] **Step 3: Run full test suite**
 
@@ -583,9 +583,9 @@ ingest:
 Then:
 
 ```bash
-# Confirm a currently-banned IP produces an event (check swarmd logs)
+# Confirm a currently-banned IP produces an event (check federloomd logs)
 docker exec fail2ban fail2ban-client banned
-# Should show banned IPs; swarmd log should show: "node: recorded event ip=X reason=ssh-auth-bruteforce"
+# Should show banned IPs; federloomd log should show: "node: recorded event ip=X reason=ssh-auth-bruteforce"
 
 # Check the API score for a banned IP
 curl http://localhost:9102/api/v1/score/1.2.3.4

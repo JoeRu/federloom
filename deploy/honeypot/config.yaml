@@ -1,21 +1,21 @@
-# SwarmGuard config for the honeypot node.
+# FederLoom config for the honeypot node.
 # block_threshold is set high: this is a sensor node, not a firewall.
 federation_mode: federated
 store:
-  dir: /var/lib/swarmguard
+  dir: /var/lib/federloom
 enforce:
   backend: ipset
-  set_name: swarmguard
+  set_name: federloom
   chain: INPUT
   extra_whitelist:
-    - 65.108.62.108    # wordpress peer (swarmguard-wordpress)
-    - 135.181.91.151   # mailcow peer (swarmguard-mailcow)
+    - 65.108.62.108    # wordpress peer (federloom-wordpress)
+    - 135.181.91.151   # mailcow peer (federloom-mailcow)
 reputation:
   block_threshold: 1000    # high: sensor node; legacy fallback never fires
   unblock_threshold: 900
   half_life: 168h
   decay_interval: 1h
-  rules_file: /etc/swarmguard/rules.yaml
+  rules_file: /etc/federloom/rules.yaml
 ingest:
   honeypot:
     enabled: true
@@ -26,7 +26,7 @@ ingest:
     log_file: /var/log/opencanary/opencanary.log
     poll_interval: 1s
   crowdsec:
-    enabled: false          # enable after: cscli bouncers add swarmguard
+    enabled: false          # enable after: cscli bouncers add federloom
     lapi_url: "http://localhost:8080"
     api_key: ""             # set in config.local.yaml — never commit
     poll_interval: 30s
@@ -34,12 +34,12 @@ ingest:
     enable_alerts: true
 observability:
   prometheus_addr: ":9101"
-  sqlite_path: "metrics.db"      # relative to store.dir: /var/lib/swarmguard/metrics.db
+  sqlite_path: "metrics.db"      # relative to store.dir: /var/lib/federloom/metrics.db
   sqlite_retention: 360h         # 15 days
 api:
   addr: ":9102"
 dnsbl:
   addr: ":5353"
-  zone: "dnsbl.swarmguard.jru.me."
+  zone: "dnsbl.federloom.jru.me."
 bootstrap_peers:
   - /ip4/167.233.115.41/tcp/7700/p2p/12D3KooWBvpzbEBgcFbHrw3kEFjfdFB2AwimGMhMrVGQBHMpZNjD  # relay peer

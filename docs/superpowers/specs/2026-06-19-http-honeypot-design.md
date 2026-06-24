@@ -68,11 +68,11 @@ attacker → port 80/443
          → /var/log/opencanary/opencanary.log (existing shared volume)
          → ingest/opencanary.go tail loop (existing)
          → proto.Event{Reason: "http-probe", Trust: 1.0}
-         → swarmguard reputation store
+         → federloom reputation store
          → federated to mailcow + wordpress (matches "web" taxonomy)
 ```
 
-The existing shared volume `opencanary-logs` already bridges the opencanary container and the swarmguard container. No new volumes or mounts needed.
+The existing shared volume `opencanary-logs` already bridges the opencanary container and the federloom container. No new volumes or mounts needed.
 
 ---
 
@@ -82,14 +82,14 @@ After deploying:
 
 ```bash
 # Confirm HTTP responds (expect 200 or redirect, not connection refused)
-curl -si http://swarmguard.jru.me/ | head -5
+curl -si http://federloom.jru.me/ | head -5
 
 # Confirm HTTPS responds
-curl -sik https://swarmguard.jru.me/ | head -5
+curl -sik https://federloom.jru.me/ | head -5
 
-# After ~1 poll interval, check swarmguard metrics for http events
+# After ~1 poll interval, check federloom metrics for http events
 curl -s http://167.233.115.41:9101/metrics \
-  | grep 'swarmguard_events_received_total.*http'
+  | grep 'federloom_events_received_total.*http'
 ```
 
 ---

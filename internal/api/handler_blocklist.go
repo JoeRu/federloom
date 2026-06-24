@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 // blockEntry is one row in the JSON blocklist response.

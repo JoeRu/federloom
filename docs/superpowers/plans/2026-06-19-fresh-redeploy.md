@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build `deploy/redeploy.sh` — a single script that wipes all three SwarmGuard nodes, pulls the latest GHCR image, rotates peer IDs, generates a federation invite from the honeypot, patches all `bootstrap_peers` configs, and runs a full smoke test.
+**Goal:** Build `deploy/redeploy.sh` — a single script that wipes all three FederLoom nodes, pulls the latest GHCR image, rotates peer IDs, generates a federation invite from the honeypot, patches all `bootstrap_peers` configs, and runs a full smoke test.
 
 **Architecture:** Two tasks. Task 1 commits the pre-flight config changes (honeypot bootstrap fix, DNSBL config, compose port + advertise). Task 2 writes the redeploy script. No Go code changes — pure bash + YAML.
 
@@ -15,7 +15,7 @@
 | File | Action | Purpose |
 |---|---|---|
 | `deploy/honeypot/bootstrap.sh` | Modify | Replace `docker build` with `docker pull`; add rsync exclusions |
-| `deploy/honeypot/config.yaml` | Modify | Add DNSBL block (`addr: ":5353"`, `zone: "dnsbl.swarmguard.jru.me."`) |
+| `deploy/honeypot/config.yaml` | Modify | Add DNSBL block (`addr: ":5353"`, `zone: "dnsbl.federloom.jru.me."`) |
 | `deploy/honeypot/docker-compose.yml` | Modify | Expose `5353:5353/udp`; change `--advertise` to DNS name |
 | `.gitignore` | Modify | Add `honeypot-invite.json` |
 | `deploy/redeploy.sh` | Create | The 8-phase redeploy + smoke test script |
@@ -38,8 +38,8 @@ No code under test — verify with shellcheck and manual diff review.
 
   ```bash
   # OLD (remove):
-  echo "==> [3/5] Building swarmguard image on server (first run takes ~2 min)"
-  ssh_run "cd $REMOTE_DIR && docker build -t swarmguard:latest -f deploy/docker/Dockerfile . -q"
+  echo "==> [3/5] Building federloom image on server (first run takes ~2 min)"
+  ssh_run "cd $REMOTE_DIR && docker build -t federloom:latest -f deploy/docker/Dockerfile . -q"
 
   echo "==> [4/5] Starting honeypot stack"
   ssh_run "
@@ -48,8 +48,8 @@ No code under test — verify with shellcheck and manual diff review.
   "
 
   # NEW (replace with):
-  echo "==> [3/5] Pulling swarmguard image"
-  ssh_run "docker pull ghcr.io/joeru/swarmguard:latest"
+  echo "==> [3/5] Pulling federloom image"
+  ssh_run "docker pull ghcr.io/joeru/federloom:latest"
 
   echo "==> [4/5] Starting honeypot stack"
   ssh_run "docker compose -f $REMOTE_DIR/deploy/honeypot/docker-compose.yml up -d"
@@ -84,12 +84,12 @@ No code under test — verify with shellcheck and manual diff review.
   ```yaml
   dnsbl:
     addr: ":5353"
-    zone: "dnsbl.swarmguard.jru.me."
+    zone: "dnsbl.federloom.jru.me."
   ```
 
 - [ ] **Step 3: Update `deploy/honeypot/docker-compose.yml`**
 
-  Two changes to the `swarmguard` service:
+  Two changes to the `federloom` service:
 
   **Add DNSBL port** — in the `ports:` block, add after `"9102:9102"`:
   ```yaml
@@ -102,7 +102,7 @@ No code under test — verify with shellcheck and manual diff review.
   ```
   to:
   ```yaml
-      --advertise /dns4/swarmguard.jru.me/tcp/7700
+      --advertise /dns4/federloom.jru.me/tcp/7700
   ```
 
 - [ ] **Step 4: Add `honeypot-invite.json` to `.gitignore`**
@@ -146,35 +146,35 @@ The script is written in phases. Each step below adds one phase to the file. Sta
 
   ```bash
   #!/usr/bin/env bash
-  # Fresh redeploy of all SwarmGuard nodes.
+  # Fresh redeploy of all FederLoom nodes.
   # Wipes volumes (new peer IDs), pulls GHCR image, generates invite, patches configs,
   # restarts all nodes, and runs smoke tests.
   # Usage: ./deploy/redeploy.sh
   # Requires: gh CLI, docker, jq, dig, curl, rsync, ssh access to all three nodes.
   set -euo pipefail
 
-  IMAGE="ghcr.io/joeru/swarmguard:latest"
+  IMAGE="ghcr.io/joeru/federloom:latest"
   INVITE_FILE="honeypot-invite.json"
 
   HONEYPOT_HOST="167.233.115.41"
   HONEYPOT_PORT="2244"
   HONEYPOT_USER="root"
-  HONEYPOT_CTR="swarmguard"
-  HONEYPOT_DIR="/opt/swarmguard"
+  HONEYPOT_CTR="federloom"
+  HONEYPOT_DIR="/opt/federloom"
   HONEYPOT_COMPOSE="$HONEYPOT_DIR/deploy/honeypot/docker-compose.yml"
 
   MAILCOW_HOST="mail.jru.me"
   MAILCOW_PORT="2222"
   MAILCOW_USER="joe"
-  MAILCOW_CTR="swarmguard-mailcow"
-  MAILCOW_DIR="/opt/swarmguard"
+  MAILCOW_CTR="federloom-mailcow"
+  MAILCOW_DIR="/opt/federloom"
   MAILCOW_COMPOSE="$MAILCOW_DIR/deploy/mailcow/docker-compose.yml"
 
   WP_HOST="d.jru.me"
   WP_PORT="2222"
   WP_USER="root"
-  WP_CTR="swarmguard-wordpress"
-  WP_DIR="/opt/swarmguard"
+  WP_CTR="federloom-wordpress"
+  WP_DIR="/opt/federloom"
   WP_COMPOSE="$WP_DIR/deploy/wordpress/docker-compose.yml"
 
   SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -218,7 +218,7 @@ The script is written in phases. Each step below adds one phase to the file. Sta
     docker pull $IMAGE
     docker compose -f $HONEYPOT_COMPOSE up -d
   "
-  echo "  Waiting 20s for swarmd to initialise..."
+  echo "  Waiting 20s for federloomd to initialise..."
   sleep 20
 
   STATUS=$(hp "docker inspect --format='{{.State.Status}}' $HONEYPOT_CTR 2>/dev/null || echo missing")
@@ -239,13 +239,13 @@ The script is written in phases. Each step below adds one phase to the file. Sta
   echo ""
   echo "══ Phase 2: Setup identity + generate invite ══"
 
-  hp "docker exec $HONEYPOT_CTR swarmctl setup \
-    --config /etc/swarmguard/config.yaml \
+  hp "docker exec $HONEYPOT_CTR federloomctl setup \
+    --config /etc/federloom/config.yaml \
     --label honeypot"
 
-  hp "docker exec $HONEYPOT_CTR swarmctl federation invite \
-    --config /etc/swarmguard/config.yaml \
-    --addr /dns4/swarmguard.jru.me/tcp/7700 \
+  hp "docker exec $HONEYPOT_CTR federloomctl federation invite \
+    --config /etc/federloom/config.yaml \
+    --addr /dns4/federloom.jru.me/tcp/7700 \
     --out /tmp/invite.json"
 
   hp "docker exec $HONEYPOT_CTR cat /tmp/invite.json" > "$INVITE_FILE"
@@ -271,7 +271,7 @@ The script is written in phases. Each step below adds one phase to the file. Sta
     # Replace old IP-based honeypot multiaddr
     sed -i "s|/ip4/167\.233\.115\.41/tcp/7700/p2p/[A-Za-z0-9]*|$NEW_MULTIADDR|g" "$cfg"
     # Replace old DNS-based honeypot multiaddr (from a previous redeploy run)
-    sed -i "s|/dns4/swarmguard\.jru\.me/tcp/7700/p2p/[A-Za-z0-9]*|$NEW_MULTIADDR|g" "$cfg"
+    sed -i "s|/dns4/federloom\.jru\.me/tcp/7700/p2p/[A-Za-z0-9]*|$NEW_MULTIADDR|g" "$cfg"
     label=$(basename "$(dirname "$cfg")")
     echo "  ✓ patched $label/config.yaml"
   done
@@ -377,10 +377,10 @@ The script is written in phases. Each step below adds one phase to the file. Sta
 
   # DNSBL: 2.0.0.127 is 127.0.0.2 reversed — always NXDOMAIN on a clean list.
   # An empty reply means the server answered and the IP is not listed (correct).
-  DNSBL=$(dig +short @swarmguard.jru.me -p 5353 \
-    2.0.0.127.dnsbl.swarmguard.jru.me. A 2>/dev/null || echo "ERROR")
+  DNSBL=$(dig +short @federloom.jru.me -p 5353 \
+    2.0.0.127.dnsbl.federloom.jru.me. A 2>/dev/null || echo "ERROR")
   if [[ "$DNSBL" == "ERROR" ]]; then
-    check_fail "honeypot DNSBL" "no response from swarmguard.jru.me:5353 (UDP)"
+    check_fail "honeypot DNSBL" "no response from federloom.jru.me:5353 (UDP)"
   elif [[ -z "$DNSBL" ]]; then
     check_ok "honeypot DNSBL (NXDOMAIN for 127.0.0.2)"
   else
@@ -393,7 +393,7 @@ The script is written in phases. Each step below adds one phase to the file. Sta
     "wordpress http://100.92.58.24:9101/metrics"; do
     name="${row%% *}"; url="${row#* }"
     EVENTS=$(curl -sf "$url" \
-      | grep '^swarmguard_events_received_total' \
+      | grep '^federloom_events_received_total' \
       | awk '{sum+=$2} END{print int(sum)}')
     if [[ "${EVENTS:-0}" -gt 0 ]]; then
       check_ok "$name federation events (${EVENTS:-0} received)"
@@ -409,7 +409,7 @@ The script is written in phases. Each step below adds one phase to the file. Sta
     "wordpress http://100.92.58.24:9101/metrics"; do
     name="${row%% *}"; url="${row#* }"
     PEERS=$(curl -sf "$url" \
-      | grep '^swarmguard_federation_peers ' \
+      | grep '^federloom_federation_peers ' \
       | awk '{print int($2)}')
     if [[ "${PEERS:-0}" -gt 0 ]]; then
       check_ok "$name peers (${PEERS:-0})"
@@ -476,14 +476,14 @@ Expected output (abridged):
 ```
 ══ Phase 0: Pre-flight checks ══
   ✓ docker workflow: success
-  ✓ image available: ghcr.io/joeru/swarmguard:latest
+  ✓ image available: ghcr.io/joeru/federloom:latest
 
 ══ Phase 1: Honeypot — down -v, pull, up ══
-  ✓ swarmguard running
+  ✓ federloom running
 
 ══ Phase 2: Setup identity + generate invite ══
   ✓ invite written to honeypot-invite.json
-  ✓ new multiaddr: /dns4/swarmguard.jru.me/tcp/7700/p2p/12D3KooW...
+  ✓ new multiaddr: /dns4/federloom.jru.me/tcp/7700/p2p/12D3KooW...
 
 ══ Phase 3: Patching config files ══
   ✓ patched honeypot/config.yaml
@@ -515,7 +515,7 @@ Expected output (abridged):
 
 All checks passed.
   Invite : honeypot-invite.json
-  Multiaddr: /dns4/swarmguard.jru.me/tcp/7700/p2p/12D3KooW...
+  Multiaddr: /dns4/federloom.jru.me/tcp/7700/p2p/12D3KooW...
 ```
 
 After a successful run, commit the patched config files:

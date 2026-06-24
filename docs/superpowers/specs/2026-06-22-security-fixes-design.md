@@ -1,6 +1,6 @@
 # Security Fixes Design — 2026-06-22
 
-Fixes for three confirmed vulnerabilities identified in the SwarmGuard security review.
+Fixes for three confirmed vulnerabilities identified in the FederLoom security review.
 
 ---
 
@@ -70,7 +70,7 @@ Two independent layers of protection:
 internet → [blocked by Docker binding]
 Tailscale peer → 100.71.239.1:9102 → tokenMiddleware → mux → handler
                                            ↑
-                               SWARMGUARD_API_TOKEN env var
+                               FEDERLOOM_API_TOKEN env var
 ```
 
 ### Changes
@@ -93,27 +93,27 @@ env_file:
 
 **`internal/api/server.go` — bearer token middleware**
 
-`Start()` reads `os.Getenv("SWARMGUARD_API_TOKEN")` at startup:
+`Start()` reads `os.Getenv("FEDERLOOM_API_TOKEN")` at startup:
 
 - If set and non-empty: wrap the mux with a middleware that checks `Authorization: Bearer <token>`. Requests missing or with wrong token → `401 Unauthorized`. Log a startup message confirming auth is active.
-- If unset or empty: skip middleware, log a startup warning (`api: SWARMGUARD_API_TOKEN not set — API is unauthenticated`). Backward-compatible: existing deployments without the var configured keep working.
+- If unset or empty: skip middleware, log a startup warning (`api: FEDERLOOM_API_TOKEN not set — API is unauthenticated`). Backward-compatible: existing deployments without the var configured keep working.
 
 Middleware is implemented as a closure wrapping `http.Handler` — no new dependencies, no interface changes.
 
 **Secret management**
 
-- `deploy/honeypot/.env` — gitignored, contains `SWARMGUARD_API_TOKEN=<secret>`. Created by operator on first deploy.
-- `deploy/honeypot/.env.example` — committed, contains `SWARMGUARD_API_TOKEN=changeme` as a placeholder.
+- `deploy/honeypot/.env` — gitignored, contains `FEDERLOOM_API_TOKEN=<secret>`. Created by operator on first deploy.
+- `deploy/honeypot/.env.example` — committed, contains `FEDERLOOM_API_TOKEN=changeme` as a placeholder.
 - Add `**/.env` to `.gitignore` (currently absent — `.env` files are not covered).
 
 ### Tests
 
 `internal/api/server_test.go`:
 
-- `SWARMGUARD_API_TOKEN` set, request without `Authorization` header → `401`
-- `SWARMGUARD_API_TOKEN` set, request with wrong token → `401`
-- `SWARMGUARD_API_TOKEN` set, request with correct `Bearer <token>` → `200`
-- `SWARMGUARD_API_TOKEN` unset → all requests pass through (no 401)
+- `FEDERLOOM_API_TOKEN` set, request without `Authorization` header → `401`
+- `FEDERLOOM_API_TOKEN` set, request with wrong token → `401`
+- `FEDERLOOM_API_TOKEN` set, request with correct `Bearer <token>` → `200`
+- `FEDERLOOM_API_TOKEN` unset → all requests pass through (no 401)
 
 ---
 
@@ -127,6 +127,6 @@ Middleware is implemented as a closure wrapping `http.Handler` — no new depend
 
 ## Invariants Preserved
 
-- **Invariant 1 (local override):** The bearer token is operator-configured via env var; operators can disable it by leaving `SWARMGUARD_API_TOKEN` unset.
+- **Invariant 1 (local override):** The bearer token is operator-configured via env var; operators can disable it by leaving `FEDERLOOM_API_TOKEN` unset.
 - **Invariant 4 (enforcement is O(1)):** IP validation adds one `net.ParseIP` call per event — no change to the firewall write path's complexity.
 - **Invariant 7 (`internal/enforce` is security-critical):** The validation gate lives in `internal/node`, upstream of `internal/enforce`. The enforce package itself remains unchanged.

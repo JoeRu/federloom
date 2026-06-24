@@ -3,7 +3,7 @@ package enforce_test
 import (
 	"testing"
 
-	"github.com/JoeRu/swarmguard/internal/enforce"
+	"github.com/JoeRu/federloom/internal/enforce"
 )
 
 func TestNeverBlockRFC1918(t *testing.T) {

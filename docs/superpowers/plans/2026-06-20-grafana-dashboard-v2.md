@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a `block_threshold` dashboard variable, a "Connected peers" table, and a "Blocklist candidates" table to the existing SwarmGuard Grafana dashboard JSON.
+**Goal:** Add a `block_threshold` dashboard variable, a "Connected peers" table, and a "Blocklist candidates" table to the existing FederLoom Grafana dashboard JSON.
 
-**Architecture:** Pure JSON edits to `deploy/grafana/provisioning/dashboards/swarmguard-dashboard.json`. No Go code changes. Two tasks: (1) add the template variable, (2) add the two new panels and shift existing SQLite panels down to make room.
+**Architecture:** Pure JSON edits to `deploy/grafana/provisioning/dashboards/federloom-dashboard.json`. No Go code changes. Two tasks: (1) add the template variable, (2) add the two new panels and shift existing SQLite panels down to make room.
 
 **Tech Stack:** Grafana dashboard JSON, Prometheus datasource, Python for JSON validation.
 
@@ -14,7 +14,7 @@
 
 The existing dashboard file is at:
 ```
-deploy/grafana/provisioning/dashboards/swarmguard-dashboard.json
+deploy/grafana/provisioning/dashboards/federloom-dashboard.json
 ```
 
 Current panel layout (all panels are in this file's `panels` array):
@@ -34,7 +34,7 @@ Current panel layout (all panels are in this file's `panels` array):
 
 After Task 2, the two new panels occupy y=17-24 (between the Live row content and the SQLite row). All SQLite panels shift down by 8.
 
-The Prometheus datasource uid is `${DS_PROMETHEUS}`. The SQLite datasource uid is `${DS_SWARMGUARD_SQLITE}`.
+The Prometheus datasource uid is `${DS_PROMETHEUS}`. The SQLite datasource uid is `${DS_FEDERLOOM_SQLITE}`.
 
 ---
 
@@ -42,18 +42,18 @@ The Prometheus datasource uid is `${DS_PROMETHEUS}`. The SQLite datasource uid i
 
 | File | Action | Purpose |
 |---|---|---|
-| `deploy/grafana/provisioning/dashboards/swarmguard-dashboard.json` | Modify | Add variable + two panels, shift SQLite panels |
+| `deploy/grafana/provisioning/dashboards/federloom-dashboard.json` | Modify | Add variable + two panels, shift SQLite panels |
 
 ---
 
 ## Task 1: Add `block_threshold` template variable
 
 **Files:**
-- Modify: `deploy/grafana/provisioning/dashboards/swarmguard-dashboard.json`
+- Modify: `deploy/grafana/provisioning/dashboards/federloom-dashboard.json`
 
 - [ ] **Step 1: Add the variable to `templating.list`**
 
-  Open `deploy/grafana/provisioning/dashboards/swarmguard-dashboard.json`. Find the `"templating"` key. Its `"list"` array currently has one entry (the `node` query variable). Append the following object to that array:
+  Open `deploy/grafana/provisioning/dashboards/federloom-dashboard.json`. Find the `"templating"` key. Its `"list"` array currently has one entry (the `node` query variable). Append the following object to that array:
 
   ```json
   {
@@ -73,7 +73,7 @@ The Prometheus datasource uid is `${DS_PROMETHEUS}`. The SQLite datasource uid i
   ```bash
   python3 -c "
   import json
-  d = json.load(open('deploy/grafana/provisioning/dashboards/swarmguard-dashboard.json'))
+  d = json.load(open('deploy/grafana/provisioning/dashboards/federloom-dashboard.json'))
   names = [v['name'] for v in d['templating']['list']]
   assert 'block_threshold' in names, f'variable missing, got: {names}'
   bt = next(v for v in d['templating']['list'] if v['name'] == 'block_threshold')
@@ -91,7 +91,7 @@ The Prometheus datasource uid is `${DS_PROMETHEUS}`. The SQLite datasource uid i
 - [ ] **Step 3: Commit**
 
   ```bash
-  git add deploy/grafana/provisioning/dashboards/swarmguard-dashboard.json
+  git add deploy/grafana/provisioning/dashboards/federloom-dashboard.json
   git commit -m "feat(grafana): add block_threshold constant variable to dashboard"
   ```
 
@@ -100,13 +100,13 @@ The Prometheus datasource uid is `${DS_PROMETHEUS}`. The SQLite datasource uid i
 ## Task 2: Add Connected peers and Blocklist candidates panels
 
 **Files:**
-- Modify: `deploy/grafana/provisioning/dashboards/swarmguard-dashboard.json`
+- Modify: `deploy/grafana/provisioning/dashboards/federloom-dashboard.json`
 
 The two new panels go at y=17 (between the Live row's last content at y=16 and the SQLite row header, which currently sits at y=17). To make room, shift the SQLite row and all four SQLite panels down by 8.
 
 - [ ] **Step 1: Shift existing SQLite panels down by 8**
 
-  In `deploy/grafana/provisioning/dashboards/swarmguard-dashboard.json`, update the `gridPos.y` value for these five panels:
+  In `deploy/grafana/provisioning/dashboards/federloom-dashboard.json`, update the `gridPos.y` value for these five panels:
 
   | id | current y | new y |
   |----|-----------|-------|
@@ -122,7 +122,7 @@ The two new panels go at y=17 (between the Live row's last content at y=16 and t
   ```bash
   python3 -c "
   import json
-  d = json.load(open('deploy/grafana/provisioning/dashboards/swarmguard-dashboard.json'))
+  d = json.load(open('deploy/grafana/provisioning/dashboards/federloom-dashboard.json'))
   by_id = {p['id']: p for p in d['panels']}
   assert by_id[11]['gridPos']['y'] == 25, f\"row y={by_id[11]['gridPos']['y']}\"
   assert by_id[6]['gridPos']['y']  == 26, f\"event log y={by_id[6]['gridPos']['y']}\"
@@ -171,7 +171,7 @@ The two new panels go at y=17 (between the Live row's last content at y=16 and t
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
         },
-        "expr": "sum by (reporter_id) (increase(swarmguard_events_received_total{job=~\"$node\"}[$__range]))",
+        "expr": "sum by (reporter_id) (increase(federloom_events_received_total{job=~\"$node\"}[$__range]))",
         "instant": true,
         "legendFormat": "{{reporter_id}}",
         "refId": "A"
@@ -216,7 +216,7 @@ The two new panels go at y=17 (between the Live row's last content at y=16 and t
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
         },
-        "expr": "swarmguard_ip_score{job=~\"$node\"} < $block_threshold",
+        "expr": "federloom_ip_score{job=~\"$node\"} < $block_threshold",
         "instant": true,
         "legendFormat": "{{ip}}",
         "refId": "A"
@@ -232,7 +232,7 @@ The two new panels go at y=17 (between the Live row's last content at y=16 and t
   ```bash
   python3 -c "
   import json
-  d = json.load(open('deploy/grafana/provisioning/dashboards/swarmguard-dashboard.json'))
+  d = json.load(open('deploy/grafana/provisioning/dashboards/federloom-dashboard.json'))
   by_id = {p['id']: p for p in d['panels']}
 
   # New panels exist
@@ -273,7 +273,7 @@ The two new panels go at y=17 (between the Live row's last content at y=16 and t
   docker compose -f /container/compose/grafana/docker-compose.yml restart grafana
   ```
 
-  Open the SwarmGuard dashboard in a browser. Confirm:
+  Open the FederLoom dashboard in a browser. Confirm:
   - A "Block threshold" input appears in the dashboard variables bar (default: 80)
   - A "Connected peers" table appears between the "Top 10 reporters" barchart row and the SQLite history row
   - A "Blocklist candidates" table appears next to "Connected peers"
@@ -282,7 +282,7 @@ The two new panels go at y=17 (between the Live row's last content at y=16 and t
 
   If the Grafana instance is not running locally, check using the smoke test script:
   ```bash
-  curl -sf http://localhost:3000/api/dashboards/uid/swarmguard-v1 | python3 -c "
+  curl -sf http://localhost:3000/api/dashboards/uid/federloom-v1 | python3 -c "
   import json, sys
   d = json.load(sys.stdin)
   panels = d['dashboard']['panels']
@@ -297,6 +297,6 @@ The two new panels go at y=17 (between the Live row's last content at y=16 and t
 - [ ] **Step 7: Commit**
 
   ```bash
-  git add deploy/grafana/provisioning/dashboards/swarmguard-dashboard.json
+  git add deploy/grafana/provisioning/dashboards/federloom-dashboard.json
   git commit -m "feat(grafana): add Connected peers and Blocklist candidates panels"
   ```

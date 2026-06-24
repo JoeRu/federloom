@@ -1,6 +1,6 @@
 # Plugins: wrapping existing tools
 
-SwarmGuard is built around two small interfaces so it can integrate existing
+FederLoom is built around two small interfaces so it can integrate existing
 honeypots and security tooling instead of reinventing them.
 
 ## `ingest.Source` — attack-signal producers

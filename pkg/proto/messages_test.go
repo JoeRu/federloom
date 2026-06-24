@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 func TestEventVouchRoundTrip(t *testing.T) {

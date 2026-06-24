@@ -1,7 +1,7 @@
 ---
 name: adversarial-test
 description: >
-  Use this skill whenever writing, updating, or reasoning about SwarmGuard's
+  Use this skill whenever writing, updating, or reasoning about FederLoom's
   security tests — poisoning, Sybil, patient-Sybil, compromised-high-trust-node,
   mass-whitelist, or federation feedback-loop scenarios. Trigger for "add a
   poisoning test", "test Sybil resistance", "how do we prove the anti-poisoning

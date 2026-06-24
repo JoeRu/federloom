@@ -27,5 +27,5 @@ jobs:
           file: deploy/docker/Dockerfile
           push: true
           tags: |
-            ghcr.io/joeru/swarmguard:latest
-            ghcr.io/joeru/swarmguard:${{ github.event.workflow_run.head_sha }}
+            ghcr.io/joeru/federloom:latest
+            ghcr.io/joeru/federloom:${{ github.event.workflow_run.head_sha }}

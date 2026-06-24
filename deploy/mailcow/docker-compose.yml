@@ -1,4 +1,4 @@
-# SwarmGuard sidecar for Mailcow.
+# FederLoom sidecar for Mailcow.
 #
 # network_mode: host matches the cs-firewall-bouncer pattern:
 #   - reaches CrowdSec LAPI at 127.0.0.1:8080 without touching the mailcow network
@@ -8,24 +8,24 @@
 #   1. Run ./bootstrap-mailcow.sh — registers CrowdSec bouncer, writes config.local.yaml
 #   2. Open port 7700 in the NixOS firewall if you want peers to initiate connections here
 services:
-  swarmguard:
+  federloom:
     build:
       context: ../..
       dockerfile: deploy/docker/Dockerfile
-    image: ghcr.io/joeru/swarmguard:latest
-    container_name: swarmguard-mailcow
+    image: ghcr.io/joeru/federloom:latest
+    container_name: federloom-mailcow
     restart: unless-stopped
     cap_add: [NET_ADMIN, NET_RAW]
     network_mode: host
     volumes:
-      - ./config.local.yaml:/etc/swarmguard/config.yaml:ro
-      - ./rules.yaml:/etc/swarmguard/rules.yaml:ro
-      - swarmguard-data:/var/lib/swarmguard
+      - ./config.local.yaml:/etc/federloom/config.yaml:ro
+      - ./rules.yaml:/etc/federloom/rules.yaml:ro
+      - federloom-data:/var/lib/federloom
       - /var/run/docker.sock:/var/run/docker.sock:ro
     command: >
-      --config /etc/swarmguard/config.yaml
+      --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
       --advertise /ip4/135.181.91.151/tcp/7700
 
 volumes:
-  swarmguard-data:
+  federloom-data:

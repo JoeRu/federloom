@@ -1,23 +1,23 @@
-# Local SwarmGuard peer for smoke-testing federation with the honeypot node.
+# Local FederLoom peer for smoke-testing federation with the honeypot node.
 # Usage:
 #   HONEYPOT_PEER_ADDR=/ip4/167.233.115.41/tcp/7700/p2p/<PEER_ID> \
 #     docker compose -f deploy/client/docker-compose.yml up
 services:
-  swarmguard:
-    image: ghcr.io/joeru/swarmguard:latest
-    container_name: swarmguard-client
+  federloom:
+    image: ghcr.io/joeru/federloom:latest
+    container_name: federloom-client
     restart: unless-stopped
     cap_add: [NET_ADMIN, NET_RAW]
     ports:
       - "7701:7700"
+      - "127.0.0.1:9101:9101"
     volumes:
-      - ./config.yaml:/etc/swarmguard/config.yaml:ro
-      - ./rules.yaml:/etc/swarmguard/rules.yaml:ro
-      - swarmguard-client-data:/var/lib/swarmguard
+      - ./config.yaml:/etc/federloom/config.yaml:ro
+      - ./rules.yaml:/etc/federloom/rules.yaml:ro
+      - federloom-client-data:/var/lib/federloom
     command: >
-      --config /etc/swarmguard/config.yaml
+      --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
-      --bootstrap ${HONEYPOT_PEER_ADDR}
 
 volumes:
-  swarmguard-client-data:
+  federloom-client-data:

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
+	"github.com/JoeRu/federloom/internal/identity"
 )
 
 func TestCertIssueVerifyRoundTrip(t *testing.T) {

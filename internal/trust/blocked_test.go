@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/JoeRu/swarmguard/internal/trust"
+	"github.com/JoeRu/federloom/internal/trust"
 )
 
 func TestLoadBlockedPeers_MissingFile(t *testing.T) {

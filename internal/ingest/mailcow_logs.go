@@ -9,8 +9,8 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // logFetcher retrieves container log lines since a given RFC3339 timestamp.

@@ -8,8 +8,8 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/multiformats/go-multiaddr"
 
-	"github.com/JoeRu/swarmguard/internal/transport"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/transport"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // testOpts returns options for a test node listening on a random localhost port.

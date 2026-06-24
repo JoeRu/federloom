@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 // listStoreStub implements StoreReader with three fixed IPs for blocklist tests:

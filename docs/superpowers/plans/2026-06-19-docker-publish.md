@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Publish `ghcr.io/joeru/swarmguard:latest` to GitHub Container Registry on every push to `main`, and update all deploy compose files to pull the pre-built image instead of building from source.
+**Goal:** Publish `ghcr.io/joeru/federloom:latest` to GitHub Container Registry on every push to `main`, and update all deploy compose files to pull the pre-built image instead of building from source.
 
-**Architecture:** A new `.github/workflows/docker.yml` workflow triggers on `main` push, logs in with `GITHUB_TOKEN`, and uses `docker/build-push-action` to build and push. All four compose files drop their `build:` blocks in favour of `image: ghcr.io/joeru/swarmguard:latest`. The Dockerfile gets a Go version fix (`1.25` → `1.22`) and OCI labels.
+**Architecture:** A new `.github/workflows/docker.yml` workflow triggers on `main` push, logs in with `GITHUB_TOKEN`, and uses `docker/build-push-action` to build and push. All four compose files drop their `build:` blocks in favour of `image: ghcr.io/joeru/federloom:latest`. The Dockerfile gets a Go version fix (`1.25` → `1.22`) and OCI labels.
 
 **Tech Stack:** GitHub Actions, `docker/login-action@v3`, `docker/build-push-action@v5`, GHCR (`ghcr.io`), Alpine Linux runtime image.
 
@@ -16,12 +16,12 @@
 |---|---|---|
 | `.github/workflows/docker.yml` | Create | Build-and-push workflow triggered on `main` push |
 | `deploy/docker/Dockerfile` | Modify | Fix `golang:1.25` → `golang:1.22`; add OCI labels |
-| `deploy/docker/docker-compose.yml` | Modify | Replace `build:` with `image: ghcr.io/joeru/swarmguard:latest` |
-| `deploy/mailcow/docker-compose.yml` | Modify | Replace `image: swarmguard:latest` + `build:` with `image: ghcr.io/joeru/swarmguard:latest` |
-| `deploy/wordpress/docker-compose.yml` | Modify | Replace `image: swarmguard:latest` + `build:` with `image: ghcr.io/joeru/swarmguard:latest` |
-| `deploy/honeypot/docker-compose.yml` | Modify | Replace `image: swarmguard:latest` + `build:` with `image: ghcr.io/joeru/swarmguard:latest` |
-| `deploy/mailcow/bootstrap-mailcow.sh` | Modify | Replace `docker build` step with `docker pull ghcr.io/joeru/swarmguard:latest` |
-| `deploy/wordpress/bootstrap-wordpress.sh` | Modify | Replace `docker build` step with `docker pull ghcr.io/joeru/swarmguard:latest` |
+| `deploy/docker/docker-compose.yml` | Modify | Replace `build:` with `image: ghcr.io/joeru/federloom:latest` |
+| `deploy/mailcow/docker-compose.yml` | Modify | Replace `image: federloom:latest` + `build:` with `image: ghcr.io/joeru/federloom:latest` |
+| `deploy/wordpress/docker-compose.yml` | Modify | Replace `image: federloom:latest` + `build:` with `image: ghcr.io/joeru/federloom:latest` |
+| `deploy/honeypot/docker-compose.yml` | Modify | Replace `image: federloom:latest` + `build:` with `image: ghcr.io/joeru/federloom:latest` |
+| `deploy/mailcow/bootstrap-mailcow.sh` | Modify | Replace `docker build` step with `docker pull ghcr.io/joeru/federloom:latest` |
+| `deploy/wordpress/bootstrap-wordpress.sh` | Modify | Replace `docker build` step with `docker pull ghcr.io/joeru/federloom:latest` |
 
 ---
 
@@ -40,17 +40,17 @@ Replace the full content of `deploy/docker/Dockerfile` with:
 FROM golang:1.22 AS build
 WORKDIR /src
 COPY . .
-RUN CGO_ENABLED=0 go build -o /out/swarmd ./cmd/swarmd \
- && CGO_ENABLED=0 go build -o /out/swarmctl ./cmd/swarmctl
+RUN CGO_ENABLED=0 go build -o /out/federloomd ./cmd/federloomd \
+ && CGO_ENABLED=0 go build -o /out/federloomctl ./cmd/federloomctl
 
 # Runtime — needs iptables/ipset tooling for the enforce backends
 FROM alpine:3.20
 RUN apk add --no-cache iptables ipset nftables docker-cli
-COPY --from=build /out/swarmd /usr/local/bin/swarmd
-COPY --from=build /out/swarmctl /usr/local/bin/swarmctl
-LABEL org.opencontainers.image.source="https://github.com/JoeRu/swarmguard"
+COPY --from=build /out/federloomd /usr/local/bin/federloomd
+COPY --from=build /out/federloomctl /usr/local/bin/federloomctl
+LABEL org.opencontainers.image.source="https://github.com/JoeRu/federloom"
 LABEL org.opencontainers.image.description="Federated IP reputation daemon"
-ENTRYPOINT ["/usr/local/bin/swarmd"]
+ENTRYPOINT ["/usr/local/bin/federloomd"]
 ```
 
 - [ ] **Step 2: Verify the Go version change**
@@ -92,7 +92,7 @@ jobs:
           context: .
           file: deploy/docker/Dockerfile
           push: true
-          tags: ghcr.io/joeru/swarmguard:latest
+          tags: ghcr.io/joeru/federloom:latest
 ```
 
 - [ ] **Step 4: Verify the workflow file exists and has the right trigger**
@@ -144,29 +144,29 @@ Replace the full content with:
 ```yaml
 # Standalone deployment (outside Mailcow).
 services:
-  swarmguard:
-    image: ghcr.io/joeru/swarmguard:latest
-    container_name: swarmguard
+  federloom:
+    image: ghcr.io/joeru/federloom:latest
+    container_name: federloom
     restart: unless-stopped
     cap_add: [ NET_ADMIN, NET_RAW ]
     network_mode: host
     volumes:
-      - ./config.yaml:/etc/swarmguard/config.yaml:ro
-      - swarmguard-data:/var/lib/swarmguard
+      - ./config.yaml:/etc/federloom/config.yaml:ro
+      - federloom-data:/var/lib/federloom
 volumes:
-  swarmguard-data:
+  federloom-data:
 ```
 
 ### `deploy/mailcow/docker-compose.yml`
 
-This file has `image: swarmguard:latest` (local tag) AND a `build:` block. Replace both with the GHCR image. All other fields are unchanged.
+This file has `image: federloom:latest` (local tag) AND a `build:` block. Replace both with the GHCR image. All other fields are unchanged.
 
 - [ ] **Step 2: Update `deploy/mailcow/docker-compose.yml`**
 
 Replace the full content with:
 
 ```yaml
-# SwarmGuard sidecar for Mailcow.
+# FederLoom sidecar for Mailcow.
 #
 # network_mode: host matches the cs-firewall-bouncer pattern:
 #   - reaches CrowdSec LAPI at 127.0.0.1:8080 without touching the mailcow network
@@ -175,24 +175,24 @@ Replace the full content with:
 # Before starting:
 #   1. Open port 7700 in the NixOS firewall if you want peers to initiate connections here
 services:
-  swarmguard:
-    image: ghcr.io/joeru/swarmguard:latest
-    container_name: swarmguard-mailcow
+  federloom:
+    image: ghcr.io/joeru/federloom:latest
+    container_name: federloom-mailcow
     restart: unless-stopped
     cap_add: [NET_ADMIN, NET_RAW]
     network_mode: host
     volumes:
-      - ./config.local.yaml:/etc/swarmguard/config.yaml:ro
-      - ./rules.yaml:/etc/swarmguard/rules.yaml:ro
-      - swarmguard-data:/var/lib/swarmguard
+      - ./config.local.yaml:/etc/federloom/config.yaml:ro
+      - ./rules.yaml:/etc/federloom/rules.yaml:ro
+      - federloom-data:/var/lib/federloom
       - /var/run/docker.sock:/var/run/docker.sock:ro
     command: >
-      --config /etc/swarmguard/config.yaml
+      --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
       --advertise /ip4/135.181.91.151/tcp/7700
 
 volumes:
-  swarmguard-data:
+  federloom-data:
 ```
 
 Note: the comment referencing `bootstrap-mailcow.sh` step 1 ("builds image") is removed since the image is now pre-built.
@@ -204,7 +204,7 @@ Note: the comment referencing `bootstrap-mailcow.sh` step 1 ("builds image") is 
 Replace the full content with:
 
 ```yaml
-# SwarmGuard sidecar for WordPress/Traefik stack.
+# FederLoom sidecar for WordPress/Traefik stack.
 #
 # network_mode: host is required so the container can:
 #   - reach CrowdSec LAPI at 172.21.0.3:8080 (internal traefik Docker bridge)
@@ -212,28 +212,28 @@ Replace the full content with:
 #
 # The CrowdSec container is NOT exposed on host ports; it lives on the internal
 # traefik network (172.21.0.0/16). The host has 172.21.0.1 as the bridge gateway,
-# so network_mode: host lets SwarmGuard reach 172.21.0.3:8080 directly.
+# so network_mode: host lets FederLoom reach 172.21.0.3:8080 directly.
 #
 # Before starting:
 #   1. Open port 7700 in the NixOS firewall if you want peers to initiate connections here
 services:
-  swarmguard:
-    image: ghcr.io/joeru/swarmguard:latest
-    container_name: swarmguard-wordpress
+  federloom:
+    image: ghcr.io/joeru/federloom:latest
+    container_name: federloom-wordpress
     restart: unless-stopped
     cap_add: [NET_ADMIN, NET_RAW]
     network_mode: host
     volumes:
-      - ./config.local.yaml:/etc/swarmguard/config.yaml:ro
-      - ./rules.yaml:/etc/swarmguard/rules.yaml:ro
-      - swarmguard-data:/var/lib/swarmguard
+      - ./config.local.yaml:/etc/federloom/config.yaml:ro
+      - ./rules.yaml:/etc/federloom/rules.yaml:ro
+      - federloom-data:/var/lib/federloom
     command: >
-      --config /etc/swarmguard/config.yaml
+      --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
       --advertise /ip4/65.108.62.108/tcp/7700
 
 volumes:
-  swarmguard-data:
+  federloom-data:
 ```
 
 ### `deploy/honeypot/docker-compose.yml`
@@ -243,7 +243,7 @@ volumes:
 Replace the full content with:
 
 ```yaml
-# Honeypot stack: Cowrie (SSH) + OpenCanary (SMTP/IMAP) + SwarmGuard node.
+# Honeypot stack: Cowrie (SSH) + OpenCanary (SMTP/IMAP) + FederLoom node.
 # Deploy via deploy/honeypot/bootstrap.sh — do not run directly without reading that script.
 services:
   cowrie:
@@ -266,9 +266,9 @@ services:
       - opencanary-logs:/var/log/opencanary
       - ./opencanary.json:/etc/opencanaryd/opencanary.conf:ro
 
-  swarmguard:
-    image: ghcr.io/joeru/swarmguard:latest
-    container_name: swarmguard
+  federloom:
+    image: ghcr.io/joeru/federloom:latest
+    container_name: federloom
     restart: unless-stopped
     cap_add: [NET_ADMIN, NET_RAW]
     ports:
@@ -276,13 +276,13 @@ services:
       - "9101:9101"
       - "9102:9102"
     volumes:
-      - ./config.yaml:/etc/swarmguard/config.yaml:ro
-      - ./rules.yaml:/etc/swarmguard/rules.yaml:ro
+      - ./config.yaml:/etc/federloom/config.yaml:ro
+      - ./rules.yaml:/etc/federloom/rules.yaml:ro
       - cowrie-logs:/var/log/cowrie:ro
       - opencanary-logs:/var/log/opencanary:ro
-      - swarmguard-data:/var/lib/swarmguard
+      - federloom-data:/var/lib/federloom
     command: >
-      --config /etc/swarmguard/config.yaml
+      --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
       --advertise /ip4/213.199.36.212/tcp/7700
     depends_on:
@@ -292,7 +292,7 @@ services:
 volumes:
   cowrie-logs:
   opencanary-logs:
-  swarmguard-data:
+  federloom-data:
 ```
 
 - [ ] **Step 5: Verify no `build:` blocks remain in any compose file**
@@ -311,12 +311,12 @@ grep -r "image:" deploy/*/docker-compose.yml
 
 Expected output (order may vary):
 ```
-deploy/docker/docker-compose.yml:    image: ghcr.io/joeru/swarmguard:latest
-deploy/mailcow/docker-compose.yml:    image: ghcr.io/joeru/swarmguard:latest
-deploy/wordpress/docker-compose.yml:    image: ghcr.io/joeru/swarmguard:latest
+deploy/docker/docker-compose.yml:    image: ghcr.io/joeru/federloom:latest
+deploy/mailcow/docker-compose.yml:    image: ghcr.io/joeru/federloom:latest
+deploy/wordpress/docker-compose.yml:    image: ghcr.io/joeru/federloom:latest
 deploy/honeypot/docker-compose.yml:    image: cowrie/cowrie:latest
 deploy/honeypot/docker-compose.yml:    image: thinkst/opencanary:latest
-deploy/honeypot/docker-compose.yml:    image: ghcr.io/joeru/swarmguard:latest
+deploy/honeypot/docker-compose.yml:    image: ghcr.io/joeru/federloom:latest
 ```
 
 - [ ] **Step 7: Run the Go test suite to confirm nothing is broken**
@@ -334,7 +334,7 @@ git add deploy/docker/docker-compose.yml \
         deploy/mailcow/docker-compose.yml \
         deploy/wordpress/docker-compose.yml \
         deploy/honeypot/docker-compose.yml
-git commit -m "deploy: use ghcr.io/joeru/swarmguard:latest in all compose files"
+git commit -m "deploy: use ghcr.io/joeru/federloom:latest in all compose files"
 ```
 
 ---
@@ -345,14 +345,14 @@ git commit -m "deploy: use ghcr.io/joeru/swarmguard:latest in all compose files"
 - Modify: `deploy/mailcow/bootstrap-mailcow.sh`
 - Modify: `deploy/wordpress/bootstrap-wordpress.sh`
 
-Both scripts currently build the image on the remote server (step 3) with `docker build`. Replace this step with `docker pull ghcr.io/joeru/swarmguard:latest`. The rsync in step 2 is still needed for config files, scripts, and rules — only the build step changes.
+Both scripts currently build the image on the remote server (step 3) with `docker build`. Replace this step with `docker pull ghcr.io/joeru/federloom:latest`. The rsync in step 2 is still needed for config files, scripts, and rules — only the build step changes.
 
 ### `deploy/mailcow/bootstrap-mailcow.sh`
 
 Current step 3 (lines 46-48):
 ```bash
-echo "==> [3/6] Building swarmguard image on server"
-sudo_run docker build -t swarmguard:latest \
+echo "==> [3/6] Building federloom image on server"
+sudo_run docker build -t federloom:latest \
   -f "$REMOTE_DIR/deploy/docker/Dockerfile" "$REMOTE_DIR" -q
 ```
 
@@ -360,8 +360,8 @@ sudo_run docker build -t swarmguard:latest \
 
 Replace those three lines with:
 ```bash
-echo "==> [3/6] Pulling swarmguard image"
-sudo_run docker pull ghcr.io/joeru/swarmguard:latest
+echo "==> [3/6] Pulling federloom image"
+sudo_run docker pull ghcr.io/joeru/federloom:latest
 ```
 
 - [ ] **Step 2: Verify the change**
@@ -372,16 +372,16 @@ grep -A2 "\[3/6\]" deploy/mailcow/bootstrap-mailcow.sh
 
 Expected output:
 ```
-echo "==> [3/6] Pulling swarmguard image"
-sudo_run docker pull ghcr.io/joeru/swarmguard:latest
+echo "==> [3/6] Pulling federloom image"
+sudo_run docker pull ghcr.io/joeru/federloom:latest
 ```
 
 ### `deploy/wordpress/bootstrap-wordpress.sh`
 
 Current step 3 (lines 49-51):
 ```bash
-echo "==> [3/6] Building swarmguard image on server"
-ssh_run docker build -t swarmguard:latest \
+echo "==> [3/6] Building federloom image on server"
+ssh_run docker build -t federloom:latest \
   -f "$REMOTE_DIR/deploy/docker/Dockerfile" "$REMOTE_DIR" -q
 ```
 
@@ -389,8 +389,8 @@ ssh_run docker build -t swarmguard:latest \
 
 Replace those three lines with:
 ```bash
-echo "==> [3/6] Pulling swarmguard image"
-ssh_run docker pull ghcr.io/joeru/swarmguard:latest
+echo "==> [3/6] Pulling federloom image"
+ssh_run docker pull ghcr.io/joeru/federloom:latest
 ```
 
 - [ ] **Step 4: Verify the change**
@@ -401,8 +401,8 @@ grep -A2 "\[3/6\]" deploy/wordpress/bootstrap-wordpress.sh
 
 Expected output:
 ```
-echo "==> [3/6] Pulling swarmguard image"
-ssh_run docker pull ghcr.io/joeru/swarmguard:latest
+echo "==> [3/6] Pulling federloom image"
+ssh_run docker pull ghcr.io/joeru/federloom:latest
 ```
 
 - [ ] **Step 5: Verify no `docker build` references remain in either bootstrap script**
@@ -425,7 +425,7 @@ Expected: all packages pass.
 
 ```bash
 git add deploy/mailcow/bootstrap-mailcow.sh deploy/wordpress/bootstrap-wordpress.sh
-git commit -m "deploy: pull swarmguard image from GHCR instead of building on server"
+git commit -m "deploy: pull federloom image from GHCR instead of building on server"
 ```
 
 ---

@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Guarantee every IP string inside SwarmGuard is in canonical `net/netip` form — with IPv4-mapped IPv6 collapsed to IPv4 — before it touches any store, bloom filter, whitelist, signature, or enforcement call.
+**Goal:** Guarantee every IP string inside FederLoom is in canonical `net/netip` form — with IPv4-mapped IPv6 collapsed to IPv4 — before it touches any store, bloom filter, whitelist, signature, or enforcement call.
 
 **Architecture:** Normalization is enforced at the two mandatory entry points in `node.go` (local and remote event handlers). All packages that parse IPs or CIDRs independently migrate from `net.IP`/`net.IPNet` to `netip.Addr`/`netip.Prefix` so that IPv4-mapped forms and non-canonical representations are handled uniformly at every callsite.
 
@@ -217,7 +217,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 ```
 
@@ -359,7 +359,7 @@ import (
 
 	libp2pcrypto "github.com/libp2p/go-libp2p/core/crypto"
 
-	"github.com/JoeRu/swarmguard/internal/api"
+	"github.com/JoeRu/federloom/internal/api"
 	// ... rest of imports unchanged
 )
 ```

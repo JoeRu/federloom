@@ -4,13 +4,13 @@
 
 **Goal:** Make the federation layer correct (OriginTrace loop guard, trust discount, event signing, defederation) and discoverable (DHT rendezvous + signed relay list, two opt-out flags).
 
-**Architecture:** Five independent features land as six tasks. Config additions land first so every subsequent task can reference the new fields. Event signing adds a `SignEvent`/`VerifyEventSig` function pair in `internal/identity/` and is wired into `node.processLocal`/`node.ProcessRemote`. OriginTrace wiring + federation discount are purely node.go changes. Defederation adds a hot-reloaded blocked-peers list to `internal/trust/` and a `swarmctl trust block/unblock` command. Federation discovery is a new `internal/discovery/` package wired into the node.
+**Architecture:** Five independent features land as six tasks. Config additions land first so every subsequent task can reference the new fields. Event signing adds a `SignEvent`/`VerifyEventSig` function pair in `internal/identity/` and is wired into `node.processLocal`/`node.ProcessRemote`. OriginTrace wiring + federation discount are purely node.go changes. Defederation adds a hot-reloaded blocked-peers list to `internal/trust/` and a `federloomctl trust block/unblock` command. Federation discovery is a new `internal/discovery/` package wired into the node.
 
 **Tech Stack:** Go 1.25, libp2p v0.48 (`go-libp2p/p2p/discovery/routing` + `util` sub-packages for DHT rendezvous), `//go:embed` for the bundled relay list.
 
 ## Global Constraints
 
-- Module path: `github.com/JoeRu/swarmguard`
+- Module path: `github.com/JoeRu/federloom`
 - Go version: 1.25 (see `go.mod`)
 - All new config fields must have defaults in `config.Defaults()` and must be operator-overridable (spec Leitprinzip 7)
 - `internal/` packages are private; only `pkg/` is the public wire contract
@@ -32,7 +32,7 @@
 | Create | `internal/trust/blocked.go` | `LoadBlockedPeers`, `SaveBlockedPeers`; `IsBlocked` method on `trust.Store` |
 | Create | `internal/trust/blocked_test.go` | Unit tests for blocked peer list |
 | Modify | `internal/trust/store.go` | Add `blockedPath`, `blocked`, `blockedStat` fields; extend `maybeReload`; extend `NewStore` signature |
-| Modify | `cmd/swarmctl/trust.go` | Add `block` / `unblock` subcommands |
+| Modify | `cmd/federloomctl/trust.go` | Add `block` / `unblock` subcommands |
 | Create | `internal/resources/resources.go` | `//go:embed relay-list.json` → `var RelayList []byte` |
 | Create | `internal/resources/relay-list.json` | Bundled bootstrap relay list (empty array for now) |
 | Create | `internal/discovery/discovery.go` | `Manager` struct, `New`, `Start` |
@@ -212,8 +212,8 @@ import (
 
 	libp2pcrypto "github.com/libp2p/go-libp2p/core/crypto"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 func makeTestKey(t *testing.T) libp2pcrypto.PrivKey {
@@ -313,14 +313,14 @@ import (
 	libp2pcrypto "github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // eventMessage is the canonical byte string signed to authenticate an event.
-// Domain-separated with "swarmguard-event-v1" so signatures cannot be replayed
+// Domain-separated with "federloom-event-v1" so signatures cannot be replayed
 // across protocols. Fields joined by "|"; none of them can contain "|".
 func eventMessage(e proto.Event) []byte {
-	return []byte("swarmguard-event-v1|" +
+	return []byte("federloom-event-v1|" +
 		e.IP + "|" +
 		e.Reason + "|" +
 		e.Timestamp.UTC().Format(time.RFC3339Nano) + "|" +
@@ -661,7 +661,7 @@ git commit -m "feat(node): OriginTrace loop guard + federation discount per hop"
 - Create: `internal/trust/blocked_test.go`
 - Modify: `internal/trust/store.go` (add `blockedPath`, `blocked`, `blockedStat` fields; extend `maybeReload`; update `NewStore` signature)
 - Modify: `internal/node/node.go` (update `trust.NewStore` call; add IsBlocked check in `ProcessRemote`)
-- Modify: `cmd/swarmctl/trust.go` (add `block` / `unblock` subcommands)
+- Modify: `cmd/federloomctl/trust.go` (add `block` / `unblock` subcommands)
 
 **Interfaces:**
 - Consumes: `config.TrustConfig.BlockedPeersFile` + `(*Config).TrustBlockedPeersFile()` (Task 1), `trust.atomicWrite` (existing unexported — use `trust.SaveBlockedPeers`)
@@ -683,7 +683,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/JoeRu/swarmguard/internal/trust"
+	"github.com/JoeRu/federloom/internal/trust"
 )
 
 func TestLoadBlockedPeers_MissingFile(t *testing.T) {
@@ -910,9 +910,9 @@ if n.trust.IsBlocked(re.From) {
 }
 ```
 
-- [ ] **Step 6: Add swarmctl trust block/unblock**
+- [ ] **Step 6: Add federloomctl trust block/unblock**
 
-In `cmd/swarmctl/trust.go`, extend `cmdTrust` to handle `block` and `unblock`:
+In `cmd/federloomctl/trust.go`, extend `cmdTrust` to handle `block` and `unblock`:
 
 Find the switch statement in `cmdTrust` and add two cases before `default`:
 
@@ -933,7 +933,7 @@ func trustBlock(args []string) error {
 		return err
 	}
 	if fset.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl trust block PEER_ID")
+		return fmt.Errorf("usage: federloomctl trust block PEER_ID")
 	}
 	peerID := fset.Arg(0)
 	cfg, err := loadCfg()
@@ -955,7 +955,7 @@ func trustBlock(args []string) error {
 	if err := trust.SaveBlockedPeers(path, peers); err != nil {
 		return fmt.Errorf("save blocked peers: %w", err)
 	}
-	fmt.Printf("blocked peer %s — swarmd will reload within 10s\n", peerID)
+	fmt.Printf("blocked peer %s — federloomd will reload within 10s\n", peerID)
 	return nil
 }
 
@@ -966,7 +966,7 @@ func trustUnblock(args []string) error {
 		return err
 	}
 	if fset.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl trust unblock PEER_ID")
+		return fmt.Errorf("usage: federloomctl trust unblock PEER_ID")
 	}
 	peerID := fset.Arg(0)
 	cfg, err := loadCfg()
@@ -991,23 +991,23 @@ func trustUnblock(args []string) error {
 	if err := trust.SaveBlockedPeers(path, filtered); err != nil {
 		return fmt.Errorf("save blocked peers: %w", err)
 	}
-	fmt.Printf("unblocked peer %s — swarmd will reload within 10s\n", peerID)
+	fmt.Printf("unblocked peer %s — federloomd will reload within 10s\n", peerID)
 	return nil
 }
 ```
 
-Update the usage string in `cmd/swarmctl/main.go` — find the `trust` section and add:
+Update the usage string in `cmd/federloomctl/main.go` — find the `trust` section and add:
 
 ```
-  swarmctl trust block PEER_ID
-  swarmctl trust unblock PEER_ID
+  federloomctl trust block PEER_ID
+  federloomctl trust unblock PEER_ID
 ```
 
 - [ ] **Step 7: Build and run all tests**
 
 ```bash
 make build
-go test ./internal/trust/... ./internal/node/... ./cmd/swarmctl/... -v
+go test ./internal/trust/... ./internal/node/... ./cmd/federloomctl/... -v
 ```
 
 Expected: all tests pass.
@@ -1017,8 +1017,8 @@ Expected: all tests pass.
 ```bash
 git add internal/trust/blocked.go internal/trust/blocked_test.go \
         internal/trust/store.go internal/node/node.go \
-        cmd/swarmctl/trust.go cmd/swarmctl/main.go
-git commit -m "feat(trust): defederation — blocked-peers hot-reload + swarmctl trust block/unblock"
+        cmd/federloomctl/trust.go cmd/federloomctl/main.go
+git commit -m "feat(trust): defederation — blocked-peers hot-reload + federloomctl trust block/unblock"
 ```
 
 ---
@@ -1082,8 +1082,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/JoeRu/swarmguard/internal/discovery"
-	"github.com/JoeRu/swarmguard/internal/resources"
+	"github.com/JoeRu/federloom/internal/discovery"
+	"github.com/JoeRu/federloom/internal/resources"
 )
 
 func TestLoadRelayList_Embedded(t *testing.T) {
@@ -1217,13 +1217,13 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/multiformats/go-multiaddr"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/resources"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/resources"
 )
 
-// rendezvousPoint is the well-known DHT key under which SwarmGuard nodes advertise
+// rendezvousPoint is the well-known DHT key under which FederLoom nodes advertise
 // themselves (spec §14.2). All nodes on the same topic find each other here.
-const rendezvousPoint = "/swarmguard/v1/peers"
+const rendezvousPoint = "/federloom/v1/peers"
 
 // Manager drives peer discovery: DHT rendezvous advertisement + relay list bootstrap.
 type Manager struct {
@@ -1341,7 +1341,7 @@ func (n *Node) DHT() *dht.IpfsDHT { return n.dht }
 Add import to `internal/node/node.go`:
 
 ```go
-"github.com/JoeRu/swarmguard/internal/discovery"
+"github.com/JoeRu/federloom/internal/discovery"
 ```
 
 Add `discovery *discovery.Manager` field to the `Node` struct after `dnsbl`.
@@ -1436,7 +1436,7 @@ git commit -m "feat(discovery): DHT rendezvous + relay list bootstrap; wire into
 | Event sig verification (drop on bad sig) | Task 2 — `ProcessRemote` |
 | Defederation: blocked-peers hot-reload | Task 4 — `trust.Store` |
 | Defederation: drop events from blocked peer | Task 4 — `ProcessRemote` |
-| `swarmctl trust block / unblock` | Task 4 — `cmd/swarmctl/trust.go` |
+| `federloomctl trust block / unblock` | Task 4 — `cmd/federloomctl/trust.go` |
 | DHT rendezvous advertisement | Task 5 — `discovery.Manager` |
 | Relay list fallback | Task 5 — `discovery.LoadRelayList` |
 | `discovery.advertise` flag | Task 5 — config + Manager.Start |

@@ -7,7 +7,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 	_ "modernc.org/sqlite"
 )
 

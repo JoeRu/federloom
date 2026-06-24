@@ -6,11 +6,11 @@
 
 ## Problem
 
-External tools (Postfix, nginx, fail2ban, etc.) cannot query SwarmGuard's reputation data using standard interfaces. They either need the full gossip stream (too heavy) or custom HTTP API integration (non-standard). A DNSBL interface lets any tool query "is this IP blocked?" with a single DNS lookup — the same protocol used by every major spam/abuse blocklist.
+External tools (Postfix, nginx, fail2ban, etc.) cannot query FederLoom's reputation data using standard interfaces. They either need the full gossip stream (too heavy) or custom HTTP API integration (non-standard). A DNSBL interface lets any tool query "is this IP blocked?" with a single DNS lookup — the same protocol used by every major spam/abuse blocklist.
 
 ## Goal
 
-Embed a DNS DNSBL server in swarmd that answers `A` and `TXT` queries from the local reputation store. Answers are local-only (no fan-out to the swarm). The server is opt-in (disabled when `dnsbl.addr == ""`). External tools configure SwarmGuard's DNS port as their DNSBL source.
+Embed a DNS DNSBL server in federloomd that answers `A` and `TXT` queries from the local reputation store. Answers are local-only (no fan-out to the swarm). The server is opt-in (disabled when `dnsbl.addr == ""`). External tools configure FederLoom's DNS port as their DNSBL source.
 
 ## Design
 
@@ -130,11 +130,11 @@ n.dnsbl.Start(ctx)
 ```yaml
 dnsbl:
   addr: ":5353"
-  zone: "dnsbl.swarmguard.mail."
+  zone: "dnsbl.federloom.mail."
   # min_score: 0   # defaults to reputation.block_threshold
 ```
 
-Same pattern for `deploy/wordpress/config.yaml` with zone `dnsbl.swarmguard.web.`.
+Same pattern for `deploy/wordpress/config.yaml` with zone `dnsbl.federloom.web.`.
 
 ### Testing
 
@@ -152,7 +152,7 @@ No mocking needed — the DNS client/server round-trip is fast and deterministic
 - Fan-out to swarm when IP is unknown locally
 - DNS-over-HTTPS or DNS-over-TLS
 - Authoritative NS/SOA records (not needed for DNSBL-only use)
-- `swarmctl query` CLI command (existing `/api/v1/score/{ip}` HTTP endpoint covers node queries)
+- `federloomctl query` CLI command (existing `/api/v1/score/{ip}` HTTP endpoint covers node queries)
 
 ## Files Changed
 

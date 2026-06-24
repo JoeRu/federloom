@@ -16,8 +16,8 @@ const (
 	ModeRelay
 )
 
-// DefaultTopic is the gossipsub topic for SwarmGuard events.
-const DefaultTopic = "swarmguard/events/v0"
+// DefaultTopic is the gossipsub topic for FederLoom events.
+const DefaultTopic = "federloom/events/v0"
 
 // Options configures a transport Node.
 type Options struct {

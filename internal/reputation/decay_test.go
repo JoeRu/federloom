@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/reputation"
+	"github.com/JoeRu/federloom/internal/reputation"
 )
 
 func TestDecayAtZeroElapsed(t *testing.T) {

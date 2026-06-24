@@ -1,13 +1,13 @@
 # Standalone deployment (outside Mailcow).
 services:
-  swarmguard:
-    image: ghcr.io/joeru/swarmguard:latest
-    container_name: swarmguard
+  federloom:
+    image: ghcr.io/joeru/federloom:latest
+    container_name: federloom
     restart: unless-stopped
     cap_add: [ NET_ADMIN, NET_RAW ]
     network_mode: host
     volumes:
-      - ./config.yaml:/etc/swarmguard/config.yaml:ro
-      - swarmguard-data:/var/lib/swarmguard
+      - ./config.yaml:/etc/federloom/config.yaml:ro
+      - federloom-data:/var/lib/federloom
 volumes:
-  swarmguard-data:
+  federloom-data:

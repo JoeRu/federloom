@@ -1,11 +1,11 @@
 package trust
 
 import (
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
-// Bundle is the offline exchange format produced by `swarmctl trust export`
-// and consumed by `swarmctl trust import`: a Person's public identity plus
+// Bundle is the offline exchange format produced by `federloomctl trust export`
+// and consumed by `federloomctl trust import`: a Person's public identity plus
 // every peer-cert they have issued. The importer chooses the local Person
 // name; Label is the exporter's suggestion.
 type Bundle struct {

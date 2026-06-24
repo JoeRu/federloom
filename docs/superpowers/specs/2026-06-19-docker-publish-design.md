@@ -1,6 +1,6 @@
 # Docker Image Publishing Design
 
-**Feature:** GitHub Actions workflow to build and publish SwarmGuard Docker images to GHCR  
+**Feature:** GitHub Actions workflow to build and publish FederLoom Docker images to GHCR  
 **Date:** 2026-06-19  
 **Status:** Approved
 
@@ -8,11 +8,11 @@
 
 ## Problem
 
-Operators who want to run SwarmGuard currently have to build from source (`docker build` or `docker compose up --build`). This creates friction for new operators and makes deployments slower. Pre-built images on a public registry let operators start with a single `docker compose up`.
+Operators who want to run FederLoom currently have to build from source (`docker build` or `docker compose up --build`). This creates friction for new operators and makes deployments slower. Pre-built images on a public registry let operators start with a single `docker compose up`.
 
 ## Goal
 
-- Publish `ghcr.io/joeru/swarmguard:latest` on every push to `main`
+- Publish `ghcr.io/joeru/federloom:latest` on every push to `main`
 - Update all deploy compose files to pull the pre-built image instead of building from source
 - Fix the Dockerfile's Go version to match CI (`1.22`)
 - Add OCI image labels for discoverability
@@ -51,7 +51,7 @@ jobs:
           context: .
           file: deploy/docker/Dockerfile
           push: true
-          tags: ghcr.io/joeru/swarmguard:latest
+          tags: ghcr.io/joeru/federloom:latest
 ```
 
 Build context is the repo root (`.`), matching the existing compose `context: ../..` behaviour.
@@ -68,7 +68,7 @@ Two changes:
 2. Add OCI labels to the runtime stage:
 
 ```dockerfile
-LABEL org.opencontainers.image.source="https://github.com/JoeRu/swarmguard"
+LABEL org.opencontainers.image.source="https://github.com/JoeRu/federloom"
 LABEL org.opencontainers.image.description="Federated IP reputation daemon"
 ```
 
@@ -79,17 +79,17 @@ Full updated Dockerfile:
 FROM golang:1.22 AS build
 WORKDIR /src
 COPY . .
-RUN CGO_ENABLED=0 go build -o /out/swarmd ./cmd/swarmd \
- && CGO_ENABLED=0 go build -o /out/swarmctl ./cmd/swarmctl
+RUN CGO_ENABLED=0 go build -o /out/federloomd ./cmd/federloomd \
+ && CGO_ENABLED=0 go build -o /out/federloomctl ./cmd/federloomctl
 
 # Runtime — needs iptables/ipset tooling for the enforce backends
 FROM alpine:3.20
 RUN apk add --no-cache iptables ipset nftables docker-cli
-COPY --from=build /out/swarmd /usr/local/bin/swarmd
-COPY --from=build /out/swarmctl /usr/local/bin/swarmctl
-LABEL org.opencontainers.image.source="https://github.com/JoeRu/swarmguard"
+COPY --from=build /out/federloomd /usr/local/bin/federloomd
+COPY --from=build /out/federloomctl /usr/local/bin/federloomctl
+LABEL org.opencontainers.image.source="https://github.com/JoeRu/federloom"
 LABEL org.opencontainers.image.description="Federated IP reputation daemon"
-ENTRYPOINT ["/usr/local/bin/swarmd"]
+ENTRYPOINT ["/usr/local/bin/federloomd"]
 ```
 
 ---
@@ -103,30 +103,30 @@ Four compose files are updated to pull from GHCR instead of building from source
 ```yaml
 # Before
 services:
-  swarmguard:
+  federloom:
     build: { context: ../.., dockerfile: deploy/docker/Dockerfile }
 
 # After
 services:
-  swarmguard:
-    image: ghcr.io/joeru/swarmguard:latest
+  federloom:
+    image: ghcr.io/joeru/federloom:latest
 ```
 
-**Pattern B** (`deploy/mailcow`, `deploy/wordpress`, `deploy/honeypot`): have both `image: swarmguard:latest` (local tag) and `build:` (Docker's build-and-tag pattern). Replace both with the GHCR image:
+**Pattern B** (`deploy/mailcow`, `deploy/wordpress`, `deploy/honeypot`): have both `image: federloom:latest` (local tag) and `build:` (Docker's build-and-tag pattern). Replace both with the GHCR image:
 
 ```yaml
 # Before
 services:
-  swarmguard:
-    image: swarmguard:latest
+  federloom:
+    image: federloom:latest
     build:
       context: ../..
       dockerfile: deploy/docker/Dockerfile
 
 # After
 services:
-  swarmguard:
-    image: ghcr.io/joeru/swarmguard:latest
+  federloom:
+    image: ghcr.io/joeru/federloom:latest
 ```
 
 **Files affected:**

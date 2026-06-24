@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Guarantee that every IP string inside SwarmGuard is in canonical `net/netip` form before it touches any store, bloom filter, whitelist, signature, or enforcement call.
+**Goal:** Guarantee that every IP string inside FederLoom is in canonical `net/netip` form before it touches any store, bloom filter, whitelist, signature, or enforcement call.
 
 **Architecture:** Normalization happens at the two mandatory entry points in `node.go` (local and remote event handlers). All other callsites that hold parsed IP/CIDR state migrate from `net.IP`/`net.IPNet` to `netip.Addr`/`netip.Prefix`. IPv4-mapped IPv6 addresses (`::ffff:x.x.x.x`) are collapsed to their IPv4 form via `.Unmap()`.
 

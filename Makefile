@@ -1,8 +1,8 @@
 .PHONY: build test lint fmt adversarial run-node clean smoke
 
 build:        ## build daemon + CLI
-	go build -o bin/swarmd ./cmd/swarmd
-	go build -o bin/swarmctl ./cmd/swarmctl
+	go build -o bin/federloomd ./cmd/federloomd
+	go build -o bin/federloomctl ./cmd/federloomctl
 
 test:         ## unit + integration tests
 	go test ./...

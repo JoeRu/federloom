@@ -12,9 +12,9 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/trust"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/trust"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 func cmdStatus(args []string) error {
@@ -34,7 +34,7 @@ func cmdStatus(args []string) error {
 	fmt.Println("NODE")
 	nodeKeyPath := cfg.NodeKeyFile()
 	if _, err := os.Stat(nodeKeyPath); errors.Is(err, fs.ErrNotExist) {
-		fmt.Println("  peer ID:     not configured — run swarmctl setup")
+		fmt.Println("  peer ID:     not configured — run federloomctl setup")
 		fmt.Printf("  node key:    %s  ✗\n", nodeKeyPath)
 	} else {
 		nodePriv, err := identity.LoadOrCreateNodeKey(nodeKeyPath)
@@ -54,7 +54,7 @@ func cmdStatus(args []string) error {
 	fmt.Println("IDENTITY")
 	personPriv, personErr := identity.LoadPersonKey(cfg.TrustPersonKeyFile())
 	if personErr != nil {
-		fmt.Println("  not configured — run swarmctl setup")
+		fmt.Println("  not configured — run federloomctl setup")
 		fmt.Println()
 	} else {
 		pub := identity.PersonPub(personPriv)
@@ -79,7 +79,7 @@ func cmdStatus(args []string) error {
 			fmt.Printf("  peer cert:   valid until %s  (%dd remaining)\n",
 				cert.ValidUntil.Format("2006-01-02"), days)
 		} else {
-			fmt.Println("  peer cert:   not found — run swarmctl setup")
+			fmt.Println("  peer cert:   not found — run federloomctl setup")
 		}
 		fmt.Println()
 	}
@@ -151,7 +151,7 @@ func cmdStatus(args []string) error {
 
 	fmt.Printf("TRUST ANCHORS  (%d)\n", len(rows))
 	if len(rows) == 0 {
-		fmt.Println("  not configured — run swarmctl setup")
+		fmt.Println("  not configured — run federloomctl setup")
 	} else {
 		fmt.Printf("  %-12s %-7s %-9s %-22s %s\n", "PERSON", "WEIGHT", "STATUS", "FINGERPRINT", "LABEL")
 		for _, r := range rows {
@@ -163,7 +163,7 @@ func cmdStatus(args []string) error {
 	// ── BOOTSTRAP PEERS ──────────────────────────────────────────────────────
 	fmt.Printf("BOOTSTRAP PEERS  (%d)\n", len(cfg.BootstrapPeers))
 	if len(cfg.BootstrapPeers) == 0 {
-		fmt.Println("  not configured — run swarmctl setup")
+		fmt.Println("  not configured — run federloomctl setup")
 	} else {
 		for _, p := range cfg.BootstrapPeers {
 			fmt.Printf("  %s\n", p)

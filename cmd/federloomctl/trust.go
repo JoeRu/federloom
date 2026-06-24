@@ -8,15 +8,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/trust"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/trust"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 func cmdTrust(args []string) error {
 	if len(args) < 1 {
-		return fmt.Errorf("usage: swarmctl trust add|set|remove|list|export|import|block|unblock ...")
+		return fmt.Errorf("usage: federloomctl trust add|set|remove|list|export|import|block|unblock ...")
 	}
 	switch args[0] {
 	case "add":
@@ -50,7 +50,7 @@ func trustAdd(args []string) error {
 		return err
 	}
 	if fs.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl trust add PERSON --identity ed25519:...")
+		return fmt.Errorf("usage: federloomctl trust add PERSON --identity ed25519:...")
 	}
 	person := fs.Arg(0)
 	cfg, err := loadCfg()
@@ -93,7 +93,7 @@ func trustSet(args []string) error {
 		return err
 	}
 	if fs.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl trust set PERSON [--weight W] [--label L]")
+		return fmt.Errorf("usage: federloomctl trust set PERSON [--weight W] [--label L]")
 	}
 	person := fs.Arg(0)
 	cfg, err := loadCfg()
@@ -122,7 +122,7 @@ func trustSet(args []string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("no anchored person %q — see `swarmctl trust list`", person)
+	return fmt.Errorf("no anchored person %q — see `federloomctl trust list`", person)
 }
 
 func trustRemove(args []string) error {
@@ -132,7 +132,7 @@ func trustRemove(args []string) error {
 		return err
 	}
 	if fs.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl trust remove PERSON")
+		return fmt.Errorf("usage: federloomctl trust remove PERSON")
 	}
 	person := fs.Arg(0)
 	cfg, err := loadCfg()
@@ -177,7 +177,7 @@ func trustList(args []string) error {
 		return err
 	}
 	if len(anchors) == 0 {
-		fmt.Println("no anchored persons — see `swarmctl trust add`")
+		fmt.Println("no anchored persons — see `federloomctl trust add`")
 		return nil
 	}
 	// Load the imported certs so STATUS can report actual cert coverage per
@@ -236,7 +236,7 @@ func trustExport(args []string) error {
 	}
 	priv, err := identity.LoadPersonKey(cfg.TrustPersonKeyFile())
 	if err != nil {
-		return fmt.Errorf("no person identity — run `swarmctl identity init` first: %w", err)
+		return fmt.Errorf("no person identity — run `federloomctl identity init` first: %w", err)
 	}
 	label := ""
 	if data, err := os.ReadFile(labelPath(cfg.TrustPersonKeyFile())); err == nil {
@@ -269,7 +269,7 @@ func trustImport(args []string) error {
 		return err
 	}
 	if fs.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl trust import FILE [--as NAME] [--weight W]")
+		return fmt.Errorf("usage: federloomctl trust import FILE [--as NAME] [--weight W]")
 	}
 	cfg, err := loadCfg()
 	if err != nil {
@@ -357,7 +357,7 @@ func trustBlock(args []string) error {
 		return err
 	}
 	if fset.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl trust block PEER_ID")
+		return fmt.Errorf("usage: federloomctl trust block PEER_ID")
 	}
 	peerID := fset.Arg(0)
 	cfg, err := loadCfg()
@@ -379,7 +379,7 @@ func trustBlock(args []string) error {
 	if err := trust.SaveBlockedPeers(path, peers); err != nil {
 		return fmt.Errorf("save blocked peers: %w", err)
 	}
-	fmt.Printf("blocked peer %s — swarmd will reload within 10s\n", peerID)
+	fmt.Printf("blocked peer %s — federloomd will reload within 10s\n", peerID)
 	return nil
 }
 
@@ -390,7 +390,7 @@ func trustUnblock(args []string) error {
 		return err
 	}
 	if fset.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl trust unblock PEER_ID")
+		return fmt.Errorf("usage: federloomctl trust unblock PEER_ID")
 	}
 	peerID := fset.Arg(0)
 	cfg, err := loadCfg()
@@ -415,7 +415,7 @@ func trustUnblock(args []string) error {
 	if err := trust.SaveBlockedPeers(path, filtered); err != nil {
 		return fmt.Errorf("save blocked peers: %w", err)
 	}
-	fmt.Printf("unblocked peer %s — swarmd will reload within 10s\n", peerID)
+	fmt.Printf("unblocked peer %s — federloomd will reload within 10s\n", peerID)
 	return nil
 }
 

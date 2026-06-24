@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 // reportWeight maps event reason to score contribution weight.

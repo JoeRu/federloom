@@ -9,8 +9,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // openCanaryEvent is one JSON line from OpenCanary's log.
@@ -20,7 +20,7 @@ type openCanaryEvent struct {
 	LocalTime string `json:"local_time"`
 }
 
-// openCanaryReasons maps OpenCanary logtype to SwarmGuard reason strings.
+// openCanaryReasons maps OpenCanary logtype to FederLoom reason strings.
 // Verified against /opencanary/opencanary/logger.py in the running container.
 // Cross-check: docker exec opencanary cat /opencanary/opencanary/logger.py | grep LOG_
 //

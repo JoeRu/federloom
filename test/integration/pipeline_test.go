@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/enforce"
-	"github.com/JoeRu/swarmguard/internal/reputation"
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/enforce"
+	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 // mockSink is a single-goroutine test double for enforce.Sink.

@@ -6,7 +6,7 @@
 
 ## Problem
 
-All SwarmGuard nodes currently require `--bootstrap <multiaddr>` passed as a CLI flag, hardcoded in each `deploy/*/docker-compose.yml`. When the bootstrap peer's node key rotates, every docker-compose file must be updated manually. Private-swarm operators have no standard place to declare their own bootstrap peers without editing project-managed files.
+All FederLoom nodes currently require `--bootstrap <multiaddr>` passed as a CLI flag, hardcoded in each `deploy/*/docker-compose.yml`. When the bootstrap peer's node key rotates, every docker-compose file must be updated manually. Private-swarm operators have no standard place to declare their own bootstrap peers without editing project-managed files.
 
 ## Goal
 
@@ -27,7 +27,7 @@ type Config struct {
 
 `Defaults()` returns an empty slice. No project-provided peer IDs are baked into code — they live in deploy-specific config files so private-swarm operators start with a clean slate.
 
-### CLI flag (`cmd/swarmd/main.go`)
+### CLI flag (`cmd/federloomd/main.go`)
 
 The existing `--bootstrap` flag remains. After config is loaded, CLI-provided multiaddrs are **appended** to `cfg.BootstrapPeers` (not replaced). This means:
 
@@ -37,7 +37,7 @@ The existing `--bootstrap` flag remains. After config is loaded, CLI-provided mu
 # → dials [A, B]
 ```
 
-If both config and CLI are empty, swarmd logs `"no bootstrap peers configured, starting as isolated node"` and continues.
+If both config and CLI are empty, federloomd logs `"no bootstrap peers configured, starting as isolated node"` and continues.
 
 ### Transport wiring (`internal/node/node.go`)
 
@@ -80,7 +80,7 @@ Peer IDs are libp2p cryptographic identities tied to the node's private key. Whe
 | File | Action |
 |---|---|
 | `internal/config/config.go` | Add `BootstrapPeers []string` to `Config`; empty default |
-| `cmd/swarmd/main.go` | Change `--bootstrap` handler to append to `cfg.BootstrapPeers` instead of passing directly to transport |
+| `cmd/federloomd/main.go` | Change `--bootstrap` handler to append to `cfg.BootstrapPeers` instead of passing directly to transport |
 | `internal/node/node.go` | Pass `cfg.BootstrapPeers` to `transport.Bootstrap()` instead of CLI-derived value |
 | `deploy/mailcow/config.yaml` | Add `bootstrap_peers:` section |
 | `deploy/mailcow/docker-compose.yml` | Remove `--bootstrap` from `command:` |

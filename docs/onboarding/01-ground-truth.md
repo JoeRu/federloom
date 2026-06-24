@@ -22,6 +22,6 @@ calibrates everyone else. Register their signatures as high-weight trust anchors
 ## What to do
 
 1. Stand up at least one ground-truth source (honeypot and/or spamtrap signals).
-2. Generate its key and register it as an anchor (`swarmctl anchor add ...`).
+2. Generate its key and register it as an anchor (`federloomctl anchor add ...`).
 3. Decide the operating model: **central** (project runs anchors) or **decentralised**
    (volunteers run anchors, status attested in-network). Both are valid (spec §4.1).

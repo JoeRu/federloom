@@ -9,8 +9,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // cowrieEvent is one JSON line from cowrie.json.
@@ -20,7 +20,7 @@ type cowrieEvent struct {
 	Timestamp string `json:"timestamp"`
 }
 
-// cowrieReasons maps Cowrie eventid to SwarmGuard reason strings.
+// cowrieReasons maps Cowrie eventid to FederLoom reason strings.
 var cowrieReasons = map[string]string{
 	"cowrie.login.success":   "ssh-auth-success",
 	"cowrie.login.failed":    "ssh-auth-bruteforce",

@@ -18,7 +18,7 @@
 | `internal/node/node_test.go` | Add IP validation tests for both functions |
 | `internal/api/handler_blocklist.go` | Skip malformed keys in `handleCrowdSecCTI` |
 | `internal/api/handler_blocklist_test.go` | Add test for malformed key sanitization |
-| `internal/api/server.go` | Add `bearerTokenMiddleware`; apply when `SWARMGUARD_API_TOKEN` is set; add `"os"` import |
+| `internal/api/server.go` | Add `bearerTokenMiddleware`; apply when `FEDERLOOM_API_TOKEN` is set; add `"os"` import |
 | `internal/api/server_test.go` | Add four bearer token tests |
 | `test/adversarial/poisoning_test.go` | Add `TestCIDRInjectionNeverRecorded` scenario |
 | `deploy/honeypot/docker-compose.yml` | Bind ports 9101/9102 to `100.71.239.1`; add `env_file` |
@@ -43,15 +43,15 @@ import (
     "testing"
     "time"
 
-    "github.com/JoeRu/swarmguard/internal/config"
-    "github.com/JoeRu/swarmguard/internal/enforce"
-    "github.com/JoeRu/swarmguard/internal/identity"
-    "github.com/JoeRu/swarmguard/internal/reputation"
-    "github.com/JoeRu/swarmguard/internal/rules"
-    "github.com/JoeRu/swarmguard/internal/store"
-    "github.com/JoeRu/swarmguard/internal/transport"
-    "github.com/JoeRu/swarmguard/internal/trust"
-    "github.com/JoeRu/swarmguard/pkg/proto"
+    "github.com/JoeRu/federloom/internal/config"
+    "github.com/JoeRu/federloom/internal/enforce"
+    "github.com/JoeRu/federloom/internal/identity"
+    "github.com/JoeRu/federloom/internal/reputation"
+    "github.com/JoeRu/federloom/internal/rules"
+    "github.com/JoeRu/federloom/internal/store"
+    "github.com/JoeRu/federloom/internal/transport"
+    "github.com/JoeRu/federloom/internal/trust"
+    "github.com/JoeRu/federloom/pkg/proto"
 )
 ```
 
@@ -149,7 +149,7 @@ import (
     "sync"
     "time"
 
-    "github.com/JoeRu/swarmguard/internal/api"
+    "github.com/JoeRu/federloom/internal/api"
     // ... rest of imports unchanged
 )
 ```
@@ -372,10 +372,10 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 In `test/adversarial/poisoning_test.go`, the existing import block already has `"context"`, `"fmt"`, `"testing"`, `"time"`, `enforce`, `reputation`, and `store`. Add the four missing packages to the import block:
 
 ```go
-    "github.com/JoeRu/swarmguard/internal/config"
-    "github.com/JoeRu/swarmguard/internal/node"
-    "github.com/JoeRu/swarmguard/internal/transport"
-    "github.com/JoeRu/swarmguard/pkg/proto"
+    "github.com/JoeRu/federloom/internal/config"
+    "github.com/JoeRu/federloom/internal/node"
+    "github.com/JoeRu/federloom/internal/transport"
+    "github.com/JoeRu/federloom/pkg/proto"
 ```
 
 Then append this test at the end of the file:
@@ -457,8 +457,8 @@ import (
     "testing"
     "time"
 
-    "github.com/JoeRu/swarmguard/internal/config"
-    "github.com/JoeRu/swarmguard/internal/store"
+    "github.com/JoeRu/federloom/internal/config"
+    "github.com/JoeRu/federloom/internal/store"
 )
 ```
 
@@ -571,8 +571,8 @@ import (
     "sync"
     "time"
 
-    "github.com/JoeRu/swarmguard/internal/config"
-    "github.com/JoeRu/swarmguard/internal/store"
+    "github.com/JoeRu/federloom/internal/config"
+    "github.com/JoeRu/federloom/internal/store"
 )
 ```
 
@@ -620,11 +620,11 @@ Replace with:
     mux.HandleFunc("GET /crowdsec/v1/decisions", s.handleCrowdSecCTI)
 
     var handler http.Handler = mux
-    if token := os.Getenv("SWARMGUARD_API_TOKEN"); token != "" {
+    if token := os.Getenv("FEDERLOOM_API_TOKEN"); token != "" {
         log.Printf("api: bearer token authentication enabled")
         handler = bearerTokenMiddleware(token, mux)
     } else {
-        log.Printf("api: SWARMGUARD_API_TOKEN not set — API is unauthenticated")
+        log.Printf("api: FEDERLOOM_API_TOKEN not set — API is unauthenticated")
     }
 
     srv := &http.Server{Addr: s.cfg.Addr, Handler: handler}
@@ -652,7 +652,7 @@ Expected: all tests PASS.
 git add internal/api/server.go internal/api/server_test.go
 git commit -m "fix(api): add bearer token middleware for API authentication
 
-Reads SWARMGUARD_API_TOKEN from environment. When set, wraps all API
+Reads FEDERLOOM_API_TOKEN from environment. When set, wraps all API
 routes with a middleware that rejects requests missing the correct
 Authorization: Bearer header with 401. When unset, logs a warning and
 operates without auth (backward-compatible). Fixes Vuln 2.
@@ -671,7 +671,7 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 
 - [ ] **Step 1: Restrict port bindings in docker-compose.yml**
 
-In `deploy/honeypot/docker-compose.yml`, the `swarmguard` service `ports` section currently reads:
+In `deploy/honeypot/docker-compose.yml`, the `federloom` service `ports` section currently reads:
 
 ```yaml
     ports:
@@ -691,14 +691,14 @@ Change to (bind API and Prometheus to Tailscale interface only):
       - "5353:5353/udp"
 ```
 
-- [ ] **Step 2: Add `env_file` to the swarmguard service**
+- [ ] **Step 2: Add `env_file` to the federloom service**
 
-In the same `swarmguard` service block, add `env_file` directly after `restart`:
+In the same `federloom` service block, add `env_file` directly after `restart`:
 
 ```yaml
-  swarmguard:
-    image: ghcr.io/joeru/swarmguard:latest
-    container_name: swarmguard
+  federloom:
+    image: ghcr.io/joeru/federloom:latest
+    container_name: federloom
     restart: unless-stopped
     env_file:
       - .env
@@ -712,7 +712,7 @@ Create `deploy/honeypot/.env.example` with content:
 ```
 # Copy to .env and set a strong random value before deploying.
 # Generate with: openssl rand -hex 32
-SWARMGUARD_API_TOKEN=changeme
+FEDERLOOM_API_TOKEN=changeme
 ```
 
 - [ ] **Step 4: Add `.env` to `.gitignore`**
@@ -728,7 +728,7 @@ The secrets section currently ends at `cs-firewall-bouncer.yaml`. Add the line a
 - [ ] **Step 5: Verify `.env` is ignored**
 
 ```bash
-echo "SWARMGUARD_API_TOKEN=test" > deploy/honeypot/.env
+echo "FEDERLOOM_API_TOKEN=test" > deploy/honeypot/.env
 git check-ignore -v deploy/honeypot/.env
 rm deploy/honeypot/.env
 ```
@@ -743,7 +743,7 @@ git commit -m "fix(deploy): bind API/Prometheus to Tailscale interface; add toke
 
 - Port 9101 (Prometheus) and 9102 (API) now bound to 100.71.239.1 only,
   making them invisible to the public internet.
-- env_file: .env wires SWARMGUARD_API_TOKEN into the container.
+- env_file: .env wires FEDERLOOM_API_TOKEN into the container.
 - .env.example committed; **/.env added to .gitignore.
 Fixes Vuln 2 (network layer).
 
@@ -776,4 +776,4 @@ Expected: all adversarial scenarios pass including `TestCIDRInjectionNeverRecord
 make build
 ```
 
-Expected: `bin/swarmd` and `bin/swarmctl` built without errors.
+Expected: `bin/federloomd` and `bin/federloomctl` built without errors.

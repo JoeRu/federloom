@@ -1,4 +1,4 @@
-# Honeypot stack: Cowrie (SSH) + OpenCanary (SMTP/IMAP) + SwarmGuard node.
+# Honeypot stack: Cowrie (SSH) + OpenCanary (SMTP/IMAP) + FederLoom node.
 # Deploy via deploy/honeypot/bootstrap.sh — do not run directly without reading that script.
 services:
   cowrie:
@@ -23,12 +23,12 @@ services:
       - opencanary-logs:/var/log/opencanary
       - ./opencanary.json:/etc/opencanaryd/opencanary.conf:ro
 
-  swarmguard:
+  federloom:
     build:
       context: ../..
       dockerfile: deploy/docker/Dockerfile
-    image: ghcr.io/joeru/swarmguard:latest
-    container_name: swarmguard
+    image: ghcr.io/joeru/federloom:latest
+    container_name: federloom
     restart: unless-stopped
     env_file:
       - .env
@@ -39,15 +39,15 @@ services:
       - "100.71.239.1:9102:9102"
       - "5353:5353/udp"
     volumes:
-      - ./config.yaml:/etc/swarmguard/config.yaml:ro
-      - ./rules.yaml:/etc/swarmguard/rules.yaml:ro
+      - ./config.yaml:/etc/federloom/config.yaml:ro
+      - ./rules.yaml:/etc/federloom/rules.yaml:ro
       - cowrie-logs:/var/log/cowrie:ro
       - opencanary-logs:/var/log/opencanary:ro
-      - swarmguard-data:/var/lib/swarmguard
+      - federloom-data:/var/lib/federloom
     command: >
-      --config /etc/swarmguard/config.yaml
+      --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
-      --advertise /dns4/swarmguard.jru.me/tcp/7700
+      --advertise /dns4/federloom.jru.me/tcp/7700
     depends_on:
       - cowrie
       - opencanary
@@ -55,4 +55,4 @@ services:
 volumes:
   cowrie-logs:
   opencanary-logs:
-  swarmguard-data:
+  federloom-data:

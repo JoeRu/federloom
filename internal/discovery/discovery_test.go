@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/JoeRu/swarmguard/internal/discovery"
-	"github.com/JoeRu/swarmguard/internal/resources"
+	"github.com/JoeRu/federloom/internal/discovery"
+	"github.com/JoeRu/federloom/internal/resources"
 )
 
 func TestLoadRelayList_Embedded(t *testing.T) {

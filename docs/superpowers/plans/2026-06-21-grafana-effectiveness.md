@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add a "SwarmGuard — Effectiveness" Grafana dashboard showing all three nodes (honeypot, mailcow, wordpress) side-by-side across six metric rows, plus the three Prometheus datasource files that back it.
+**Goal:** Add a "FederLoom — Effectiveness" Grafana dashboard showing all three nodes (honeypot, mailcow, wordpress) side-by-side across six metric rows, plus the three Prometheus datasource files that back it.
 
 **Architecture:** Two types of files — three Prometheus datasource YAMLs (one per node) and one dashboard JSON with 24 panels + 6 row headers. The dashboard JSON is generated via a Python script to avoid error-prone manual authoring of 24 nearly-identical panels. No Go code changes.
 
@@ -17,7 +17,7 @@
 | `deploy/grafana/provisioning/datasources/prometheus-honeypot.yml` | Create | Prometheus datasource for honeypot node |
 | `deploy/grafana/provisioning/datasources/prometheus-mailcow.yml` | Create | Prometheus datasource for mailcow node |
 | `deploy/grafana/provisioning/datasources/prometheus-wordpress.yml` | Create | Prometheus datasource for wordpress node |
-| `deploy/grafana/provisioning/dashboards/swarmguard-effectiveness.json` | Create | Effectiveness dashboard JSON |
+| `deploy/grafana/provisioning/dashboards/federloom-effectiveness.json` | Create | Effectiveness dashboard JSON |
 
 ---
 
@@ -112,7 +112,7 @@
 ## Task 2: Effectiveness dashboard JSON
 
 **Files:**
-- Create: `deploy/grafana/provisioning/dashboards/swarmguard-effectiveness.json`
+- Create: `deploy/grafana/provisioning/dashboards/federloom-effectiveness.json`
 
 The dashboard has 24 data panels plus 6 row headers = 30 panel objects total. Writing them by hand invites subtle JSON errors. Generate and validate with Python instead.
 
@@ -276,7 +276,7 @@ y=36: Recidivism (h=4, stat)           ids 22/23/24  x=0/8/16
   for pid, (label, uid, x) in zip([2, 3, 4], NODES):
       panels.append(stat_panel(
           pid, f"Blocked IPs — {label}", uid,
-          "sum(swarmguard_blocked_ips)", y=1, x=x,
+          "sum(federloom_blocked_ips)", y=1, x=x,
       ))
 
   # Row 2 — Block rate
@@ -284,7 +284,7 @@ y=36: Recidivism (h=4, stat)           ids 22/23/24  x=0/8/16
   for pid, (label, uid, x) in zip([6, 7, 8], NODES):
       panels.append(timeseries_panel(
           pid, f"Block rate — {label}", uid,
-          "sum(increase(swarmguard_blocks_total[$__interval]))",
+          "sum(increase(federloom_blocks_total[$__interval]))",
           y=6, x=x, h=6, draw_style="bars",
       ))
 
@@ -293,7 +293,7 @@ y=36: Recidivism (h=4, stat)           ids 22/23/24  x=0/8/16
   for pid, (label, uid, x) in zip([10, 11, 12], NODES):
       panels.append(timeseries_panel(
           pid, f"Events/min — {label}", uid,
-          "sum(rate(swarmguard_events_received_total[$__interval])) * 60",
+          "sum(rate(federloom_events_received_total[$__interval])) * 60",
           y=13, x=x, h=6, unit="reqpm", draw_style="lines",
       ))
 
@@ -302,7 +302,7 @@ y=36: Recidivism (h=4, stat)           ids 22/23/24  x=0/8/16
   for pid, (label, uid, x) in zip([14, 15, 16], NODES):
       panels.append(timeseries_panel(
           pid, f"Federation in — {label}", uid,
-          'rate(swarmguard_events_federated_total{direction="in"}[$__interval]) * 60',
+          'rate(federloom_events_federated_total{direction="in"}[$__interval]) * 60',
           y=20, x=x, h=6, unit="reqpm", draw_style="lines",
       ))
 
@@ -311,7 +311,7 @@ y=36: Recidivism (h=4, stat)           ids 22/23/24  x=0/8/16
   for pid, (label, uid, x) in zip([18, 19, 20], NODES):
       panels.append(table_panel(
           pid, f"Candidates — {label}", uid,
-          "swarmguard_ip_score < $block_threshold",
+          "federloom_ip_score < $block_threshold",
           y=27, x=x,
       ))
 
@@ -320,7 +320,7 @@ y=36: Recidivism (h=4, stat)           ids 22/23/24  x=0/8/16
   for pid, (label, uid, x) in zip([22, 23, 24], NODES):
       p = stat_panel(
           pid, f"Recidivism — {label}", uid,
-          "sum(swarmguard_block_recurrence_total)",
+          "sum(federloom_block_recurrence_total)",
           y=36, x=x, color_mode="fixed",
       )
       # No threshold colouring — informational stat
@@ -330,9 +330,9 @@ y=36: Recidivism (h=4, stat)           ids 22/23/24  x=0/8/16
 
   dashboard = {
       "id": None,
-      "uid": "swarmguard-effectiveness",
-      "title": "SwarmGuard — Effectiveness",
-      "tags": ["swarmguard"],
+      "uid": "federloom-effectiveness",
+      "title": "FederLoom — Effectiveness",
+      "tags": ["federloom"],
       "schemaVersion": 38,
       "version": 1,
       "refresh": "30s",
@@ -355,7 +355,7 @@ y=36: Recidivism (h=4, stat)           ids 22/23/24  x=0/8/16
   }
 
   out = json.dumps(dashboard, indent=2, ensure_ascii=False)
-  with open("deploy/grafana/provisioning/dashboards/swarmguard-effectiveness.json", "w") as f:
+  with open("deploy/grafana/provisioning/dashboards/federloom-effectiveness.json", "w") as f:
       f.write(out)
   print(f"Written: {len(panels)} panels, {len(out)} bytes")
   PYEOF
@@ -373,10 +373,10 @@ y=36: Recidivism (h=4, stat)           ids 22/23/24  x=0/8/16
   import json
   from pathlib import Path
 
-  d = json.loads(Path('deploy/grafana/provisioning/dashboards/swarmguard-effectiveness.json').read_text())
+  d = json.loads(Path('deploy/grafana/provisioning/dashboards/federloom-effectiveness.json').read_text())
 
-  assert d['uid'] == 'swarmguard-effectiveness', f\"uid wrong: {d['uid']}\"
-  assert d['title'] == 'SwarmGuard — Effectiveness', f\"title wrong: {d['title']}\"
+  assert d['uid'] == 'federloom-effectiveness', f\"uid wrong: {d['uid']}\"
+  assert d['title'] == 'FederLoom — Effectiveness', f\"title wrong: {d['title']}\"
 
   # Check template variable
   names = [v['name'] for v in d['templating']['list']]
@@ -444,8 +444,8 @@ y=36: Recidivism (h=4, stat)           ids 22/23/24  x=0/8/16
 - [ ] **Step 3: Commit**
 
   ```bash
-  git add deploy/grafana/provisioning/dashboards/swarmguard-effectiveness.json
-  git commit -m "feat(grafana): add SwarmGuard Effectiveness dashboard with per-node Prometheus panels"
+  git add deploy/grafana/provisioning/dashboards/federloom-effectiveness.json
+  git commit -m "feat(grafana): add FederLoom Effectiveness dashboard with per-node Prometheus panels"
   ```
 
 - [ ] **Step 4: Reload Grafana and verify**
@@ -456,7 +456,7 @@ y=36: Recidivism (h=4, stat)           ids 22/23/24  x=0/8/16
 
   Then open `http://grafana.joesnuc:3030` and confirm:
   - Three new datasources appear in Grafana → Connections: "Prometheus — Honeypot", "Prometheus — Mailcow", "Prometheus — WordPress"
-  - "SwarmGuard — Effectiveness" dashboard appears in the dashboard list
+  - "FederLoom — Effectiveness" dashboard appears in the dashboard list
   - Six rows visible, each with three panels (honeypot | mailcow | wordpress)
   - "Block threshold" variable appears in the variables bar (default: 80)
   - Blocked IPs stats show non-zero values for mailcow and wordpress (they have lower thresholds)
@@ -464,7 +464,7 @@ y=36: Recidivism (h=4, stat)           ids 22/23/24  x=0/8/16
 
   Optional smoke-test from host:
   ```bash
-  curl -sf http://167.233.115.41:9101/metrics | grep swarmguard_blocked_ips
-  curl -sf http://100.120.31.14:9101/metrics  | grep swarmguard_blocked_ips
-  curl -sf http://100.92.58.24:9101/metrics   | grep swarmguard_blocked_ips
+  curl -sf http://167.233.115.41:9101/metrics | grep federloom_blocked_ips
+  curl -sf http://100.120.31.14:9101/metrics  | grep federloom_blocked_ips
+  curl -sf http://100.92.58.24:9101/metrics   | grep federloom_blocked_ips
   ```

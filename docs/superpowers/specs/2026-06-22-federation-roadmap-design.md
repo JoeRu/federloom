@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-22
 **Status:** Approved — ready for implementation planning
-**Scope:** Five sequential implementation phases that complete SwarmGuard's federation
+**Scope:** Five sequential implementation phases that complete FederLoom's federation
 layer and bring remaining spec gaps to production quality.
 
 ---
@@ -19,7 +19,7 @@ The audit of 2026-06-22 identified the following spec gaps ranked by impact:
 | Event signing dead field | §7.1 | 1 |
 | Defederation not implemented | §5.2 / Problem L | 1 |
 | Whitelist store missing | §6.2 / §7.4 | 2 |
-| `swarmctl whitelist` subcommand missing | §6.2 | 2 |
+| `federloomctl whitelist` subcommand missing | §6.2 | 2 |
 | `install.sh` TODO unresolved | §6.2 | 2 |
 | Bloom filter not implemented | §11.3 | 3 |
 | Pull-on-demand (DNSBL model) not wired | §11.4 | 3 |
@@ -62,7 +62,7 @@ New subsystem: `internal/discovery`.
 **Components:**
 - `discovery.Manager` — owns both advertisement and peer-finding goroutines
 - DHT rendezvous via `go-libp2p/p2p/discovery/routing.NewRoutingDiscovery` wrapping
-  the existing `*dht.IpfsDHT`; rendezvous point `/swarmguard/v1/peers`
+  the existing `*dht.IpfsDHT`; rendezvous point `/federloom/v1/peers`
 - Relay list: `internal/discovery/relaylist.go` — loads `relay-list.json` (bundled
   at `internal/resources/relay-list.json`; overridable via config `discovery.relay_list_path`)
 - `relay-list.json` schema: `[{"peer_id": "12D3...", "addrs": ["/ip4/..."], "label": "..."}]`
@@ -98,7 +98,7 @@ A compromised or malicious subnet must be removable without restarting the daemo
 **Design:**
 - New config list: `trust.blocked_peers []string` (peer IDs)
 - `ProcessRemote`: early-return if `re.From` is in `blocked_peers`
-- `swarmctl trust block PEER_ID` / `swarmctl trust unblock PEER_ID` — edit
+- `federloomctl trust block PEER_ID` / `federloomctl trust unblock PEER_ID` — edit
   `blocked-peers.json` (same hot-reload pattern as `anchors.json`)
 - `trust.Store` gains `IsBlocked(peerID string) bool` method
 
@@ -125,19 +125,19 @@ New file: `internal/store/whitelist.go`
 `whitelistStore.Contains` for `scope: local-only` entries. These suppress local
 blocks but are never published (spec §6.2 invariant: local-only is never federated).
 
-### 2c. `swarmctl whitelist` subcommand
+### 2c. `federloomctl whitelist` subcommand
 
-New file: `cmd/swarmctl/whitelist.go`
+New file: `cmd/federloomctl/whitelist.go`
 ```
-swarmctl whitelist add --scope local-only CIDR_OR_IP
-swarmctl whitelist add --scope shared-vote CIDR_OR_IP
-swarmctl whitelist remove CIDR_OR_IP
-swarmctl whitelist list
+federloomctl whitelist add --scope local-only CIDR_OR_IP
+federloomctl whitelist add --scope shared-vote CIDR_OR_IP
+federloomctl whitelist remove CIDR_OR_IP
+federloomctl whitelist list
 ```
 
 ### 2d. Complete install.sh
 
-Replace the TODO line with an actual call to `swarmctl whitelist add --scope local-only`
+Replace the TODO line with an actual call to `federloomctl whitelist add --scope local-only`
 for each confirmed entry. The script already detects entries; it just needs to persist them.
 
 ---
@@ -160,7 +160,7 @@ New file: `internal/store/bloom.go`
 
 New file: `internal/transport/dht_query.go`
 - `Node.QueryScore(ctx, ip string) (*proto.ScoreEntry, error)` — DHT `GetValue` on
-  key `/swarmguard/score/v1/<ip>`; returns nil if not found (locally or remotely)
+  key `/federloom/score/v1/<ip>`; returns nil if not found (locally or remotely)
 - Nodes with a score above `block_threshold` publish their score to DHT
   (`PutValue`) after every `Record` call; TTL matches score's BadgerDB TTL
 - Consuming nodes (those that don't yet have an entry for an IP) call `QueryScore`
@@ -205,7 +205,7 @@ sync:
 
 ### 4c. `nice`/cgroup hints
 
-- `swarmd` calls `syscall.Setpriority(syscall.PRIO_PROCESS, 0, 10)` on startup
+- `federloomd` calls `syscall.Setpriority(syscall.PRIO_PROCESS, 0, 10)` on startup
   (configurable: `resources.nice_level`, default 10)
 - Document cgroup setup in `docs/onboarding/`
 
@@ -236,7 +236,7 @@ sync:
 Each phase produces a separate implementation plan:
 
 1. `2026-06-22-phase1-federation-semantics.md` — OriginTrace, discount, discovery, signing, defederation
-2. `2026-06-22-phase2-whitelist.md` — whitelist store, swarmctl whitelist, install.sh completion
+2. `2026-06-22-phase2-whitelist.md` — whitelist store, federloomctl whitelist, install.sh completion
 3. `2026-06-22-phase3-sync-model.md` — bloom filter, DHT pull-on-demand, sync config
 4. `2026-06-22-phase4-resource-budget.md` — token bucket, graceful degradation, nice level
 5. `2026-06-22-phase5-reporter-privacy.md` — OriginTrace HMAC option, docs

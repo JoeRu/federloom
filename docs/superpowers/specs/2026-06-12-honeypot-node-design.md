@@ -5,7 +5,7 @@
 
 ## Goal
 
-Deploy a first real-life SwarmGuard honeypot node to `167.233.115.41` that captures
+Deploy a first real-life FederLoom honeypot node to `167.233.115.41` that captures
 SSH, SMTP, and IMAP attack signals and federates them to a peer. Provides a
 production smoke test of the full ingest → reputation → p2p pipeline.
 
@@ -19,12 +19,12 @@ Three containers, deployed via `deploy/honeypot/docker-compose.yml`:
 |---|---|---|---|
 | `cowrie` | `cowrie/cowrie` | SSH honeypot; logs sessions to JSONL | 22 |
 | `opencanary` | `thinkst/opencanary` | SMTP + IMAP honeypot; logs to JSONL | 25, 143 |
-| `swarmguard` | built from this repo | Tails both logs, scores IPs, runs p2p | 7700 |
+| `federloom` | built from this repo | Tails both logs, scores IPs, runs p2p | 7700 |
 
-Two named Docker volumes share log files between honeypots and SwarmGuard:
+Two named Docker volumes share log files between honeypots and FederLoom:
 
-- `cowrie-logs` — mounted at `/var/log/cowrie` in `cowrie` and `swarmguard`
-- `opencanary-logs` — mounted at `/var/log/opencanary` in `opencanary` and `swarmguard`
+- `cowrie-logs` — mounted at `/var/log/cowrie` in `cowrie` and `federloom`
+- `opencanary-logs` — mounted at `/var/log/opencanary` in `opencanary` and `federloom`
 
 ### Client stack (runs locally on the dev machine)
 
@@ -32,16 +32,16 @@ One container in `deploy/client/docker-compose.yml`:
 
 | Container | Image | Role |
 |---|---|---|
-| `swarmguard` | built from this repo | Federated peer; connects to honeypot node via gossipsub |
+| `federloom` | built from this repo | Federated peer; connects to honeypot node via gossipsub |
 
 ### Bootstrap script
 
 `deploy/honeypot/bootstrap.sh`:
 1. SSHes into the server on port 2244
 2. Installs Docker via `apt`
-3. Copies compose files and configs to `/opt/swarmguard-honeypot/`
+3. Copies compose files and configs to `/opt/federloom-honeypot/`
 4. Runs `docker compose up -d`
-5. Prints the SwarmGuard peer ID (from `docker logs swarmguard | grep peer_id`)
+5. Prints the FederLoom peer ID (from `docker logs federloom | grep peer_id`)
 
 ## Go Code Changes
 
@@ -86,12 +86,12 @@ New ingest adapter (~80 lines), mirroring `honeypot.go`:
 ```
 deploy/
   honeypot/
-    docker-compose.yml     # cowrie + opencanary + swarmguard
-    config.yaml            # swarmguard: federated, both ingest adapters enabled
+    docker-compose.yml     # cowrie + opencanary + federloom
+    config.yaml            # federloom: federated, both ingest adapters enabled
     opencanary.json        # opencanary: smtp + imap modules enabled
     bootstrap.sh           # ssh → install docker → copy files → docker compose up
   client/
-    docker-compose.yml     # single swarmguard peer
+    docker-compose.yml     # single federloom peer
     config.yaml            # federation_mode: federated, bootstrap_peers: [honeypot addr]
 ```
 

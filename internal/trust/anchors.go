@@ -43,7 +43,7 @@ func LoadAnchors(path string) ([]Anchor, error) {
 }
 
 // SaveAnchors writes anchors atomically (temp file + rename) so a concurrently
-// reading swarmd never sees a half-written file.
+// reading federloomd never sees a half-written file.
 func SaveAnchors(path string, anchors []Anchor) error {
 	data, err := json.MarshalIndent(anchors, "", "  ")
 	if err != nil {

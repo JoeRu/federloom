@@ -4,7 +4,7 @@
 
 **Goal:** Move bootstrap peer multiaddrs from hardcoded `--bootstrap` CLI flags in docker-compose files into a `bootstrap_peers:` YAML field, with the CLI flag becoming additive.
 
-**Architecture:** Three changes in sequence: (1) add `BootstrapPeers []string` to `Config`; (2) modify `cmd/swarmd/main.go` to parse the config field and append any CLI `--bootstrap` args to it before dialing; (3) update all four deploy config.yaml files to carry the peers, and strip `--bootstrap` from all docker-compose `command:` blocks.
+**Architecture:** Three changes in sequence: (1) add `BootstrapPeers []string` to `Config`; (2) modify `cmd/federloomd/main.go` to parse the config field and append any CLI `--bootstrap` args to it before dialing; (3) update all four deploy config.yaml files to carry the peers, and strip `--bootstrap` from all docker-compose `command:` blocks.
 
 **Tech Stack:** Go stdlib `flag`, `github.com/libp2p/go-libp2p/core/peer`, `github.com/multiformats/go-multiaddr`, YAML config.
 
@@ -16,7 +16,7 @@
 |---|---|---|
 | `internal/config/config.go` | Modify | Add `BootstrapPeers []string` to `Config` struct |
 | `internal/config/config_test.go` | Modify | Two new tests: default empty, YAML round-trip |
-| `cmd/swarmd/main.go` | Modify | Parse config peers + append CLI peers, warn when empty, call `Bootstrap` with merged list |
+| `cmd/federloomd/main.go` | Modify | Parse config peers + append CLI peers, warn when empty, call `Bootstrap` with merged list |
 | `deploy/mailcow/config.yaml` | Modify | Add `bootstrap_peers:` section |
 | `deploy/mailcow/docker-compose.yml` | Modify | Remove `--bootstrap` line from `command:` |
 | `deploy/wordpress/config.yaml` | Modify | Add `bootstrap_peers:` section |
@@ -123,7 +123,7 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 ## Task 2: Merge CLI `--bootstrap` into config and call Bootstrap with combined list
 
 **Files:**
-- Modify: `cmd/swarmd/main.go`
+- Modify: `cmd/federloomd/main.go`
 
 The current code in `main.go` (lines 76–93) only calls `t.Bootstrap()` when `*bootstrap != ""`. The new code must:
 1. Parse `cfg.BootstrapPeers` into `[]peer.AddrInfo`
@@ -131,7 +131,7 @@ The current code in `main.go` (lines 76–93) only calls `t.Bootstrap()` when `*
 3. Log a warning if the slice is still empty after both sources
 4. Call `t.Bootstrap()` with the combined slice
 
-- [ ] **Step 1: Replace the bootstrap block in `cmd/swarmd/main.go`**
+- [ ] **Step 1: Replace the bootstrap block in `cmd/federloomd/main.go`**
 
 Replace lines 76–93 (the existing `if *bootstrap != ""` block):
 
@@ -206,15 +206,15 @@ if len(bootstrapPeers) == 0 {
 - [ ] **Step 2: Build to confirm it compiles**
 
 ```bash
-go build ./cmd/swarmd/
+go build ./cmd/federloomd/
 ```
 
-Expected: exits 0, produces `swarmd` binary.
+Expected: exits 0, produces `federloomd` binary.
 
 - [ ] **Step 3: Vet the binary**
 
 ```bash
-go vet ./cmd/swarmd/
+go vet ./cmd/federloomd/
 ```
 
 Expected: exits 0, no output.
@@ -230,8 +230,8 @@ Expected: all tests pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cmd/swarmd/main.go
-git commit -m "feat(swarmd): merge bootstrap_peers config with --bootstrap CLI flag (additive)
+git add cmd/federloomd/main.go
+git commit -m "feat(federloomd): merge bootstrap_peers config with --bootstrap CLI flag (additive)
 
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 ```
@@ -264,7 +264,7 @@ The `command:` block currently reads:
 
 ```yaml
     command: >
-      --config /etc/swarmguard/config.yaml
+      --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
       --advertise /ip4/135.181.91.151/tcp/7700
       --bootstrap /ip4/167.233.115.41/tcp/7700/p2p/12D3KooWBvpzbEBgcFbHrw3kEFjfdFB2AwimGMhMrVGQBHMpZNjD
@@ -274,7 +274,7 @@ Replace with (removing only the `--bootstrap` line):
 
 ```yaml
     command: >
-      --config /etc/swarmguard/config.yaml
+      --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
       --advertise /ip4/135.181.91.151/tcp/7700
 ```
@@ -294,7 +294,7 @@ The `command:` block currently reads:
 
 ```yaml
     command: >
-      --config /etc/swarmguard/config.yaml
+      --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
       --advertise /ip4/65.108.62.108/tcp/7700
       --bootstrap /ip4/167.233.115.41/tcp/7700/p2p/12D3KooWBvpzbEBgcFbHrw3kEFjfdFB2AwimGMhMrVGQBHMpZNjD
@@ -304,7 +304,7 @@ Replace with:
 
 ```yaml
     command: >
-      --config /etc/swarmguard/config.yaml
+      --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
       --advertise /ip4/65.108.62.108/tcp/7700
 ```
@@ -324,7 +324,7 @@ The `command:` block currently reads:
 
 ```yaml
     command: >
-      --config /etc/swarmguard/config.yaml
+      --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
       --advertise /ip4/213.199.36.212/tcp/7700
       --bootstrap /ip4/167.233.115.41/tcp/7700/p2p/12D3KooWBvpzbEBgcFbHrw3kEFjfdFB2AwimGMhMrVGQBHMpZNjD
@@ -334,7 +334,7 @@ Replace with:
 
 ```yaml
     command: >
-      --config /etc/swarmguard/config.yaml
+      --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
       --advertise /ip4/213.199.36.212/tcp/7700
 ```

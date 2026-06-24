@@ -1,5 +1,5 @@
 // Package enforce is the data plane: the only place that writes to the firewall.
-// CrowdSec blocklist sink — pushes SwarmGuard's federated reputation decisions
+// CrowdSec blocklist sink — pushes FederLoom's federated reputation decisions
 // to a local CrowdSec LAPI instance so an existing cs-firewall-bouncer enforces
 // them (drop-in, spec §3).
 package enforce
@@ -14,12 +14,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
+	"github.com/JoeRu/federloom/internal/config"
 )
 
 // CrowdSecSink pushes block decisions to a CrowdSec LAPI as machine-account
 // alerts. The LAPI then distributes them to any registered bouncer (e.g.
-// cs-firewall-bouncer), keeping SwarmGuard non-invasive (spec §3).
+// cs-firewall-bouncer), keeping FederLoom non-invasive (spec §3).
 type CrowdSecSink struct {
 	cfg       config.EnforceConfig
 	halfLife  time.Duration
@@ -108,8 +108,8 @@ func (s *CrowdSecSink) Block(ip string) error {
 		Decisions: []csDecision{{
 			Duration: s.banDur.String(),
 			IP:       ip,
-			Origin:   "swarmguard",
-			Scenario: "swarmguard/reputation",
+			Origin:   "federloom",
+			Scenario: "federloom/reputation",
 			Scope:    "Ip",
 			Type:     "ban",
 			Value:    ip,
@@ -117,8 +117,8 @@ func (s *CrowdSecSink) Block(ip string) error {
 		Events:          []struct{}{},
 		EventsCount:     1,
 		LeakSpeed:       "",
-		Message:         "swarmguard reputation block",
-		Scenario:        "swarmguard/reputation",
+		Message:         "federloom reputation block",
+		Scenario:        "federloom/reputation",
 		ScenarioHash:    "",
 		ScenarioVersion: "",
 		Simulated:       false,
@@ -158,12 +158,12 @@ func (s *CrowdSecSink) Block(ip string) error {
 	return nil
 }
 
-// Unblock deletes all swarmguard-origin decisions for ip from the LAPI.
+// Unblock deletes all federloom-origin decisions for ip from the LAPI.
 // CrowdSec v1.5+ supports filter-delete via ?origin=&value= query parameters.
 func (s *CrowdSecSink) Unblock(ip string) error {
 	ctx := context.Background()
 
-	u := s.cfg.CrowdSecLAPIURL + "/v1/decisions?origin=swarmguard&value=" + url.QueryEscape(ip)
+	u := s.cfg.CrowdSecLAPIURL + "/v1/decisions?origin=federloom&value=" + url.QueryEscape(ip)
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, u, nil)
 	if err != nil {
 		return fmt.Errorf("enforce/crowdsec: create unblock request: %w", err)

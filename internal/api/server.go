@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 // StoreReader is the read-only subset of store.BadgerStore used by the API.
@@ -78,11 +78,11 @@ func (s *Server) Start(ctx context.Context) {
 	mux.HandleFunc("GET /crowdsec/v1/decisions", s.handleCrowdSecCTI)
 
 	var handler http.Handler = mux
-	if token := os.Getenv("SWARMGUARD_API_TOKEN"); token != "" {
+	if token := os.Getenv("FEDERLOOM_API_TOKEN"); token != "" {
 		log.Printf("api: bearer token authentication enabled")
 		handler = bearerTokenMiddleware(token, mux)
 	} else {
-		log.Printf("api: SWARMGUARD_API_TOKEN not set — API is unauthenticated")
+		log.Printf("api: FEDERLOOM_API_TOKEN not set — API is unauthenticated")
 	}
 	srv := &http.Server{Addr: s.cfg.Addr, Handler: handler}
 

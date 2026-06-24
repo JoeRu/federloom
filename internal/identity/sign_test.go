@@ -6,8 +6,8 @@ import (
 
 	libp2pcrypto "github.com/libp2p/go-libp2p/core/crypto"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 func makeTestKey(t *testing.T) libp2pcrypto.PrivKey {

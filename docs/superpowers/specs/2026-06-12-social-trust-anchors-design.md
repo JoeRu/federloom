@@ -88,7 +88,7 @@ Five components, all control plane. `internal/enforce` is not touched.
 ### 1. `internal/identity` — node + person keys, cert issuance/verification
 
 - Load-or-create the **node** Ed25519 keypair at `<store.dir>/identity.key` (0600);
-  the libp2p host is built from it, so the peer ID is stable. swarmd refuses to start
+  the libp2p host is built from it, so the peer ID is stable. federloomd refuses to start
   if the file is group/world-readable.
 - Manage the optional **person** key at `<store.dir>/person.key` (0600).
 - `IssueCert(personKey, peerID, validUntil) PeerCert` — sign a binding.
@@ -123,26 +123,26 @@ func (s *Store) Resolve(peerID string) (weight float64, group string, anchored b
   Anchored & valid → Person weight (default `trust.anchor_weight` = 0.9), group =
   Person name. Otherwise → `trust.stranger_weight` (0.3), group `""`, anchored = false.
 
-### 3. `swarmctl` — identity, certs, anchoring CLI
+### 3. `federloomctl` — identity, certs, anchoring CLI
 
 Manual identity-fingerprint exchange over any channel the operators already trust
 (Signal, phone, in person). Anchor edits use temp-file + atomic rename; they work
-whether swarmd is running or not.
+whether federloomd is running or not.
 
 ```
 # Jo, once:
-swarmctl identity init --label "Jo"      # create person.key; auto-cert + install peer.cert for the local node
-swarmctl identity show                    # print Jo's identity pubkey + fingerprint to share
-swarmctl peer-cert <peer-id>              # sign an additional machine; prints a cert to install on that node
-swarmctl trust export > jo.bundle         # optional offline bundle: identity pubkey + label + all peer-certs
+federloomctl identity init --label "Jo"      # create person.key; auto-cert + install peer.cert for the local node
+federloomctl identity show                    # print Jo's identity pubkey + fingerprint to share
+federloomctl peer-cert <peer-id>              # sign an additional machine; prints a cert to install on that node
+federloomctl trust export > jo.bundle         # optional offline bundle: identity pubkey + label + all peer-certs
 
 # You, after verifying Jo's fingerprint out-of-band:
-swarmctl trust add jo --identity ed25519:9f3c… --weight 0.9   # anchor Jo's identity (the only required step)
-swarmctl trust import jo.bundle                                # optional: seed identity + certs offline
-swarmctl trust set jo --weight 0.8 --label "Jo"               # manage the human in one place
-swarmctl trust remove jo                                       # drop Jo and every machine he certified
-swarmctl trust list                                            # grouped by Person, flags EXPIRED
-swarmctl identity                                             # print this node's own peer ID
+federloomctl trust add jo --identity ed25519:9f3c… --weight 0.9   # anchor Jo's identity (the only required step)
+federloomctl trust import jo.bundle                                # optional: seed identity + certs offline
+federloomctl trust set jo --weight 0.8 --label "Jo"               # manage the human in one place
+federloomctl trust remove jo                                       # drop Jo and every machine he certified
+federloomctl trust list                                            # grouped by Person, flags EXPIRED
+federloomctl identity                                             # print this node's own peer ID
 ```
 
 - The Person is the unit you manage: weight, label, and expiry live on the identity,
@@ -150,7 +150,7 @@ swarmctl identity                                             # print this node'
 - `trust add jo` is idempotent (re-running updates the entry).
 - Anchoring your own identity warns and is a no-op (local events already run at 1.0).
 - `weight` must be in (0, 1].
-- swarmctl locates the data dir via the same `config.yaml` swarmd uses
+- federloomctl locates the data dir via the same `config.yaml` federloomd uses
   (`--config`, same default path).
 
 ### 4. Verified sender binding + vouch extraction — `internal/transport` + `internal/node`
@@ -230,7 +230,7 @@ All values operator-overridable (Invariant 1).
 | Person removed (`trust remove`) | All their vouched events score as stranger immediately (Invariant 6). Past score contributions are not clawed back — they fade via decay (lingering up to ~half-life; documented, §4.3 is the real fix). |
 | Old node receives `Vouch` field | Ignored (additive field); it scores the event as a stranger. Graceful. |
 | New node receives Event without `Vouch` | Stranger path. |
-| `identity.key` / `person.key` too permissive | swarmd / swarmctl refuse to use it. |
+| `identity.key` / `person.key` too permissive | federloomd / federloomctl refuse to use it. |
 | `person.key` absent | Node cannot be vouched; publishes Events with `Vouch=nil`. Fine. |
 
 ## Testing

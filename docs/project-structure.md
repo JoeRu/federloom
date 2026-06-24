@@ -1,7 +1,7 @@
 # Projektstruktur-Vorschlag: P2P-Reputations-Blockliste
 
 **Bezug:** `p2p-blocklist-spec.md`
-**Arbeitstitel (Platzhalter im Pfad):** `swarmguard` (final offen – s. Spec)
+**Arbeitstitel (Platzhalter im Pfad):** `federloom` (final offen – s. Spec)
 **Layout:** Monorepo, Go, libp2p
 
 ---
@@ -17,7 +17,7 @@
 | Enforcement | **ipset / nftables** via netlink | O(1)-Lookups (§11.3), kein iptables-Regel-pro-IP | nftables-Sets nativ |
 | Config | **YAML + ENV-Override** | menschenlesbar, gut für Docker | TOML |
 
-> Repo-Modulpfad im Beispiel: `github.com/<org>/swarmguard`
+> Repo-Modulpfad im Beispiel: `github.com/<org>/federloom`
 
 ---
 
@@ -31,14 +31,14 @@ Pakete sichtbar:
 - **Observability Plane** → `internal/observability`
 - **Trust/Föderation** → `internal/trust`
 - **Ground-Truth-Ingest** → `internal/ingest`
-- **Onboarding-Pflichten (§6)** → `scripts/install`, `cmd/swarmctl`, `docs/onboarding`
+- **Onboarding-Pflichten (§6)** → `scripts/install`, `cmd/federloomctl`, `docs/onboarding`
 
 ---
 
 ## 3. Verzeichnisbaum
 
 ```
-swarmguard/
+federloom/
 ├── README.md                     # Einstieg + Verweis auf Onboarding (§6 prominent!)
 ├── LICENSE
 ├── CHANGELOG.md
@@ -46,9 +46,9 @@ swarmguard/
 ├── Makefile                      # build, test, lint, release
 │
 ├── cmd/                          # ausführbare Binaries
-│   ├── swarmd/                   # der P2P-Node-Daemon (Long-running)
+│   ├── federloomd/                   # der P2P-Node-Daemon (Long-running)
 │   │   └── main.go
-│   └── swarmctl/                 # Admin-CLI (Keys, Anchors, Föderation, Status)
+│   └── federloomctl/                 # Admin-CLI (Keys, Anchors, Föderation, Status)
 │       └── main.go
 │
 ├── internal/                     # private Anwendungslogik (nicht importierbar)
@@ -154,9 +154,9 @@ swarmguard/
 
 ## 4. Komponenten-Verantwortlichkeiten (Kurz)
 
-- **`cmd/swarmd`** – der laufende Daemon: zieht Ingest → Reputation → Enforce
+- **`cmd/federloomd`** – der laufende Daemon: zieht Ingest → Reputation → Enforce
   zusammen und spricht über `transport` mit dem Netz.
-- **`cmd/swarmctl`** – Admin-Werkzeug: Schlüssel erzeugen/rotieren, Anchors
+- **`cmd/federloomctl`** – Admin-Werkzeug: Schlüssel erzeugen/rotieren, Anchors
   hinzufügen/entfernen, Teilnetze föderieren/defederieren, Status/Score abfragen.
 - **`internal/trust`** – das vereinheitlichende Primitiv: Honeypot-Anker,
   Projekt-Defaults und Never-Block-Set sind hier dieselbe Mechanik mit anderem

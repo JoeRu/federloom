@@ -1,6 +1,6 @@
 # Grafana Observability Design
 
-**Goal:** Add an optional observability plane to SwarmGuard that feeds a Grafana dashboard with live metrics (Prometheus) and full event history with due-time computation (SQLite).
+**Goal:** Add an optional observability plane to FederLoom that feeds a Grafana dashboard with live metrics (Prometheus) and full event history with due-time computation (SQLite).
 
 **Architecture:** A thin `Observer` struct in `internal/observability` hooks into the Node event pipeline as a synchronous write-fan-out. Two independent outputs — a Prometheus HTTP server and a SQLite appender — are each enabled by config. Neither output is on the critical enforcement path; a failed write logs and continues.
 
@@ -21,7 +21,7 @@ ingest event arrives
       → enforce.Unblock(ip)    ──→ Observer.RecordUnblock(ip)
 ```
 
-`RecordEvent` writes one row to `events` and one to `rule_firings` (if a rule matched), then updates Prometheus counters. `RecordBlock` / `RecordUnblock` update the `blocks` table and the `swarmguard_blocked_ips` gauge.
+`RecordEvent` writes one row to `events` and one to `rule_firings` (if a rule matched), then updates Prometheus counters. `RecordBlock` / `RecordUnblock` update the `blocks` table and the `federloom_blocked_ips` gauge.
 
 All writes are synchronous and non-blocking to the caller. SQLite write errors are logged; Prometheus updates never fail. Observer holds no channels or goroutines on the hot path. A single background goroutine runs the daily retention sweep.
 
@@ -39,18 +39,18 @@ All writes are synchronous and non-blocking to the caller. SQLite write errors a
 
 HTTP server binds to `observability.prometheus_addr` (default `:9101`). Plain HTTP, no TLS — consistent with CrowdSec's own exporter. Empty string disables the server entirely.
 
-All metrics share the namespace `swarmguard_`:
+All metrics share the namespace `federloom_`:
 
 | Metric | Type | Labels | Description |
 |---|---|---|---|
-| `swarmguard_events_received_total` | Counter | `reason`, `reporter_id` | Incremented on every ingest event reaching the reputation engine |
-| `swarmguard_rules_fired_total` | Counter | `rule`, `action` | Incremented when a rule matches (`block`/`watch`/`ignore`) |
-| `swarmguard_blocked_ips` | Gauge | — | Current count of IPs in the enforced block set |
-| `swarmguard_ip_score` | Gauge | `ip` | Current score for IPs at or above `score_gauge_threshold`; omitted for low-score IPs to bound cardinality |
-| `swarmguard_federation_peers` | Gauge | — | Connected libp2p gossipsub peers; 0 in solo/federated-client mode |
-| `swarmguard_events_federated_total` | Counter | `direction` (`in`/`out`) | Gossip messages received/published |
+| `federloom_events_received_total` | Counter | `reason`, `reporter_id` | Incremented on every ingest event reaching the reputation engine |
+| `federloom_rules_fired_total` | Counter | `rule`, `action` | Incremented when a rule matches (`block`/`watch`/`ignore`) |
+| `federloom_blocked_ips` | Gauge | — | Current count of IPs in the enforced block set |
+| `federloom_ip_score` | Gauge | `ip` | Current score for IPs at or above `score_gauge_threshold`; omitted for low-score IPs to bound cardinality |
+| `federloom_federation_peers` | Gauge | — | Connected libp2p gossipsub peers; 0 in solo/federated-client mode |
+| `federloom_events_federated_total` | Counter | `direction` (`in`/`out`) | Gossip messages received/published |
 
-**Cardinality guard:** `swarmguard_ip_score` series are only created for IPs whose score ≥ `score_gauge_threshold`. When `score_gauge_threshold` is 0 (default), it is treated as `block_threshold / 2`. When a score drops below the threshold its gauge series is deleted via `prometheus.GaugeVec.Delete()`.
+**Cardinality guard:** `federloom_ip_score` series are only created for IPs whose score ≥ `score_gauge_threshold`. When `score_gauge_threshold` is 0 (default), it is treated as `block_threshold / 2`. When a score drops below the threshold its gauge series is deleted via `prometheus.GaugeVec.Delete()`.
 
 ---
 
@@ -147,19 +147,19 @@ Added to `Config` as `Observability ObservabilityConfig yaml:"observability"`.
 
 ```
 deploy/grafana/
-  swarmguard-dashboard.json               ← importable dashboard export
+  federloom-dashboard.json               ← importable dashboard export
   provisioning/
     dashboards/
-      swarmguard.yml                      ← Grafana provisioning pointer
+      federloom.yml                      ← Grafana provisioning pointer
     datasources/
-      swarmguard-sqlite.yml               ← SQLite datasource pre-config
+      federloom-sqlite.yml               ← SQLite datasource pre-config
 ```
 
-`swarmguard-dashboard.json` is a standard Grafana JSON model. Operators on remote nodes (no SQLite) import it and the SQLite row panels show "No data" gracefully — they do not break the Prometheus panels.
+`federloom-dashboard.json` is a standard Grafana JSON model. Operators on remote nodes (no SQLite) import it and the SQLite row panels show "No data" gracefully — they do not break the Prometheus panels.
 
 ### Dashboard Variable
 
-One template variable `$node` populated from `label_values(swarmguard_events_received_total, job)`. All Prometheus panels append `{job="$node"}`. Set to `All` by default.
+One template variable `$node` populated from `label_values(federloom_events_received_total, job)`. All Prometheus panels append `{job="$node"}`. Set to `All` by default.
 
 ### Panels
 
@@ -167,11 +167,11 @@ One template variable `$node` populated from `label_values(swarmguard_events_rec
 
 | Panel | Visualization | Query |
 |---|---|---|
-| Events/min by reason | Timeseries | `rate(swarmguard_events_received_total{job="$node"}[5m]) * 60` grouped by `reason` |
-| Rule firings by action | Timeseries | `rate(swarmguard_rules_fired_total{job="$node"}[5m]) * 60` grouped by `action` |
-| Blocked IPs | Stat | `swarmguard_blocked_ips{job="$node"}` |
-| Federation peers | Stat | `swarmguard_federation_peers{job="$node"}` |
-| Top 10 reporters | Bar chart | `topk(10, sum by(reporter_id)(swarmguard_events_received_total{job="$node"}))` |
+| Events/min by reason | Timeseries | `rate(federloom_events_received_total{job="$node"}[5m]) * 60` grouped by `reason` |
+| Rule firings by action | Timeseries | `rate(federloom_rules_fired_total{job="$node"}[5m]) * 60` grouped by `action` |
+| Blocked IPs | Stat | `federloom_blocked_ips{job="$node"}` |
+| Federation peers | Stat | `federloom_federation_peers{job="$node"}` |
+| Top 10 reporters | Bar chart | `topk(10, sum by(reporter_id)(federloom_events_received_total{job="$node"}))` |
 
 **Row 2 — History (SQLite datasource, local node only)**
 
@@ -183,25 +183,25 @@ One template variable `$node` populated from `label_values(swarmguard_events_rec
 
 ### Grafana Provisioning Files
 
-`deploy/grafana/provisioning/dashboards/swarmguard.yml`:
+`deploy/grafana/provisioning/dashboards/federloom.yml`:
 ```yaml
 apiVersion: 1
 providers:
-  - name: SwarmGuard
+  - name: FederLoom
     type: file
     options:
       path: /etc/grafana/provisioning/dashboards
 ```
 
-`deploy/grafana/provisioning/datasources/swarmguard-sqlite.yml`:
+`deploy/grafana/provisioning/datasources/federloom-sqlite.yml`:
 ```yaml
 apiVersion: 1
 datasources:
-  - name: SwarmGuard SQLite
+  - name: FederLoom SQLite
     type: frser-sqlite-datasource
     access: proxy
     jsonData:
-      path: /var/lib/swarmguard/metrics.db
+      path: /var/lib/federloom/metrics.db
 ```
 
 ### Local Grafana Wiring
@@ -210,9 +210,9 @@ datasources:
 
 ```yaml
 volumes:
-  - swarmguard-data:/var/lib/swarmguard:ro
-  - /root/swarmguard/deploy/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards/swarmguard:ro
-  - /root/swarmguard/deploy/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources/swarmguard:ro
+  - federloom-data:/var/lib/federloom:ro
+  - /root/federloom/deploy/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards/federloom:ro
+  - /root/federloom/deploy/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources/federloom:ro
 ```
 
 And at the bottom of the Grafana compose, declare the external volume:
@@ -221,24 +221,24 @@ And at the bottom of the Grafana compose, declare the external volume:
 volumes:
   grafana-storage:
     external: true
-  swarmguard-data:
+  federloom-data:
     external: true
 ```
 
 `/container/compose/prometheus/prometheus.yml` gets three new scrape jobs:
 
 ```yaml
-- job_name: "swarmguard-honeypot"
+- job_name: "federloom-honeypot"
   scrape_interval: "30s"
   static_configs:
     - targets: ['host.docker.internal:9101']
 
-- job_name: "swarmguard-mailcow"
+- job_name: "federloom-mailcow"
   scrape_interval: "30s"
   static_configs:
     - targets: ['100.120.31.14:9101']
 
-- job_name: "swarmguard-wordpress"
+- job_name: "federloom-wordpress"
   scrape_interval: "30s"
   static_configs:
     - targets: ['100.92.58.24:9101']
@@ -279,9 +279,9 @@ volumes:
 - [ ] `deploy/mailcow/config.yaml` — enable Prometheus
 - [ ] `deploy/wordpress/config.yaml` — enable Prometheus
 - [ ] `deploy/examples/config.solo.yaml` — commented example
-- [ ] `deploy/grafana/swarmguard-dashboard.json`
-- [ ] `deploy/grafana/provisioning/dashboards/swarmguard.yml`
-- [ ] `deploy/grafana/provisioning/datasources/swarmguard-sqlite.yml`
+- [ ] `deploy/grafana/federloom-dashboard.json`
+- [ ] `deploy/grafana/provisioning/dashboards/federloom.yml`
+- [ ] `deploy/grafana/provisioning/datasources/federloom-sqlite.yml`
 - [ ] `/container/compose/grafana/docker-compose.yml` — volume mounts
 - [ ] `/container/compose/prometheus/prometheus.yml` — 3 scrape jobs
 - [ ] `CHANGELOG.md`

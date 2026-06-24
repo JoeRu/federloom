@@ -1,7 +1,7 @@
 ---
 name: wire-protocol
 description: >
-  Use this skill whenever changing the SwarmGuard wire format — anything in
+  Use this skill whenever changing the FederLoom wire format — anything in
   pkg/proto (Event, ScoreEntry, AnchorEntry, WhitelistEntry) or the messages nodes
   exchange over gossip/DHT. Trigger for "add a field to Event", "change the report
   schema", "version the protocol", "what does a node send on the wire", or any edit

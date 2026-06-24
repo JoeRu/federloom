@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add an optional dual-output Observer to SwarmGuard that exposes a Prometheus `/metrics` endpoint and an append-only SQLite event log, then ship a Grafana dashboard covering all three SwarmGuard nodes.
+**Goal:** Add an optional dual-output Observer to FederLoom that exposes a Prometheus `/metrics` endpoint and an append-only SQLite event log, then ship a Grafana dashboard covering all three FederLoom nodes.
 
 **Architecture:** A thin `Observer` struct in `internal/observability` fans out to two optional outputs (Prometheus counters/gauges, SQLite row appenders). The Node wires Observer into its event pipeline at three call-sites: `RecordEvent`, `RecordBlock`, `RecordUnblock`. Both outputs are disabled by default (empty config values); enabling either requires only a one-line config change per deploy.
 
@@ -28,11 +28,11 @@
 | `deploy/mailcow/config.yaml` | Add `observability:` (Prometheus only) |
 | `deploy/wordpress/config.yaml` | Add `observability:` (Prometheus only) |
 | `deploy/examples/config.solo.yaml` | Add commented `observability:` example |
-| `deploy/grafana/swarmguard-dashboard.json` | New — Grafana dashboard export |
-| `deploy/grafana/provisioning/dashboards/swarmguard.yml` | New — provisioning pointer |
-| `deploy/grafana/provisioning/datasources/swarmguard-sqlite.yml` | New — SQLite datasource config |
+| `deploy/grafana/federloom-dashboard.json` | New — Grafana dashboard export |
+| `deploy/grafana/provisioning/dashboards/federloom.yml` | New — provisioning pointer |
+| `deploy/grafana/provisioning/datasources/federloom-sqlite.yml` | New — SQLite datasource config |
 | `/container/compose/grafana/docker-compose.yml` | Add volume mounts for SQLite + provisioning |
-| `/container/compose/prometheus/prometheus.yml` | Add three swarmguard scrape jobs |
+| `/container/compose/prometheus/prometheus.yml` | Add three federloom scrape jobs |
 | `CHANGELOG.md` | Entry |
 
 ---
@@ -89,7 +89,7 @@ func TestObservabilityConfig_Defaults(t *testing.T) {
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-cd /root/swarmguard && go test ./internal/config/... -run TestObservability -v
+cd /root/federloom && go test ./internal/config/... -run TestObservability -v
 ```
 
 Expected: FAIL with "cfg.Observability undefined"
@@ -128,7 +128,7 @@ type Config struct {
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-cd /root/swarmguard && go test ./internal/config/... -v
+cd /root/federloom && go test ./internal/config/... -v
 ```
 
 Expected: all PASS
@@ -144,7 +144,7 @@ git commit -m "feat(config): add ObservabilityConfig for optional metrics plane"
 
 ## Task 2: Return rule name from rules.Evaluate
 
-The Prometheus metric `swarmguard_rules_fired_total` needs a `rule` label. `Evaluate` currently returns only `Action`; change it to `(Action, string)` where the string is the matched rule's name.
+The Prometheus metric `federloom_rules_fired_total` needs a `rule` label. `Evaluate` currently returns only `Action`; change it to `(Action, string)` where the string is the matched rule's name.
 
 **Files:**
 - Modify: `internal/rules/rule.go`
@@ -205,7 +205,7 @@ func TestEvaluate_NoMatch_EmptyName(t *testing.T) {
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-cd /root/swarmguard && go test ./internal/rules/... -run TestEvaluate_ReturnsRuleName -v
+cd /root/federloom && go test ./internal/rules/... -run TestEvaluate_ReturnsRuleName -v
 ```
 
 Expected: FAIL with "too many return values"
@@ -291,7 +291,7 @@ The `_` is intentional for now — Task 6 replaces it with the real rule name fo
 - [ ] **Step 5: Run all tests**
 
 ```bash
-cd /root/swarmguard && go test ./... -race
+cd /root/federloom && go test ./... -race
 ```
 
 Expected: all PASS
@@ -314,7 +314,7 @@ git commit -m "feat(rules): return matched rule name from Evaluate"
 `prometheus/client_golang` is already an indirect dependency. Promote it to direct:
 
 ```bash
-cd /root/swarmguard && go get github.com/prometheus/client_golang/prometheus
+cd /root/federloom && go get github.com/prometheus/client_golang/prometheus
 ```
 
 - [ ] **Step 1: Write failing tests**
@@ -331,7 +331,7 @@ import (
 	"testing"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 func scrape(t *testing.T, p *prometheusOutput) string {
@@ -351,10 +351,10 @@ func TestPrometheusOutput_RecordEvent_Counter(t *testing.T) {
 	p.recordEvent(e, 50.0, "my-rule", "block")
 
 	body := scrape(t, p)
-	if !strings.Contains(body, `swarmguard_events_received_total{reason="ssh-probe",reporter_id="peer1"} 1`) {
+	if !strings.Contains(body, `federloom_events_received_total{reason="ssh-probe",reporter_id="peer1"} 1`) {
 		t.Errorf("missing events counter in:\n%s", body)
 	}
-	if !strings.Contains(body, `swarmguard_rules_fired_total{action="block",rule="my-rule"} 1`) {
+	if !strings.Contains(body, `federloom_rules_fired_total{action="block",rule="my-rule"} 1`) {
 		t.Errorf("missing rules counter in:\n%s", body)
 	}
 }
@@ -365,7 +365,7 @@ func TestPrometheusOutput_ScoreGauge_AboveThreshold(t *testing.T) {
 	p.recordEvent(e, 50.0, "", "")
 
 	body := scrape(t, p)
-	if !strings.Contains(body, `swarmguard_ip_score{ip="1.2.3.4"} 50`) {
+	if !strings.Contains(body, `federloom_ip_score{ip="1.2.3.4"} 50`) {
 		t.Errorf("expected ip_score gauge above threshold in:\n%s", body)
 	}
 }
@@ -376,7 +376,7 @@ func TestPrometheusOutput_ScoreGauge_BelowThreshold(t *testing.T) {
 	p.recordEvent(e, 30.0, "", "") // below threshold
 
 	body := scrape(t, p)
-	if strings.Contains(body, `swarmguard_ip_score{ip="1.2.3.4"}`) {
+	if strings.Contains(body, `federloom_ip_score{ip="1.2.3.4"}`) {
 		t.Errorf("ip_score should not appear below threshold in:\n%s", body)
 	}
 }
@@ -388,7 +388,7 @@ func TestPrometheusOutput_BlockedGauge(t *testing.T) {
 	p.blockedIPs.Dec()
 
 	body := scrape(t, p)
-	if !strings.Contains(body, "swarmguard_blocked_ips 1") {
+	if !strings.Contains(body, "federloom_blocked_ips 1") {
 		t.Errorf("expected blocked_ips=1 in:\n%s", body)
 	}
 }
@@ -399,7 +399,7 @@ func TestPrometheusOutput_NoRuleName_SkipsRuleCounter(t *testing.T) {
 	p.recordEvent(e, 50.0, "", "") // no rule matched
 
 	body := scrape(t, p)
-	if strings.Contains(body, "swarmguard_rules_fired_total") {
+	if strings.Contains(body, "federloom_rules_fired_total") {
 		t.Errorf("rules counter should not appear when no rule matched in:\n%s", body)
 	}
 }
@@ -408,7 +408,7 @@ func TestPrometheusOutput_NoRuleName_SkipsRuleCounter(t *testing.T) {
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-cd /root/swarmguard && go test ./internal/observability/... -v
+cd /root/federloom && go test ./internal/observability/... -v
 ```
 
 Expected: FAIL with "no Go files"
@@ -427,7 +427,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 type prometheusOutput struct {
@@ -449,27 +449,27 @@ func newPrometheusOutput(addr string, scoreThreshold float64) (*prometheusOutput
 		threshold: scoreThreshold,
 		registry:  reg,
 		events: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "swarmguard_events_received_total",
+			Name: "federloom_events_received_total",
 			Help: "Total events processed by the reputation engine.",
 		}, []string{"reason", "reporter_id"}),
 		rules: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "swarmguard_rules_fired_total",
+			Name: "federloom_rules_fired_total",
 			Help: "Total rule evaluations that produced a match.",
 		}, []string{"rule", "action"}),
 		blockedIPs: prometheus.NewGauge(prometheus.GaugeOpts{
-			Name: "swarmguard_blocked_ips",
+			Name: "federloom_blocked_ips",
 			Help: "Current number of IPs in the enforced block set.",
 		}),
 		score: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "swarmguard_ip_score",
+			Name: "federloom_ip_score",
 			Help: "Current reputation score for IPs at or above the gauge threshold.",
 		}, []string{"ip"}),
 		peers: prometheus.NewGauge(prometheus.GaugeOpts{
-			Name: "swarmguard_federation_peers",
+			Name: "federloom_federation_peers",
 			Help: "Number of connected libp2p peers.",
 		}),
 		federated: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "swarmguard_events_federated_total",
+			Name: "federloom_events_federated_total",
 			Help: "Gossip messages exchanged with peers.",
 		}, []string{"direction"}),
 	}
@@ -517,7 +517,7 @@ func (p *prometheusOutput) recordEvent(e proto.Event, score float64, rule, actio
 - [ ] **Step 4: Run tests**
 
 ```bash
-cd /root/swarmguard && go test ./internal/observability/... -v -run TestPrometheus
+cd /root/federloom && go test ./internal/observability/... -v -run TestPrometheus
 ```
 
 Expected: all PASS
@@ -541,7 +541,7 @@ git commit -m "feat(observability): Prometheus metrics output"
 - [ ] **Step 1: Add modernc.org/sqlite dependency**
 
 ```bash
-cd /root/swarmguard && go get modernc.org/sqlite@latest
+cd /root/federloom && go get modernc.org/sqlite@latest
 ```
 
 - [ ] **Step 2: Write failing tests**
@@ -557,7 +557,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 	// modernc.org/sqlite driver is registered by sqlite.go (same package)
 )
 
@@ -671,7 +671,7 @@ func TestSQLiteOutput_RetentionSweep_KeepsActiveBlocks(t *testing.T) {
 - [ ] **Step 3: Run test to verify it fails**
 
 ```bash
-cd /root/swarmguard && go test ./internal/observability/... -run TestSQLite -v
+cd /root/federloom && go test ./internal/observability/... -run TestSQLite -v
 ```
 
 Expected: FAIL with "undefined: newSQLiteOutput"
@@ -690,7 +690,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 	_ "modernc.org/sqlite"
 )
 
@@ -837,7 +837,7 @@ func (s *sqliteOutput) startRetentionSweep(ctx context.Context) {
 - [ ] **Step 5: Run tests**
 
 ```bash
-cd /root/swarmguard && go test ./internal/observability/... -v -run TestSQLite
+cd /root/federloom && go test ./internal/observability/... -v -run TestSQLite
 ```
 
 Expected: all PASS
@@ -870,8 +870,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // Observer fans out observability events to an optional Prometheus output
@@ -1000,7 +1000,7 @@ func (o *Observer) RecordFederated(direction string) {
 - [ ] **Step 2: Build check**
 
 ```bash
-cd /root/swarmguard && go build ./internal/observability/...
+cd /root/federloom && go build ./internal/observability/...
 ```
 
 Expected: no errors
@@ -1008,7 +1008,7 @@ Expected: no errors
 - [ ] **Step 3: Run all observability tests**
 
 ```bash
-cd /root/swarmguard && go test ./internal/observability/... -v -race
+cd /root/federloom && go test ./internal/observability/... -v -race
 ```
 
 Expected: all PASS
@@ -1033,7 +1033,7 @@ In `internal/node/node.go`:
 
 Add import:
 ```go
-"github.com/JoeRu/swarmguard/internal/observability"
+"github.com/JoeRu/federloom/internal/observability"
 ```
 
 Add `obs` field to `Node` struct (after `burst`):
@@ -1169,7 +1169,7 @@ if score < n.cfg.Reputation.UnblockThreshold {
 - [ ] **Step 6: Run all tests**
 
 ```bash
-cd /root/swarmguard && go test ./... -race
+cd /root/federloom && go test ./... -race
 ```
 
 Expected: all PASS
@@ -1199,13 +1199,13 @@ Add to the end of `deploy/honeypot/config.yaml`:
 ```yaml
 observability:
   prometheus_addr: ":9101"
-  sqlite_path: "metrics.db"      # relative to store.dir: /var/lib/swarmguard/metrics.db
+  sqlite_path: "metrics.db"      # relative to store.dir: /var/lib/federloom/metrics.db
   sqlite_retention: 360h         # 15 days
 ```
 
 - [ ] **Step 2: Expose port 9101 in honeypot docker-compose**
 
-In `deploy/honeypot/docker-compose.yml`, add `- "9101:9101"` to the swarmguard service ports:
+In `deploy/honeypot/docker-compose.yml`, add `- "9101:9101"` to the federloom service ports:
 
 ```yaml
     ports:
@@ -1248,7 +1248,7 @@ Add to the end of `deploy/examples/config.solo.yaml`:
 - [ ] **Step 6: Build check**
 
 ```bash
-cd /root/swarmguard && go build ./...
+cd /root/federloom && go build ./...
 ```
 
 Expected: no errors
@@ -1267,44 +1267,44 @@ git commit -m "feat(deploy): enable observability in honeypot/mailcow/wordpress 
 ## Task 8: Grafana dashboard and provisioning files
 
 **Files:**
-- Create: `deploy/grafana/swarmguard-dashboard.json`
-- Create: `deploy/grafana/provisioning/dashboards/swarmguard.yml`
-- Create: `deploy/grafana/provisioning/datasources/swarmguard-sqlite.yml`
+- Create: `deploy/grafana/federloom-dashboard.json`
+- Create: `deploy/grafana/provisioning/dashboards/federloom.yml`
+- Create: `deploy/grafana/provisioning/datasources/federloom-sqlite.yml`
 
 - [ ] **Step 1: Create provisioning dashboard pointer**
 
-Create `deploy/grafana/provisioning/dashboards/swarmguard.yml`:
+Create `deploy/grafana/provisioning/dashboards/federloom.yml`:
 
 ```yaml
 apiVersion: 1
 providers:
-  - name: SwarmGuard
+  - name: FederLoom
     type: file
     disableDeletion: false
     updateIntervalSeconds: 30
     options:
-      path: /etc/grafana/provisioning/dashboards/swarmguard
+      path: /etc/grafana/provisioning/dashboards/federloom
 ```
 
 - [ ] **Step 2: Create SQLite datasource config**
 
-Create `deploy/grafana/provisioning/datasources/swarmguard-sqlite.yml`:
+Create `deploy/grafana/provisioning/datasources/federloom-sqlite.yml`:
 
 ```yaml
 apiVersion: 1
 datasources:
-  - name: SwarmGuard SQLite
+  - name: FederLoom SQLite
     type: frser-sqlite-datasource
     access: proxy
-    uid: swarmguard-sqlite
+    uid: federloom-sqlite
     jsonData:
-      path: /var/lib/swarmguard/metrics.db
+      path: /var/lib/federloom/metrics.db
     editable: true
 ```
 
 - [ ] **Step 3: Create the Grafana dashboard JSON**
 
-Create `deploy/grafana/swarmguard-dashboard.json`:
+Create `deploy/grafana/federloom-dashboard.json`:
 
 ```json
 {
@@ -1317,8 +1317,8 @@ Create `deploy/grafana/swarmguard-dashboard.json`:
       "pluginName": "Prometheus"
     },
     {
-      "name": "DS_SWARMGUARD_SQLITE",
-      "label": "SwarmGuard SQLite",
+      "name": "DS_FEDERLOOM_SQLITE",
+      "label": "FederLoom SQLite",
       "type": "datasource",
       "pluginId": "frser-sqlite-datasource",
       "pluginName": "frser-sqlite-datasource"
@@ -1335,7 +1335,7 @@ Create `deploy/grafana/swarmguard-dashboard.json`:
     {"type": "panel", "id": "table", "name": "Table", "version": ""}
   ],
   "annotations": {"list": []},
-  "description": "SwarmGuard reputation events, rule firings, and active blocks with due-time",
+  "description": "FederLoom reputation events, rule firings, and active blocks with due-time",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -1361,7 +1361,7 @@ Create `deploy/grafana/swarmguard-dashboard.json`:
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-          "expr": "sum by (reason) (rate(swarmguard_events_received_total{job=~\"$node\"}[5m]) * 60)",
+          "expr": "sum by (reason) (rate(federloom_events_received_total{job=~\"$node\"}[5m]) * 60)",
           "legendFormat": "{{reason}}",
           "refId": "A"
         }
@@ -1381,7 +1381,7 @@ Create `deploy/grafana/swarmguard-dashboard.json`:
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-          "expr": "sum by (action) (rate(swarmguard_rules_fired_total{job=~\"$node\"}[5m]) * 60)",
+          "expr": "sum by (action) (rate(federloom_rules_fired_total{job=~\"$node\"}[5m]) * 60)",
           "legendFormat": "{{action}}",
           "refId": "A"
         }
@@ -1398,7 +1398,7 @@ Create `deploy/grafana/swarmguard-dashboard.json`:
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-          "expr": "sum(swarmguard_blocked_ips{job=~\"$node\"})",
+          "expr": "sum(federloom_blocked_ips{job=~\"$node\"})",
           "legendFormat": "Blocked IPs",
           "refId": "A"
         }
@@ -1415,7 +1415,7 @@ Create `deploy/grafana/swarmguard-dashboard.json`:
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-          "expr": "sum(swarmguard_federation_peers{job=~\"$node\"})",
+          "expr": "sum(federloom_federation_peers{job=~\"$node\"})",
           "legendFormat": "Peers",
           "refId": "A"
         }
@@ -1432,7 +1432,7 @@ Create `deploy/grafana/swarmguard-dashboard.json`:
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-          "expr": "topk(10, sum by (reporter_id) (swarmguard_events_received_total{job=~\"$node\"}))",
+          "expr": "topk(10, sum by (reporter_id) (federloom_events_received_total{job=~\"$node\"}))",
           "legendFormat": "{{reporter_id}}",
           "instant": true,
           "refId": "A"
@@ -1449,14 +1449,14 @@ Create `deploy/grafana/swarmguard-dashboard.json`:
       "type": "row"
     },
     {
-      "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
+      "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_FEDERLOOM_SQLITE}"},
       "fieldConfig": {"defaults": {}, "overrides": []},
       "gridPos": {"h": 8, "w": 24, "x": 0, "y": 18},
       "id": 6,
       "options": {"sortBy": [{"displayName": "time", "desc": true}]},
       "targets": [
         {
-          "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
+          "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_FEDERLOOM_SQLITE}"},
           "rawSql": "SELECT datetime(ts,'unixepoch','localtime') AS time, ip, reason, reporter, ROUND(score,1) AS score FROM events ORDER BY ts DESC LIMIT 200",
           "format": "table",
           "refId": "A"
@@ -1466,14 +1466,14 @@ Create `deploy/grafana/swarmguard-dashboard.json`:
       "type": "table"
     },
     {
-      "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
+      "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_FEDERLOOM_SQLITE}"},
       "fieldConfig": {"defaults": {}, "overrides": []},
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 26},
       "id": 7,
       "options": {"sortBy": [{"displayName": "due_time", "desc": false}]},
       "targets": [
         {
-          "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
+          "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_FEDERLOOM_SQLITE}"},
           "rawSql": "SELECT ip, ROUND(score_at_block,1) AS score, datetime(expected_unblock,'unixepoch','localtime') AS due_time FROM blocks WHERE unblocked_at IS NULL ORDER BY expected_unblock ASC",
           "format": "table",
           "refId": "A"
@@ -1483,14 +1483,14 @@ Create `deploy/grafana/swarmguard-dashboard.json`:
       "type": "table"
     },
     {
-      "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
+      "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_FEDERLOOM_SQLITE}"},
       "fieldConfig": {"defaults": {}, "overrides": []},
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 26},
       "id": 8,
       "options": {"sortBy": [{"displayName": "time", "desc": true}]},
       "targets": [
         {
-          "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_SWARMGUARD_SQLITE}"},
+          "datasource": {"type": "frser-sqlite-datasource", "uid": "${DS_FEDERLOOM_SQLITE}"},
           "rawSql": "SELECT datetime(ts,'unixepoch','localtime') AS time, ip, rule, action, ROUND(score,1) AS score FROM rule_firings ORDER BY ts DESC LIMIT 200",
           "format": "table",
           "refId": "A"
@@ -1501,13 +1501,13 @@ Create `deploy/grafana/swarmguard-dashboard.json`:
     }
   ],
   "schemaVersion": 39,
-  "tags": ["swarmguard"],
+  "tags": ["federloom"],
   "templating": {
     "list": [
       {
         "current": {"selected": true, "text": "All", "value": "$__all"},
         "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-        "definition": "label_values(swarmguard_events_received_total,job)",
+        "definition": "label_values(federloom_events_received_total,job)",
         "hide": 0,
         "includeAll": true,
         "label": "Node",
@@ -1515,7 +1515,7 @@ Create `deploy/grafana/swarmguard-dashboard.json`:
         "name": "node",
         "options": [],
         "query": {
-          "query": "label_values(swarmguard_events_received_total,job)",
+          "query": "label_values(federloom_events_received_total,job)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -1528,8 +1528,8 @@ Create `deploy/grafana/swarmguard-dashboard.json`:
   "time": {"from": "now-6h", "to": "now"},
   "timepicker": {},
   "timezone": "browser",
-  "title": "SwarmGuard",
-  "uid": "swarmguard-v1",
+  "title": "FederLoom",
+  "uid": "federloom-v1",
   "version": 1,
   "weekStart": ""
 }
@@ -1559,41 +1559,41 @@ These files are outside the repo (infra config on this machine). Changes are com
 In `/container/compose/grafana/docker-compose.yml`, add two items to the `grafana` service `volumes:` list:
 
 ```yaml
-     - swarmguard-data:/var/lib/swarmguard:ro
-     - /root/swarmguard/deploy/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards/swarmguard:ro
-     - /root/swarmguard/deploy/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources/swarmguard:ro
+     - federloom-data:/var/lib/federloom:ro
+     - /root/federloom/deploy/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards/federloom:ro
+     - /root/federloom/deploy/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources/federloom:ro
 ```
 
-At the bottom of the file, declare the external volume so Docker Compose can reference the SwarmGuard named volume:
+At the bottom of the file, declare the external volume so Docker Compose can reference the FederLoom named volume:
 
 ```yaml
 volumes:
   grafana-storage:
     external: true
-  swarmguard-data:
+  federloom-data:
     external: true
 ```
 
-- [ ] **Step 2: Add swarmguard scrape jobs to Prometheus**
+- [ ] **Step 2: Add federloom scrape jobs to Prometheus**
 
 In `/container/compose/prometheus/prometheus.yml`, add three jobs at the end of `scrape_configs:`:
 
 ```yaml
-  - job_name: "swarmguard-honeypot"
+  - job_name: "federloom-honeypot"
     scrape_interval: "30s"
     static_configs:
       - targets: ['host.docker.internal:9101']
         labels:
           node: honeypot
 
-  - job_name: "swarmguard-mailcow"
+  - job_name: "federloom-mailcow"
     scrape_interval: "30s"
     static_configs:
       - targets: ['100.120.31.14:9101']
         labels:
           node: mailcow
 
-  - job_name: "swarmguard-wordpress"
+  - job_name: "federloom-wordpress"
     scrape_interval: "30s"
     static_configs:
       - targets: ['100.92.58.24:9101']
@@ -1610,7 +1610,7 @@ docker compose -f /container/compose/grafana/docker-compose.yml up -d grafana
 
 - [ ] **Step 4: Verify Prometheus targets**
 
-Open `http://prometheus.joesnuc:9099/targets` and confirm `swarmguard-honeypot` appears (mailcow and wordpress will show DOWN until their SwarmGuard containers are rebuilt with the new image).
+Open `http://prometheus.joesnuc:9099/targets` and confirm `federloom-honeypot` appears (mailcow and wordpress will show DOWN until their FederLoom containers are rebuilt with the new image).
 
 - [ ] **Step 5: Add CHANGELOG entry**
 
@@ -1620,12 +1620,12 @@ In `CHANGELOG.md`, add under `## [Unreleased]`:
 ### Added
 - `internal/observability`: dual-output Observer — Prometheus `/metrics` (port 9101) + SQLite
   event history with configurable retention (default 15 days). Both disabled by default.
-- Six Prometheus metrics: `swarmguard_events_received_total`, `swarmguard_rules_fired_total`,
-  `swarmguard_blocked_ips`, `swarmguard_ip_score`, `swarmguard_federation_peers`,
-  `swarmguard_events_federated_total`.
+- Six Prometheus metrics: `federloom_events_received_total`, `federloom_rules_fired_total`,
+  `federloom_blocked_ips`, `federloom_ip_score`, `federloom_federation_peers`,
+  `federloom_events_federated_total`.
 - SQLite tables: `events`, `rule_firings`, `blocks` with precomputed `expected_unblock`
   (due-time for active blocks).
-- `deploy/grafana/swarmguard-dashboard.json`: importable Grafana dashboard covering live
+- `deploy/grafana/federloom-dashboard.json`: importable Grafana dashboard covering live
   Prometheus panels and local SQLite history panels.
 - `rules.Evaluate` now returns `(Action, string)` — matched rule name available for metrics.
 - Honeypot, mailcow, and wordpress deploy configs updated to enable observability.
@@ -1637,7 +1637,7 @@ In `CHANGELOG.md`, add under `## [Unreleased]`:
 - [ ] **Step 6: Run full test suite one final time**
 
 ```bash
-cd /root/swarmguard && go test ./... -race
+cd /root/federloom && go test ./... -race
 ```
 
 Expected: all PASS

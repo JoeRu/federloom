@@ -1,7 +1,7 @@
 //go:build tools
 // +build tools
 
-package swarmguard
+package federloom
 
 import (
 	_ "github.com/miekg/dns"

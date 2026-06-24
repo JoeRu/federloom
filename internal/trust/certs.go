@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
-// LoadCerts reads locally imported peer-certs (seeded by `swarmctl trust import`).
+// LoadCerts reads locally imported peer-certs (seeded by `federloomctl trust import`).
 // Missing file = empty list.
 func LoadCerts(path string) ([]proto.PeerCert, error) {
 	data, err := os.ReadFile(path)

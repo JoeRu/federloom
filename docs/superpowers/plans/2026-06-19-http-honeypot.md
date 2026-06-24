@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Enable OpenCanary's built-in HTTP (port 80) and HTTPS (port 443) honeypot modules and map their log entries to `http-*` reason codes in the SwarmGuard ingest adapter.
+**Goal:** Enable OpenCanary's built-in HTTP (port 80) and HTTPS (port 443) honeypot modules and map their log entries to `http-*` reason codes in the FederLoom ingest adapter.
 
 **Architecture:** Two tasks. Task 1 is pure config — update `opencanary.json` and `docker-compose.yml`, deploy to the honeypot server, verify HTTP/HTTPS responds. Task 2 discovers the actual OpenCanary logtype integers from the running container, then adds them to the existing `openCanaryReasons` map in `internal/ingest/opencanary.go` following the TDD pattern already established for SMTP and IMAP.
 
@@ -35,7 +35,7 @@ No Go code in this task. Verification is a live `curl` against the honeypot serv
 
   ```json
   {
-      "device.node_id": "swarmguard-honeypot-1",
+      "device.node_id": "federloom-honeypot-1",
       "git.enabled": false,
       "ftp.enabled": false,
       "http.enabled": true,
@@ -94,10 +94,10 @@ No Go code in this task. Verification is a live `curl` against the honeypot serv
     --exclude='deploy/mailcow/config.local.yaml' \
     -e "ssh -p 2244" \
     ./ \
-    root@167.233.115.41:/opt/swarmguard/
+    root@167.233.115.41:/opt/federloom/
 
   ssh -p 2244 root@167.233.115.41 \
-    "docker compose -f /opt/swarmguard/deploy/honeypot/docker-compose.yml \
+    "docker compose -f /opt/federloom/deploy/honeypot/docker-compose.yml \
      restart opencanary"
   ```
 
@@ -107,10 +107,10 @@ No Go code in this task. Verification is a live `curl` against the honeypot serv
 
   ```bash
   # HTTP — expect a 200 or 302, not "connection refused"
-  curl -si http://swarmguard.jru.me/ 2>&1 | head -3
+  curl -si http://federloom.jru.me/ 2>&1 | head -3
 
   # HTTPS — -k to skip cert validation (OpenCanary uses self-signed)
-  curl -sik https://swarmguard.jru.me/ 2>&1 | head -3
+  curl -sik https://federloom.jru.me/ 2>&1 | head -3
   ```
 
   Expected output (exact content varies, but must not be `curl: (7) Failed to connect`):
@@ -329,22 +329,22 @@ Follow the same TDD pattern as the existing SMTP and IMAP entries. The logtype i
 After both tasks are committed and the honeypot is running:
 
 ```bash
-# 1. Confirm HTTP events appear in swarmguard metrics on the honeypot
+# 1. Confirm HTTP events appear in federloom metrics on the honeypot
 #    (make a test request first to generate an event)
-curl -s http://swarmguard.jru.me/ >/dev/null
+curl -s http://federloom.jru.me/ >/dev/null
 sleep 35   # wait for one poll cycle
 
 curl -s http://167.233.115.41:9101/metrics \
-  | grep 'swarmguard_events_received_total.*http'
+  | grep 'federloom_events_received_total.*http'
 ```
 
 Expected output (reporter label will be the honeypot's peer ID):
 ```
-swarmguard_events_received_total{reason="http-probe",reporter_id="12D3KooW..."} 1
+federloom_events_received_total{reason="http-probe",reporter_id="12D3KooW..."} 1
 ```
 
 ```bash
 # 2. Confirm the event federated to mailcow (web taxonomy check)
 curl -s http://100.120.31.14:9101/metrics \
-  | grep 'swarmguard_events_received_total.*http'
+  | grep 'federloom_events_received_total.*http'
 ```

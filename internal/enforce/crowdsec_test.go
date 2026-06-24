@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/enforce"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/enforce"
 )
 
 // mockLAPI sets up a fake CrowdSec LAPI server and returns a CrowdSecSink
@@ -111,8 +111,8 @@ func TestCrowdSecSink_Block(t *testing.T) {
 			if decision["ip"] != "1.2.3.4" {
 				t.Errorf("alerts: expected ip=1.2.3.4, got %v", decision["ip"])
 			}
-			if decision["origin"] != "swarmguard" {
-				t.Errorf("alerts: expected origin=swarmguard, got %v", decision["origin"])
+			if decision["origin"] != "federloom" {
+				t.Errorf("alerts: expected origin=federloom, got %v", decision["origin"])
 			}
 			if decision["type"] != "ban" {
 				t.Errorf("alerts: expected type=ban, got %v", decision["type"])
@@ -153,8 +153,8 @@ func TestCrowdSecSink_Unblock(t *testing.T) {
 				t.Error("decisions: expected Authorization header to be set")
 			}
 			q := r.URL.Query()
-			if q.Get("origin") != "swarmguard" {
-				t.Errorf("decisions: expected origin=swarmguard, got %q", q.Get("origin"))
+			if q.Get("origin") != "federloom" {
+				t.Errorf("decisions: expected origin=federloom, got %q", q.Get("origin"))
 			}
 			if q.Get("value") != "5.6.7.8" {
 				t.Errorf("decisions: expected value=5.6.7.8, got %q", q.Get("value"))

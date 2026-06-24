@@ -12,11 +12,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
-// scenarioMap translates known CrowdSec scenario names to SwarmGuard reason strings.
+// scenarioMap translates known CrowdSec scenario names to FederLoom reason strings.
 // Unknown scenarios fall back to "crowdsec-alert".
 var scenarioMap = map[string]string{
 	"crowdsecurity/ssh-bf":           "ssh-auth-bruteforce",
@@ -213,7 +213,7 @@ func (c *CrowdSec) fetchDecisions(ctx context.Context, ch chan<- proto.Event) {
 			return
 		}
 	}
-	// Deleted decisions are ignored: SwarmGuard releases IPs via score decay.
+	// Deleted decisions are ignored: FederLoom releases IPs via score decay.
 }
 
 // --- alerts ---

@@ -1,4 +1,4 @@
-# SwarmGuard rules for the WordPress production node.
+# FederLoom rules for the WordPress production node.
 # Rules are evaluated top-to-bottom; first match wins.
 # Reason patterns: exact string OR prefix wildcard ending in "*" (e.g. "http-*").
 

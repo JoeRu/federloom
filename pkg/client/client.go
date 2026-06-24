@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// Client is a thin HTTP client for the local SwarmGuard API (spec §3).
+// Client is a thin HTTP client for the local FederLoom API (spec §3).
 type Client struct {
 	baseURL string
 	hc      *http.Client

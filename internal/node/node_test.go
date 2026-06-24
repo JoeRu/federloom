@@ -7,15 +7,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/enforce"
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/reputation"
-	"github.com/JoeRu/swarmguard/internal/rules"
-	"github.com/JoeRu/swarmguard/internal/store"
-	"github.com/JoeRu/swarmguard/internal/transport"
-	"github.com/JoeRu/swarmguard/internal/trust"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/enforce"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/rules"
+	"github.com/JoeRu/federloom/internal/store"
+	"github.com/JoeRu/federloom/internal/transport"
+	"github.com/JoeRu/federloom/internal/trust"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // testNode builds a Node with a temp store, no transport, and a permissive

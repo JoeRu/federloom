@@ -4,9 +4,9 @@
 
 **Goal:** Ed25519 Person identities sign peer-certs that travel on the wire, so anchoring one human's key extends trust to all their machines; un-anchored strangers are score-capped.
 
-**Architecture:** Three keys (node libp2p key, Person identity key, peer-cert). `internal/identity` handles keys + cert issue/verify; `internal/trust` holds the anchor store + verified cert cache behind `Resolve(peerID)`; transport surfaces the gossipsub-verified publisher; the node drops spoofed reporters and verifies vouches; the reputation engine counts distinct Person groups and caps stranger contributions. `swarmctl` manages identities, certs, and anchors by editing files (atomic rename) — no daemon API.
+**Architecture:** Three keys (node libp2p key, Person identity key, peer-cert). `internal/identity` handles keys + cert issue/verify; `internal/trust` holds the anchor store + verified cert cache behind `Resolve(peerID)`; transport surfaces the gossipsub-verified publisher; the node drops spoofed reporters and verifies vouches; the reputation engine counts distinct Person groups and caps stranger contributions. `federloomctl` manages identities, certs, and anchors by editing files (atomic rename) — no daemon API.
 
-**Tech Stack:** Go 1.22, stdlib `crypto/ed25519`, libp2p (`core/crypto`, `core/peer`, gossipsub message signing — already on by default), BadgerDB (existing store), `flag` stdlib for swarmctl subcommands (no new deps).
+**Tech Stack:** Go 1.22, stdlib `crypto/ed25519`, libp2p (`core/crypto`, `core/peer`, gossipsub message signing — already on by default), BadgerDB (existing store), `flag` stdlib for federloomctl subcommands (no new deps).
 
 **Spec:** `docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md`. Wire change governed by `.claude/skills/wire-protocol`.
 
@@ -31,16 +31,16 @@
 | `internal/trust/bundle.go` (create) | `Bundle` export/import format |
 | `internal/transport/gossip.go` (modify) | `ReceivedEvent{Event, From}`, verified publisher |
 | `internal/node/node.go` (modify) | trust wiring, vouch attach/verify, spoof drop, `ProcessRemote` exported |
-| `cmd/swarmd/main.go` (modify) | load persistent node key |
-| `cmd/swarmctl/main.go` (modify) | subcommand dispatch |
-| `cmd/swarmctl/common.go` (create) | config loading helper |
-| `cmd/swarmctl/identity.go` (create) | `identity`, `identity init/show`, `peer-cert` |
-| `cmd/swarmctl/trust.go` (create) | `trust add/set/remove/list/export/import` |
+| `cmd/federloomd/main.go` (modify) | load persistent node key |
+| `cmd/federloomctl/main.go` (modify) | subcommand dispatch |
+| `cmd/federloomctl/common.go` (create) | config loading helper |
+| `cmd/federloomctl/identity.go` (create) | `identity`, `identity init/show`, `peer-cert` |
+| `cmd/federloomctl/trust.go` (create) | `trust add/set/remove/list/export/import` |
 | `test/adversarial/vouch_test.go` (create) | new CI-gate scenarios |
 | `test/integration/vouch_pipeline_test.go` (create) | on-wire vouch round-trip |
 | docs (modify) | `docs/onboarding/03-key-management.md`, `docs/federation-guide.md`, `CHANGELOG.md` |
 
-Run all commands from the repo root `/root/swarmguard`. The PostToolUse hook runs `gofmt` + `go vet` on every Go edit — if vet fails mid-task because a later step hasn't landed yet, finish the task's implementation steps before re-running tests.
+Run all commands from the repo root `/root/federloom`. The PostToolUse hook runs `gofmt` + `go vet` on every Go edit — if vet fails mid-task because a later step hasn't landed yet, finish the task's implementation steps before re-running tests.
 
 ---
 
@@ -64,7 +64,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 func TestEventVouchRoundTrip(t *testing.T) {
@@ -180,12 +180,12 @@ git commit -m "feat(proto): add PeerCert vouching to Event, bump SchemaVersion t
 
 ---
 
-### Task 2: Persistent node key — `internal/identity/nodekey.go` + swarmd wiring
+### Task 2: Persistent node key — `internal/identity/nodekey.go` + federloomd wiring
 
 **Files:**
 - Create: `internal/identity/nodekey.go`
 - Create: `internal/identity/nodekey_test.go`
-- Modify: `cmd/swarmd/main.go`
+- Modify: `cmd/federloomd/main.go`
 - Modify: `internal/config/config.go` (one helper method)
 
 - [ ] **Step 1: Write the failing tests**
@@ -202,7 +202,7 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
+	"github.com/JoeRu/federloom/internal/identity"
 )
 
 func TestNodeKeyStableAcrossLoads(t *testing.T) {
@@ -338,9 +338,9 @@ func (c *Config) NodeKeyFile() string {
 }
 ```
 
-- [ ] **Step 6: Wire into swarmd**
+- [ ] **Step 6: Wire into federloomd**
 
-In `cmd/swarmd/main.go`, add to imports: `"github.com/JoeRu/swarmguard/internal/identity"`.
+In `cmd/federloomd/main.go`, add to imports: `"github.com/JoeRu/federloom/internal/identity"`.
 
 Replace the `t, err := transport.New(...)` block (currently lines 51–57) with:
 
@@ -370,7 +370,7 @@ Expected: build OK, all tests PASS.
 - [ ] **Step 8: Commit**
 
 ```bash
-git add internal/identity/ internal/config/config.go cmd/swarmd/main.go
+git add internal/identity/ internal/config/config.go cmd/federloomd/main.go
 git commit -m "feat(identity): persistent node key — stable peer ID across restarts"
 ```
 
@@ -396,7 +396,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
+	"github.com/JoeRu/federloom/internal/identity"
 )
 
 func TestPersonKeyGenerateAndLoad(t *testing.T) {
@@ -473,7 +473,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
+	"github.com/JoeRu/federloom/internal/identity"
 )
 
 func TestCertIssueVerifyRoundTrip(t *testing.T) {
@@ -631,13 +631,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // certMessage is the canonical, domain-separated byte string a Person identity
 // signs to vouch for a peer. Any field change invalidates the signature.
 func certMessage(peerID string, personKey []byte, validUntil time.Time) []byte {
-	return []byte("swarmguard-peer-cert-v1|" + peerID + "|" +
+	return []byte("federloom-peer-cert-v1|" + peerID + "|" +
 		base64.StdEncoding.EncodeToString(personKey) + "|" +
 		validUntil.UTC().Format(time.RFC3339))
 }
@@ -711,27 +711,27 @@ func TestDefaultsTrust(t *testing.T) {
 
 func TestTrustPathDefaultsDeriveFromStoreDir(t *testing.T) {
 	cfg := config.Defaults()
-	cfg.Store.Dir = "/var/lib/swarmguard"
-	if got := cfg.TrustAnchorsFile(); got != "/var/lib/swarmguard/anchors.json" {
+	cfg.Store.Dir = "/var/lib/federloom"
+	if got := cfg.TrustAnchorsFile(); got != "/var/lib/federloom/anchors.json" {
 		t.Errorf("TrustAnchorsFile = %q", got)
 	}
-	if got := cfg.TrustPersonKeyFile(); got != "/var/lib/swarmguard/person.key" {
+	if got := cfg.TrustPersonKeyFile(); got != "/var/lib/federloom/person.key" {
 		t.Errorf("TrustPersonKeyFile = %q", got)
 	}
-	if got := cfg.TrustPeerCertFile(); got != "/var/lib/swarmguard/peer.cert" {
+	if got := cfg.TrustPeerCertFile(); got != "/var/lib/federloom/peer.cert" {
 		t.Errorf("TrustPeerCertFile = %q", got)
 	}
-	if got := cfg.TrustCertsFile(); got != "/var/lib/swarmguard/imported-certs.json" {
+	if got := cfg.TrustCertsFile(); got != "/var/lib/federloom/imported-certs.json" {
 		t.Errorf("TrustCertsFile = %q", got)
 	}
 }
 
 func TestTrustPathOverrides(t *testing.T) {
-	cfg, err := config.LoadYAML([]byte("trust:\n  anchors_file: /etc/swarmguard/anchors.json\n  stranger_score_cap: 5\n"))
+	cfg, err := config.LoadYAML([]byte("trust:\n  anchors_file: /etc/federloom/anchors.json\n  stranger_score_cap: 5\n"))
 	if err != nil {
 		t.Fatalf("LoadYAML: %v", err)
 	}
-	if got := cfg.TrustAnchorsFile(); got != "/etc/swarmguard/anchors.json" {
+	if got := cfg.TrustAnchorsFile(); got != "/etc/federloom/anchors.json" {
 		t.Errorf("TrustAnchorsFile override = %q", got)
 	}
 	if cfg.Trust.StrangerScoreCap != 5 {
@@ -809,7 +809,7 @@ func (c *Config) TrustPeerCertFile() string {
 }
 
 // TrustCertsFile returns the path of the locally imported cert cache
-// (seeded by `swarmctl trust import`; internal file, no config key).
+// (seeded by `federloomctl trust import`; internal file, no config key).
 func (c *Config) TrustCertsFile() string {
 	return filepath.Join(c.Store.Dir, "imported-certs.json")
 }
@@ -929,8 +929,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/reputation"
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 func openEngineCap(t *testing.T, cap float64) *reputation.Engine {
@@ -1267,8 +1267,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/trust"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/trust"
 )
 
 // fixture: a Person key, an anchor for it, and a cached cert for peer "12D3KooWpeerA".
@@ -1465,7 +1465,7 @@ func LoadAnchors(path string) ([]Anchor, error) {
 }
 
 // SaveAnchors writes anchors atomically (temp file + rename) so a concurrently
-// reading swarmd never sees a half-written file.
+// reading federloomd never sees a half-written file.
 func SaveAnchors(path string, anchors []Anchor) error {
 	data, err := json.MarshalIndent(anchors, "", "  ")
 	if err != nil {
@@ -1511,10 +1511,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
-// LoadCerts reads locally imported peer-certs (seeded by `swarmctl trust import`).
+// LoadCerts reads locally imported peer-certs (seeded by `federloomctl trust import`).
 // Missing file = empty list.
 func LoadCerts(path string) ([]proto.PeerCert, error) {
 	data, err := os.ReadFile(path)
@@ -1554,8 +1554,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // Store answers "how much do I trust this peer?" by combining the anchored
@@ -1690,11 +1690,11 @@ Create `internal/trust/bundle.go`:
 package trust
 
 import (
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
-// Bundle is the offline exchange format produced by `swarmctl trust export`
-// and consumed by `swarmctl trust import`: a Person's public identity plus
+// Bundle is the offline exchange format produced by `federloomctl trust export`
+// and consumed by `federloomctl trust import`: a Person's public identity plus
 // every peer-cert they have issued. The importer chooses the local Person
 // name; Label is the exporter's suggestion.
 type Bundle struct {
@@ -1930,14 +1930,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/enforce"
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/reputation"
-	"github.com/JoeRu/swarmguard/internal/store"
-	"github.com/JoeRu/swarmguard/internal/transport"
-	"github.com/JoeRu/swarmguard/internal/trust"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/enforce"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/store"
+	"github.com/JoeRu/federloom/internal/transport"
+	"github.com/JoeRu/federloom/internal/trust"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // testNode builds a Node with a temp store, no transport, and a permissive
@@ -2051,7 +2051,7 @@ Expected: FAIL — `Node` has no `trust` field; vouch path missing (replay test 
 
 In `internal/node/node.go`:
 
-Add imports: `"os"`, `"encoding/json"`, `"time"` (already there), `"github.com/JoeRu/swarmguard/internal/identity"`, `"github.com/JoeRu/swarmguard/internal/trust"`.
+Add imports: `"os"`, `"encoding/json"`, `"time"` (already there), `"github.com/JoeRu/federloom/internal/identity"`, `"github.com/JoeRu/federloom/internal/trust"`.
 
 Add fields to `Node`:
 
@@ -2147,19 +2147,19 @@ git commit -m "feat(node): verify vouches, resolve trust, drop spoofed reporters
 
 ---
 
-### Task 11: swarmctl — dispatch, `identity`, `peer-cert`
+### Task 11: federloomctl — dispatch, `identity`, `peer-cert`
 
 **Files:**
-- Modify: `cmd/swarmctl/main.go`
-- Create: `cmd/swarmctl/common.go`
-- Create: `cmd/swarmctl/identity.go`
+- Modify: `cmd/federloomctl/main.go`
+- Create: `cmd/federloomctl/common.go`
+- Create: `cmd/federloomctl/identity.go`
 
-swarmctl is exercised by `go build` + manual smoke commands (CLI glue over already-tested packages; per-package unit tests cover the logic).
+federloomctl is exercised by `go build` + manual smoke commands (CLI glue over already-tested packages; per-package unit tests cover the logic).
 
-- [ ] **Step 1: Replace `cmd/swarmctl/main.go`**
+- [ ] **Step 1: Replace `cmd/federloomctl/main.go`**
 
 ```go
-// Command swarmctl is the SwarmGuard admin CLI: node identity, Person
+// Command federloomctl is the FederLoom admin CLI: node identity, Person
 // identities, peer-certs, and the local trust-anchor list (spec §5.1).
 package main
 
@@ -2169,21 +2169,21 @@ import (
 )
 
 func usage() {
-	fmt.Fprint(os.Stderr, `swarmctl — SwarmGuard admin CLI
+	fmt.Fprint(os.Stderr, `federloomctl — FederLoom admin CLI
 
 Usage:
-  swarmctl identity                      print this node's peer ID
-  swarmctl identity init --label NAME    create a Person identity + self peer-cert
-  swarmctl identity show                 print Person pubkey + fingerprint
-  swarmctl peer-cert PEER_ID             sign a peer-cert for another machine
-  swarmctl trust add PERSON --identity ed25519:...   anchor a Person
-  swarmctl trust set PERSON [--weight W] [--label L]
-  swarmctl trust remove PERSON
-  swarmctl trust list
-  swarmctl trust export                  write this Person's bundle to stdout
-  swarmctl trust import FILE [--as NAME] [--weight W]
+  federloomctl identity                      print this node's peer ID
+  federloomctl identity init --label NAME    create a Person identity + self peer-cert
+  federloomctl identity show                 print Person pubkey + fingerprint
+  federloomctl peer-cert PEER_ID             sign a peer-cert for another machine
+  federloomctl trust add PERSON --identity ed25519:...   anchor a Person
+  federloomctl trust set PERSON [--weight W] [--label L]
+  federloomctl trust remove PERSON
+  federloomctl trust list
+  federloomctl trust export                  write this Person's bundle to stdout
+  federloomctl trust import FILE [--as NAME] [--weight W]
 
-All commands accept -config PATH (same file swarmd uses).
+All commands accept -config PATH (same file federloomd uses).
 `)
 }
 
@@ -2207,13 +2207,13 @@ func main() {
 		os.Exit(2)
 	}
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "swarmctl:", err)
+		fmt.Fprintln(os.Stderr, "federloomctl:", err)
 		os.Exit(1)
 	}
 }
 ```
 
-- [ ] **Step 2: Create `cmd/swarmctl/common.go`**
+- [ ] **Step 2: Create `cmd/federloomctl/common.go`**
 
 ```go
 package main
@@ -2221,11 +2221,11 @@ package main
 import (
 	"flag"
 
-	"github.com/JoeRu/swarmguard/internal/config"
+	"github.com/JoeRu/federloom/internal/config"
 )
 
 // addConfigFlag registers -config on fs and returns a loader that resolves
-// the effective Config (defaults when no file is given — same as swarmd).
+// the effective Config (defaults when no file is given — same as federloomd).
 func addConfigFlag(fs *flag.FlagSet) func() (*config.Config, error) {
 	path := fs.String("config", "", "path to YAML config file")
 	return func() (*config.Config, error) {
@@ -2237,7 +2237,7 @@ func addConfigFlag(fs *flag.FlagSet) func() (*config.Config, error) {
 }
 ```
 
-- [ ] **Step 3: Create `cmd/swarmctl/identity.go`**
+- [ ] **Step 3: Create `cmd/federloomctl/identity.go`**
 
 ```go
 package main
@@ -2252,9 +2252,9 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/trust"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/trust"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // labelPath stores the operator-chosen label next to the person key.
@@ -2321,10 +2321,10 @@ func identityInit(args []string) error {
 	fmt.Println("fingerprint:", identity.Fingerprint(pub))
 
 	// If this machine already has a node key, self-certify it so the local
-	// swarmd publishes vouched events immediately.
+	// federloomd publishes vouched events immediately.
 	nodePriv, err := identity.LoadOrCreateNodeKey(cfg.NodeKeyFile())
 	if err != nil {
-		fmt.Println("note: no node key yet — run `swarmctl peer-cert` after swarmd first start")
+		fmt.Println("note: no node key yet — run `federloomctl peer-cert` after federloomd first start")
 		return nil
 	}
 	pid, err := peer.IDFromPrivateKey(nodePriv)
@@ -2373,7 +2373,7 @@ func cmdPeerCert(args []string) error {
 		return err
 	}
 	if fs.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl peer-cert PEER_ID")
+		return fmt.Errorf("usage: federloomctl peer-cert PEER_ID")
 	}
 	peerID := fs.Arg(0)
 	if _, err := peer.Decode(peerID); err != nil {
@@ -2434,7 +2434,7 @@ func personPubMust(personKeyFile string) ed25519.PublicKey {
 
 - [ ] **Step 4: Add a temporary stub so the package builds before Task 12**
 
-Create `cmd/swarmctl/trust.go` with just:
+Create `cmd/federloomctl/trust.go` with just:
 
 ```go
 package main
@@ -2450,8 +2450,8 @@ func cmdTrust(args []string) error {
 
 ```bash
 make build
-./bin/swarmctl identity -config /dev/null 2>/dev/null || true
-TMP=$(mktemp -d) && ./bin/swarmctl identity init -label "Test Op" -config <(printf 'store:\n  dir: %s\n' "$TMP")
+./bin/federloomctl identity -config /dev/null 2>/dev/null || true
+TMP=$(mktemp -d) && ./bin/federloomctl identity init -label "Test Op" -config <(printf 'store:\n  dir: %s\n' "$TMP")
 ```
 
 Expected: `identity init` prints a pubkey + 4-group fingerprint and "self peer-cert installed" (the node key is auto-created in `$TMP`). If process substitution misbehaves under zsh, write the config to a temp file instead.
@@ -2459,20 +2459,20 @@ Expected: `identity init` prints a pubkey + 4-group fingerprint and "self peer-c
 - [ ] **Step 6: Commit**
 
 ```bash
-git add cmd/swarmctl/
-git commit -m "feat(swarmctl): identity init/show and peer-cert signing commands"
+git add cmd/federloomctl/
+git commit -m "feat(federloomctl): identity init/show and peer-cert signing commands"
 ```
 
 ---
 
-### Task 12: swarmctl — trust add/set/remove/list/export/import
+### Task 12: federloomctl — trust add/set/remove/list/export/import
 
 **Files:**
-- Modify: `cmd/swarmctl/trust.go` (replace stub)
+- Modify: `cmd/federloomctl/trust.go` (replace stub)
 
 - [ ] **Step 1: Implement**
 
-Replace `cmd/swarmctl/trust.go`:
+Replace `cmd/federloomctl/trust.go`:
 
 ```go
 package main
@@ -2485,14 +2485,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/trust"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/trust"
 )
 
 func cmdTrust(args []string) error {
 	if len(args) < 1 {
-		return fmt.Errorf("usage: swarmctl trust add|set|remove|list|export|import ...")
+		return fmt.Errorf("usage: federloomctl trust add|set|remove|list|export|import ...")
 	}
 	switch args[0] {
 	case "add":
@@ -2522,7 +2522,7 @@ func trustAdd(args []string) error {
 		return err
 	}
 	if fs.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl trust add PERSON --identity ed25519:...")
+		return fmt.Errorf("usage: federloomctl trust add PERSON --identity ed25519:...")
 	}
 	person := fs.Arg(0)
 	cfg, err := loadCfg()
@@ -2561,7 +2561,7 @@ func trustSet(args []string) error {
 		return err
 	}
 	if fs.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl trust set PERSON [--weight W] [--label L]")
+		return fmt.Errorf("usage: federloomctl trust set PERSON [--weight W] [--label L]")
 	}
 	person := fs.Arg(0)
 	cfg, err := loadCfg()
@@ -2590,7 +2590,7 @@ func trustSet(args []string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("no anchored person %q — see `swarmctl trust list`", person)
+	return fmt.Errorf("no anchored person %q — see `federloomctl trust list`", person)
 }
 
 func trustRemove(args []string) error {
@@ -2600,7 +2600,7 @@ func trustRemove(args []string) error {
 		return err
 	}
 	if fs.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl trust remove PERSON")
+		return fmt.Errorf("usage: federloomctl trust remove PERSON")
 	}
 	person := fs.Arg(0)
 	cfg, err := loadCfg()
@@ -2645,7 +2645,7 @@ func trustList(args []string) error {
 		return err
 	}
 	if len(anchors) == 0 {
-		fmt.Println("no anchored persons — see `swarmctl trust add`")
+		fmt.Println("no anchored persons — see `federloomctl trust add`")
 		return nil
 	}
 	fmt.Printf("%-12s %-7s %-8s %-22s %s\n", "PERSON", "WEIGHT", "STATUS", "FINGERPRINT", "LABEL")
@@ -2675,7 +2675,7 @@ func trustExport(args []string) error {
 	}
 	priv, err := identity.LoadPersonKey(cfg.TrustPersonKeyFile())
 	if err != nil {
-		return fmt.Errorf("no person identity — run `swarmctl identity init` first: %w", err)
+		return fmt.Errorf("no person identity — run `federloomctl identity init` first: %w", err)
 	}
 	label := ""
 	if data, err := os.ReadFile(labelPath(cfg.TrustPersonKeyFile())); err == nil {
@@ -2708,7 +2708,7 @@ func trustImport(args []string) error {
 		return err
 	}
 	if fs.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl trust import FILE [--as NAME] [--weight W]")
+		return fmt.Errorf("usage: federloomctl trust import FILE [--as NAME] [--weight W]")
 	}
 	cfg, err := loadCfg()
 	if err != nil {
@@ -2819,12 +2819,12 @@ make build
 JO=$(mktemp -d); ME=$(mktemp -d)
 printf 'store:\n  dir: %s\n' "$JO" > "$JO/cfg.yaml"
 printf 'store:\n  dir: %s\n' "$ME" > "$ME/cfg.yaml"
-./bin/swarmctl identity init -label "Jo" -config "$JO/cfg.yaml"
-./bin/swarmctl trust export -config "$JO/cfg.yaml" > /tmp/jo.bundle
-./bin/swarmctl trust import /tmp/jo.bundle --as jo -config "$ME/cfg.yaml"
-./bin/swarmctl trust list -config "$ME/cfg.yaml"
-./bin/swarmctl trust set jo -weight 0.8 -config "$ME/cfg.yaml"
-./bin/swarmctl trust remove jo -config "$ME/cfg.yaml"
+./bin/federloomctl identity init -label "Jo" -config "$JO/cfg.yaml"
+./bin/federloomctl trust export -config "$JO/cfg.yaml" > /tmp/jo.bundle
+./bin/federloomctl trust import /tmp/jo.bundle --as jo -config "$ME/cfg.yaml"
+./bin/federloomctl trust list -config "$ME/cfg.yaml"
+./bin/federloomctl trust set jo -weight 0.8 -config "$ME/cfg.yaml"
+./bin/federloomctl trust remove jo -config "$ME/cfg.yaml"
 ```
 
 Expected: init prints fingerprint; import prints the same fingerprint + "imported 1 cert(s)" + "anchored jo (weight 0.90)"; list shows jo/0.90/ok; set/remove succeed.
@@ -2837,8 +2837,8 @@ Expected: PASS.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add cmd/swarmctl/
-git commit -m "feat(swarmctl): trust anchor management — add/set/remove/list/export/import"
+git add cmd/federloomctl/
+git commit -m "feat(federloomctl): trust anchor management — add/set/remove/list/export/import"
 ```
 
 ---
@@ -2870,12 +2870,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/node"
-	"github.com/JoeRu/swarmguard/internal/transport"
-	"github.com/JoeRu/swarmguard/internal/trust"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/node"
+	"github.com/JoeRu/federloom/internal/transport"
+	"github.com/JoeRu/federloom/internal/trust"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // newHarness builds a full Node (no transport; block threshold set high so
@@ -3024,7 +3024,7 @@ func TestPersonRemovalAppliesImmediately(t *testing.T) {
 In `internal/node/node.go` add:
 
 ```go
-// GetScore exposes the raw reputation record for ip (tests, swarmctl status).
+// GetScore exposes the raw reputation record for ip (tests, federloomctl status).
 func (n *Node) GetScore(ip string) (store.ScoreRecord, error) {
 	return n.rep.GetRecord(ip)
 }
@@ -3077,12 +3077,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/node"
-	"github.com/JoeRu/swarmguard/internal/transport"
-	"github.com/JoeRu/swarmguard/internal/trust"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/node"
+	"github.com/JoeRu/federloom/internal/transport"
+	"github.com/JoeRu/federloom/internal/trust"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // TestVouchTravelsOverGossip proves the full §5.1 chain across a real libp2p
@@ -3208,7 +3208,7 @@ Append a section (adapt heading level to the file's existing style):
 ```markdown
 ## Node keys, Person identities, and peer-certs
 
-SwarmGuard separates three keys with distinct blast radii:
+FederLoom separates three keys with distinct blast radii:
 
 | Key | File (default) | Compromise means |
 |---|---|---|
@@ -3216,16 +3216,16 @@ SwarmGuard separates three keys with distinct blast radii:
 | Person identity | `<store-dir>/person.key` (0600) | ALL your machines' vouching burned — keep it off shared boxes, back it up offline |
 | Peer-cert | `<store-dir>/peer.cert` | nothing secret — it is a public, signed statement |
 
-- The node key is created automatically on first `swarmd` start. swarmd refuses
+- The node key is created automatically on first `federloomd` start. federloomd refuses
   to start if it is group- or world-readable (`chmod 600` to fix).
-- The Person identity is created once with `swarmctl identity init --label "You"`.
-  It signs a certificate per machine (`swarmctl peer-cert <peer-id>`); certs
+- The Person identity is created once with `federloomctl identity init --label "You"`.
+  It signs a certificate per machine (`federloomctl peer-cert <peer-id>`); certs
   default to one year validity — re-issue before expiry.
 - **The fingerprint ritual:** before anchoring anyone, read the fingerprint
-  shown by `swarmctl trust import` aloud against the one your friend gets from
-  `swarmctl identity show`, over a channel you already trust (call, Signal,
+  shown by `federloomctl trust import` aloud against the one your friend gets from
+  `federloomctl identity show`, over a channel you already trust (call, Signal,
   in person). Matching fingerprints = you anchored the right human.
-- Removing a person (`swarmctl trust remove jo`) takes effect within ~10
+- Removing a person (`federloomctl trust remove jo`) takes effect within ~10
   seconds for all their machines. Their past score contributions fade through
   normal decay.
 ```
@@ -3237,25 +3237,25 @@ Append:
 ```markdown
 ## Pairing with a friend (social trust anchors)
 
-Trust in SwarmGuard is granted to *people*, not machines (spec §5.1). One
+Trust in FederLoom is granted to *people*, not machines (spec §5.1). One
 anchored Person identity covers every machine they certify — including ones
 they add later — and all of them together count as **one** corroboration vote.
 
 Jo (being trusted), once:
 
 ​```bash
-swarmctl identity init --label "Jo"        # Person key + self-cert for this node
-swarmctl identity show                      # pubkey + fingerprint to share
-swarmctl peer-cert <peer-id-of-2nd-box>     # cert for each additional machine
-swarmctl trust export > jo.bundle           # optional offline bundle
+federloomctl identity init --label "Jo"        # Person key + self-cert for this node
+federloomctl identity show                      # pubkey + fingerprint to share
+federloomctl peer-cert <peer-id-of-2nd-box>     # cert for each additional machine
+federloomctl trust export > jo.bundle           # optional offline bundle
 ​```
 
 You (trusting Jo):
 
 ​```bash
-swarmctl trust import jo.bundle --as jo     # or: swarmctl trust add jo --identity ed25519:...
+federloomctl trust import jo.bundle --as jo     # or: federloomctl trust add jo --identity ed25519:...
 # → read the printed fingerprint to Jo over a channel you already trust
-swarmctl trust list
+federloomctl trust list
 ​```
 
 From then on Jo's machines attach their certs to every report on the wire —
@@ -3267,8 +3267,8 @@ one corroboration vote: a Sybil flood cannot block anything on its own.
 Re-rate or drop a person any time (lists are aids, not law — Invariant 1/6):
 
 ​```bash
-swarmctl trust set jo --weight 0.5
-swarmctl trust remove jo
+federloomctl trust set jo --weight 0.5
+federloomctl trust remove jo
 ​```
 ```
 
@@ -3283,7 +3283,7 @@ Add under an `## Unreleased` heading (create it if absent):
 - Social trust anchors (spec §5.1): Ed25519 Person identities sign peer-certs;
   certs travel on the wire (`Event.Vouch`); anchored Persons drive
   corroboration, strangers are score-capped (`trust.stranger_score_cap`).
-- `swarmctl` identity/peer-cert/trust command set.
+- `federloomctl` identity/peer-cert/trust command set.
 - Persistent node identity key — stable peer ID across restarts.
 
 ### Changed
@@ -3310,5 +3310,5 @@ git commit -m "docs: key management, friend-pairing guide, changelog for trust a
 ## Self-review checklist (run after writing, before execution)
 
 - **Spec coverage:** identity keys (T2/T3), wire change (T1), anchor store + Resolve (T8), CLI (T11/T12), verified sender + spoof drop (T9/T10), vouch verify (T10), capped strangers + groups (T5/T6), adversarial gate (T13), on-wire round trip (T14), docs (T15). Edge cases from the spec map to tests in T8 (corrupt/missing/expired/hot-reload), T10 (replay/spoof), T13 (forge/expire/removal).
-- **Known deviations from spec, accepted:** per-peer revocation is out of scope (documented); `swarmctl trust list` shows anchors, not cached certs.
+- **Known deviations from spec, accepted:** per-peer revocation is out of scope (documented); `federloomctl trust list` shows anchors, not cached certs.
 - **Type consistency:** `Record(ip, reason, reporterID string, trust float64, group string, anchored bool)` used identically in T6/T7/T10/T13; `NewStore(anchorsPath, certsPath string, strangerWeight float64)` in T8/T10/T13; `ReceivedEvent{Event, From}` in T9/T10/T13/T14.

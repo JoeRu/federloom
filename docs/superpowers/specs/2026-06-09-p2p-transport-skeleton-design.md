@@ -8,7 +8,7 @@
 
 ## 1. Motivation
 
-The SwarmGuard codebase is fully scaffolded but contains zero implementation. The highest-risk unknown is the networking layer: will libp2p gossipsub + DHT + relay/aggregator topology actually behave as the spec describes? This skeleton answers that question first, before any reputation, enforcement, or trust logic is written.
+The FederLoom codebase is fully scaffolded but contains zero implementation. The highest-risk unknown is the networking layer: will libp2p gossipsub + DHT + relay/aggregator topology actually behave as the spec describes? This skeleton answers that question first, before any reputation, enforcement, or trust logic is written.
 
 Approach: build the thinnest end-to-end path that runs — a binary that hosts a libp2p node, gossips `proto.Event`s, and logs what it receives. Prove the topology with both an in-process CI test and a real-process smoke test.
 
@@ -19,7 +19,7 @@ Approach: build the thinnest end-to-end path that runs — a binary that hosts a
 ### In scope
 
 - `internal/transport/`: libp2p host, gossipsub, Kademlia DHT, relay mode
-- `cmd/swarmd/main.go`: walking skeleton binary (~80 lines)
+- `cmd/federloomd/main.go`: walking skeleton binary (~80 lines)
 - `test/integration/cluster_test.go`: in-process 5-node star-topology test (CI gate)
 - `scripts/dev/docker-compose.dev.yml` + `scripts/dev/smoke-test.sh`: real-process smoke test (manual gate)
 
@@ -61,7 +61,7 @@ func (n *Node) Subscribe() <-chan proto.Event
 func (n *Node) Close() error
 ```
 
-Wire encoding: JSON (proto types already carry JSON tags). Topic constant: `swarmguard/events/v0`.
+Wire encoding: JSON (proto types already carry JSON tags). Topic constant: `federloom/events/v0`.
 
 ### `dht.go`
 
@@ -88,7 +88,7 @@ type Options struct {
     BootstrapPeers []peer.AddrInfo
     Mode           NodeMode  // ModeRelay | ModeLeaf
     PrivKey        crypto.PrivKey // nil = generate ephemeral (tests use fixed keys)
-    Topic          string         // default: "swarmguard/events/v0"
+    Topic          string         // default: "federloom/events/v0"
 }
 ```
 
@@ -100,7 +100,7 @@ type Options struct {
 
 ---
 
-## 4. `cmd/swarmd/main.go`
+## 4. `cmd/federloomd/main.go`
 
 CLI flags:
 

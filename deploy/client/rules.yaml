@@ -1,4 +1,4 @@
-# SwarmGuard rules for the local smoke-test client.
+# FederLoom rules for the local smoke-test client.
 # block_threshold in config is 1000 (enforcement disabled), so blocks are
 # logged but no iptables rules are actually installed. Thresholds here are
 # intentionally low so we can see rules firing during live observation.

@@ -1,4 +1,4 @@
-# SwarmGuard sidecar for WordPress/Traefik stack.
+# FederLoom sidecar for WordPress/Traefik stack.
 #
 # network_mode: host is required so the container can:
 #   - reach CrowdSec LAPI at 172.21.0.3:8080 (internal traefik Docker bridge)
@@ -6,29 +6,29 @@
 #
 # The CrowdSec container is NOT exposed on host ports; it lives on the internal
 # traefik network (172.21.0.0/16). The host has 172.21.0.1 as the bridge gateway,
-# so network_mode: host lets SwarmGuard reach 172.21.0.3:8080 directly.
+# so network_mode: host lets FederLoom reach 172.21.0.3:8080 directly.
 #
 # Before starting:
 #   1. Run ./bootstrap-wordpress.sh — registers CrowdSec bouncer, writes config.local.yaml
 #   2. Open port 7700 in the NixOS firewall if you want peers to initiate connections here
 services:
-  swarmguard:
+  federloom:
     build:
       context: ../..
       dockerfile: deploy/docker/Dockerfile
-    image: ghcr.io/joeru/swarmguard:latest
-    container_name: swarmguard-wordpress
+    image: ghcr.io/joeru/federloom:latest
+    container_name: federloom-wordpress
     restart: unless-stopped
     cap_add: [NET_ADMIN, NET_RAW]
     network_mode: host
     volumes:
-      - ./config.local.yaml:/etc/swarmguard/config.yaml:ro
-      - ./rules.yaml:/etc/swarmguard/rules.yaml:ro
-      - swarmguard-data:/var/lib/swarmguard
+      - ./config.local.yaml:/etc/federloom/config.yaml:ro
+      - ./rules.yaml:/etc/federloom/rules.yaml:ro
+      - federloom-data:/var/lib/federloom
     command: >
-      --config /etc/swarmguard/config.yaml
+      --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700
       --advertise /ip4/65.108.62.108/tcp/7700
 
 volumes:
-  swarmguard-data:
+  federloom-data:

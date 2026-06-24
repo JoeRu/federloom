@@ -8,13 +8,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/enforce"
-	"github.com/JoeRu/swarmguard/internal/node"
-	"github.com/JoeRu/swarmguard/internal/reputation"
-	"github.com/JoeRu/swarmguard/internal/store"
-	"github.com/JoeRu/swarmguard/internal/transport"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/enforce"
+	"github.com/JoeRu/federloom/internal/node"
+	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/store"
+	"github.com/JoeRu/federloom/internal/transport"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // mockSink records Block/Unblock calls without touching any real firewall.

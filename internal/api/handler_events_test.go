@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
+	"github.com/JoeRu/federloom/internal/config"
 )
 
 // noFlushWriter is an http.ResponseWriter that explicitly does NOT implement

@@ -13,13 +13,13 @@ import (
 	dutil "github.com/libp2p/go-libp2p/p2p/discovery/util"
 	"github.com/multiformats/go-multiaddr"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/resources"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/resources"
 )
 
-// rendezvousPoint is the well-known DHT key under which SwarmGuard nodes advertise
+// rendezvousPoint is the well-known DHT key under which FederLoom nodes advertise
 // themselves (spec §14.2). All nodes on the same topic find each other here.
-const rendezvousPoint = "/swarmguard/v1/peers"
+const rendezvousPoint = "/federloom/v1/peers"
 
 // Manager drives peer discovery: DHT rendezvous advertisement + relay list bootstrap.
 type Manager struct {

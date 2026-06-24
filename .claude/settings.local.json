@@ -110,7 +110,27 @@
       "Bash(echo \"BASE: $\\(git -C /root/swarmguard rev-parse HEAD\\)\")",
       "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/task-brief /root/swarmguard/docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md 3)",
       "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/task-brief /root/swarmguard/docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md 4)",
-      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/task-brief /root/swarmguard/docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md 5)"
+      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/task-brief /root/swarmguard/docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md 5)",
+      "Bash(echo \"BUILD_EXIT=$?\")",
+      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/task-brief *)",
+      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package d24697e *)",
+      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package 89dd2c9 *)",
+      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package ca0d209 *)",
+      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package 7e3dac8 *)",
+      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package bc0b745 *)",
+      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package 3e956ea *)",
+      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package fbbecbb *)",
+      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package 57da270 *)",
+      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package 0a4165c 08dd6a6)",
+      "Bash(/root/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package 08dd6a6 f8224a3)",
+      "Bash(~/.claude/skills/swarmguard-env/scripts/smoke-test.sh)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(~/.claude/skills/swarmguard-env/scripts/smoke-test.sh mailcow *)",
+      "Bash(~/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/task-brief *)",
+      "Bash(~/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package 8cd24d2 HEAD)",
+      "Bash(~/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package e51d481 *)",
+      "Bash(~/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package c28e31d *)",
+      "Bash(~/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package 5513293 HEAD)"
     ]
   }
 }

@@ -9,7 +9,7 @@ package ingest
 import (
 	"context"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // Source is the plugin contract for an attack-signal producer.

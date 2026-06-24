@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Wire a complete local reputation pipeline: Cowrie honeypot → exponential-decay/corroboration reputation engine (BadgerDB) → ipset or nftables enforcement, with P2P gossip events feeding the same pipeline, and swarmd driven by a YAML config file.
+**Goal:** Wire a complete local reputation pipeline: Cowrie honeypot → exponential-decay/corroboration reputation engine (BadgerDB) → ipset or nftables enforcement, with P2P gossip events feeding the same pipeline, and federloomd driven by a YAML config file.
 
-**Architecture:** `internal/ingest/honeypot.go` tails `cowrie.json` (JSONL). `internal/reputation` computes scores via lazy decay + logistic accumulation, backed by `internal/store` (BadgerDB, TTL = 3×half-life for GDPR compliance). `internal/enforce/ipset.go` and `nftables.go` shell out to the firewall tool. `internal/node/node.go` fans events from ingest sources + gossip transport into the reputation engine, then calls the enforce sink at threshold crossings. `cmd/swarmd/main.go` loads YAML config and launches `node.New(cfg)`.
+**Architecture:** `internal/ingest/honeypot.go` tails `cowrie.json` (JSONL). `internal/reputation` computes scores via lazy decay + logistic accumulation, backed by `internal/store` (BadgerDB, TTL = 3×half-life for GDPR compliance). `internal/enforce/ipset.go` and `nftables.go` shell out to the firewall tool. `internal/node/node.go` fans events from ingest sources + gossip transport into the reputation engine, then calls the enforce sink at threshold crossings. `cmd/federloomd/main.go` loads YAML config and launches `node.New(cfg)`.
 
 **Tech Stack:** Go 1.25, `github.com/dgraph-io/badger/v4` (KV store), `gopkg.in/yaml.v3` (config), `/sbin/ipset`+`/sbin/iptables` or `/sbin/nft` (enforcement via `os/exec`), libp2p gossipsub (existing `internal/transport`).
 
@@ -26,7 +26,7 @@
 | `internal/enforce/nftables.go` | Modify | nftables backend: Start (create table/set/rule), Block, Unblock |
 | `internal/ingest/honeypot.go` | Modify | Cowrie JSONL tail: poll, parse, emit `proto.Event` via channel |
 | `internal/node/node.go` | **Create** | Composition root: New(), Run(), processLocal/Remote, runDecay |
-| `cmd/swarmd/main.go` | Modify | Add `--config`, load YAML, wire transport + node |
+| `cmd/federloomd/main.go` | Modify | Add `--config`, load YAML, wire transport + node |
 | `internal/config/config_test.go` | **Create** | Unit: defaults valid, YAML round-trip |
 | `internal/reputation/decay_test.go` | **Create** | Unit: half-life math |
 | `internal/reputation/corroboration_test.go` | **Create** | Unit: reporter dedup |
@@ -48,7 +48,7 @@
 - [ ] **Step 1: Add dependencies**
 
 ```bash
-cd /mnt/c/Users/johan/code/swarmguard
+cd /mnt/c/Users/johan/code/federloom
 go get github.com/dgraph-io/badger/v4
 go get gopkg.in/yaml.v3
 ```
@@ -66,7 +66,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
+	"github.com/JoeRu/federloom/internal/config"
 )
 
 func TestDefaultsAreValid(t *testing.T) {
@@ -207,7 +207,7 @@ func Defaults() *Config {
 		},
 		Enforce: EnforceConfig{
 			Backend: "ipset",
-			SetName: "swarmguard",
+			SetName: "federloom",
 			Chain:   "DOCKER-USER",
 			NftHook: "input",
 		},
@@ -244,7 +244,7 @@ func Load(path string) (*Config, error) {
 go test ./internal/config/...
 ```
 
-Expected: `ok github.com/JoeRu/swarmguard/internal/config`
+Expected: `ok github.com/JoeRu/federloom/internal/config`
 
 - [ ] **Step 6: Verify build**
 
@@ -280,7 +280,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 func openTestStore(t *testing.T) *store.BadgerStore {
@@ -488,7 +488,7 @@ func (s *BadgerStore) ScanScores(fn func(ip string, r ScoreRecord) error) error 
 go test ./internal/store/...
 ```
 
-Expected: `ok github.com/JoeRu/swarmguard/internal/store`
+Expected: `ok github.com/JoeRu/federloom/internal/store`
 
 - [ ] **Step 5: Commit**
 
@@ -518,7 +518,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/reputation"
+	"github.com/JoeRu/federloom/internal/reputation"
 )
 
 func TestDecayAtZeroElapsed(t *testing.T) {
@@ -596,7 +596,7 @@ func DecayScore(score float64, lastSeen, now time.Time, halfLife time.Duration) 
 go test ./internal/reputation/...
 ```
 
-Expected: `ok github.com/JoeRu/swarmguard/internal/reputation`
+Expected: `ok github.com/JoeRu/federloom/internal/reputation`
 
 - [ ] **Step 5: Commit**
 
@@ -626,8 +626,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/reputation"
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 func openEngine(t *testing.T) *reputation.Engine {
@@ -728,7 +728,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 // reportWeight maps event reason to score contribution weight.
@@ -832,7 +832,7 @@ func (e *Engine) GetRecord(ip string) (store.ScoreRecord, error) {
 go test ./internal/reputation/...
 ```
 
-Expected: `ok github.com/JoeRu/swarmguard/internal/reputation`
+Expected: `ok github.com/JoeRu/federloom/internal/reputation`
 
 - [ ] **Step 6: Commit**
 
@@ -861,7 +861,7 @@ package enforce_test
 import (
 	"testing"
 
-	"github.com/JoeRu/swarmguard/internal/enforce"
+	"github.com/JoeRu/federloom/internal/enforce"
 )
 
 func TestNeverBlockRFC1918(t *testing.T) {
@@ -1003,7 +1003,7 @@ Expected: success. If it fails because another file references `Apply`, fix by r
 go test ./internal/enforce/...
 ```
 
-Expected: `ok github.com/JoeRu/swarmguard/internal/enforce`
+Expected: `ok github.com/JoeRu/federloom/internal/enforce`
 
 - [ ] **Step 7: Commit**
 
@@ -1048,7 +1048,7 @@ type IpsetSink struct {
 // iptables chain (DOCKER-USER recommended for Docker environments; INPUT for host-only).
 func NewIpset(setName, chain string) *IpsetSink {
 	if setName == "" {
-		setName = "swarmguard"
+		setName = "federloom"
 	}
 	if chain == "" {
 		chain = "DOCKER-USER"
@@ -1149,7 +1149,7 @@ import (
 	"time"
 )
 
-const nftTable = "swarmguard"
+const nftTable = "federloom"
 const nftSetName = "blocked"
 
 // NftablesSink enforces blocks via nftables. Shells out to /sbin/nft. Requires root.
@@ -1255,8 +1255,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/ingest"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/ingest"
 )
 
 func writeLines(t *testing.T, path string, lines []string) {
@@ -1401,8 +1401,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // cowrieEvent is one JSON line from cowrie.json.
@@ -1412,7 +1412,7 @@ type cowrieEvent struct {
 	Timestamp string `json:"timestamp"`
 }
 
-// cowrieReasons maps Cowrie eventid to SwarmGuard reason strings.
+// cowrieReasons maps Cowrie eventid to FederLoom reason strings.
 var cowrieReasons = map[string]string{
 	"cowrie.login.success":  "ssh-auth-success",
 	"cowrie.login.failed":   "ssh-auth-bruteforce",
@@ -1530,7 +1530,7 @@ func (h *Honeypot) tail(ctx context.Context, ch chan<- proto.Event) {
 go test ./internal/ingest/...
 ```
 
-Expected: `ok github.com/JoeRu/swarmguard/internal/ingest`
+Expected: `ok github.com/JoeRu/federloom/internal/ingest`
 
 - [ ] **Step 5: Commit**
 
@@ -1561,13 +1561,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/enforce"
-	"github.com/JoeRu/swarmguard/internal/ingest"
-	"github.com/JoeRu/swarmguard/internal/reputation"
-	"github.com/JoeRu/swarmguard/internal/store"
-	"github.com/JoeRu/swarmguard/internal/transport"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/enforce"
+	"github.com/JoeRu/federloom/internal/ingest"
+	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/store"
+	"github.com/JoeRu/federloom/internal/transport"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // Node is the composition root that connects ingest, reputation, enforce, and transport.
@@ -1791,17 +1791,17 @@ git commit -m "feat(node): composition root wiring ingest→reputation→enforce
 
 ---
 
-### Task 10: swarmd Config-Driven Wiring
+### Task 10: federloomd Config-Driven Wiring
 
 **Files:**
-- Modify: `cmd/swarmd/main.go`
+- Modify: `cmd/federloomd/main.go`
 
 - [ ] **Step 1: Update main.go**
 
-Replace `cmd/swarmd/main.go`:
+Replace `cmd/federloomd/main.go`:
 
 ```go
-// Command swarmd is the long-running SwarmGuard P2P node daemon.
+// Command federloomd is the long-running FederLoom P2P node daemon.
 package main
 
 import (
@@ -1816,9 +1816,9 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/multiformats/go-multiaddr"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/node"
-	"github.com/JoeRu/swarmguard/internal/transport"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/node"
+	"github.com/JoeRu/federloom/internal/transport"
 )
 
 func main() {
@@ -1899,7 +1899,7 @@ func main() {
 		log.Fatalf("create node: %v", err)
 	}
 
-	log.Printf("swarmd running (enforce=%s, honeypot=%v)",
+	log.Printf("federloomd running (enforce=%s, honeypot=%v)",
 		cfg.Enforce.Backend, cfg.Ingest.Honeypot.Enabled)
 
 	if err := n.Run(ctx); err != nil && err != context.Canceled {
@@ -1911,7 +1911,7 @@ func main() {
 - [ ] **Step 2: Build to verify**
 
 ```bash
-go build ./cmd/swarmd/...
+go build ./cmd/federloomd/...
 ```
 
 Expected: success.
@@ -1919,7 +1919,7 @@ Expected: success.
 - [ ] **Step 3: Smoke check — node starts without config file**
 
 ```bash
-./bin/swarmd --listen /ip4/127.0.0.1/tcp/17700 &
+./bin/federloomd --listen /ip4/127.0.0.1/tcp/17700 &
 SWARMD_PID=$!
 sleep 2
 kill $SWARMD_PID 2>/dev/null || true
@@ -1930,9 +1930,9 @@ Expected: prints `peer ID: 12D3...` and exits cleanly on SIGTERM. No panic.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add cmd/swarmd/main.go
-git update-index --chmod=-x cmd/swarmd/main.go
-git commit -m "feat(swarmd): wire node composition root; add --config flag for YAML config"
+git add cmd/federloomd/main.go
+git update-index --chmod=-x cmd/federloomd/main.go
+git commit -m "feat(federloomd): wire node composition root; add --config flag for YAML config"
 ```
 
 ---
@@ -1954,8 +1954,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/reputation"
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 func openEngine(t *testing.T, halfLife time.Duration) *reputation.Engine {
@@ -2030,7 +2030,7 @@ func TestEngineMultipleReportersCorroboration(t *testing.T) {
 go test ./test/integration/...
 ```
 
-Expected: `ok github.com/JoeRu/swarmguard/test/integration`
+Expected: `ok github.com/JoeRu/federloom/test/integration`
 
 - [ ] **Step 3: Commit**
 
@@ -2062,11 +2062,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/enforce"
-	"github.com/JoeRu/swarmguard/internal/ingest"
-	"github.com/JoeRu/swarmguard/internal/reputation"
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/enforce"
+	"github.com/JoeRu/federloom/internal/ingest"
+	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 // mockSink records Block/Unblock calls for assertions.
@@ -2241,7 +2241,7 @@ done:
 go test ./test/integration/...
 ```
 
-Expected: `ok github.com/JoeRu/swarmguard/test/integration`
+Expected: `ok github.com/JoeRu/federloom/test/integration`
 
 - [ ] **Step 3: Commit**
 
@@ -2261,7 +2261,7 @@ git commit -m "test(integration): full pipeline test with mock sink and neverblo
 - [ ] **Step 1: Create the adversarial directory and write the test**
 
 ```bash
-mkdir -p /mnt/c/Users/johan/code/swarmguard/test/adversarial
+mkdir -p /mnt/c/Users/johan/code/federloom/test/adversarial
 ```
 
 Create `test/adversarial/sybil_ingest_test.go`:
@@ -2276,8 +2276,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/reputation"
-	"github.com/JoeRu/swarmguard/internal/store"
+	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/store"
 )
 
 func openEngine(t *testing.T) *reputation.Engine {
@@ -2348,7 +2348,7 @@ func TestSybilFloodCorroborationAccurate(t *testing.T) {
 make adversarial
 ```
 
-Expected: `ok github.com/JoeRu/swarmguard/test/adversarial`
+Expected: `ok github.com/JoeRu/federloom/test/adversarial`
 
 - [ ] **Step 3: Commit**
 
@@ -2378,10 +2378,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/enforce"
-	"github.com/JoeRu/swarmguard/internal/reputation"
-	"github.com/JoeRu/swarmguard/internal/store"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/enforce"
+	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/store"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 type recordingSink struct {
@@ -2491,7 +2491,7 @@ func TestLegitimateIPStillBlocked(t *testing.T) {
 make adversarial
 ```
 
-Expected: `ok github.com/JoeRu/swarmguard/test/adversarial`
+Expected: `ok github.com/JoeRu/federloom/test/adversarial`
 
 - [ ] **Step 3: Run full test suite**
 

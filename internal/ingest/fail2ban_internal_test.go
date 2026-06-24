@@ -3,7 +3,7 @@ package ingest
 import (
 	"testing"
 
-	"github.com/JoeRu/swarmguard/internal/config"
+	"github.com/JoeRu/federloom/internal/config"
 )
 
 // TestParseBanned exercises the parseBanned pure function directly.

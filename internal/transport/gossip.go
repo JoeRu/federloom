@@ -10,7 +10,7 @@ import (
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	"github.com/libp2p/go-libp2p/core/host"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // ReceivedEvent pairs a decoded Event with the gossipsub-verified original
@@ -21,7 +21,7 @@ type ReceivedEvent struct {
 	From  string
 }
 
-// Node is a SwarmGuard P2P peer: libp2p host + gossipsub topic + Kademlia DHT.
+// Node is a FederLoom P2P peer: libp2p host + gossipsub topic + Kademlia DHT.
 type Node struct {
 	host     host.Host
 	ps       *pubsub.PubSub

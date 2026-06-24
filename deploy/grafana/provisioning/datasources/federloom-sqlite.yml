@@ -1,11 +1,11 @@
 apiVersion: 1
 datasources:
-  - name: SwarmGuard SQLite
+  - name: FederLoom SQLite
     type: frser-sqlite-datasource
     access: proxy
-    uid: swarmguard-sqlite
+    uid: federloom-sqlite
     jsonData:
-      path: /var/lib/swarmguard/metrics.db
+      path: /var/lib/federloom/metrics.db
       pathPrefix: "file:"
       attachLimit: 0
     editable: true

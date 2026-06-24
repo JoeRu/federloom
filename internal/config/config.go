@@ -210,7 +210,7 @@ func Defaults() *Config {
 		},
 		Enforce: EnforceConfig{
 			Backend: "ipset",
-			SetName: "swarmguard",
+			SetName: "federloom",
 			Chain:   "DOCKER-USER",
 			NftHook: "input",
 		},
@@ -300,7 +300,7 @@ func (c *Config) TrustPeerCertFile() string {
 }
 
 // TrustCertsFile returns the path of the locally imported cert cache
-// (seeded by `swarmctl trust import`; internal file, no config key).
+// (seeded by `federloomctl trust import`; internal file, no config key).
 func (c *Config) TrustCertsFile() string {
 	return filepath.Join(c.Store.Dir, "imported-certs.json")
 }

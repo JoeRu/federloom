@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- Module: `github.com/JoeRu/swarmguard`, Go 1.25
+- Module: `github.com/JoeRu/federloom`, Go 1.25
 - New dependency: `github.com/bits-and-blooms/bloom/v3` — activate via `go get`, do not hand-edit `go.mod`
 - `repBloom` is unexported — no public types added to the `store` package
 - Bloom capacity: constant `bloomCapacity uint = 1_000_000`; FPR: constant `bloomFPR float64 = 0.01`
@@ -52,7 +52,7 @@
 - [ ] **Step 1: Activate the dependency**
 
 ```bash
-cd /root/swarmguard
+cd /root/federloom
 go get github.com/bits-and-blooms/bloom/v3
 go mod tidy
 ```
@@ -324,7 +324,7 @@ Expected: all packages pass.
 make build
 ```
 
-Expected: `bin/swarmd` and `bin/swarmctl` build successfully.
+Expected: `bin/federloomd` and `bin/federloomctl` build successfully.
 
 - [ ] **Step 9: Commit**
 

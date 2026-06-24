@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add `swarmctl setup`, `swarmctl federation invite/join`, `swarmctl status`, and `docs/getting-started.md` so that federation setup becomes a guided, linear flow with no manual key exchange steps.
+**Goal:** Add `federloomctl setup`, `federloomctl federation invite/join`, `federloomctl status`, and `docs/getting-started.md` so that federation setup becomes a guided, linear flow with no manual key exchange steps.
 
-**Architecture:** New `internal/federation` package holds the invitation data model. Four new files in `cmd/swarmctl/` add the commands. All commands are read-only from files — no config auto-write. `main.go` gets four new dispatch entries. Documentation ships in the same PR.
+**Architecture:** New `internal/federation` package holds the invitation data model. Four new files in `cmd/federloomctl/` add the commands. All commands are read-only from files — no config auto-write. `main.go` gets four new dispatch entries. Documentation ships in the same PR.
 
 **Tech Stack:** Go stdlib only (`encoding/json`, `bufio`, `os`), `github.com/multiformats/go-multiaddr` (already in go.mod), `github.com/libp2p/go-libp2p/core/peer` (already in go.mod), existing `internal/identity`, `internal/trust`, `internal/config` packages.
 
@@ -12,7 +12,7 @@
 
 ## Context for implementers
 
-All commands live in `cmd/swarmctl/` as `package main`. Existing helpers (same package, no import needed):
+All commands live in `cmd/federloomctl/` as `package main`. Existing helpers (same package, no import needed):
 
 - `addConfigFlag(fs *flag.FlagSet) func() (*config.Config, error)` — `common.go`
 - `labelPath(personKeyFile string) string` — `identity.go:21`
@@ -54,7 +54,7 @@ Peer ID (`github.com/libp2p/go-libp2p/core/peer`):
 
 - `peer.IDFromPrivateKey(priv crypto.PrivKey) (peer.ID, error)`
 
-Module path: `github.com/JoeRu/swarmguard`
+Module path: `github.com/JoeRu/federloom`
 
 ---
 
@@ -64,10 +64,10 @@ Module path: `github.com/JoeRu/swarmguard`
 |---|---|---|
 | `internal/federation/invitation.go` | Create | `Invitation` type, `NewInvitation`, `WriteInvitation`, `ReadInvitation` |
 | `internal/federation/invitation_test.go` | Create | TDD tests for the invitation package |
-| `cmd/swarmctl/setup.go` | Create | `cmdSetup` — doctor wizard for node + person + peer cert |
-| `cmd/swarmctl/federation.go` | Create | `cmdFederation` → `federationInvite` + `federationJoin` |
-| `cmd/swarmctl/status.go` | Create | `cmdStatus` — local identity/anchor/peer summary |
-| `cmd/swarmctl/main.go` | Modify | Add setup/status/federation to usage() + switch |
+| `cmd/federloomctl/setup.go` | Create | `cmdSetup` — doctor wizard for node + person + peer cert |
+| `cmd/federloomctl/federation.go` | Create | `cmdFederation` → `federationInvite` + `federationJoin` |
+| `cmd/federloomctl/status.go` | Create | `cmdStatus` — local identity/anchor/peer summary |
+| `cmd/federloomctl/main.go` | Modify | Add setup/status/federation to usage() + switch |
 | `docs/getting-started.md` | Create | Linear operator guide (solo / start / join) |
 | `docs/federation-guide.md` | Modify | Add 2-line preamble pointing to getting-started |
 | `README.md` | Modify | Update quickstart + federation sections |
@@ -94,9 +94,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/federation"
-	"github.com/JoeRu/swarmguard/internal/identity"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/federation"
+	"github.com/JoeRu/federloom/internal/identity"
 )
 
 func makeTestConfig(t *testing.T) *config.Config {
@@ -282,7 +282,7 @@ func TestInvitationSuggestedWeight(t *testing.T) {
 - [ ] **Step 2: Run tests to confirm they fail**
 
 ```bash
-cd /root/swarmguard
+cd /root/federloom
 go test ./internal/federation/...
 ```
 
@@ -305,9 +305,9 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/multiformats/go-multiaddr"
 
-	"github.com/JoeRu/swarmguard/internal/config"
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/trust"
+	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/trust"
 )
 
 // Invitation is the shareable bundle an existing federation member generates
@@ -360,7 +360,7 @@ func NewInvitation(cfg *config.Config, label string, transportAddr string) (*Inv
 	// Load person identity.
 	personPriv, err := identity.LoadPersonKey(cfg.TrustPersonKeyFile())
 	if err != nil {
-		return nil, fmt.Errorf("federation: no person identity — run `swarmctl setup` first: %w", err)
+		return nil, fmt.Errorf("federation: no person identity — run `federloomctl setup` first: %w", err)
 	}
 	pub := identity.PersonPub(personPriv)
 
@@ -415,7 +415,7 @@ func ReadInvitation(r io.Reader) (*Invitation, error) {
 - [ ] **Step 4: Run tests to confirm they pass**
 
 ```bash
-cd /root/swarmguard
+cd /root/federloom
 go test ./internal/federation/... -v
 ```
 
@@ -439,17 +439,17 @@ git commit -m "feat(federation): add Invitation type, NewInvitation, WriteInvita
 
 ---
 
-## Task 2: `swarmctl setup`
+## Task 2: `federloomctl setup`
 
 **Files:**
-- Create: `cmd/swarmctl/setup.go`
-- Modify: `cmd/swarmctl/main.go`
+- Create: `cmd/federloomctl/setup.go`
+- Modify: `cmd/federloomctl/main.go`
 
 - [ ] **Step 1: Write the failing test (smoke test only — setup is interactive)**
 
 The setup command is a wizard with optional interactive prompt; a full unit test would require terminal mocking. Write a minimal compile-check test that also validates idempotency:
 
-Create a small test file that we'll expand later: `cmd/swarmctl/setup_test.go`
+Create a small test file that we'll expand later: `cmd/federloomctl/setup_test.go`
 
 ```go
 package main
@@ -459,7 +459,7 @@ import (
 )
 
 // TestSetupPackageCompiles is a compile-time guard.
-// Integration test: run `swarmctl setup --label Alice` manually.
+// Integration test: run `federloomctl setup --label Alice` manually.
 func TestSetupPackageCompiles(t *testing.T) {
 	// Ensures cmdSetup is reachable at the package level.
 	_ = cmdSetup
@@ -469,19 +469,19 @@ func TestSetupPackageCompiles(t *testing.T) {
 - [ ] **Step 2: Run to confirm compilation failure**
 
 ```bash
-cd /root/swarmguard
-go build ./cmd/swarmctl/
+cd /root/federloom
+go build ./cmd/federloomctl/
 ```
 
 Expected: success (file doesn't exist yet means this is a build check). Actually just verify the test references a function that doesn't exist yet:
 
 ```bash
-go test -run TestSetupPackageCompiles ./cmd/swarmctl/
+go test -run TestSetupPackageCompiles ./cmd/federloomctl/
 ```
 
 Expected: `undefined: cmdSetup`
 
-- [ ] **Step 3: Implement `cmd/swarmctl/setup.go`**
+- [ ] **Step 3: Implement `cmd/federloomctl/setup.go`**
 
 ```go
 package main
@@ -500,8 +500,8 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 func cmdSetup(args []string) error {
@@ -516,15 +516,15 @@ func cmdSetup(args []string) error {
 		return err
 	}
 
-	fmt.Println("SwarmGuard setup")
+	fmt.Println("FederLoom setup")
 	fmt.Println()
 
 	// [1/3] Node key
 	fmt.Println("[1/3] Node key")
 	nodePriv, err := identity.LoadOrCreateNodeKey(cfg.NodeKeyFile())
 	if err != nil {
-		// Key file might not exist yet — swarmd must run first.
-		fmt.Println("      swarmd must run once first to generate the node key — then re-run setup.")
+		// Key file might not exist yet — federloomd must run first.
+		fmt.Println("      federloomd must run once first to generate the node key — then re-run setup.")
 		return fmt.Errorf("node key not found: %w", err)
 	}
 	pid, err := peer.IDFromPrivateKey(nodePriv)
@@ -602,20 +602,20 @@ func cmdSetup(args []string) error {
 	fmt.Println("Setup complete.")
 	fmt.Println()
 	fmt.Printf("Share your fingerprint (%s) with operators you want to federate with.\n", fp)
-	fmt.Println("Next: swarmctl federation invite --addr /ip4/YOUR_IP/tcp/7700 > invite.json")
+	fmt.Println("Next: federloomctl federation invite --addr /ip4/YOUR_IP/tcp/7700 > invite.json")
 	return nil
 }
 ```
 
-- [ ] **Step 4: Wire `setup` into `cmd/swarmctl/main.go`**
+- [ ] **Step 4: Wire `setup` into `cmd/federloomctl/main.go`**
 
 Add to the `usage()` function (insert before the "All commands accept" line):
 
 ```
-  swarmctl setup [--label NAME]
-  swarmctl status
-  swarmctl federation invite --addr MULTIADDR [--weight W] [--out FILE]
-  swarmctl federation join FILE [--as NAME] [--weight W]
+  federloomctl setup [--label NAME]
+  federloomctl status
+  federloomctl federation invite --addr MULTIADDR [--weight W] [--out FILE]
+  federloomctl federation join FILE [--as NAME] [--weight W]
 ```
 
 Add to the `switch` in `main()`:
@@ -632,7 +632,7 @@ case "federation":
 The full updated `main.go`:
 
 ```go
-// Command swarmctl is the SwarmGuard admin CLI: node identity, Person
+// Command federloomctl is the FederLoom admin CLI: node identity, Person
 // identities, peer-certs, and the local trust-anchor list (spec §5.1).
 package main
 
@@ -642,27 +642,27 @@ import (
 )
 
 func usage() {
-	fmt.Fprint(os.Stderr, `swarmctl — SwarmGuard admin CLI
+	fmt.Fprint(os.Stderr, `federloomctl — FederLoom admin CLI
 
 Flags must come BEFORE positional args (PERSON, PEER_ID, FILE).
 
 Usage:
-  swarmctl setup [--label NAME]
-  swarmctl status
-  swarmctl federation invite --addr MULTIADDR [--weight W] [--out FILE]
-  swarmctl federation join FILE [--as NAME] [--weight W]
-  swarmctl identity                      print this node's peer ID
-  swarmctl identity init --label NAME    create a Person identity + self peer-cert
-  swarmctl identity show                 print Person pubkey + fingerprint
-  swarmctl peer-cert PEER_ID             sign a peer-cert for another machine
-  swarmctl trust add --identity ed25519:... [--weight W] [--label L] PERSON
-  swarmctl trust set [--weight W] [--label L] PERSON
-  swarmctl trust remove PERSON
-  swarmctl trust list
-  swarmctl trust export                  write this Person's bundle to stdout
-  swarmctl trust import [--as NAME] [--weight W] FILE
+  federloomctl setup [--label NAME]
+  federloomctl status
+  federloomctl federation invite --addr MULTIADDR [--weight W] [--out FILE]
+  federloomctl federation join FILE [--as NAME] [--weight W]
+  federloomctl identity                      print this node's peer ID
+  federloomctl identity init --label NAME    create a Person identity + self peer-cert
+  federloomctl identity show                 print Person pubkey + fingerprint
+  federloomctl peer-cert PEER_ID             sign a peer-cert for another machine
+  federloomctl trust add --identity ed25519:... [--weight W] [--label L] PERSON
+  federloomctl trust set [--weight W] [--label L] PERSON
+  federloomctl trust remove PERSON
+  federloomctl trust list
+  federloomctl trust export                  write this Person's bundle to stdout
+  federloomctl trust import [--as NAME] [--weight W] FILE
 
-All commands accept -config PATH (same file swarmd uses).
+All commands accept -config PATH (same file federloomd uses).
 `)
 }
 
@@ -692,7 +692,7 @@ func main() {
 		os.Exit(2)
 	}
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "swarmctl:", err)
+		fmt.Fprintln(os.Stderr, "federloomctl:", err)
 		os.Exit(1)
 	}
 }
@@ -701,16 +701,16 @@ func main() {
 - [ ] **Step 5: Build and verify compile**
 
 ```bash
-cd /root/swarmguard
+cd /root/federloom
 make build
 ```
 
-Expected: `bin/swarmd` and `bin/swarmctl` build without errors.
+Expected: `bin/federloomd` and `bin/federloomctl` build without errors.
 
 - [ ] **Step 6: Run tests**
 
 ```bash
-go test ./cmd/swarmctl/...
+go test ./cmd/federloomctl/...
 ```
 
 Expected: `TestSetupPackageCompiles` passes.
@@ -718,21 +718,21 @@ Expected: `TestSetupPackageCompiles` passes.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add cmd/swarmctl/setup.go cmd/swarmctl/setup_test.go cmd/swarmctl/main.go
-git commit -m "feat(swarmctl): add setup wizard command"
+git add cmd/federloomctl/setup.go cmd/federloomctl/setup_test.go cmd/federloomctl/main.go
+git commit -m "feat(federloomctl): add setup wizard command"
 ```
 
 ---
 
-## Task 3: `swarmctl federation invite/join`
+## Task 3: `federloomctl federation invite/join`
 
 **Files:**
-- Create: `cmd/swarmctl/federation.go`
+- Create: `cmd/federloomctl/federation.go`
 - No changes to `main.go` needed (already wired in Task 2)
 
 - [ ] **Step 1: Write a compile-check test**
 
-Create `cmd/swarmctl/federation_test.go`:
+Create `cmd/federloomctl/federation_test.go`:
 
 ```go
 package main
@@ -750,12 +750,12 @@ func TestFederationPackageCompiles(t *testing.T) {
 - [ ] **Step 2: Run to confirm failure**
 
 ```bash
-go test -run TestFederationPackageCompiles ./cmd/swarmctl/
+go test -run TestFederationPackageCompiles ./cmd/federloomctl/
 ```
 
 Expected: `undefined: cmdFederation`
 
-- [ ] **Step 3: Implement `cmd/swarmctl/federation.go`**
+- [ ] **Step 3: Implement `cmd/federloomctl/federation.go`**
 
 ```go
 package main
@@ -769,14 +769,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/JoeRu/swarmguard/internal/federation"
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/trust"
+	"github.com/JoeRu/federloom/internal/federation"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/trust"
 )
 
 func cmdFederation(args []string) error {
 	if len(args) < 1 {
-		return fmt.Errorf("usage: swarmctl federation invite|join ...")
+		return fmt.Errorf("usage: federloomctl federation invite|join ...")
 	}
 	switch args[0] {
 	case "invite":
@@ -808,7 +808,7 @@ func federationInvite(args []string) error {
 	// Read label from the label file next to person.key.
 	labelData, err := os.ReadFile(labelPath(cfg.TrustPersonKeyFile()))
 	if err != nil {
-		return fmt.Errorf("no person identity — run `swarmctl setup` first")
+		return fmt.Errorf("no person identity — run `federloomctl setup` first")
 	}
 	label := strings.TrimSpace(string(labelData))
 
@@ -858,7 +858,7 @@ func federationJoin(args []string) error {
 		return err
 	}
 	if fset.NArg() != 1 {
-		return fmt.Errorf("usage: swarmctl federation join FILE [--as NAME] [--weight W]")
+		return fmt.Errorf("usage: federloomctl federation join FILE [--as NAME] [--weight W]")
 	}
 
 	f, err := os.Open(fset.Arg(0))
@@ -976,9 +976,9 @@ func federationJoin(args []string) error {
 	fmt.Println("──────────────────────────────────────────")
 	fmt.Println()
 	fmt.Println("Now send your bundle so they can anchor you back:")
-	fmt.Println("  swarmctl trust export > my.bundle")
+	fmt.Println("  federloomctl trust export > my.bundle")
 	fmt.Printf("  # send my.bundle to %s\n", inv.InvitedBy)
-	fmt.Printf("  # they run: swarmctl trust import my.bundle --as %s --weight %.1f\n", person, w)
+	fmt.Printf("  # they run: federloomctl trust import my.bundle --as %s --weight %.1f\n", person, w)
 
 	return nil
 }
@@ -987,9 +987,9 @@ func federationJoin(args []string) error {
 - [ ] **Step 4: Build and run tests**
 
 ```bash
-cd /root/swarmguard
+cd /root/federloom
 make build
-go test ./cmd/swarmctl/...
+go test ./cmd/federloomctl/...
 ```
 
 Expected: builds clean, `TestFederationPackageCompiles` passes.
@@ -997,21 +997,21 @@ Expected: builds clean, `TestFederationPackageCompiles` passes.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cmd/swarmctl/federation.go cmd/swarmctl/federation_test.go
-git commit -m "feat(swarmctl): add federation invite/join commands"
+git add cmd/federloomctl/federation.go cmd/federloomctl/federation_test.go
+git commit -m "feat(federloomctl): add federation invite/join commands"
 ```
 
 ---
 
-## Task 4: `swarmctl status`
+## Task 4: `federloomctl status`
 
 **Files:**
-- Create: `cmd/swarmctl/status.go`
+- Create: `cmd/federloomctl/status.go`
 - No changes to `main.go` needed (already wired in Task 2)
 
 - [ ] **Step 1: Write a compile-check test**
 
-Create `cmd/swarmctl/status_test.go`:
+Create `cmd/federloomctl/status_test.go`:
 
 ```go
 package main
@@ -1029,12 +1029,12 @@ func TestStatusPackageCompiles(t *testing.T) {
 - [ ] **Step 2: Run to confirm failure**
 
 ```bash
-go test -run TestStatusPackageCompiles ./cmd/swarmctl/
+go test -run TestStatusPackageCompiles ./cmd/federloomctl/
 ```
 
 Expected: `undefined: cmdStatus`
 
-- [ ] **Step 3: Implement `cmd/swarmctl/status.go`**
+- [ ] **Step 3: Implement `cmd/federloomctl/status.go`**
 
 ```go
 package main
@@ -1049,9 +1049,9 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/JoeRu/swarmguard/internal/identity"
-	"github.com/JoeRu/swarmguard/internal/trust"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/identity"
+	"github.com/JoeRu/federloom/internal/trust"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 func cmdStatus(args []string) error {
@@ -1069,7 +1069,7 @@ func cmdStatus(args []string) error {
 	fmt.Println("NODE")
 	nodePriv, nodeErr := identity.LoadOrCreateNodeKey(cfg.NodeKeyFile())
 	if nodeErr != nil {
-		fmt.Printf("  peer ID:     not configured — run swarmctl setup\n")
+		fmt.Printf("  peer ID:     not configured — run federloomctl setup\n")
 		fmt.Printf("  node key:    %s  ✗\n\n", cfg.NodeKeyFile())
 	} else {
 		pid, err := peer.IDFromPrivateKey(nodePriv)
@@ -1085,7 +1085,7 @@ func cmdStatus(args []string) error {
 	fmt.Println("IDENTITY")
 	personPriv, personErr := identity.LoadPersonKey(cfg.TrustPersonKeyFile())
 	if personErr != nil {
-		fmt.Println("  not configured — run swarmctl setup")
+		fmt.Println("  not configured — run federloomctl setup")
 	} else {
 		pub := identity.PersonPub(personPriv)
 		fp := identity.Fingerprint(pub)
@@ -1107,7 +1107,7 @@ func cmdStatus(args []string) error {
 					cert.ValidUntil.Format("2006-01-02"), days)
 			}
 		} else {
-			fmt.Println("  peer cert:   not found — run swarmctl setup")
+			fmt.Println("  peer cert:   not found — run federloomctl setup")
 		}
 	}
 	fmt.Println()
@@ -1174,7 +1174,7 @@ func cmdStatus(args []string) error {
 
 	fmt.Printf("TRUST ANCHORS  (%d)\n", len(rows))
 	if len(rows) == 0 {
-		fmt.Println("  not configured — run swarmctl setup")
+		fmt.Println("  not configured — run federloomctl setup")
 	} else {
 		fmt.Printf("  %-12s %-7s %-10s %-22s %s\n", "PERSON", "WEIGHT", "STATUS", "FINGERPRINT", "LABEL")
 		for _, r := range rows {
@@ -1186,7 +1186,7 @@ func cmdStatus(args []string) error {
 	// BOOTSTRAP PEERS section
 	fmt.Printf("BOOTSTRAP PEERS  (%d)\n", len(cfg.BootstrapPeers))
 	if len(cfg.BootstrapPeers) == 0 {
-		fmt.Println("  not configured — run swarmctl setup")
+		fmt.Println("  not configured — run federloomctl setup")
 	} else {
 		for _, p := range cfg.BootstrapPeers {
 			fmt.Printf("  %s\n", p)
@@ -1202,9 +1202,9 @@ func cmdStatus(args []string) error {
 - [ ] **Step 4: Build and run tests**
 
 ```bash
-cd /root/swarmguard
+cd /root/federloom
 make build
-go test ./cmd/swarmctl/...
+go test ./cmd/federloomctl/...
 ```
 
 Expected: builds clean, all tests pass.
@@ -1212,8 +1212,8 @@ Expected: builds clean, all tests pass.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cmd/swarmctl/status.go cmd/swarmctl/status_test.go
-git commit -m "feat(swarmctl): add status command"
+git add cmd/federloomctl/status.go cmd/federloomctl/status_test.go
+git commit -m "feat(federloomctl): add status command"
 ```
 
 ---
@@ -1230,27 +1230,27 @@ No Go code in this task.
 - [ ] **Step 1: Create `docs/getting-started.md`**
 
 ```markdown
-# Getting Started with SwarmGuard
+# Getting Started with FederLoom
 
-SwarmGuard is a federated IP reputation system. This guide covers three paths:
+FederLoom is a federated IP reputation system. This guide covers three paths:
 **A** — solo node, **B** — start a new federation, **C** — join an existing federation.
 
-Run `make build` first to produce `bin/swarmd` and `bin/swarmctl`.
+Run `make build` first to produce `bin/federloomd` and `bin/federloomctl`.
 
 ---
 
 ## Option A — Solo node (single operator, no federation)
 
-1. Start swarmd once to generate the node key:
+1. Start federloomd once to generate the node key:
    ```bash
-   ./bin/swarmd -config config.yaml
+   ./bin/federloomd -config config.yaml
    # (Ctrl-C after it prints "peer ID: 12D3Koo...")
    ```
 2. Initialise your identity:
    ```bash
-   ./bin/swarmctl setup --label "MyNode" -config config.yaml
+   ./bin/federloomctl setup --label "MyNode" -config config.yaml
    ```
-3. Set `federation_mode: solo` in `config.yaml` and restart swarmd.
+3. Set `federation_mode: solo` in `config.yaml` and restart federloomd.
 4. Done. Your node scores IP reputation locally.
 
 ---
@@ -1259,25 +1259,25 @@ Run `make build` first to produce `bin/swarmd` and `bin/swarmctl`.
 
 You are creating the federation that others will join.
 
-1. Start swarmd once to generate the node key, then Ctrl-C.
+1. Start federloomd once to generate the node key, then Ctrl-C.
 2. Initialise your identity:
    ```bash
-   ./bin/swarmctl setup --label "Alice" -config config.yaml
+   ./bin/federloomctl setup --label "Alice" -config config.yaml
    ```
 3. Generate an invitation for each operator who will join:
    ```bash
-   ./bin/swarmctl federation invite \
+   ./bin/federloomctl federation invite \
        --addr /ip4/YOUR_PUBLIC_IP/tcp/7700 \
        --out alice.invite \
        -config config.yaml
    ```
    Send `alice.invite` to each joining operator over Signal, encrypted email, or any channel you already trust.
-4. Ask them to read back the **fingerprint** shown during `swarmctl setup`. Verify it matches the fingerprint printed during step 2 before they proceed.
+4. Ask them to read back the **fingerprint** shown during `federloomctl setup`. Verify it matches the fingerprint printed during step 2 before they proceed.
 5. For each reply bundle you receive from joining operators:
    ```bash
-   ./bin/swarmctl trust import bob.bundle --as bob --weight 0.8 -config config.yaml
+   ./bin/federloomctl trust import bob.bundle --as bob --weight 0.8 -config config.yaml
    ```
-6. Set `federation_mode: federated` in `config.yaml` and restart swarmd.
+6. Set `federation_mode: federated` in `config.yaml` and restart federloomd.
 
 ---
 
@@ -1285,14 +1285,14 @@ You are creating the federation that others will join.
 
 You received an `alice.invite` file from an existing federation operator.
 
-1. Start swarmd once to generate the node key, then Ctrl-C.
+1. Start federloomd once to generate the node key, then Ctrl-C.
 2. Initialise your identity:
    ```bash
-   ./bin/swarmctl setup --label "Bob" -config config.yaml
+   ./bin/federloomctl setup --label "Bob" -config config.yaml
    ```
 3. Join using the invitation:
    ```bash
-   ./bin/swarmctl federation join alice.invite -config config.yaml
+   ./bin/federloomctl federation join alice.invite -config config.yaml
    ```
    You will be shown a fingerprint. **Verify it with Alice** over a channel you already trust before typing `yes`.
 4. Paste the printed config snippet into `config.yaml`:
@@ -1303,18 +1303,18 @@ You received an `alice.invite` file from an existing federation operator.
    ```
 5. Export your own bundle and send it back to Alice:
    ```bash
-   ./bin/swarmctl trust export > bob.bundle -config config.yaml
+   ./bin/federloomctl trust export > bob.bundle -config config.yaml
    # send bob.bundle to Alice
-   # Alice runs: swarmctl trust import bob.bundle --as bob --weight 0.8
+   # Alice runs: federloomctl trust import bob.bundle --as bob --weight 0.8
    ```
-6. Restart swarmd.
+6. Restart federloomd.
 
 ---
 
 ## Checking status at any time
 
 ```bash
-./bin/swarmctl status -config config.yaml
+./bin/federloomctl status -config config.yaml
 ```
 
 Shows your node identity, person fingerprint, trust anchors, and bootstrap peers.
@@ -1325,11 +1325,11 @@ Shows your node identity, person fingerprint, trust anchors, and bootstrap peers
 
 | File | Purpose | Command |
 |---|---|---|
-| `data/reputation/identity.key` | libp2p node key (created by swarmd) | auto |
-| `data/reputation/person.key` | operator Ed25519 key | `swarmctl setup` |
-| `data/reputation/peer.cert` | node-to-operator binding | `swarmctl setup` |
-| `data/reputation/anchors.json` | trusted operators | `swarmctl trust add/import` |
-| `data/reputation/imported-certs.json` | peer certs from anchored operators | `swarmctl trust import` |
+| `data/reputation/identity.key` | libp2p node key (created by federloomd) | auto |
+| `data/reputation/person.key` | operator Ed25519 key | `federloomctl setup` |
+| `data/reputation/peer.cert` | node-to-operator binding | `federloomctl setup` |
+| `data/reputation/anchors.json` | trusted operators | `federloomctl trust add/import` |
+| `data/reputation/imported-certs.json` | peer certs from anchored operators | `federloomctl trust import` |
 
 All paths are configurable via `trust.*_file` in `config.yaml`. See `docs/onboarding/03-key-management.md` for the full reference.
 
@@ -1338,25 +1338,25 @@ All paths are configurable via `trust.*_file` in `config.yaml`. See `docs/onboar
 ## Troubleshooting
 
 **Scores not syncing after setup**
-Restart swarmd — it reads identity files on startup, not live.
+Restart federloomd — it reads identity files on startup, not live.
 
 **Fingerprint mismatch during join**
 Stop immediately. Do not type `yes`. Contact the inviting operator on a separate channel to verify identity.
 
 **`no person identity` error**
-Run `swarmctl setup --label NAME` first.
+Run `federloomctl setup --label NAME` first.
 
 **`node key not found` error**
-Start swarmd at least once before running `swarmctl setup`. Swarmd generates the node key (`identity.key`) on first boot.
+Start federloomd at least once before running `federloomctl setup`. Swarmd generates the node key (`identity.key`) on first boot.
 
 **Peer cert expired**
-Re-run `swarmctl setup` — it will reissue the cert. Or use `swarmctl peer-cert <PEER_ID>` to issue a new one manually.
+Re-run `federloomctl setup` — it will reissue the cert. Or use `federloomctl peer-cert <PEER_ID>` to issue a new one manually.
 
 **Weight set to 0**
-A weight of 0 means events from that operator are silently ignored. Use `swarmctl trust set --weight 0.8 PERSON` to fix it.
+A weight of 0 means events from that operator are silently ignored. Use `federloomctl trust set --weight 0.8 PERSON` to fix it.
 
 **Bootstrap peer not connecting**
-Check that port 7700/tcp is open in your firewall and that the peer ID in `bootstrap_peers` matches the ID printed by swarmd (`peer ID: 12D3Koo...` in the startup log).
+Check that port 7700/tcp is open in your firewall and that the peer ID in `bootstrap_peers` matches the ID printed by federloomd (`peer ID: 12D3Koo...` in the startup log).
 ```
 
 - [ ] **Step 2: Add preamble to `docs/federation-guide.md`**
@@ -1379,11 +1379,11 @@ Read the current `README.md`. Find the "Quick start" or scaffold section and rep
 2. Shows the three-line solo setup:
    ```
    make build
-   swarmctl setup --label "MyNode"
-   ./bin/swarmd -config config.yaml
+   federloomctl setup --label "MyNode"
+   ./bin/federloomd -config config.yaml
    ```
 3. Replaces any "(currently stubs)" notes with current capability descriptions
-4. Updates the federation section to mention `swarmctl setup` and `swarmctl federation invite/join` as starting points
+4. Updates the federation section to mention `federloomctl setup` and `federloomctl federation invite/join` as starting points
 
 Read README.md first, then make the targeted edits. Do not rewrite sections that are already accurate.
 
@@ -1422,21 +1422,21 @@ cat > /tmp/sg-test.yaml << 'EOF'
 store:
   dir: /tmp/sg-test-data
 EOF
-./bin/swarmd -config /tmp/sg-test.yaml -listen /ip4/127.0.0.1/tcp/0 &
+./bin/federloomd -config /tmp/sg-test.yaml -listen /ip4/127.0.0.1/tcp/0 &
 sleep 1; kill %1   # let it create identity.key, then stop
-./bin/swarmctl setup --label "TestOperator" -config /tmp/sg-test.yaml
-./bin/swarmctl status -config /tmp/sg-test.yaml
+./bin/federloomctl setup --label "TestOperator" -config /tmp/sg-test.yaml
+./bin/federloomctl status -config /tmp/sg-test.yaml
 
 # Smoke test federation invite (prints JSON to stdout)
-./bin/swarmctl federation invite --addr /ip4/1.2.3.4/tcp/7700 -config /tmp/sg-test.yaml | head -5
+./bin/federloomctl federation invite --addr /ip4/1.2.3.4/tcp/7700 -config /tmp/sg-test.yaml | head -5
 
 # Verify usage shows new commands
-./bin/swarmctl --help 2>&1 | grep -E "setup|status|federation"
+./bin/federloomctl --help 2>&1 | grep -E "setup|status|federation"
 ```
 
 Expected output from setup:
 ```
-SwarmGuard setup
+FederLoom setup
 
 [1/3] Node key
       peer ID: 12D3Koo...
@@ -1453,5 +1453,5 @@ SwarmGuard setup
 Setup complete.
 
 Share your fingerprint (ab12 cd34 ef56 78gh) with operators you want to federate with.
-Next: swarmctl federation invite --addr /ip4/YOUR_IP/tcp/7700 > invite.json
+Next: federloomctl federation invite --addr /ip4/YOUR_IP/tcp/7700 > invite.json
 ```

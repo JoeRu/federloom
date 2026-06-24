@@ -1,12 +1,12 @@
 # CrowdSec Ingest Adapter Design
 
-**Goal:** Implement the `internal/ingest/crowdsec.go` stub as a fully working ingest source that polls a local CrowdSec LAPI instance for both decisions and alerts, translating them into `proto.Event`s that flow through SwarmGuard's trust, scoring, and rules pipeline.
+**Goal:** Implement the `internal/ingest/crowdsec.go` stub as a fully working ingest source that polls a local CrowdSec LAPI instance for both decisions and alerts, translating them into `proto.Event`s that flow through FederLoom's trust, scoring, and rules pipeline.
 
-**Architecture:** Single adapter (`ingest.Source`) with one polling goroutine that fetches `/v1/decisions/stream` and `/v1/alerts` sequentially per tick. Decisions emit high-confidence `crowdsec-decision` events; alerts map CrowdSec scenarios to SwarmGuard reason strings. HTTP errors skip the tick and retry on the next interval.
+**Architecture:** Single adapter (`ingest.Source`) with one polling goroutine that fetches `/v1/decisions/stream` and `/v1/alerts` sequentially per tick. Decisions emit high-confidence `crowdsec-decision` events; alerts map CrowdSec scenarios to FederLoom reason strings. HTTP errors skip the tick and retry on the next interval.
 
 **Tech Stack:** Go 1.22, `net/http` (stdlib), `encoding/json`, `gopkg.in/yaml.v3` (existing).
 
-**Spec:** This is sub-project 1 of 2 for the "smoke test + observability" initiative. Sub-project 2 (score reporting + live monitoring via `swarmctl score`) follows separately.
+**Spec:** This is sub-project 1 of 2 for the "smoke test + observability" initiative. Sub-project 2 (score reporting + live monitoring via `federloomctl score`) follows separately.
 
 ---
 
@@ -43,7 +43,7 @@ type IngestConfig struct {
 type CrowdSecConfig struct {
     Enabled         bool     `yaml:"enabled"`
     LAPIURL         string   `yaml:"lapi_url"`         // e.g. http://localhost:8080
-    APIKey          string   `yaml:"api_key"`           // bouncer key: cscli bouncers add swarmguard
+    APIKey          string   `yaml:"api_key"`           // bouncer key: cscli bouncers add federloom
     PollInterval    Duration `yaml:"poll_interval"`     // default 30s
     EnableDecisions bool     `yaml:"enable_decisions"`  // pull /v1/decisions/stream
     EnableAlerts    bool     `yaml:"enable_alerts"`     // pull /v1/alerts
@@ -65,7 +65,7 @@ CrowdSec: CrowdSecConfig{
 ```yaml
 ingest:
   crowdsec:
-    enabled: false          # set to true after: cscli bouncers add swarmguard
+    enabled: false          # set to true after: cscli bouncers add federloom
     lapi_url: "http://localhost:8080"
     api_key: ""             # paste bouncer key here (never commit)
     poll_interval: 30s
@@ -93,11 +93,11 @@ import (
     "net/url"
     "time"
 
-    "github.com/JoeRu/swarmguard/internal/config"
-    "github.com/JoeRu/swarmguard/pkg/proto"
+    "github.com/JoeRu/federloom/internal/config"
+    "github.com/JoeRu/federloom/pkg/proto"
 )
 
-// scenarioMap translates known CrowdSec scenario names to SwarmGuard reason strings.
+// scenarioMap translates known CrowdSec scenario names to FederLoom reason strings.
 // Unknown scenarios fall back to "crowdsec-alert".
 var scenarioMap = map[string]string{
     "crowdsecurity/ssh-bf":           "ssh-auth-bruteforce",
@@ -215,7 +215,7 @@ func (c *CrowdSec) fetchDecisions(ctx context.Context, ch chan<- proto.Event) {
             return
         }
     }
-    // Deleted decisions are ignored: SwarmGuard releases IPs via score decay.
+    // Deleted decisions are ignored: FederLoom releases IPs via score decay.
 }
 
 // --- alerts ---

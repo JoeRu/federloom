@@ -24,7 +24,7 @@
 | `internal/transport/gossip_test.go` | Create | Two-node Publish/Subscribe test |
 | `internal/transport/dht_test.go` | Create | DHT FindPeer-via-relay test |
 | `test/integration/cluster_test.go` | Create | Five-node star topology test (CI gate) |
-| `cmd/swarmd/main.go` | Modify | Replace stub with walking skeleton binary |
+| `cmd/federloomd/main.go` | Modify | Replace stub with walking skeleton binary |
 | `scripts/dev/docker-compose.dev.yml` | Create | Five-container smoke topology |
 | `scripts/dev/smoke-test.sh` | Create | Smoke test runner script |
 | `Makefile` | Modify | Add `smoke` target |
@@ -39,7 +39,7 @@
 - [ ] **Step 1: Add the three libp2p packages**
 
 ```bash
-cd /path/to/swarmguard
+cd /path/to/federloom
 go get github.com/libp2p/go-libp2p@latest
 go get github.com/libp2p/go-libp2p-kad-dht@latest
 go get github.com/libp2p/go-libp2p-pubsub@latest
@@ -87,7 +87,7 @@ func TestNodeModeConstants(t *testing.T) {
 	if ModeRelay != 1 {
 		t.Fatalf("ModeRelay should be 1, got %d", ModeRelay)
 	}
-	if DefaultTopic != "swarmguard/events/v0" {
+	if DefaultTopic != "federloom/events/v0" {
 		t.Fatalf("unexpected DefaultTopic: %q", DefaultTopic)
 	}
 }
@@ -124,8 +124,8 @@ const (
 	ModeRelay
 )
 
-// DefaultTopic is the gossipsub topic for SwarmGuard events.
-const DefaultTopic = "swarmguard/events/v0"
+// DefaultTopic is the gossipsub topic for FederLoom events.
+const DefaultTopic = "federloom/events/v0"
 
 // Options configures a transport Node.
 type Options struct {
@@ -181,8 +181,8 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/multiformats/go-multiaddr"
 
-	"github.com/JoeRu/swarmguard/internal/transport"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/transport"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // testOpts returns options for a test node listening on a random localhost port.
@@ -296,10 +296,10 @@ import (
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
-// Node is a SwarmGuard P2P peer: libp2p host + gossipsub topic + Kademlia DHT.
+// Node is a FederLoom P2P peer: libp2p host + gossipsub topic + Kademlia DHT.
 type Node struct {
 	host   host.Host
 	ps     *pubsub.PubSub
@@ -446,7 +446,7 @@ import (
 
 	"github.com/libp2p/go-libp2p/core/peer"
 
-	"github.com/JoeRu/swarmguard/internal/transport"
+	"github.com/JoeRu/federloom/internal/transport"
 )
 
 // TestDHTFindPeerViaRelay proves a leaf can resolve another leaf's address
@@ -582,8 +582,8 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/multiformats/go-multiaddr"
 
-	"github.com/JoeRu/swarmguard/internal/transport"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/transport"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 func localOpts(t *testing.T, mode transport.NodeMode) transport.Options {
@@ -736,7 +736,7 @@ Expected: all three tests pass. If `TestDHTDiscoveryViaRelay` is flaky (DHT rout
 make test
 ```
 
-Expected: `ok github.com/JoeRu/swarmguard/internal/transport`, `ok github.com/JoeRu/swarmguard/test/integration`, all other packages pass (stubs have no test failures).
+Expected: `ok github.com/JoeRu/federloom/internal/transport`, `ok github.com/JoeRu/federloom/test/integration`, all other packages pass (stubs have no test failures).
 
 - [ ] **Step 4: Commit**
 
@@ -747,17 +747,17 @@ git commit -m "test(integration): add 5-node star topology cluster test (CI gate
 
 ---
 
-## Task 6: Walking skeleton swarmd binary
+## Task 6: Walking skeleton federloomd binary
 
 **Files:**
-- Modify: `cmd/swarmd/main.go`
+- Modify: `cmd/federloomd/main.go`
 
 - [ ] **Step 1: Replace the stub with the skeleton binary**
 
-Replace `cmd/swarmd/main.go` with:
+Replace `cmd/federloomd/main.go` with:
 
 ```go
-// Command swarmd is the long-running SwarmGuard P2P node daemon.
+// Command federloomd is the long-running FederLoom P2P node daemon.
 package main
 
 import (
@@ -774,8 +774,8 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/multiformats/go-multiaddr"
 
-	"github.com/JoeRu/swarmguard/internal/transport"
-	"github.com/JoeRu/swarmguard/pkg/proto"
+	"github.com/JoeRu/federloom/internal/transport"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 func main() {
@@ -875,13 +875,13 @@ func main() {
 make build
 ```
 
-Expected: `bin/swarmd` and `bin/swarmctl` produced without errors.
+Expected: `bin/federloomd` and `bin/federloomctl` produced without errors.
 
 - [ ] **Step 3: Manual two-terminal smoke test**
 
 Terminal 1 — start bootstrap/relay node:
 ```bash
-./bin/swarmd --relay
+./bin/federloomd --relay
 ```
 Expected output (peer ID and address will differ):
 ```
@@ -893,15 +893,15 @@ Copy the full `listening on:` address (the `/ip4/.../p2p/...` part).
 
 Terminal 2 — start a leaf node pointing at the relay:
 ```bash
-./bin/swarmd --listen /ip4/0.0.0.0/tcp/7701 --bootstrap <paste-the-address-from-terminal-1>
+./bin/federloomd --listen /ip4/0.0.0.0/tcp/7701 --bootstrap <paste-the-address-from-terminal-1>
 ```
 Expected: after ~5s, terminal 2 publishes an event; both terminals log activity. `Ctrl-C` to stop.
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add cmd/swarmd/main.go
-git commit -m "feat(swarmd): replace stub with P2P walking skeleton binary"
+git add cmd/federloomd/main.go
+git commit -m "feat(federloomd): replace stub with P2P walking skeleton binary"
 ```
 
 ---
@@ -989,7 +989,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "=== SwarmGuard smoke test ==="
+echo "=== FederLoom smoke test ==="
 
 # Build image from current source
 echo "--- building image ---"

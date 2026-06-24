@@ -114,8 +114,8 @@ import (
     "time"
 
     "gopkg.in/yaml.v3"
-    "github.com/JoeRu/swarmguard/internal/store"
-    "github.com/JoeRu/swarmguard/pkg/proto"
+    "github.com/JoeRu/federloom/internal/store"
+    "github.com/JoeRu/federloom/pkg/proto"
 )
 
 type Action string
