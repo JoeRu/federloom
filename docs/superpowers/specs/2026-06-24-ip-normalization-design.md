@@ -130,6 +130,12 @@ func (w *WhitelistStore) Contains(ip string) bool {
 
 ---
 
+## Data Compatibility
+
+**BadgerDB and bloom filter require no code changes.** Keys are plain strings; after node.go normalization all new entries use canonical `netip` form. IPv4 canonical form is identical between `net.IP.String()` and `netip.Addr.String()`, so all existing IPv4 store data survives the migration intact.
+
+Any pre-existing non-canonical IPv6 store entries (e.g., a key stored as `"2001:0db8::0001"` before this change) become unreachable after migration — canonical lookups will miss them in both bloom and BadgerDB. This is acceptable: such entries are negligible in current deployments and will decay naturally via BadgerDB TTL. No data migration is required.
+
 ## Testing Requirements
 
 New tests cover:
