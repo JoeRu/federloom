@@ -78,6 +78,7 @@ func (s *CrowdSecSink) Block(ip string) error {
 		IP       string `json:"ip"`
 		Origin   string `json:"origin"`
 		Scenario string `json:"scenario"`
+		Scope    string `json:"scope"`
 		Type     string `json:"type"`
 		Value    string `json:"value"`
 	}
@@ -87,31 +88,40 @@ func (s *CrowdSecSink) Block(ip string) error {
 		Value string `json:"value"`
 	}
 	type csAlert struct {
-		Decisions   []csDecision `json:"decisions"`
-		Events      []struct{}   `json:"events"`
-		EventsCount int          `json:"events_count"`
-		Message     string       `json:"message"`
-		Scenario    string       `json:"scenario"`
-		Simulated   bool         `json:"simulated"`
-		Source      csSource     `json:"source"`
-		StartAt     string       `json:"start_at"`
-		StopAt      string       `json:"stop_at"`
+		Capacity        int          `json:"capacity"`
+		Decisions       []csDecision `json:"decisions"`
+		Events          []struct{}   `json:"events"`
+		EventsCount     int          `json:"events_count"`
+		LeakSpeed       string       `json:"leakspeed"`
+		Message         string       `json:"message"`
+		Scenario        string       `json:"scenario"`
+		ScenarioHash    string       `json:"scenario_hash"`
+		ScenarioVersion string       `json:"scenario_version"`
+		Simulated       bool         `json:"simulated"`
+		Source          csSource     `json:"source"`
+		StartAt         string       `json:"start_at"`
+		StopAt          string       `json:"stop_at"`
 	}
 
 	alert := csAlert{
+		Capacity: 0,
 		Decisions: []csDecision{{
 			Duration: s.banDur.String(),
 			IP:       ip,
 			Origin:   "swarmguard",
 			Scenario: "swarmguard/reputation",
+			Scope:    "Ip",
 			Type:     "ban",
 			Value:    ip,
 		}},
-		Events:      []struct{}{},
-		EventsCount: 1,
-		Message:     "swarmguard reputation block",
-		Scenario:    "swarmguard/reputation",
-		Simulated:   false,
+		Events:          []struct{}{},
+		EventsCount:     1,
+		LeakSpeed:       "",
+		Message:         "swarmguard reputation block",
+		Scenario:        "swarmguard/reputation",
+		ScenarioHash:    "",
+		ScenarioVersion: "",
+		Simulated:       false,
 		Source: csSource{
 			IP:    ip,
 			Scope: "Ip",
