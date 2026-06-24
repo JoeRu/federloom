@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net"
+	"net/netip"
 	"os"
 	"sync"
 	"time"
@@ -247,10 +247,12 @@ func (n *Node) Run(ctx context.Context) error {
 }
 
 func (n *Node) processLocal(ctx context.Context, e proto.Event) {
-	if net.ParseIP(e.IP) == nil {
+	addr, err := netip.ParseAddr(e.IP)
+	if err != nil {
 		log.Printf("node: drop event with invalid IP %q", e.IP)
 		return
 	}
+	e.IP = addr.Unmap().String()
 	if n.neverblock.Contains(e.IP) {
 		return
 	}
@@ -323,10 +325,12 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 			return
 		}
 	}
-	if net.ParseIP(e.IP) == nil {
+	addr, err := netip.ParseAddr(e.IP)
+	if err != nil {
 		log.Printf("node: drop event with invalid IP %q", e.IP)
 		return
 	}
+	e.IP = addr.Unmap().String()
 	// Feedback loop guard: drop events that have already passed through this node.
 	if n.selfID != "" {
 		for _, hop := range e.OriginTrace {

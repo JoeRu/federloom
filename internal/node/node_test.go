@@ -372,6 +372,56 @@ func TestProcessRemoteRespectsWhitelist(t *testing.T) {
 	}
 }
 
+func TestProcessLocalNormalizesIPv6(t *testing.T) {
+	n, _ := testNode(t)
+	ctx := context.Background()
+
+	n.processLocal(ctx, proto.Event{IP: "2001:0db8::0001", Reason: "test"})
+
+	rec, err := n.rep.GetRecord("2001:db8::1")
+	if err != nil {
+		t.Fatalf("GetRecord: %v", err)
+	}
+	if rec.Score == 0 {
+		t.Error("expected non-zero score stored under canonical key 2001:db8::1")
+	}
+}
+
+func TestProcessLocalCollapsesIPv4Mapped(t *testing.T) {
+	n, _ := testNode(t)
+	ctx := context.Background()
+
+	n.processLocal(ctx, proto.Event{IP: "::ffff:1.2.3.4", Reason: "test"})
+
+	rec, err := n.rep.GetRecord("1.2.3.4")
+	if err != nil {
+		t.Fatalf("GetRecord: %v", err)
+	}
+	if rec.Score == 0 {
+		t.Error("expected non-zero score under key 1.2.3.4 after IPv4-mapped event")
+	}
+	recMapped, _ := n.rep.GetRecord("::ffff:1.2.3.4")
+	if recMapped.Score != 0 {
+		t.Error("key ::ffff:1.2.3.4 must be empty — event should be stored as 1.2.3.4")
+	}
+}
+
+func TestProcessLocalSplitReputationPrevention(t *testing.T) {
+	n, _ := testNode(t)
+	ctx := context.Background()
+
+	n.processLocal(ctx, proto.Event{IP: "::ffff:1.2.3.4", Reason: "test"})
+	n.processLocal(ctx, proto.Event{IP: "1.2.3.4", Reason: "test"})
+
+	rec, err := n.rep.GetRecord("1.2.3.4")
+	if err != nil {
+		t.Fatalf("GetRecord: %v", err)
+	}
+	if rec.Score < 2 {
+		t.Errorf("expected combined score ≥ 2 (both events merged), got %.1f", rec.Score)
+	}
+}
+
 func TestProcessRemoteRespectsWhitelistCIDR(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Defaults()
