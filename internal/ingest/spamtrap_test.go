@@ -109,6 +109,45 @@ func TestSpamtrapSkipsInvalidIP(t *testing.T) {
 	}
 }
 
+func TestSpamtrapRejectsIPv6(t *testing.T) {
+	dir := t.TempDir()
+	logPath := filepath.Join(dir, "spamtrap.log")
+
+	cfg := config.SpamtrapConfig{
+		Enabled:      true,
+		LogFile:      logPath,
+		PollInterval: config.Duration{Duration: 50 * time.Millisecond},
+	}
+	s := ingest.NewSpamtrap(cfg, "selfpeer")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+
+	ch, err := s.Start(ctx)
+	if err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+
+	// ::ffff:198.51.100.5 contains dots so the old guard passes it through as if IPv4.
+	// The new guard must reject it (Is4() returns false for IPv4-mapped IPv6 before Unmap).
+	// 198.51.100.5 is a valid IPv4 that must pass.
+	writeLines(t, logPath, []string{"::ffff:198.51.100.5", "198.51.100.5"})
+
+	var got []string
+	for {
+		select {
+		case e := <-ch:
+			got = append(got, e.IP)
+		case <-ctx.Done():
+			goto done
+		}
+	}
+done:
+	if len(got) != 1 || got[0] != "198.51.100.5" {
+		t.Errorf("expected only [198.51.100.5], got %v", got)
+	}
+}
+
 func TestSpamtrapMultipleIPs(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "spamtrap.log")

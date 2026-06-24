@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/netip"
 	"strings"
 	"sync"
 	"time"
@@ -258,6 +259,11 @@ func (c *CrowdSec) fetchAlerts(ctx context.Context, ch chan<- proto.Event) {
 		if a.Source.IP == "" {
 			continue
 		}
+		addr, err := netip.ParseAddr(a.Source.IP)
+		if err != nil {
+			log.Printf("crowdsec: invalid IP %q in alert — skipping", a.Source.IP)
+			continue
+		}
 		reason := mapScenario(a.Scenario)
 		ts, err := time.Parse(time.RFC3339, a.StartAt)
 		if err != nil {
@@ -265,7 +271,7 @@ func (c *CrowdSec) fetchAlerts(ctx context.Context, ch chan<- proto.Event) {
 		}
 		select {
 		case ch <- proto.Event{
-			IP:         a.Source.IP,
+			IP:         addr.Unmap().String(),
 			Reason:     reason,
 			Timestamp:  ts,
 			ReporterID: c.selfID,

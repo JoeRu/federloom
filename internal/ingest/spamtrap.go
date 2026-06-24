@@ -5,7 +5,7 @@ import (
 	"context"
 	"io"
 	"log"
-	"net"
+	"net/netip"
 	"os"
 	"strings"
 	"time"
@@ -90,7 +90,8 @@ func (s *Spamtrap) tail(ctx context.Context, ch chan<- proto.Event) {
 				if line == "" || strings.HasPrefix(line, "#") {
 					continue
 				}
-				if net.ParseIP(line) == nil || !strings.Contains(line, ".") {
+				addr, err := netip.ParseAddr(line)
+				if err != nil || !addr.Is4() {
 					log.Printf("ingest/spamtrap: invalid IPv4 %q in %s — skipping", line, s.cfg.LogFile)
 					continue
 				}
