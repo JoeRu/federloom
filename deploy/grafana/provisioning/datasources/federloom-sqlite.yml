@@ -1,6 +1,7 @@
 apiVersion: 1
 datasources:
   - name: FederLoom SQLite
+    orgId: 2
     type: frser-sqlite-datasource
     access: proxy
     uid: federloom-sqlite

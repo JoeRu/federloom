@@ -1,9 +1,9 @@
 {
   "id": null,
-  "uid": "swarmguard-effectiveness",
-  "title": "SwarmGuard — Effectiveness",
+  "uid": "federloom-effectiveness",
+  "title": "FederLoom — Effectiveness",
   "tags": [
-    "swarmguard"
+    "federloom"
   ],
   "schemaVersion": 38,
   "version": 1,
@@ -91,7 +91,7 @@
             "type": "prometheus",
             "uid": "prom-honeypot"
           },
-          "expr": "sum(swarmguard_blocked_ips)",
+          "expr": "sum(federloom_blocked_ips)",
           "instant": true,
           "refId": "A"
         }
@@ -149,7 +149,7 @@
             "type": "prometheus",
             "uid": "prom-mailcow"
           },
-          "expr": "sum(swarmguard_blocked_ips)",
+          "expr": "sum(federloom_blocked_ips)",
           "instant": true,
           "refId": "A"
         }
@@ -207,7 +207,7 @@
             "type": "prometheus",
             "uid": "prom-wordpress"
           },
-          "expr": "sum(swarmguard_blocked_ips)",
+          "expr": "sum(federloom_blocked_ips)",
           "instant": true,
           "refId": "A"
         }
@@ -264,7 +264,7 @@
             "type": "prometheus",
             "uid": "prom-honeypot"
           },
-          "expr": "sum(increase(swarmguard_blocks_total[$__interval]))",
+          "expr": "sum(increase(federloom_blocks_total[$__interval]))",
           "legendFormat": "__auto",
           "refId": "A"
         }
@@ -309,7 +309,7 @@
             "type": "prometheus",
             "uid": "prom-mailcow"
           },
-          "expr": "sum(increase(swarmguard_blocks_total[$__interval]))",
+          "expr": "sum(increase(federloom_blocks_total[$__interval]))",
           "legendFormat": "__auto",
           "refId": "A"
         }
@@ -354,7 +354,7 @@
             "type": "prometheus",
             "uid": "prom-wordpress"
           },
-          "expr": "sum(increase(swarmguard_blocks_total[$__interval]))",
+          "expr": "sum(increase(federloom_blocks_total[$__interval]))",
           "legendFormat": "__auto",
           "refId": "A"
         }
@@ -411,7 +411,7 @@
             "type": "prometheus",
             "uid": "prom-honeypot"
           },
-          "expr": "sum(rate(swarmguard_events_received_total[$__interval])) * 60",
+          "expr": "sum(rate(federloom_events_received_total[$__interval])) * 60",
           "legendFormat": "__auto",
           "refId": "A"
         }
@@ -456,7 +456,7 @@
             "type": "prometheus",
             "uid": "prom-mailcow"
           },
-          "expr": "sum(rate(swarmguard_events_received_total[$__interval])) * 60",
+          "expr": "sum(rate(federloom_events_received_total[$__interval])) * 60",
           "legendFormat": "__auto",
           "refId": "A"
         }
@@ -501,7 +501,7 @@
             "type": "prometheus",
             "uid": "prom-wordpress"
           },
-          "expr": "sum(rate(swarmguard_events_received_total[$__interval])) * 60",
+          "expr": "sum(rate(federloom_events_received_total[$__interval])) * 60",
           "legendFormat": "__auto",
           "refId": "A"
         }
@@ -558,7 +558,7 @@
             "type": "prometheus",
             "uid": "prom-honeypot"
           },
-          "expr": "rate(swarmguard_events_federated_total{direction=\"in\"}[$__interval]) * 60",
+          "expr": "rate(federloom_events_federated_total{direction=\"in\"}[$__interval]) * 60",
           "legendFormat": "__auto",
           "refId": "A"
         }
@@ -603,7 +603,7 @@
             "type": "prometheus",
             "uid": "prom-mailcow"
           },
-          "expr": "rate(swarmguard_events_federated_total{direction=\"in\"}[$__interval]) * 60",
+          "expr": "rate(federloom_events_federated_total{direction=\"in\"}[$__interval]) * 60",
           "legendFormat": "__auto",
           "refId": "A"
         }
@@ -648,7 +648,7 @@
             "type": "prometheus",
             "uid": "prom-wordpress"
           },
-          "expr": "rate(swarmguard_events_federated_total{direction=\"in\"}[$__interval]) * 60",
+          "expr": "rate(federloom_events_federated_total{direction=\"in\"}[$__interval]) * 60",
           "legendFormat": "__auto",
           "refId": "A"
         }
@@ -723,7 +723,7 @@
             "type": "prometheus",
             "uid": "prom-honeypot"
           },
-          "expr": "swarmguard_ip_score < $block_threshold",
+          "expr": "federloom_ip_score < $block_threshold",
           "format": "table",
           "instant": true,
           "legendFormat": "{{ip}}",
@@ -788,7 +788,7 @@
             "type": "prometheus",
             "uid": "prom-mailcow"
           },
-          "expr": "swarmguard_ip_score < $block_threshold",
+          "expr": "federloom_ip_score < $block_threshold",
           "format": "table",
           "instant": true,
           "legendFormat": "{{ip}}",
@@ -853,7 +853,7 @@
             "type": "prometheus",
             "uid": "prom-wordpress"
           },
-          "expr": "swarmguard_ip_score < $block_threshold",
+          "expr": "federloom_ip_score < $block_threshold",
           "format": "table",
           "instant": true,
           "legendFormat": "{{ip}}",
@@ -913,7 +913,7 @@
             "type": "prometheus",
             "uid": "prom-honeypot"
           },
-          "expr": "sum(swarmguard_block_recurrence_total)",
+          "expr": "sum(federloom_block_recurrence_total)",
           "instant": true,
           "refId": "A"
         }
@@ -959,7 +959,7 @@
             "type": "prometheus",
             "uid": "prom-mailcow"
           },
-          "expr": "sum(swarmguard_block_recurrence_total)",
+          "expr": "sum(federloom_block_recurrence_total)",
           "instant": true,
           "refId": "A"
         }
@@ -1005,7 +1005,7 @@
             "type": "prometheus",
             "uid": "prom-wordpress"
           },
-          "expr": "sum(swarmguard_block_recurrence_total)",
+          "expr": "sum(federloom_block_recurrence_total)",
           "instant": true,
           "refId": "A"
         }

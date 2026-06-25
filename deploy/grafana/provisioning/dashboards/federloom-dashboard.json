@@ -9,7 +9,7 @@
     },
     {
       "name": "DS_SWARMGUARD_SQLITE",
-      "label": "SwarmGuard SQLite",
+      "label": "FederLoom SQLite",
       "type": "datasource",
       "pluginId": "frser-sqlite-datasource",
       "pluginName": "frser-sqlite-datasource"
@@ -26,7 +26,7 @@
     {"type": "panel", "id": "table", "name": "Table", "version": ""}
   ],
   "annotations": {"list": []},
-  "description": "SwarmGuard reputation events, rule firings, and active blocks with due-time",
+  "description": "FederLoom reputation events, rule firings, and active blocks with due-time",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -52,7 +52,7 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-          "expr": "sum by (reason) (rate(swarmguard_events_received_total{job=~\"$node\"}[5m]) * 60)",
+          "expr": "sum by (reason) (rate(federloom_events_received_total{job=~\"$node\"}[5m]) * 60)",
           "legendFormat": "{{reason}}",
           "refId": "A"
         }
@@ -72,7 +72,7 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-          "expr": "sum by (action) (rate(swarmguard_rules_fired_total{job=~\"$node\"}[5m]) * 60)",
+          "expr": "sum by (action) (rate(federloom_rules_fired_total{job=~\"$node\"}[5m]) * 60)",
           "legendFormat": "{{action}}",
           "refId": "A"
         }
@@ -89,7 +89,7 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-          "expr": "sum(swarmguard_blocked_ips{job=~\"$node\"})",
+          "expr": "sum(federloom_blocked_ips{job=~\"$node\"})",
           "legendFormat": "Blocked IPs",
           "refId": "A"
         }
@@ -106,7 +106,7 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-          "expr": "sum(swarmguard_federation_peers{job=~\"$node\"})",
+          "expr": "sum(federloom_federation_peers{job=~\"$node\"})",
           "legendFormat": "Peers",
           "refId": "A"
         }
@@ -123,7 +123,7 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-          "expr": "topk(10, sum by (reporter_id) (swarmguard_events_received_total{job=~\"$node\"}))",
+          "expr": "topk(10, sum by (reporter_id) (federloom_events_received_total{job=~\"$node\"}))",
           "legendFormat": "{{reporter_id}}",
           "instant": true,
           "refId": "A"
@@ -225,7 +225,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (reporter_id) (increase(swarmguard_events_received_total{job=~\"$node\"}[$__range]))",
+          "expr": "sum by (reporter_id) (increase(federloom_events_received_total{job=~\"$node\"}[$__range]))",
           "instant": true,
           "legendFormat": "{{reporter_id}}",
           "refId": "A"
@@ -263,7 +263,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "swarmguard_ip_score{job=~\"$node\"} < $block_threshold",
+          "expr": "federloom_ip_score{job=~\"$node\"} < $block_threshold",
           "instant": true,
           "legendFormat": "{{ip}}",
           "refId": "A"
@@ -274,13 +274,13 @@
     }
   ],
   "schemaVersion": 39,
-  "tags": ["swarmguard"],
+  "tags": ["federloom"],
   "templating": {
     "list": [
       {
         "current": {"selected": true, "text": "All", "value": "$__all"},
         "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-        "definition": "label_values(swarmguard_events_received_total,job)",
+        "definition": "label_values(federloom_events_received_total,job)",
         "hide": 0,
         "includeAll": true,
         "label": "Node",
@@ -288,7 +288,7 @@
         "name": "node",
         "options": [],
         "query": {
-          "query": "label_values(swarmguard_events_received_total,job)",
+          "query": "label_values(federloom_events_received_total,job)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -309,8 +309,8 @@
   "time": {"from": "now-6h", "to": "now"},
   "timepicker": {},
   "timezone": "browser",
-  "title": "SwarmGuard",
-  "uid": "swarmguard-v1",
+  "title": "FederLoom",
+  "uid": "federloom-v1",
   "version": 1,
   "weekStart": ""
 }
