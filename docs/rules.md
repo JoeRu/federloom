@@ -108,8 +108,9 @@ CrowdSec scenarios are mapped to reason codes as follows:
 | Any other scenario | Vendor prefix stripped: `crowdsecurity/custom-rule` → `custom-rule` |
 
 For unknown CrowdSec scenarios, the vendor prefix is stripped and the remainder
-becomes the reason code. Use prefix wildcards (e.g. `crowdsecurity-*` or the
-stripped name prefix) to match entire families of scenarios.
+becomes the reason code. For example, `crowdsecurity/http-sensitive-files` becomes
+`http-sensitive-files`. Use prefix wildcards on the stripped name (e.g. `http-*`)
+to match entire families of scenarios.
 
 ### Fail2ban
 
@@ -124,7 +125,7 @@ Reason codes are resolved from jail names. Built-in mappings (exact and prefix):
 | `apache-auth`, `apache-*` | `http-auth-bruteforce` |
 | `wordpress`, `wp-*` | `http-wp-bruteforce` |
 | `recidive` | `recidive` |
-| (any other jail) | operator-defined via `ingest.fail2ban.jail_reasons` in `config.yaml` |
+| (any other jail) | `fail2ban-<jailname>` automatically (e.g. `proftpd` → `fail2ban-proftpd`). Override via `ingest.fail2ban.jail_reasons` in `config.yaml`. Use `fail2ban-*` as a wildcard pattern to match all auto-mapped codes. |
 
 ## Deployment recipes
 
