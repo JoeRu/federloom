@@ -9,10 +9,10 @@ set -euo pipefail
 SWARMGUARD_API="http://127.0.0.1:9102"
 CROWDSEC_CTR="crowdsec"
 DURATION="168h"
-REASON="swarmguard-reputation"
+REASON="federloom-reputation"
 
 IPS=$(curl -sf --max-time 10 "${SWARMGUARD_API}/crowdsec/v1/decisions") || {
-  echo "[$(date -Iseconds)] WARN: could not reach SwarmGuard API at ${SWARMGUARD_API}" >&2
+  echo "[$(date -Iseconds)] WARN: could not reach FederLoom API at ${SWARMGUARD_API}" >&2
   exit 0
 }
 

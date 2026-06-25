@@ -5,7 +5,7 @@
 set -euo pipefail
 export PATH="/run/current-system/sw/bin:/root/.nix-profile/bin:/usr/local/bin:/usr/bin:/bin"
 
-SQLITE_DB="/var/lib/docker/volumes/wordpress_swarmguard-data/_data/metrics.db"
+SQLITE_DB="/var/lib/docker/volumes/wordpress_federloom-data/_data/metrics.db"
 NGINX_CTR="wordpress_docker_stack-nginx_webmail-1"
 CROWDSEC_CTR="crowdsec"
 
@@ -52,7 +52,7 @@ fi
 
 q() { sqlite3 "$SQLITE_DB" "$1"; }
 
-echo "=== SwarmGuard Effectiveness Report ==="
+echo "=== FederLoom Effectiveness Report ==="
 echo "Node: wordpress  |  Window: $SINCE_HR → $NOW_HR ($WINDOW_LABEL)"
 echo ""
 

@@ -7,7 +7,7 @@ set -euo pipefail
 SERVER="167.233.115.41"
 SSH_PORT="2244"
 SSH_USER="root"
-REMOTE_DIR="/opt/swarmguard"
+REMOTE_DIR="/opt/federloom"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -36,8 +36,8 @@ rsync -az --delete \
   "$REPO_ROOT/" \
   "$SSH_USER@$SERVER:$REMOTE_DIR/"
 
-echo "==> [3/5] Pulling swarmguard image"
-ssh_run "docker pull ghcr.io/joeru/swarmguard:latest"
+echo "==> [3/5] Pulling federloom image"
+ssh_run "docker pull ghcr.io/joeru/federloom:latest"
 
 echo "==> [4/5] Starting honeypot stack"
 ssh_run "docker compose -f $REMOTE_DIR/deploy/honeypot/docker-compose.yml up -d"
@@ -45,7 +45,7 @@ ssh_run "docker compose -f $REMOTE_DIR/deploy/honeypot/docker-compose.yml up -d"
 echo "==> [5/5] Waiting 15s for swarmd to print peer ID..."
 sleep 15
 
-PEER_ID=$(ssh_run "docker logs swarmguard 2>/dev/null | grep 'peer ID:' | tail -1 | awk '{print \$NF}'" || true)
+PEER_ID=$(ssh_run "docker logs federloom 2>/dev/null | grep 'peer ID:' | tail -1 | awk '{print \$NF}'" || true)
 
 echo ""
 if [[ -z "$PEER_ID" ]]; then

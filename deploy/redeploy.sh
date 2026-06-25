@@ -6,26 +6,26 @@
 # Requires: gh CLI, docker, jq, dig, curl, rsync, ssh access to all three nodes.
 set -euo pipefail
 
-IMAGE="ghcr.io/joeru/swarmguard:latest"
+IMAGE="ghcr.io/joeru/federloom:latest"
 INVITE_FILE="honeypot-invite.json"
 
 HONEYPOT_HOST="167.233.115.41"
 HONEYPOT_PORT="2244"
 HONEYPOT_USER="root"
-HONEYPOT_CTR="swarmguard"
-HONEYPOT_DIR="/opt/swarmguard"
+HONEYPOT_CTR="federloom"
+HONEYPOT_DIR="/opt/federloom"
 HONEYPOT_COMPOSE="$HONEYPOT_DIR/deploy/honeypot/docker-compose.yml"
 
 MAILCOW_HOST="mail.jru.me"
 MAILCOW_PORT="2222"
 MAILCOW_USER="joe"
-MAILCOW_DIR="/opt/swarmguard"
+MAILCOW_DIR="/opt/federloom"
 MAILCOW_COMPOSE="$MAILCOW_DIR/deploy/mailcow/docker-compose.yml"
 
 WP_HOST="d.jru.me"
 WP_PORT="2222"
 WP_USER="root"
-WP_DIR="/opt/swarmguard"
+WP_DIR="/opt/federloom"
 WP_COMPOSE="$WP_DIR/deploy/wordpress/docker-compose.yml"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -79,11 +79,11 @@ echo ""
 echo "══ Phase 2: Setup identity + generate invite ══"
 
 hp "docker exec $HONEYPOT_CTR swarmctl setup \
-  --config /etc/swarmguard/config.yaml \
+  --config /etc/federloom/config.yaml \
   --label honeypot"
 
 hp "docker exec $HONEYPOT_CTR swarmctl federation invite \
-  --config /etc/swarmguard/config.yaml \
+  --config /etc/federloom/config.yaml \
   --addr /dns4/swarmguard.jru.me/tcp/7700 \
   --out /tmp/invite.json"
 
@@ -224,7 +224,7 @@ for row in \
   "wordpress http://100.92.58.24:9101/metrics"; do
   name="${row%% *}"; url="${row#* }"
   PEERS=$(curl -sf "$url" \
-    | grep '^swarmguard_federation_peers ' \
+    | grep '^federloom_federation_peers ' \
     | awk '{print int($2)}')
   if [[ "${PEERS:-0}" -gt 0 ]]; then
     check_ok "$name peers (${PEERS:-0})"
@@ -241,7 +241,7 @@ echo ""
 
 if [[ $FAIL -gt 0 ]]; then
   exit 1
-fi
+fi1
 
 echo "All checks passed."
 echo "  Invite   : $INVITE_FILE"
