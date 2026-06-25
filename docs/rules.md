@@ -81,6 +81,7 @@ adapters. Use these values in the `reason` field of your rules.
 | `smb-file-open` | 5000 | SMB file open event. |
 | `telnet-login-attempt` | 6001 | Telnet login attempt. |
 | `mysql-login-attempt` | 8001 | MySQL login attempt. |
+| `opencanary-unknown` | (other) | Fallback for OpenCanary logtypes not in the standard map. |
 
 ### Mailcow logs (Postfix + Dovecot)
 
