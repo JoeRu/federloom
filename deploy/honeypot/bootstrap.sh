@@ -44,6 +44,9 @@ rsync -az --delete \
   "$REPO_ROOT/" \
   "$SSH_USER@$SERVER:$REMOTE_DIR/"
 
+echo "==> [2b/5] Copying .env to $SERVER:$REMOTE_DIR/deploy/honeypot/.env"
+scp -P "$SSH_PORT" "$ENV_FILE" "$SSH_USER@$SERVER:$REMOTE_DIR/deploy/honeypot/.env"
+
 echo "==> [3/5] Pulling federloom image"
 ssh_run "docker pull ghcr.io/joeru/federloom:latest"
 
