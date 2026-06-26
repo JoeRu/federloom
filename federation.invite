@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "created_at": "2026-06-26T14:52:38.400567985Z",
+  "invited_by": "79bb d13a 114b 88fe",
+  "federation": {
+    "mode": "federated",
+    "bootstrap_peer": "/dns4/federloom.jru.me/tcp/7700/p2p/12D3KooWBvpzbEBgcFbHrw3kEFjfdFB2AwimGMhMrVGQBHMpZNjD",
+    "suggested_weight": 0.9
+  },
+  "trust_bundle": {
+    "person": "FederLoom Honeypot (JoeRu)",
+    "label": "FederLoom Honeypot (JoeRu)",
+    "identity_pubkey": "ed25519:Azytb6TyxsHNg/d6PioMPxjfjizYoBkXtNq8Yu1A1z0=",
+    "certs": [
+      {
+        "peer_id": "12D3KooWBvpzbEBgcFbHrw3kEFjfdFB2AwimGMhMrVGQBHMpZNjD",
+        "person_key": "Azytb6TyxsHNg/d6PioMPxjfjizYoBkXtNq8Yu1A1z0=",
+        "valid_until": "2027-06-26T14:52:27.026700074Z",
+        "sig": "XYojflIJGmhErD6N0p6ygBqJxeFXUpwcajP3C0Q8ZZE2W3IgRjGNk/ljQRbsWQR0hlRPOLuV7j36udlMwMXRBQ=="
+      }
+    ]
+  }
+}
+→ ask the recipient to verify fingerprint: 79bb d13a 114b 88fe

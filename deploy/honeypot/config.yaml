@@ -42,4 +42,4 @@ dnsbl:
   addr: ":5353"
   zone: "dnsbl.federloom.jru.me."
 bootstrap_peers:
-  - /ip4/167.233.115.41/tcp/7700/p2p/12D3KooWBvpzbEBgcFbHrw3kEFjfdFB2AwimGMhMrVGQBHMpZNjD  # relay peer
+  - /dns4/federloom.jru.me/tcp/7700/p2p/12D3KooWBvpzbEBgcFbHrw3kEFjfdFB2AwimGMhMrVGQBHMpZNjD
