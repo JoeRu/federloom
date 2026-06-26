@@ -73,7 +73,7 @@ The script installs Docker on the server if needed, syncs the repo, pulls
 the image, and starts the stack. At the end it prints:
 
 ```
-Honeypot stack running on 203.0.113.10
+Honeypot stack running on <your-server>
   Peer ID : 12D3KooW...
   Bootstrap multiaddr: /ip4/203.0.113.10/tcp/7700/p2p/12D3KooW...
 ```
@@ -96,16 +96,7 @@ Postfix and Dovecot container logs for brute-force and spam signals, pulls
 CrowdSec LAPI decisions, and blocks IPs via ipset on the host kernel. Port
 7700 enables outbound (and optionally inbound) federation.
 
-### 1. Create `/opt/federloom` on the server
-
-The deploy directory must exist and be writable by your SSH user:
-
-```bash
-ssh -p SSH_PORT SSH_USER@SERVER \
-  'sudo mkdir -p /opt/federloom && sudo chown $USER /opt/federloom'
-```
-
-### 2. Configure `.env`
+### 1. Configure `.env`
 
 ```bash
 cp deploy/mailcow/.env.example deploy/mailcow/.env
@@ -116,7 +107,7 @@ Edit `deploy/mailcow/.env`:
 | Variable | What it is | How to find it |
 |---|---|---|
 | `SERVER` | SSH hostname | `mail.example.com` |
-| `SSH_PORT` | SSH port | `2222` is typical for Mailcow servers |
+| `SSH_PORT` | SSH port | `2222` (project default); use `22` if your server hasn't changed its SSH port |
 | `SSH_USER` | SSH user (needs sudo + docker group) | — |
 | `REMOTE_DIR` | Deploy path | `/opt/federloom` |
 | `PUBLIC_IP` | Server's public IP | `dig +short mail.example.com` |
@@ -128,7 +119,7 @@ Edit `deploy/mailcow/.env`:
 | `DOCKER_BRIDGE` | Docker bridge CIDR (whitelisted) | `172.17.0.0/16` default |
 | `BOOTSTRAP_PEER` | Peer to connect to on startup | empty for solo; honeypot multiaddr to federate |
 
-### 3. Run
+### 2. Run
 
 ```bash
 bash deploy/mailcow/bootstrap-mailcow.sh
@@ -138,7 +129,7 @@ The script registers a CrowdSec bouncer, syncs the repo, pulls the image,
 writes `config.local.yaml` with the bouncer API key, and starts the
 container. At the end it prints the peer ID and multiaddr.
 
-### 4. Verify
+### 3. Verify
 
 ```bash
 curl -s http://SERVER:9101/metrics | grep -E 'federloom_blocked_ips|federloom_federation_peers'
@@ -247,22 +238,27 @@ then enable the fail2ban ingest plugin.
 
 ### 2. Enable fail2ban ingest
 
-SSH in to the server and append to the config:
+Open `deploy/honeypot/config.yaml` in your local clone and add the
+following block (merge with any existing `ingest:` section — do not
+duplicate the key):
 
-```bash
-ssh -p SSH_PORT SSH_USER@SERVER bash -s <<'EOF'
-cat >> /opt/federloom/deploy/honeypot/config.yaml <<'YAML'
+```yaml
 ingest:
   fail2ban:
     enabled: true
-    container: fail2ban        # replace with your container name: docker ps | grep fail2ban
+    container: fail2ban        # replace with your actual container name: docker ps | grep fail2ban
     poll_interval: 30s
-YAML
-docker restart federloom
-EOF
 ```
 
-Replace `fail2ban` with your actual container name if different.
+Then re-run bootstrap to sync the updated config to the server:
+
+```bash
+bash deploy/honeypot/bootstrap.sh
+```
+
+The rsync step overwrites the remote `deploy/honeypot/config.yaml` with
+your local copy, so editing the remote file directly would be lost on the
+next bootstrap run.
 
 ### 3. Verify
 
