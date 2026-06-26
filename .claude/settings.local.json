@@ -130,7 +130,13 @@
       "Bash(~/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package 8cd24d2 HEAD)",
       "Bash(~/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package e51d481 *)",
       "Bash(~/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package c28e31d *)",
-      "Bash(~/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package 5513293 HEAD)"
+      "Bash(~/.claude/plugins/cache/claude-plugins-official/superpowers/6.0.3/skills/subagent-driven-development/scripts/review-package 5513293 HEAD)",
+      "Read(//var/lib/docker/volumes/grafana-storage/_data/**)",
+      "Bash($SKILL_BASE/scripts/review-package *)",
+      "Bash($SKILL_BASE/scripts/review-package $MERGE_BASE *)",
+      "Bash(echo \"GREP_EXIT:$?\")",
+      "Bash(~/.claude/skills/swarmguard-env/scripts/smoke-test.sh honeypot *)",
+      "Bash(dig +short *)"
     ]
   }
 }
