@@ -39,12 +39,21 @@ repository. To join:
 ```bash
 # 1. Set up your own node first (see getting-started.md)
 # 2. Verify the fingerprint out-of-band: 79bb d13a 114b 88fe
-federloomctl federation join federation.invite --config /etc/federloom/config.yaml
+
+# On your server, from the deploy directory (bootstrap.sh already copied federation.invite there):
+docker compose cp /opt/federloom/federation.invite federloom:/tmp/federation.invite
+docker compose exec federloom federloomctl federation join /tmp/federation.invite \
+    --config /etc/federloom/config.yaml
 ```
 
 Your node will connect to `/dns4/federloom.jru.me/tcp/7700` and start
 receiving federated reputation events. You can revoke or adjust the trust
-weight at any time with `federloomctl trust set`.
+weight at any time:
+
+```bash
+docker compose exec federloom federloomctl trust set --weight 0.8 PERSON \
+    --config /etc/federloom/config.yaml
+```
 
 ## Core ideas
 
@@ -71,8 +80,18 @@ If you run (not just join) a trust domain, read
 3. **[Key management](docs/onboarding/03-key-management.md)** — issuance, rotation, revocation.
 4. **[Lists are aids, not law](docs/onboarding/04-override.md)** — the invariant that ties it together.
 
-Federation invite exchange: `federloomctl federation invite` (existing operators) /
-`federloomctl federation join` (joining operators).
+Federation invite exchange — all via `docker compose exec`:
+
+```bash
+# Existing operator: generate an invite
+docker compose exec federloom federloomctl federation invite \
+    --addr /dns4/your.host/tcp/7700 --config /etc/federloom/config.yaml
+
+# New operator: join using an invite file
+docker compose cp /opt/federloom/some.invite federloom:/tmp/some.invite
+docker compose exec federloom federloomctl federation join /tmp/some.invite \
+    --config /etc/federloom/config.yaml
+```
 
 ## Extending it: plugins
 
