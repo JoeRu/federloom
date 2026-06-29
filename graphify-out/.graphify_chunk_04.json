@@ -1,0 +1,1549 @@
+{
+  "nodes": [
+    {
+      "id": "plans_2026_06_19_docker_publish",
+      "label": "Docker Image Publishing Plan (GHCR via GitHub Actions)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-19-docker-publish.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-19",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_19_fail2ban_ingest",
+      "label": "Fail2Ban Ingest Plugin Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-19-fail2ban-ingest.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-19",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_19_fresh_redeploy",
+      "label": "Fresh Redeploy and Smoke Test Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-19-fresh-redeploy.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-19",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_19_http_honeypot",
+      "label": "HTTP Honeypot (OpenCanary HTTP/HTTPS) Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-19-http-honeypot.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-19",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_20_grafana_dashboard_v2",
+      "label": "Grafana Dashboard v2 Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-20-grafana-dashboard-v2.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-20",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_21_grafana_effectiveness",
+      "label": "Grafana Per-Node Effectiveness Dashboard Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-21-grafana-effectiveness.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-21",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_22_phase1_federation_semantics",
+      "label": "Phase 1 Federation Semantics and Discovery Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-22",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_22_phase2_whitelist",
+      "label": "Phase 2 Install Script and Local Whitelist Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-phase2-whitelist.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-22",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_22_security_fixes",
+      "label": "Security Fixes Plan (CIDR injection, bearer token, port binding)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-security-fixes.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-22",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_23_phase3a_bloom_filter",
+      "label": "Phase 3a Bloom Filter Negative Pre-Filter Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-23-phase3a-bloom-filter.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-23",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_24_ip_normalization",
+      "label": "IP Normalization Plan (net/netip migration)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-24-ip-normalization.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-24",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_25_bootstrap_env",
+      "label": "Bootstrap Scripts Infrastructure Extraction Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-25-bootstrap-env.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-25",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_25_config_docs",
+      "label": "Config Documentation Plan (docs/config.md)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-25-config-docs.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-25",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_25_rules_docs",
+      "label": "Rules Documentation Plan (docs/rules.md)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-25-rules-docs.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-25",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_26_getting_started_docker",
+      "label": "Getting Started (Docker-First Guide) Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-26-getting-started-docker.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-26",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_09_p2p_transport_skeleton_design",
+      "label": "P2P Transport Walking Skeleton Design Spec",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-09-p2p-transport-skeleton-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-09",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_10_reputation_core_design",
+      "label": "Reputation Core + Cowrie Ingest + ipset Enforcement Design Spec",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-10-reputation-core-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-10",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_12_honeypot_node_design",
+      "label": "Honeypot Node Design Spec (Cowrie + OpenCanary + FederLoom sidecar)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-12-honeypot-node-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-12",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_12_social_trust_anchors_design",
+      "label": "Social Trust Anchors Design Spec (Person Key + PeerCert + anchor store)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-12",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_14_crowdsec_ingest_design",
+      "label": "CrowdSec Ingest Adapter Design Spec",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-14-crowdsec-ingest-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-14",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_14_grafana_observability_design",
+      "label": "Grafana Observability Design Spec (Prometheus + SQLite + Grafana)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-14-grafana-observability-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": "2026-06-14",
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_19_docker_publish_ghcr_workflow",
+      "label": "GHCR Docker Publish Workflow (.github/workflows/docker.yml)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-19-docker-publish.md",
+      "source_location": "Task 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_19_fail2ban_ingest_fail2ban_adapter",
+      "label": "Fail2Ban Docker Exec Ingest Adapter (injectable fetcher pattern, NewFail2BanWithFetcher)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-19-fail2ban-ingest.md",
+      "source_location": "Task 2",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_19_fail2ban_ingest_jail_reason_mapping",
+      "label": "Fail2Ban Jail-to-Reason Mapping (builtin exact/prefix + operator override)",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/plans/2026-06-19-fail2ban-ingest.md",
+      "source_location": "Task 2 — builtinJailReasons + builtinJailPrefixes",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_19_fresh_redeploy_redeploy_script",
+      "label": "deploy/redeploy.sh — 8-Phase Fresh Redeploy and Smoke Test Script",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-19-fresh-redeploy.md",
+      "source_location": "Task 2",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_19_http_honeypot_opencanary_http",
+      "label": "OpenCanary HTTP/HTTPS Honeypot Modules (ports 80/443, http-probe/https-probe reason codes)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-19-http-honeypot.md",
+      "source_location": "Task 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_20_grafana_dashboard_v2_block_threshold_var",
+      "label": "block_threshold Grafana Template Variable (constant, used in score-based panels)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-20-grafana-dashboard-v2.md",
+      "source_location": "Task 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_21_grafana_effectiveness_per_node_datasources",
+      "label": "Per-Node Prometheus Datasources for Effectiveness Dashboard (prom-honeypot, prom-mailcow, prom-wordpress)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-21-grafana-effectiveness.md",
+      "source_location": "Task 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_22_phase1_federation_semantics_origin_trace",
+      "label": "OriginTrace Feedback Loop Guard (selfID in trace -> drop; max 8 hops)",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": "Task 3",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_22_phase1_federation_semantics_event_signing",
+      "label": "Event Signing via identity.SignEvent and identity.VerifyEventSig (Ed25519)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": "Task 2",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_22_phase1_federation_semantics_federation_discount",
+      "label": "Federation Score Discount per Hop for Non-Anchored Reporters",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": "Task 3",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_22_phase1_federation_semantics_defederation",
+      "label": "Defederation — Blocked-Peers JSON Hot-Reload + federloomctl trust block/unblock",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": "Task 4",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_22_phase1_federation_semantics_dht_discovery",
+      "label": "DHT Rendezvous Discovery (internal/discovery, /federloom/v1/peers + relay list bootstrap)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": "Task 5",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_22_phase2_whitelist_whitelist_store",
+      "label": "WhitelistStore — JSON-Backed Local IP/CIDR Allowlist (scope local-only, never federated)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-22-phase2-whitelist.md",
+      "source_location": "Task 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_22_phase2_whitelist_federloomctl_whitelist",
+      "label": "federloomctl whitelist add/remove/list CLI Commands",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-22-phase2-whitelist.md",
+      "source_location": "Task 3",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_22_security_fixes_cidr_injection_vuln",
+      "label": "CIDR Injection Vulnerability (0.0.0.0/0 passed as IP to nftables -> block-all attack vector)",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/plans/2026-06-22-security-fixes.md",
+      "source_location": "Task 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_22_security_fixes_ip_validation_gate",
+      "label": "IP Validation Gate (net.ParseIP check in processLocal and ProcessRemote, CTI handler)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-22-security-fixes.md",
+      "source_location": "Task 2",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_22_security_fixes_bearer_token_middleware",
+      "label": "Bearer Token Middleware for API Server (FEDERLOOM_API_TOKEN env var)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-22-security-fixes.md",
+      "source_location": "Task 7",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_23_phase3a_bloom_filter_rep_bloom",
+      "label": "repBloom Negative Pre-Filter (bits-and-blooms/bloom/v3, 1M capacity, 1% FPR, wired into BadgerStore.GetScore)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-23-phase3a-bloom-filter.md",
+      "source_location": "Task 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_24_ip_normalization_netip_migration",
+      "label": "net/netip Migration — Canonical IP Form with Unmap() for IPv4-Mapped IPv6 Collapse",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-24-ip-normalization.md",
+      "source_location": "Task 3",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_25_bootstrap_env_env_file_pattern",
+      "label": "Per-Node .env File Pattern (load_env function + .env.example per deployment stack)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-06-25-bootstrap-env.md",
+      "source_location": "Task 5",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_25_config_docs_two_file_pattern",
+      "label": "Two-File Config Pattern (config.yaml public + config.local.yaml secret, gitignored)",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/plans/2026-06-25-config-docs.md",
+      "source_location": "Task 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_25_rules_docs_reason_code_catalogue",
+      "label": "Reason Code Catalogue (all ingest adapter codes: cowrie, opencanary, mailcow, fail2ban, crowdsec, spamtrap)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-25-rules-docs.md",
+      "source_location": "Task 1 — docs/rules.md",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "plans_2026_06_26_getting_started_docker_per_stack_guide",
+      "label": "Per-Stack Docker Getting Started Guide (Mailcow, WordPress, CrowdSec, fail2ban, standalone)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-26-getting-started-docker.md",
+      "source_location": "Task 1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_09_p2p_transport_transport_node",
+      "label": "transport.Node — libp2p Host + GossipSub + Kademlia DHT Composition",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-09-p2p-transport-skeleton-design.md",
+      "source_location": "§3 gossip.go + dht.go",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_09_p2p_transport_relay_leaf_mode",
+      "label": "Relay/Aggregator vs Leaf Node Mode Topology (ModeRelay, ModeLeaf config)",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-06-09-p2p-transport-skeleton-design.md",
+      "source_location": "§3 relay.go",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_09_p2p_transport_gossip_topic",
+      "label": "federloom/events/v0 GossipSub Topic (versioned wire topic for proto.Event)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-09-p2p-transport-skeleton-design.md",
+      "source_location": "§3 gossip.go",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_10_reputation_core_exponential_decay",
+      "label": "Exponential Score Decay Formula (score(t) = score0 * exp(-ln2 * dt / halfLife), lazy at read time)",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-06-10-reputation-core-design.md",
+      "source_location": "§3 Decay",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_10_reputation_core_logistic_accumulation",
+      "label": "Logistic Score Accumulation Formula (score += trust * weight * (1 - score/100), caps at 100)",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-06-10-reputation-core-design.md",
+      "source_location": "§3 Accumulation",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_10_reputation_core_badger_store",
+      "label": "BadgerStore — IP Reputation Persistence (TTL=3*halfLife as GDPR deletion, JSON ScoreEntry)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-10-reputation-core-design.md",
+      "source_location": "§2 Data Store",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_10_reputation_core_cowrie_event_mapping",
+      "label": "Cowrie Event ID to FederLoom Reason Code Mapping (ssh-auth-success, ssh-auth-bruteforce, ssh-probe, etc.)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-10-reputation-core-design.md",
+      "source_location": "§4 Cowrie Ingest Plugin",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_10_reputation_core_block_thresholds",
+      "label": "Block/Unblock Thresholds (block=75, unblock=60 hysteresis to prevent score flapping)",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-06-10-reputation-core-design.md",
+      "source_location": "§3",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_12_honeypot_node_cowrie_opencanary_stack",
+      "label": "Honeypot Stack (Cowrie SSH + OpenCanary SMTP/IMAP + FederLoom sidecar on single host)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-12-honeypot-node-design.md",
+      "source_location": "Architecture",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_12_honeypot_node_opencanary_logtype_map",
+      "label": "OpenCanary logtype Integer to FederLoom Reason Code Mapping (3000=smtp-probe, 2100=imap-probe, etc.)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-12-honeypot-node-design.md",
+      "source_location": "Go Code Changes — opencanary.go",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_12_social_trust_person_identity",
+      "label": "Person Identity Key Model (Ed25519 human-bound key that signs machine PeerCerts)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md",
+      "source_location": "Keys section",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_12_social_trust_peer_cert",
+      "label": "PeerCert Wire Type (PeerID + PersonKey + ValidUntil + Signature, SchemaVersion 0->1 bump)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md",
+      "source_location": "Wire contract",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_12_social_trust_stranger_score_cap",
+      "label": "Stranger Score Cap — Sybil Resistance (stranger_score_cap=15 default, caps un-vouched contribution)",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md",
+      "source_location": "§5 Capped-stranger corroboration",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_12_social_trust_anchor_store_hot_reload",
+      "label": "Anchor Store Hot-Reload (trust anchors watched on disk, project defaults removable per Invariant 6)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md",
+      "source_location": "Anchor store",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_14_crowdsec_scenario_map",
+      "label": "CrowdSec scenarioMap (CrowdSec scenario string -> FederLoom reason code, fallback strips vendor prefix)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-14-crowdsec-ingest-design.md",
+      "source_location": "Adapter Implementation",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_14_crowdsec_lapi_polling",
+      "label": "CrowdSec LAPI Polling (GET /v1/decisions/stream + /v1/alerts, X-Api-Key header auth)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-14-crowdsec-ingest-design.md",
+      "source_location": "Adapter Implementation",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_14_grafana_observer_struct",
+      "label": "Observer Struct — Synchronous Fan-out to Prometheus Counters and SQLite",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-14-grafana-observability-design.md",
+      "source_location": "§1 Observer",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_14_grafana_prometheus_metrics",
+      "label": "Prometheus Metrics Namespace federloom_* (blocked_ips, events_received_total, federation_peers, etc.)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-14-grafana-observability-design.md",
+      "source_location": "§2 Prometheus",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_14_grafana_sqlite_schema",
+      "label": "SQLite Schema (events, rule_firings, blocks tables + expected_unblock due-time computation)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-14-grafana-observability-design.md",
+      "source_location": "§3 SQLite",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "plans_2026_06_19_docker_publish",
+      "target": "plans_2026_06_19_docker_publish_ghcr_workflow",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-19-docker-publish.md",
+      "source_location": "Task 1",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_19_fail2ban_ingest",
+      "target": "plans_2026_06_19_fail2ban_ingest_fail2ban_adapter",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-19-fail2ban-ingest.md",
+      "source_location": "Task 2",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_19_fail2ban_ingest",
+      "target": "plans_2026_06_19_fail2ban_ingest_jail_reason_mapping",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-19-fail2ban-ingest.md",
+      "source_location": "Task 2 — builtinJailReasons + builtinJailPrefixes",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_19_fresh_redeploy",
+      "target": "plans_2026_06_19_fresh_redeploy_redeploy_script",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-19-fresh-redeploy.md",
+      "source_location": "Task 2",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_19_http_honeypot",
+      "target": "plans_2026_06_19_http_honeypot_opencanary_http",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-19-http-honeypot.md",
+      "source_location": "Task 1",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_20_grafana_dashboard_v2",
+      "target": "plans_2026_06_20_grafana_dashboard_v2_block_threshold_var",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-20-grafana-dashboard-v2.md",
+      "source_location": "Task 1",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_21_grafana_effectiveness",
+      "target": "plans_2026_06_21_grafana_effectiveness_per_node_datasources",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-21-grafana-effectiveness.md",
+      "source_location": "Task 1",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_phase1_federation_semantics",
+      "target": "plans_2026_06_22_phase1_federation_semantics_event_signing",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": "Task 2",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_phase1_federation_semantics",
+      "target": "plans_2026_06_22_phase1_federation_semantics_origin_trace",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": "Task 3",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_phase1_federation_semantics",
+      "target": "plans_2026_06_22_phase1_federation_semantics_federation_discount",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": "Task 3",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_phase1_federation_semantics",
+      "target": "plans_2026_06_22_phase1_federation_semantics_defederation",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": "Task 4",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_phase1_federation_semantics",
+      "target": "plans_2026_06_22_phase1_federation_semantics_dht_discovery",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": "Task 5",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_phase2_whitelist",
+      "target": "plans_2026_06_22_phase2_whitelist_whitelist_store",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-phase2-whitelist.md",
+      "source_location": "Task 1",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_phase2_whitelist",
+      "target": "plans_2026_06_22_phase2_whitelist_federloomctl_whitelist",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-phase2-whitelist.md",
+      "source_location": "Task 3",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_security_fixes",
+      "target": "plans_2026_06_22_security_fixes_cidr_injection_vuln",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-security-fixes.md",
+      "source_location": "Task 1 — Vuln 1",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_security_fixes",
+      "target": "plans_2026_06_22_security_fixes_ip_validation_gate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-security-fixes.md",
+      "source_location": "Task 2",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_security_fixes",
+      "target": "plans_2026_06_22_security_fixes_bearer_token_middleware",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-security-fixes.md",
+      "source_location": "Task 7",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_23_phase3a_bloom_filter",
+      "target": "plans_2026_06_23_phase3a_bloom_filter_rep_bloom",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-23-phase3a-bloom-filter.md",
+      "source_location": "Task 1",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_24_ip_normalization",
+      "target": "plans_2026_06_24_ip_normalization_netip_migration",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-24-ip-normalization.md",
+      "source_location": "Task 3",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_25_bootstrap_env",
+      "target": "plans_2026_06_25_bootstrap_env_env_file_pattern",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-25-bootstrap-env.md",
+      "source_location": "Task 5",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_25_config_docs",
+      "target": "plans_2026_06_25_config_docs_two_file_pattern",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-25-config-docs.md",
+      "source_location": "Task 1",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_25_rules_docs",
+      "target": "plans_2026_06_25_rules_docs_reason_code_catalogue",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-25-rules-docs.md",
+      "source_location": "Task 1 — docs/rules.md reason code catalogue section",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_26_getting_started_docker",
+      "target": "plans_2026_06_26_getting_started_docker_per_stack_guide",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-26-getting-started-docker.md",
+      "source_location": "Task 1",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_09_p2p_transport_skeleton_design",
+      "target": "specs_2026_06_09_p2p_transport_transport_node",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-09-p2p-transport-skeleton-design.md",
+      "source_location": "§3 gossip.go + dht.go",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_09_p2p_transport_skeleton_design",
+      "target": "specs_2026_06_09_p2p_transport_relay_leaf_mode",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-09-p2p-transport-skeleton-design.md",
+      "source_location": "§3 relay.go",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_09_p2p_transport_skeleton_design",
+      "target": "specs_2026_06_09_p2p_transport_gossip_topic",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-09-p2p-transport-skeleton-design.md",
+      "source_location": "§3 gossip.go — topic constant",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_10_reputation_core_design",
+      "target": "specs_2026_06_10_reputation_core_exponential_decay",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-10-reputation-core-design.md",
+      "source_location": "§3 Decay",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_10_reputation_core_design",
+      "target": "specs_2026_06_10_reputation_core_logistic_accumulation",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-10-reputation-core-design.md",
+      "source_location": "§3 Accumulation",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_10_reputation_core_design",
+      "target": "specs_2026_06_10_reputation_core_badger_store",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-10-reputation-core-design.md",
+      "source_location": "§2 Data Store",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_10_reputation_core_design",
+      "target": "specs_2026_06_10_reputation_core_cowrie_event_mapping",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-10-reputation-core-design.md",
+      "source_location": "§4 Cowrie Ingest Plugin",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_10_reputation_core_design",
+      "target": "specs_2026_06_10_reputation_core_block_thresholds",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-10-reputation-core-design.md",
+      "source_location": "§3 — block/unblock threshold hysteresis",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_12_honeypot_node_design",
+      "target": "specs_2026_06_12_honeypot_node_cowrie_opencanary_stack",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-12-honeypot-node-design.md",
+      "source_location": "Architecture",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_12_honeypot_node_design",
+      "target": "specs_2026_06_12_honeypot_node_opencanary_logtype_map",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-12-honeypot-node-design.md",
+      "source_location": "Go Code Changes — opencanary.go openCanaryReasons map",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_12_social_trust_anchors_design",
+      "target": "specs_2026_06_12_social_trust_person_identity",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md",
+      "source_location": "Keys section",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_12_social_trust_anchors_design",
+      "target": "specs_2026_06_12_social_trust_peer_cert",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md",
+      "source_location": "Wire contract",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_12_social_trust_anchors_design",
+      "target": "specs_2026_06_12_social_trust_stranger_score_cap",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md",
+      "source_location": "§5 Capped-stranger corroboration",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_12_social_trust_anchors_design",
+      "target": "specs_2026_06_12_social_trust_anchor_store_hot_reload",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md",
+      "source_location": "Anchor store",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_14_crowdsec_ingest_design",
+      "target": "specs_2026_06_14_crowdsec_scenario_map",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-14-crowdsec-ingest-design.md",
+      "source_location": "Adapter Implementation",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_14_crowdsec_ingest_design",
+      "target": "specs_2026_06_14_crowdsec_lapi_polling",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-14-crowdsec-ingest-design.md",
+      "source_location": "Adapter Implementation",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_14_grafana_observability_design",
+      "target": "specs_2026_06_14_grafana_observer_struct",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-14-grafana-observability-design.md",
+      "source_location": "§1 Observer",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_14_grafana_observability_design",
+      "target": "specs_2026_06_14_grafana_prometheus_metrics",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-14-grafana-observability-design.md",
+      "source_location": "§2 Prometheus",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_14_grafana_observability_design",
+      "target": "specs_2026_06_14_grafana_sqlite_schema",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-14-grafana-observability-design.md",
+      "source_location": "§3 SQLite",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_phase1_federation_semantics_dht_discovery",
+      "target": "specs_2026_06_09_p2p_transport_transport_node",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": "Task 5 — discovery uses transport.Node.Host()",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_phase1_federation_semantics_event_signing",
+      "target": "specs_2026_06_12_social_trust_person_identity",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": "Task 2 — identity.LoadOrCreateNodeKey for Ed25519 key",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_phase1_federation_semantics_defederation",
+      "target": "specs_2026_06_12_social_trust_anchors_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": "Task 4 — extends trust.Store with blocked-peers hot-reload",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_phase1_federation_semantics_origin_trace",
+      "target": "plans_2026_06_22_phase1_federation_semantics_federation_discount",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": "Task 3 — discount applied per OriginTrace hop count",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_phase1_federation_semantics_federation_discount",
+      "target": "specs_2026_06_12_social_trust_stranger_score_cap",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/plans/2026-06-22-phase1-federation-semantics.md",
+      "source_location": "Task 3 — both limit score contribution from un-anchored peers",
+      "weight": 0.85
+    },
+    {
+      "source": "plans_2026_06_23_phase3a_bloom_filter_rep_bloom",
+      "target": "specs_2026_06_10_reputation_core_badger_store",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-23-phase3a-bloom-filter.md",
+      "source_location": "Task 2 — wired into BadgerStore.GetScore as early-return pre-filter",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_24_ip_normalization_netip_migration",
+      "target": "plans_2026_06_22_phase2_whitelist_whitelist_store",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-24-ip-normalization.md",
+      "source_location": "Task 2 — migrates whitelist.Contains to net/netip",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_24_ip_normalization_netip_migration",
+      "target": "specs_2026_06_10_reputation_core_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-24-ip-normalization.md",
+      "source_location": "Task 1 — migrates neverblock.go; Task 3 — migrates node.go entry points",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_security_fixes_ip_validation_gate",
+      "target": "plans_2026_06_22_security_fixes_cidr_injection_vuln",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-security-fixes.md",
+      "source_location": "Task 2 fixes Vulns 1 and 3 from Task 1",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_security_fixes_cidr_injection_vuln",
+      "target": "specs_2026_06_10_reputation_core_design",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/plans/2026-06-22-security-fixes.md",
+      "source_location": "Vuln 1 — processLocal/ProcessRemote in node.go pass user-supplied IPs to nftables sink",
+      "weight": 0.85
+    },
+    {
+      "source": "plans_2026_06_19_http_honeypot_opencanary_http",
+      "target": "specs_2026_06_12_honeypot_node_cowrie_opencanary_stack",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-19-http-honeypot.md",
+      "source_location": "Task 1 — adds http/https to existing opencanary stack",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_19_http_honeypot_opencanary_http",
+      "target": "specs_2026_06_12_honeypot_node_opencanary_logtype_map",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-19-http-honeypot.md",
+      "source_location": "Task 2 — adds logtype 3000/3001 to openCanaryReasons map",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_25_rules_docs_reason_code_catalogue",
+      "target": "specs_2026_06_10_reputation_core_cowrie_event_mapping",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-25-rules-docs.md",
+      "source_location": "Task 1 — Honeypot (Cowrie) reason code section",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_25_rules_docs_reason_code_catalogue",
+      "target": "specs_2026_06_12_honeypot_node_opencanary_logtype_map",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-25-rules-docs.md",
+      "source_location": "Task 1 — OpenCanary reason code section",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_25_rules_docs_reason_code_catalogue",
+      "target": "specs_2026_06_14_crowdsec_scenario_map",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-25-rules-docs.md",
+      "source_location": "Task 1 — CrowdSec LAPI reason code section",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_25_rules_docs_reason_code_catalogue",
+      "target": "plans_2026_06_19_fail2ban_ingest_jail_reason_mapping",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-25-rules-docs.md",
+      "source_location": "Task 1 — Fail2ban reason code section",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_21_grafana_effectiveness_per_node_datasources",
+      "target": "specs_2026_06_14_grafana_prometheus_metrics",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-21-grafana-effectiveness.md",
+      "source_location": "Task 2 — panels consume federloom_blocked_ips, federloom_events_received_total",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_20_grafana_dashboard_v2_block_threshold_var",
+      "target": "specs_2026_06_14_grafana_prometheus_metrics",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/plans/2026-06-20-grafana-dashboard-v2.md",
+      "source_location": "Task 2 — variable compared against federloom_ip_score in candidate panel",
+      "weight": 0.85
+    },
+    {
+      "source": "plans_2026_06_25_bootstrap_env_env_file_pattern",
+      "target": "plans_2026_06_19_fresh_redeploy_redeploy_script",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-25-bootstrap-env.md",
+      "source_location": "Task 5 — extracts hardcoded vars from redeploy.sh into per-node .env",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_19_fresh_redeploy_redeploy_script",
+      "target": "plans_2026_06_19_docker_publish_ghcr_workflow",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-19-fresh-redeploy.md",
+      "source_location": "Phase 0 — preflight CI check verifies docker workflow passed before deploy",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_26_getting_started_docker_per_stack_guide",
+      "target": "plans_2026_06_25_bootstrap_env_env_file_pattern",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-26-getting-started-docker.md",
+      "source_location": "All per-stack sections reference .env.example and bootstrap scripts",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_25_config_docs_two_file_pattern",
+      "target": "plans_2026_06_25_bootstrap_env_env_file_pattern",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "docs/superpowers/plans/2026-06-25-config-docs.md",
+      "source_location": "Two-file pattern — secrets in config.local.yaml mirrors secrets in .env",
+      "weight": 0.8
+    },
+    {
+      "source": "specs_2026_06_12_social_trust_anchors_design",
+      "target": "specs_2026_06_10_reputation_core_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md",
+      "source_location": "§5 — extends reputation.Engine.Record with group/anchored-aware scoring",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_12_social_trust_peer_cert",
+      "target": "specs_2026_06_09_p2p_transport_gossip_topic",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md",
+      "source_location": "§4 — PeerCert attached to proto.Event published via federloom/events/v0",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_12_honeypot_node_design",
+      "target": "specs_2026_06_09_p2p_transport_skeleton_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-12-honeypot-node-design.md",
+      "source_location": "Smoke Test — gossipsub events arriving from honeypot node to peer node",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_12_honeypot_node_design",
+      "target": "specs_2026_06_10_reputation_core_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-12-honeypot-node-design.md",
+      "source_location": "Go Code Changes — honeypot node uses same ingest pipeline as reputation core spec",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_14_crowdsec_ingest_design",
+      "target": "specs_2026_06_10_reputation_core_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-14-crowdsec-ingest-design.md",
+      "source_location": "Node Wiring — adds CrowdSec to ingest.Source list in node.go",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_14_grafana_observability_design",
+      "target": "specs_2026_06_10_reputation_core_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-14-grafana-observability-design.md",
+      "source_location": "§1 — Observer hooks into reputation.Record and rules.Eval callbacks",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_14_grafana_prometheus_metrics",
+      "target": "specs_2026_06_09_p2p_transport_transport_node",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-14-grafana-observability-design.md",
+      "source_location": "§2 — federloom_federation_peers gauge reads gossipsub peer count from transport.Node",
+      "weight": 1.0
+    },
+    {
+      "source": "plans_2026_06_22_phase2_whitelist_whitelist_store",
+      "target": "specs_2026_06_10_reputation_core_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-22-phase2-whitelist.md",
+      "source_location": "Task 2 — whitelist.Contains checked in processLocal/ProcessRemote before reputation.Record",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_10_reputation_core_exponential_decay",
+      "target": "specs_2026_06_10_reputation_core_badger_store",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-10-reputation-core-design.md",
+      "source_location": "§3 Decay — lazy decay applied at GetScore read time, LastSeen in ScoreEntry",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_10_reputation_core_block_thresholds",
+      "target": "plans_2026_06_20_grafana_dashboard_v2_block_threshold_var",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-06-20-grafana-dashboard-v2.md",
+      "source_location": "Task 1 — block_threshold variable mirrors enforce.block_threshold config value",
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "ingest_plugin_ecosystem",
+      "label": "Ingest Plugin Ecosystem — all ingest.Source adapters feeding proto.Event into reputation pipeline",
+      "nodes": [
+        "specs_2026_06_10_reputation_core_cowrie_event_mapping",
+        "specs_2026_06_12_honeypot_node_opencanary_logtype_map",
+        "specs_2026_06_14_crowdsec_scenario_map",
+        "plans_2026_06_19_fail2ban_ingest_fail2ban_adapter",
+        "plans_2026_06_19_http_honeypot_opencanary_http"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "docs/superpowers/specs/2026-06-10-reputation-core-design.md"
+    },
+    {
+      "id": "security_hardening_initiative",
+      "label": "Security Hardening Initiative — three vulns fixed plus canonical IP form enforcement",
+      "nodes": [
+        "plans_2026_06_22_security_fixes_cidr_injection_vuln",
+        "plans_2026_06_22_security_fixes_ip_validation_gate",
+        "plans_2026_06_22_security_fixes_bearer_token_middleware",
+        "plans_2026_06_24_ip_normalization_netip_migration"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/plans/2026-06-22-security-fixes.md"
+    },
+    {
+      "id": "grafana_observability_suite",
+      "label": "Grafana Observability Suite — Prometheus metrics + SQLite history + dashboard JSON",
+      "nodes": [
+        "specs_2026_06_14_grafana_observer_struct",
+        "specs_2026_06_14_grafana_prometheus_metrics",
+        "specs_2026_06_14_grafana_sqlite_schema",
+        "plans_2026_06_20_grafana_dashboard_v2_block_threshold_var",
+        "plans_2026_06_21_grafana_effectiveness_per_node_datasources"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "docs/superpowers/specs/2026-06-14-grafana-observability-design.md"
+    },
+    {
+      "id": "federation_trust_stack",
+      "label": "Federation Trust Stack — person identity, peer certs, OriginTrace loop guard, discount, defederation, DHT discovery",
+      "nodes": [
+        "specs_2026_06_12_social_trust_person_identity",
+        "specs_2026_06_12_social_trust_peer_cert",
+        "specs_2026_06_12_social_trust_stranger_score_cap",
+        "specs_2026_06_12_social_trust_anchor_store_hot_reload",
+        "plans_2026_06_22_phase1_federation_semantics_origin_trace",
+        "plans_2026_06_22_phase1_federation_semantics_event_signing",
+        "plans_2026_06_22_phase1_federation_semantics_federation_discount",
+        "plans_2026_06_22_phase1_federation_semantics_defederation",
+        "plans_2026_06_22_phase1_federation_semantics_dht_discovery"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md"
+    },
+    {
+      "id": "reputation_score_pipeline",
+      "label": "Reputation Score Pipeline — decay formula, logistic accumulation, BadgerStore, bloom pre-filter, block thresholds",
+      "nodes": [
+        "specs_2026_06_10_reputation_core_exponential_decay",
+        "specs_2026_06_10_reputation_core_logistic_accumulation",
+        "specs_2026_06_10_reputation_core_badger_store",
+        "specs_2026_06_10_reputation_core_block_thresholds",
+        "plans_2026_06_23_phase3a_bloom_filter_rep_bloom"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "docs/superpowers/specs/2026-06-10-reputation-core-design.md"
+    },
+    {
+      "id": "deployment_documentation_suite",
+      "label": "Deployment Documentation Suite — config reference, rules reference, getting started guide",
+      "nodes": [
+        "plans_2026_06_25_config_docs_two_file_pattern",
+        "plans_2026_06_25_rules_docs_reason_code_catalogue",
+        "plans_2026_06_26_getting_started_docker_per_stack_guide",
+        "plans_2026_06_25_bootstrap_env_env_file_pattern"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/plans/2026-06-25-config-docs.md"
+    },
+    {
+      "id": "p2p_transport_layer",
+      "label": "P2P Transport Layer — transport.Node, GossipSub topic, relay/leaf modes, Kademlia DHT",
+      "nodes": [
+        "specs_2026_06_09_p2p_transport_transport_node",
+        "specs_2026_06_09_p2p_transport_gossip_topic",
+        "specs_2026_06_09_p2p_transport_relay_leaf_mode",
+        "plans_2026_06_22_phase1_federation_semantics_dht_discovery"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "docs/superpowers/specs/2026-06-09-p2p-transport-skeleton-design.md"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

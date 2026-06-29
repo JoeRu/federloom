@@ -38,6 +38,12 @@ so funktional wie nötig.
 7. **Listen sind Hilfsmittel, kein Gesetz.** Der Nutzer kann **einzelne oder alle
    Parameter überschreiben**. Block- und Allow-Listen sind „nur" ein Hilfsmittel –
    die finale Entscheidung liegt immer lokal.
+8. **Lokal souverän, remote nur beratend.** Der Operator darf lokal **alles**
+   tunen (Whitelists, Peer-/Föderations-Trust, Regeln). Die harte Invariante gilt
+   **gegenüber dem Netz**: kein importiertes Signal, kein Peer, keine Föderation darf
+   bei dir einen Block, eine Whitelist- oder eine Trust-Änderung **erzwingen** —
+   Remote-Input ist immer *beratend*. Sichere Defaults werden ausgeliefert;
+   Runtertunen geschieht auf eigenes Risiko. (Schärft #1/#7 gegen Netzwerk-Poisoning.)
 
 ---
 
@@ -50,8 +56,14 @@ Drei Abstraktionsebenen, je nach Anwendungsfall:
 | **Reputations-Score pro IP** *(Default)* | Normalisierter Wert (z. B. 0–100) | Die meisten Admins |
 | **Fertige Blockliste** | Score + lokaler Threshold → drop-in für Fail2Ban/CrowdSec | „Plug & Play"-Admins |
 | **Roh-Events** | Einzelmeldungen mit Evidenz | Power-User / eigene Auswertung |
+| **Föderations-Feed-Export (STIX/TAXII)** | Client *liest* die Föderation und publiziert Events downstream (SIEM/TIP) | Integratoren |
 
 Decay und Eskalation sind **Funktionen des Scores**, keine harten An/Aus-Regeln.
+
+Der STIX/TAXII-Export ist **Egress über die bestehende REST-API** (Poll-Modell,
+downstream pollt — kein Push-Connector). STIX `confidence`/`valid_until` mappen auf
+Score/Decay; das Szenario (§7.1) auf STIX `attack-pattern`. **Eigene Reason-Codes
+bleiben Source of Truth**, STIX-Mapping nur an der Kante.
 
 ---
 
@@ -109,6 +121,20 @@ Gewählter **schlanker Stack** – drei Schichten tragen ~80 % der Last:
 > Proof-of-Work pro Meldung als Flut-Bremse; Web-of-Trust mit Bürgschaft;
 > Reputation-Slashing; strukturierte Plausibilitätsprüfung der Evidenz.
 
+### 4.5 Applicability-Gewichtung (lokal, consume-time)
+- Beim **Konsumieren** wird ein Signal danach gewichtet, wie **anwendbar** der
+  angegriffene Dienst auf das *eigene* System ist (System-Profil §7.6, ggf.
+  SBOM-abgeleitet). Ein `ssh-brute-force`-Signal wiegt für einen SSH-exponierten
+  Peer mehr.
+- **Soft down-weight, kein Hard-Filter** (Default): Dienste ändern sich, Angreifer
+  pivotieren, und die IP bleibt für die Korroboration wertvoll. Hartes Filtern nur
+  als optionale lokale Policy.
+- **Rein lokale Transformation:** ändert die *geteilte* Reputation nicht → die
+  Föderations-Konsistenz bleibt erhalten, während jeder Peer auf das Relevante
+  reagiert.
+- Resultierende lokale Formel:
+  `effektives Gewicht = Korroboration × Source-Trust × lokale-Anwendbarkeit`.
+
 ---
 
 ## 5. Föderation, Trust-Anchors & Teilnetze
@@ -141,9 +167,11 @@ Trust-Domänen** – konsistent mit Leitprinzip 4 (lokale Sicht ist Wahrheit) un
 - **Analogie Mastodon:** jede Instanz moderiert selbst, föderiert aber selektiv.
 - Betriebsarten eines Teilnetzes:
   - **Isoliert:** eigener Trust, kein Import (z. B. Firmen-/Verbund-internes Netz).
-  - **Föderiert:** Scores/Meldungen anderer Teilnetze werden importiert, aber mit
-    **eigenem Trust-Discount** gewichtet *(Annahme: fremder Konsens zählt weniger als
-    eigener, nicht 1:1)*.
+  - **Föderiert:** es werden **Evidenz-Aggregate** (nicht fertige Scores) anderer
+    Teilnetze importiert und **lokal regelbasiert neu berechnet**. Der frühere
+    Trust-Discount wird zum **Evidenz-Gewicht** pro Quelle/Subnetz. Damit entfällt
+    das Problem, fremde Score-Skalen zu kombinieren (vgl. Matrix MSC3845, das genau
+    daran als Draft hängt — s. `docs/prior-art.md`).
 - **Föderationsmodus** (wie Mastodon):
   - **Allowlist / default-deny:** nur explizit vertraute Teilnetze.
   - **Blocklist / default-allow:** alle außer explizit geblockten.
@@ -160,7 +188,8 @@ Trust-Domänen** – konsistent mit Leitprinzip 4 (lokale Sicht ist Wahrheit) un
 - Statt *einer* globalen Wahrheit ein **Geflecht von Trust-Domänen**, das soziale und
   organisatorische Vertrauensstrukturen abbildet.
 - Jeder Knoten/jedes Teilnetz berechnet seinen **eigenen** Score aus:
-  `eigene Meldungen + importierte (trust-gewichtete) fremde Meldungen + Anchor-Signale`.
+  `eigene Evidenz + importierte (evidenz-gewichtete) fremde Evidenz + Anchor-Signale`,
+  lokal über die Regel-Engine zu einem **eigenen** Score verrechnet.
 
 ---
 
@@ -219,10 +248,10 @@ muss dies explizit machen, damit niemand die Föderations-Defaults für bindend 
 ### 7.1 Meldung (Event)
 | Feld | Beschreibung |
 |------|--------------|
-| `ip` | Klartext-IPv4/IPv6 (Hashing verworfen – s. §9) |
-| `reason` | Angriffstyp (z. B. `smtp-auth-bruteforce`, `dict-attack`, `spam`) |
+| `ip` | Klartext-IPv4 (Einzeladresse) / IPv6 **präfix-normalisiert** (Default `/64`, konfigurierbar — Einzel-`/128` korroboriert nie). Hashing verworfen (§9). |
+| `scenario` | Abstraktes Angriffs-**Szenario** aus dem Reason-Code-Katalog (z. B. `ssh-brute-force`, `smtp-auth-bruteforce`). **Join-Key**: Scoring ↔ SBOM/Profil ↔ Regeln ↔ STIX `attack-pattern`. **Keine konkreten Ports.** |
 | `timestamp` | Zeitpunkt der Beobachtung |
-| `port_class` | Zielport-Klasse (für spätere Plausibilitätsprüfung) |
+| `port_class` *(optional, deprecated)* | Grobe Portklasse; entfällt zugunsten von `scenario`, um keine Dienst-Details zu leaken |
 | `reporter_id` | Pseudonyme Knoten-ID (kryptografischer Schlüssel) |
 | `signature` | Signatur des Melders |
 | `subnet_id` | Herkunfts-Teilnetz/Trust-Domäne (für Föderation, §5) |
@@ -254,12 +283,45 @@ muss dies explizit machen, damit niemand die Föderations-Defaults für bindend 
 | `scope` | `local-only` (nie geteilt) \| `shared-vote` (trust-gewichtet) |
 | `source` | `install-script` \| `manual` \| `federation` |
 
+### 7.5 Evidenz-Aggregat (föderierter Import-Typ)
+Was zwischen Teilnetzen geteilt und **lokal neu verrechnet** wird (Option b, §5.2).
+Leichter als Roh-Events, reicher als ein opaker Score.
+
+| Feld | Beschreibung |
+|------|--------------|
+| `ip` | Quelle (IPv4 einzeln / IPv6 präfix-normalisiert) |
+| `scenario` | Angriffs-Szenario (§7.1) |
+| `window` | Zeitfenster (für Decay + Korroborations-Frische) |
+| `diversity_buckets` | **Pseudonymisierte** Zähler distinkter *unabhängiger* Melder je Bucket (ASN / Region / Subnetz; aus `origin_trace`/`subnet_id`) — **nie Melder-Identität**. Trägt §4.2 über den Import. |
+| `evidence_weight` | Quell-/Subnetz-Gewicht (ehem. Trust-Discount) |
+
+> On-Demand abrufen (DNSBL-Stil) für IPs, die dich real kontaktieren — Roh-Events
+> bleiben optional (Observability-Plane). Reconciliation mit §11.
+
+### 7.6 System-Profil (lokal, nie föderiert)
+Treibt die Applicability-Gewichtung (§4.5) und die Regel-Auswahl.
+
+| Feld | Beschreibung |
+|------|--------------|
+| `roles[]` | Wofür das System da ist (`mail`, `web`, `ssh`, …) — deklariert |
+| `sbom_derived` | Ob/inwiefern aus lokaler SBOM verfeinert (semi-automatischer Matchmaker) |
+| `applicable_scenarios[]` | Szenarien, die für dieses System relevant sind |
+
+> **Invariante:** Profil **und** SBOM bleiben **strikt lokal** (eine SBOM ist die
+> Karte der eigenen Angriffsfläche) — gleiche Familie wie die `local-only`-Whitelist.
+
 ---
 
 ## 8. Score-Dynamik
 
 - **Eskalation:** Mehrfach-Angriffe / breitere Korroboration → Score steigt
   (überlinear bei hoher Quellen-Diversität).
+- **Lokale Neuberechnung aus Evidenz (Kernmechanik).** Der Score ist **kein**
+  importierter Fremdwert: jeder Knoten verrechnet **eigene + importierte Evidenz-
+  Aggregate** (§7.5) über die **Regel-Engine** zu einem eigenen Score. Die Regeln
+  sind operator-anpassbar (über den Defaults), Remote-Input bleibt beratend (§2 #8).
+- **Effektives Gewicht** `= Korroboration (diversitätsgewichtet) × Evidenz-Gewicht
+  (Quelle) × lokale Applicability (Profil, §4.5)`.
 - **Decay (Degeneration):** Ohne neue Meldungen sinkt der Score über die Zeit gegen 0.
   - Funktioniert zugleich als **DSGVO-Löschfrist** (s. §9).
   - Halbwertszeit ist ein **kritischer Tuning-Parameter**:
@@ -301,7 +363,10 @@ Nicht „IP ist keine PII" — das hält rechtlich nicht. Sondern:
 
 ## 10. Pflicht-Schutzliste (Never-Block-Set)
 
-Nicht überstimmbare Hard-Whitelist, um Selbst-Aussperrung naiver Admins zu verhindern:
+**Sicherer Default, lokal tunebar, remote-immutabel.** Verhindert Selbst-Aussperrung
+naiver Admins, ist aber **kein** harter Boden gegenüber dem Operator (Whitelists sind
+tunebar, §2 #8) — die Unantastbarkeit gilt nur **gegenüber dem Netz**: kein Remote-
+Signal kann das Set ändern. Empfohlene Default-Einträge:
 - RFC1918 / private Ranges
 - Root-DNS, öffentliche Resolver (z. B. 8.8.8.8, 1.1.1.1)
 - Große Mail-Provider-Ranges (Google, Microsoft/Outlook)
@@ -398,6 +463,10 @@ SOC/Forschung optional zuschaltbar (Beobachtung von Angriffswellen).
 | R | **CPU-Last durch Signaturverifikation** im großen Netz | mitigiert via Batch-Verifikation + Lastabwurf (§11.4/§11.5) |
 | S | **Sybil via Discovery** – viele DHT-Phantome fluten den Stranger-Pool | mitigiert via bestehendem `strangerCap` pro IP (§4.2/§4.3) |
 | T | **Privacy des Advertisers** – DHT-Eintrag leakt IP + Peer-ID | mitigiert via `advertise: false` Opt-out (§14.1/§14.5); Onboarding-Pflicht |
+| U | **Quell-Reputation als Meta-Poisoning** (eine *gute* Föderation als „Vergifter" markieren) | mitigiert: dieselben strukturellen Abwehren wie IP-Signale + bleibt **beratend**, nie erzwungener globaler Ban (Future-Feature, §13) |
+| V | **IPv6 `/128`-Reputation nutzlos** (Angreifer besitzt 2^64 Adressen pro `/64`) | gelöst via **Präfix-Normalisierung** (`/64` Default, §7.1) |
+| W | **Regel-Fehlkonfiguration** senkt lokale Schutzwirkung | mitigiert via **sichere Defaults** + Remote-advisory-Invariante (§2 #8); Schutzregeln in der UI markiert |
+| X | **Evidenz-Import-Volumen** (Option b) bedroht §11-Schlankheit | mitigiert via **On-Demand-Evidenz-Aggregate** (§7.5) statt Roh-Events/opaker Scores |
 
 ---
 
@@ -482,3 +551,17 @@ prominent erklären.
     danach Trust-Anchors, zuletzt Teilnetz-Föderation.
 15. **Föderations-Entdeckung** implementieren: DHT-Rendezvous + signierte Relay-Liste
     als Fallback; zwei Opt-out-Flags (`advertise`/`discover`, beide default an) – §14.
+16. **System-Profil + Applicability** (§4.5/§7.6): Rollen + SBOM-Matchmaker,
+    soft down-weighting beim Konsumieren.
+17. **Evidenz-Import-Modell (Option b)**: `EvidenceAggregate` (§7.5), lokale
+    Regel-Neuberechnung (§8), Diversity-Buckets, IPv6-Präfix.
+18. **STIX/TAXII-Egress** über die bestehende REST-API (Poll) – §3.
+19. **MISP-Ingest-Adapter** (`ingest.Source`) – **post-MVP**.
+20. **Quell-Reputations-Schicht** als **Future-Feature**: „diese Föderation
+    vergiftet" teilen (mappt auf MSC2313 `m.policy.rule.server`), beratend, strukturell
+    abgesichert (Risiko U).
+21. **Szenario-/Reason-Code-Katalog-Governance** + festes Mapping nach STIX
+    `attack-pattern` (Szenario ist jetzt Lastträger über 5 Schichten).
+22. **Key-Handling** gegen das Matrix-Signing-Key-Modell benchmarken (optional) –
+    s. `docs/prior-art.md`.
+23. **`docs/prior-art.md`** ins Repo aufnehmen (Positionierung + Honesty-Boundary).

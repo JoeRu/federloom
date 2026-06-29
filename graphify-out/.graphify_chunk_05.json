@@ -1,0 +1,1016 @@
+{
+  "nodes": [
+    {
+      "id": "specs_2026_06_14_rules_engine_design",
+      "label": "Rules Engine Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-14-rules-engine-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_16_blocklist_effectiveness_design",
+      "label": "Blocklist Effectiveness Monitoring Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-16-blocklist-effectiveness-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_17_bootstrap_peers_design",
+      "label": "Bootstrap Peer Config Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-17-bootstrap-peers-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_18_dnsbl_design",
+      "label": "DNSBL Server Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-18-dnsbl-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_18_federation_ux_design",
+      "label": "Federation UX Design — Setup Wizard, Invite, Join, Status",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-18-federation-ux-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_19_dnsbl_integration_design",
+      "label": "DNSBL Integration Guide Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-19-dnsbl-integration-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_19_docker_publish_design",
+      "label": "Docker Image Publishing Design — GHCR GitHub Actions Workflow",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-19-docker-publish-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_19_fail2ban_ingest_design",
+      "label": "Fail2Ban Ingest Plugin Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-19-fail2ban-ingest-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_19_fresh_redeploy_design",
+      "label": "Fresh Redeploy and Smoke Test Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-19-fresh-redeploy-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_19_http_honeypot_design",
+      "label": "HTTP Honeypot — OpenCanary HTTP/HTTPS Module Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-19-http-honeypot-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_20_grafana_dashboard_v2_design",
+      "label": "Grafana Dashboard v2 — Peer Topology, Blocklist, Candidates",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-20-grafana-dashboard-v2-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_20_grafana_effectiveness_design",
+      "label": "FederLoom Effectiveness Dashboard Design — All Three Nodes Side-by-Side",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-20-grafana-effectiveness-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_22_federation_roadmap_design",
+      "label": "Federation Roadmap — Five-Phase Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_22_security_fixes_design",
+      "label": "Security Fixes Design — CIDR Injection, Unauthenticated API, Newline Injection",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-security-fixes-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_23_phase3a_bloom_filter_design",
+      "label": "Phase 3a — Bloom Filter Pre-filter Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-23-phase3a-bloom-filter-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_24_ip_normalization_design",
+      "label": "IP Normalization Design — net/netip Canonical Forms Everywhere",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-24-ip-normalization-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_25_bootstrap_env_design",
+      "label": "Bootstrap Scripts Infrastructure Extraction Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-25-bootstrap-env-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_25_config_docs_design",
+      "label": "Config Documentation Design — docs/config.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-25-config-docs-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_25_rules_docs_design",
+      "label": "Rules Documentation Design — docs/rules.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-25-rules-docs-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_26_getting_started_docker_design",
+      "label": "Getting Started (Docker) Design — Mailcow, WordPress, CrowdSec, fail2ban Paths",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-26-getting-started-docker-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "federloom_federbloom_logo",
+      "label": "FederLoom Logo — Ornamental 8-pointed Snowflake/Mandala",
+      "file_type": "image",
+      "source_file": "federbloom-logo.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_14_rules_engine_design_ruleset",
+      "label": "RuleSet — Hot-reloadable YAML Block-Decision Evaluator (first-match wins, AND conditions)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-14-rules-engine-design.md",
+      "source_location": "internal/rules/rule.go",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_14_rules_engine_design_burststore",
+      "label": "BurstStore — In-memory Sliding Window Burst Event Counter",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-14-rules-engine-design.md",
+      "source_location": "internal/rules/burst.go",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_18_dnsbl_design_server",
+      "label": "Embedded DNSBL DNS Server — Opt-in Local Reputation A/TXT Query Service",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-18-dnsbl-design.md",
+      "source_location": "internal/dnsbl/server.go",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_18_federation_ux_design_invitation",
+      "label": "Federation Invitation Bundle — JSON Trust Exchange Object for Peer Onboarding",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-18-federation-ux-design.md",
+      "source_location": "internal/federation/invitation.go",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_19_fail2ban_ingest_design_plugin",
+      "label": "Fail2Ban Docker Ingest Plugin — docker exec Poll with Jail-to-Reason Mapping",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-19-fail2ban-ingest-design.md",
+      "source_location": "internal/ingest/fail2ban.go",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_22_federation_roadmap_design_origintrace",
+      "label": "OriginTrace Wiring — Federation Feedback Loop Guard (Phase 1a)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_22_federation_roadmap_design_discount",
+      "label": "Federation Trust Discount — Hop-based Score Dilution (Phase 1b)",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_22_federation_roadmap_design_discovery",
+      "label": "Federation Discovery via DHT Rendezvous — internal/discovery Manager (Phase 1c)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": "internal/discovery",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_22_federation_roadmap_design_signing",
+      "label": "Event Signing with Ed25519 Identity Key (Phase 1d)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_22_federation_roadmap_design_defederation",
+      "label": "Defederation — Peer Blocking via blocked-peers.json Hot-reload (Phase 1e)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_22_federation_roadmap_design_whitelist",
+      "label": "Local Whitelist Store — scope:local-only Never Federated (Phase 2a)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": "internal/store/whitelist.go",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_23_phase3a_bloom_filter_design_repbloom",
+      "label": "repBloom — Bloom Filter Negative Pre-filter for BadgerStore GetScore",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-23-phase3a-bloom-filter-design.md",
+      "source_location": "internal/store/bloom.go",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_22_security_fixes_design_ipgate",
+      "label": "IP Validation Gate — net.ParseIP Guard at processLocal and ProcessRemote Entry Points",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-22-security-fixes-design.md",
+      "source_location": "internal/node/node.go",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_22_security_fixes_design_bearertoken",
+      "label": "API Bearer Token Authentication — FEDERLOOM_API_TOKEN Middleware + Tailscale Binding",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-22-security-fixes-design.md",
+      "source_location": "internal/api/server.go",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_2026_06_24_ip_normalization_design_netip",
+      "label": "net/netip Canonical IP Normalization — Unmap() IPv4-mapped IPv6 at Node Entry Points",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-24-ip-normalization-design.md",
+      "source_location": "internal/node/node.go",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_rules_engine_hot_reload_pattern",
+      "label": "Hot-reload via fileStat mtime+size Pattern — Operator-editable Config Without Restart",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-06-14-rules-engine-design.md",
+      "source_location": "internal/rules/rule.go",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_effectiveness_textfile_exporter",
+      "label": "FederLoom Textfile Exporter — Cron Script Writing node_exporter .prom Metrics",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-16-blocklist-effectiveness-design.md",
+      "source_location": "deploy/wordpress/federloom-exporter.sh",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "specs_effectiveness_cli_report",
+      "label": "FederLoom CLI Effectiveness Report — On-demand Coverage/Latency/FP/CrowdSec Analysis",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-16-blocklist-effectiveness-design.md",
+      "source_location": "deploy/wordpress/effectiveness-report.sh",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "specs_2026_06_14_rules_engine_design",
+      "target": "specs_2026_06_14_rules_engine_design_ruleset",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-14-rules-engine-design.md",
+      "source_location": "internal/rules/rule.go",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_14_rules_engine_design",
+      "target": "specs_2026_06_14_rules_engine_design_burststore",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-14-rules-engine-design.md",
+      "source_location": "internal/rules/burst.go",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_14_rules_engine_design",
+      "target": "specs_rules_engine_hot_reload_pattern",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-14-rules-engine-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_14_rules_engine_design_ruleset",
+      "target": "specs_2026_06_14_rules_engine_design_burststore",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-14-rules-engine-design.md",
+      "source_location": "RuleSet.Evaluate(e, rec, b *BurstStore)",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_16_blocklist_effectiveness_design",
+      "target": "specs_effectiveness_textfile_exporter",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-16-blocklist-effectiveness-design.md",
+      "source_location": "deploy/wordpress/federloom-exporter.sh",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_16_blocklist_effectiveness_design",
+      "target": "specs_effectiveness_cli_report",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-16-blocklist-effectiveness-design.md",
+      "source_location": "deploy/wordpress/effectiveness-report.sh",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_16_blocklist_effectiveness_design",
+      "target": "specs_2026_06_14_rules_engine_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-16-blocklist-effectiveness-design.md",
+      "source_location": "federloom_rules_fired_total metric label namespace",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_18_dnsbl_design",
+      "target": "specs_2026_06_18_dnsbl_design_server",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-18-dnsbl-design.md",
+      "source_location": "internal/dnsbl/server.go",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_18_federation_ux_design",
+      "target": "specs_2026_06_18_federation_ux_design_invitation",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-18-federation-ux-design.md",
+      "source_location": "internal/federation/invitation.go",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_19_fail2ban_ingest_design",
+      "target": "specs_2026_06_19_fail2ban_ingest_design_plugin",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-19-fail2ban-ingest-design.md",
+      "source_location": "internal/ingest/fail2ban.go",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_22_federation_roadmap_design",
+      "target": "specs_2026_06_22_federation_roadmap_design_origintrace",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": "Phase 1a",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_22_federation_roadmap_design",
+      "target": "specs_2026_06_22_federation_roadmap_design_discount",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": "Phase 1b",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_22_federation_roadmap_design",
+      "target": "specs_2026_06_22_federation_roadmap_design_discovery",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": "Phase 1c",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_22_federation_roadmap_design",
+      "target": "specs_2026_06_22_federation_roadmap_design_signing",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": "Phase 1d",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_22_federation_roadmap_design",
+      "target": "specs_2026_06_22_federation_roadmap_design_defederation",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": "Phase 1e",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_22_federation_roadmap_design",
+      "target": "specs_2026_06_22_federation_roadmap_design_whitelist",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": "Phase 2a",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_22_federation_roadmap_design",
+      "target": "specs_2026_06_23_phase3a_bloom_filter_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": "Phase 3 — Bloom filter not implemented §11.3",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_22_security_fixes_design",
+      "target": "specs_2026_06_22_security_fixes_design_ipgate",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-22-security-fixes-design.md",
+      "source_location": "Fix 1 & 3 — IP Validation Gate",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_22_security_fixes_design",
+      "target": "specs_2026_06_22_security_fixes_design_bearertoken",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-22-security-fixes-design.md",
+      "source_location": "Fix 2 — API Auth + Tailscale Binding",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_23_phase3a_bloom_filter_design",
+      "target": "specs_2026_06_23_phase3a_bloom_filter_design_repbloom",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-23-phase3a-bloom-filter-design.md",
+      "source_location": "internal/store/bloom.go",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_24_ip_normalization_design",
+      "target": "specs_2026_06_24_ip_normalization_design_netip",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-24-ip-normalization-design.md",
+      "source_location": "Entry-Point Normalization",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_19_dnsbl_integration_design",
+      "target": "specs_2026_06_18_dnsbl_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-19-dnsbl-integration-design.md",
+      "source_location": "Problem — FederLoom DNSBL server is fully implemented",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_19_fresh_redeploy_design",
+      "target": "specs_2026_06_18_federation_ux_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-19-fresh-redeploy-design.md",
+      "source_location": "Phase 2 — docker exec federloom federloomctl setup + federloomctl federation invite",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_19_fresh_redeploy_design",
+      "target": "specs_2026_06_19_docker_publish_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-19-fresh-redeploy-design.md",
+      "source_location": "Phase 0 — gh run list --workflow=docker.yml; docker pull ghcr.io/joeru/federloom:latest",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_19_fresh_redeploy_design",
+      "target": "specs_2026_06_17_bootstrap_peers_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-19-fresh-redeploy-design.md",
+      "source_location": "Phase 3 — Replace bootstrap_peers multiaddr in all three config files",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_25_bootstrap_env_design",
+      "target": "specs_2026_06_19_fresh_redeploy_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-25-bootstrap-env-design.md",
+      "source_location": "Scope — deploy/redeploy.sh rewritten in-place",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_25_rules_docs_design",
+      "target": "specs_2026_06_14_rules_engine_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-25-rules-docs-design.md",
+      "source_location": "Source of truth — internal/rules/rule.go",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_26_getting_started_docker_design",
+      "target": "specs_2026_06_19_fail2ban_ingest_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-26-getting-started-docker-design.md",
+      "source_location": "§ fail2ban section",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_26_getting_started_docker_design",
+      "target": "specs_2026_06_18_federation_ux_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-26-getting-started-docker-design.md",
+      "source_location": "§ Federation — federloomctl setup + federation invite/join",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_24_ip_normalization_design",
+      "target": "specs_2026_06_22_security_fixes_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-24-ip-normalization-design.md",
+      "source_location": "Replaces existing if net.ParseIP(e.IP) == nil guard from security fixes",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_24_ip_normalization_design",
+      "target": "specs_2026_06_23_phase3a_bloom_filter_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-24-ip-normalization-design.md",
+      "source_location": "Data Compatibility — BadgerDB and bloom filter require no code changes",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_20_grafana_dashboard_v2_design",
+      "target": "specs_2026_06_16_blocklist_effectiveness_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-20-grafana-dashboard-v2-design.md",
+      "source_location": "No Go changes — uses metrics that already exist from effectiveness design",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_20_grafana_effectiveness_design",
+      "target": "specs_2026_06_16_blocklist_effectiveness_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-20-grafana-effectiveness-design.md",
+      "source_location": "Row 6 — federloom_block_recurrence_total from effectiveness design",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_25_config_docs_design",
+      "target": "specs_2026_06_18_dnsbl_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-25-config-docs-design.md",
+      "source_location": "Field reference — dnsbl section",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_25_config_docs_design",
+      "target": "specs_2026_06_17_bootstrap_peers_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-25-config-docs-design.md",
+      "source_location": "Field reference — bootstrap_peers section",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_25_config_docs_design",
+      "target": "specs_2026_06_14_rules_engine_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-25-config-docs-design.md",
+      "source_location": "Field reference — reputation section (rules_file)",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_25_config_docs_design",
+      "target": "specs_2026_06_19_fail2ban_ingest_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-25-config-docs-design.md",
+      "source_location": "Field reference — ingest.fail2ban section",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_25_config_docs_design",
+      "target": "specs_2026_06_22_federation_roadmap_design",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-25-config-docs-design.md",
+      "source_location": "Field reference — discovery section",
+      "weight": 1.0
+    },
+    {
+      "source": "specs_2026_06_22_federation_roadmap_design_origintrace",
+      "target": "specs_2026_06_22_federation_roadmap_design_discount",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": "Phase 1 — Federation Semantics both address correctness of federated score propagation",
+      "weight": 0.85
+    },
+    {
+      "source": "specs_2026_06_22_federation_roadmap_design_origintrace",
+      "target": "specs_2026_06_22_federation_roadmap_design_signing",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": "Both address event authenticity across federation hops",
+      "weight": 0.85
+    },
+    {
+      "source": "specs_2026_06_22_security_fixes_design_ipgate",
+      "target": "specs_2026_06_24_ip_normalization_design_netip",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "docs/superpowers/specs/2026-06-24-ip-normalization-design.md",
+      "source_location": "IP normalization replaces net.ParseIP guard with netip.ParseAddr + Unmap",
+      "weight": 0.95
+    },
+    {
+      "source": "specs_2026_06_23_phase3a_bloom_filter_design_repbloom",
+      "target": "specs_2026_06_24_ip_normalization_design_netip",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/specs/2026-06-24-ip-normalization-design.md",
+      "source_location": "Canonical netip form ensures bloom filter keys are consistent",
+      "weight": 0.85
+    },
+    {
+      "source": "specs_2026_06_22_federation_roadmap_design",
+      "target": "specs_2026_06_18_federation_ux_design",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": "Roadmap extends federation layer; UX design provides the operator interface",
+      "weight": 0.85
+    },
+    {
+      "source": "specs_2026_06_14_rules_engine_design_ruleset",
+      "target": "specs_2026_06_16_blocklist_effectiveness_design",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/specs/2026-06-16-blocklist-effectiveness-design.md",
+      "source_location": "Effectiveness metrics are per-rule labeled (rule label on all new counters)",
+      "weight": 0.85
+    },
+    {
+      "source": "specs_2026_06_18_dnsbl_design_server",
+      "target": "specs_2026_06_19_dnsbl_integration_design",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "docs/superpowers/specs/2026-06-19-dnsbl-integration-design.md",
+      "source_location": "Server is the implementation; integration guide is the operator-facing documentation",
+      "weight": 0.95
+    },
+    {
+      "source": "specs_2026_06_19_http_honeypot_design",
+      "target": "specs_2026_06_19_fail2ban_ingest_design",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "docs/superpowers/specs/2026-06-19-http-honeypot-design.md",
+      "source_location": "Both are ingest source expansions added in same sprint",
+      "weight": 0.75
+    },
+    {
+      "source": "specs_2026_06_20_grafana_dashboard_v2_design",
+      "target": "specs_2026_06_20_grafana_effectiveness_design",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/specs/2026-06-20-grafana-effectiveness-design.md",
+      "source_location": "Both are Grafana dashboard designs added in the same session",
+      "weight": 0.85
+    },
+    {
+      "source": "specs_2026_06_25_rules_docs_design",
+      "target": "specs_2026_06_25_config_docs_design",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "docs/superpowers/specs/2026-06-25-rules-docs-design.md",
+      "source_location": "Both are documentation specs created the same day as companion reference docs",
+      "weight": 0.75
+    },
+    {
+      "source": "specs_2026_06_22_federation_roadmap_design_defederation",
+      "target": "specs_2026_06_22_federation_roadmap_design_discovery",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md",
+      "source_location": "Discovery finds peers; defederation removes compromised ones — complementary lifecycle operations",
+      "weight": 0.75
+    },
+    {
+      "source": "specs_2026_06_26_getting_started_docker_design",
+      "target": "specs_2026_06_19_docker_publish_design",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/specs/2026-06-26-getting-started-docker-design.md",
+      "source_location": "Getting started uses ghcr.io/joeru/federloom:latest — no build tools required",
+      "weight": 0.85
+    },
+    {
+      "source": "specs_2026_06_25_bootstrap_env_design",
+      "target": "specs_2026_06_25_config_docs_design",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "docs/superpowers/specs/2026-06-25-bootstrap-env-design.md",
+      "source_location": "Both document operator-facing configuration — env files and config.yaml respectively",
+      "weight": 0.65
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "phase1_federation_semantics",
+      "label": "Phase 1 Federation Semantics — OriginTrace, Discount, Discovery, Signing, Defederation",
+      "nodes": [
+        "specs_2026_06_22_federation_roadmap_design_origintrace",
+        "specs_2026_06_22_federation_roadmap_design_discount",
+        "specs_2026_06_22_federation_roadmap_design_discovery",
+        "specs_2026_06_22_federation_roadmap_design_signing",
+        "specs_2026_06_22_federation_roadmap_design_defederation"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-22-federation-roadmap-design.md"
+    },
+    {
+      "id": "security_hardening_cluster",
+      "label": "Security Hardening — IP Validation Gate, Bearer Token Auth, IP Normalization",
+      "nodes": [
+        "specs_2026_06_22_security_fixes_design_ipgate",
+        "specs_2026_06_22_security_fixes_design_bearertoken",
+        "specs_2026_06_24_ip_normalization_design_netip"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "docs/superpowers/specs/2026-06-22-security-fixes-design.md"
+    },
+    {
+      "id": "grafana_observability_suite",
+      "label": "Grafana Observability Suite — Effectiveness Metrics, Dashboard v2, Multi-node Dashboard",
+      "nodes": [
+        "specs_2026_06_16_blocklist_effectiveness_design",
+        "specs_2026_06_20_grafana_dashboard_v2_design",
+        "specs_2026_06_20_grafana_effectiveness_design"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/specs/2026-06-20-grafana-effectiveness-design.md"
+    },
+    {
+      "id": "operator_documentation_suite",
+      "label": "Operator Documentation Suite — Config Ref, Rules Ref, Getting Started, DNSBL Integration",
+      "nodes": [
+        "specs_2026_06_25_config_docs_design",
+        "specs_2026_06_25_rules_docs_design",
+        "specs_2026_06_26_getting_started_docker_design",
+        "specs_2026_06_19_dnsbl_integration_design"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/specs/2026-06-25-config-docs-design.md"
+    },
+    {
+      "id": "ingest_plugin_expansion_sprint",
+      "label": "Ingest Plugin Expansion Sprint — Fail2Ban, HTTP Honeypot",
+      "nodes": [
+        "specs_2026_06_19_fail2ban_ingest_design",
+        "specs_2026_06_19_http_honeypot_design"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "docs/superpowers/specs/2026-06-19-fail2ban-ingest-design.md"
+    }
+  ],
+  "input_tokens": 26000,
+  "output_tokens": 5200
+}

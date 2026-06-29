@@ -1,0 +1,1082 @@
+{
+  "nodes": [
+    {
+      "id": "examples_config_isolated",
+      "label": "Isolated Federation Mode Example Config",
+      "file_type": "document",
+      "source_file": "deploy/examples/config.isolated.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "examples_config_solo",
+      "label": "Solo Federation Mode Example Config",
+      "file_type": "document",
+      "source_file": "deploy/examples/config.solo.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "examples_rules",
+      "label": "Example Block Rules",
+      "file_type": "document",
+      "source_file": "deploy/examples/rules.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dashboards_federloom",
+      "label": "Grafana Dashboard Provisioner",
+      "file_type": "document",
+      "source_file": "deploy/grafana/provisioning/dashboards/federloom.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "datasources_federloom_sqlite",
+      "label": "Grafana Datasource: FederLoom SQLite",
+      "file_type": "document",
+      "source_file": "deploy/grafana/provisioning/datasources/federloom-sqlite.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "datasources_prometheus_honeypot",
+      "label": "Grafana Datasource: Prometheus Honeypot",
+      "file_type": "document",
+      "source_file": "deploy/grafana/provisioning/datasources/prometheus-honeypot.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "datasources_prometheus_mailcow",
+      "label": "Grafana Datasource: Prometheus Mailcow",
+      "file_type": "document",
+      "source_file": "deploy/grafana/provisioning/datasources/prometheus-mailcow.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "datasources_prometheus_wordpress",
+      "label": "Grafana Datasource: Prometheus WordPress",
+      "file_type": "document",
+      "source_file": "deploy/grafana/provisioning/datasources/prometheus-wordpress.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "honeypot_config",
+      "label": "Honeypot Node Config",
+      "file_type": "document",
+      "source_file": "deploy/honeypot/config.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "honeypot_docker_compose",
+      "label": "Honeypot Docker Compose Stack (Cowrie + OpenCanary + FederLoom)",
+      "file_type": "document",
+      "source_file": "deploy/honeypot/docker-compose.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "honeypot_rules",
+      "label": "Honeypot Block Rules",
+      "file_type": "document",
+      "source_file": "deploy/honeypot/rules.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "mailcow_readme",
+      "label": "Mailcow Add-on README",
+      "file_type": "document",
+      "source_file": "deploy/mailcow/README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "mailcow_config",
+      "label": "Mailcow Node Config",
+      "file_type": "document",
+      "source_file": "deploy/mailcow/config.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "mailcow_docker_compose_override",
+      "label": "Mailcow Docker Compose Override (Non-Invasive)",
+      "file_type": "document",
+      "source_file": "deploy/mailcow/docker-compose.override.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "mailcow_docker_compose",
+      "label": "Mailcow FederLoom Sidecar Compose",
+      "file_type": "document",
+      "source_file": "deploy/mailcow/docker-compose.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "mailcow_rules",
+      "label": "Mailcow Production Block Rules",
+      "file_type": "document",
+      "source_file": "deploy/mailcow/rules.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "wordpress_config",
+      "label": "WordPress Node Config",
+      "file_type": "document",
+      "source_file": "deploy/wordpress/config.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "wordpress_docker_compose",
+      "label": "WordPress FederLoom Sidecar Compose",
+      "file_type": "document",
+      "source_file": "deploy/wordpress/docker-compose.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "wordpress_rules",
+      "label": "WordPress Production Block Rules",
+      "file_type": "document",
+      "source_file": "deploy/wordpress/rules.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_architecture",
+      "label": "Architecture Overview",
+      "file_type": "document",
+      "source_file": "docs/architecture.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_dnsbl_integration",
+      "label": "DNSBL Integration Guide",
+      "file_type": "document",
+      "source_file": "docs/dnsbl-integration.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "architecture_three_planes",
+      "label": "Three-Plane Architecture (Ingest Control Data Observability)",
+      "file_type": "rationale",
+      "source_file": "docs/architecture.md",
+      "source_location": "6",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "architecture_bloom_filter",
+      "label": "Bloom Filter as Negative Pre-Filter",
+      "file_type": "concept",
+      "source_file": "docs/architecture.md",
+      "source_location": "37",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "architecture_query_vs_replicate",
+      "label": "Query-Not-Replicate Scaling Design",
+      "file_type": "rationale",
+      "source_file": "docs/architecture.md",
+      "source_location": "33",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "architecture_federation_model",
+      "label": "Mastodon-Model Federation with Subnet Trust Domains",
+      "file_type": "rationale",
+      "source_file": "docs/architecture.md",
+      "source_location": "42",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "architecture_good_neighbour",
+      "label": "Good-Neighbour Behaviour: CPU/Bandwidth Budget and Load Shedding",
+      "file_type": "rationale",
+      "source_file": "docs/architecture.md",
+      "source_location": "48",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_isolated_federation_mode",
+      "label": "Isolated Federation Mode (No Import from Other Domains)",
+      "file_type": "concept",
+      "source_file": "deploy/examples/config.isolated.yaml",
+      "source_location": "2",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_solo_federation_mode",
+      "label": "Solo Federation Mode (Local-Only, No Network)",
+      "file_type": "concept",
+      "source_file": "deploy/examples/config.solo.yaml",
+      "source_location": "2",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_federated_mode",
+      "label": "Federated Mode (Active Peer-to-Peer Participation)",
+      "file_type": "concept",
+      "source_file": "deploy/honeypot/config.yaml",
+      "source_location": "3",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_corroboration_rules",
+      "label": "Corroboration-Based Block Rules (min_corroboration, min_burst)",
+      "file_type": "concept",
+      "source_file": "deploy/examples/rules.yaml",
+      "source_location": "11",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_sensor_node_strategy",
+      "label": "Sensor Node Strategy: High Block Threshold, Watch-Not-Block to Maximize Data",
+      "file_type": "rationale",
+      "source_file": "deploy/honeypot/rules.yaml",
+      "source_location": "1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_dnsbl_server",
+      "label": "Embedded DNSBL Server (Reversed-IP DNS Queries over Local Reputation)",
+      "file_type": "concept",
+      "source_file": "docs/dnsbl-integration.md",
+      "source_location": "1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_trust_discount",
+      "label": "Trust Discount (import_discount) for Cross-Federation Scores",
+      "file_type": "concept",
+      "source_file": "deploy/examples/config.isolated.yaml",
+      "source_location": "6",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_cowrie",
+      "label": "Cowrie SSH Honeypot Service",
+      "file_type": "concept",
+      "source_file": "deploy/honeypot/docker-compose.yml",
+      "source_location": "3",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_opencanary",
+      "label": "OpenCanary SMTP/IMAP/HTTP Honeypot Service",
+      "file_type": "concept",
+      "source_file": "deploy/honeypot/docker-compose.yml",
+      "source_location": "13",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_noninvasive_sidecar",
+      "label": "Non-Invasive Docker Sidecar Pattern (JoeRu Mailcow-Crowdsec-Override)",
+      "file_type": "rationale",
+      "source_file": "deploy/mailcow/docker-compose.override.yml",
+      "source_location": "1",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_decay_gdpr",
+      "label": "Decay as GDPR Storage Limitation (Time-Bound Deletion)",
+      "file_type": "rationale",
+      "source_file": "docs/architecture.md",
+      "source_location": "38",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_honeypot_relay_peer",
+      "label": "Honeypot as Bootstrap Relay Peer for Federation",
+      "file_type": "concept",
+      "source_file": "deploy/honeypot/config.yaml",
+      "source_location": "44",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "honeypot_config",
+      "target": "honeypot_rules",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/config.yaml",
+      "source_location": "18",
+      "weight": 1.0
+    },
+    {
+      "source": "mailcow_config",
+      "target": "mailcow_rules",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/mailcow/config.yaml",
+      "source_location": "16",
+      "weight": 1.0
+    },
+    {
+      "source": "wordpress_config",
+      "target": "wordpress_rules",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/wordpress/config.yaml",
+      "source_location": "16",
+      "weight": 1.0
+    },
+    {
+      "source": "honeypot_docker_compose",
+      "target": "honeypot_config",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/docker-compose.yml",
+      "source_location": "42",
+      "weight": 1.0
+    },
+    {
+      "source": "honeypot_docker_compose",
+      "target": "honeypot_rules",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/docker-compose.yml",
+      "source_location": "43",
+      "weight": 1.0
+    },
+    {
+      "source": "honeypot_docker_compose",
+      "target": "concept_cowrie",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/docker-compose.yml",
+      "source_location": "3",
+      "weight": 1.0
+    },
+    {
+      "source": "honeypot_docker_compose",
+      "target": "concept_opencanary",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/docker-compose.yml",
+      "source_location": "13",
+      "weight": 1.0
+    },
+    {
+      "source": "honeypot_config",
+      "target": "concept_cowrie",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/config.yaml",
+      "source_location": "20",
+      "weight": 1.0
+    },
+    {
+      "source": "honeypot_config",
+      "target": "concept_opencanary",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/config.yaml",
+      "source_location": "24",
+      "weight": 1.0
+    },
+    {
+      "source": "mailcow_docker_compose",
+      "target": "mailcow_config",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/mailcow/docker-compose.yml",
+      "source_location": "22",
+      "weight": 1.0
+    },
+    {
+      "source": "mailcow_docker_compose",
+      "target": "mailcow_rules",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/mailcow/docker-compose.yml",
+      "source_location": "23",
+      "weight": 1.0
+    },
+    {
+      "source": "mailcow_docker_compose_override",
+      "target": "mailcow_config",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/mailcow/docker-compose.override.yml",
+      "source_location": "14",
+      "weight": 1.0
+    },
+    {
+      "source": "mailcow_docker_compose_override",
+      "target": "concept_noninvasive_sidecar",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/mailcow/docker-compose.override.yml",
+      "source_location": "1",
+      "weight": 1.0
+    },
+    {
+      "source": "mailcow_readme",
+      "target": "concept_noninvasive_sidecar",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/mailcow/README.md",
+      "source_location": "3",
+      "weight": 1.0
+    },
+    {
+      "source": "mailcow_readme",
+      "target": "mailcow_docker_compose_override",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/mailcow/README.md",
+      "source_location": "7",
+      "weight": 1.0
+    },
+    {
+      "source": "wordpress_docker_compose",
+      "target": "wordpress_config",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/wordpress/docker-compose.yml",
+      "source_location": "25",
+      "weight": 1.0
+    },
+    {
+      "source": "wordpress_docker_compose",
+      "target": "wordpress_rules",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/wordpress/docker-compose.yml",
+      "source_location": "26",
+      "weight": 1.0
+    },
+    {
+      "source": "mailcow_config",
+      "target": "concept_honeypot_relay_peer",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/mailcow/config.yaml",
+      "source_location": "44",
+      "weight": 1.0
+    },
+    {
+      "source": "wordpress_config",
+      "target": "concept_honeypot_relay_peer",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/wordpress/config.yaml",
+      "source_location": "35",
+      "weight": 1.0
+    },
+    {
+      "source": "honeypot_config",
+      "target": "concept_honeypot_relay_peer",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/config.yaml",
+      "source_location": "44",
+      "weight": 1.0
+    },
+    {
+      "source": "honeypot_config",
+      "target": "concept_dnsbl_server",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/config.yaml",
+      "source_location": "41",
+      "weight": 1.0
+    },
+    {
+      "source": "mailcow_config",
+      "target": "concept_dnsbl_server",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/mailcow/config.yaml",
+      "source_location": "47",
+      "weight": 1.0
+    },
+    {
+      "source": "wordpress_config",
+      "target": "concept_dnsbl_server",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/wordpress/config.yaml",
+      "source_location": "37",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_dnsbl_integration",
+      "target": "concept_dnsbl_server",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/dnsbl-integration.md",
+      "source_location": "1",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_dnsbl_integration",
+      "target": "mailcow_config",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/dnsbl-integration.md",
+      "source_location": "457",
+      "weight": 1.0
+    },
+    {
+      "source": "examples_config_isolated",
+      "target": "concept_isolated_federation_mode",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/examples/config.isolated.yaml",
+      "source_location": "2",
+      "weight": 1.0
+    },
+    {
+      "source": "examples_config_isolated",
+      "target": "concept_trust_discount",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/examples/config.isolated.yaml",
+      "source_location": "6",
+      "weight": 1.0
+    },
+    {
+      "source": "examples_config_solo",
+      "target": "concept_solo_federation_mode",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/examples/config.solo.yaml",
+      "source_location": "2",
+      "weight": 1.0
+    },
+    {
+      "source": "honeypot_config",
+      "target": "concept_federated_mode",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/config.yaml",
+      "source_location": "3",
+      "weight": 1.0
+    },
+    {
+      "source": "mailcow_config",
+      "target": "concept_federated_mode",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/mailcow/config.yaml",
+      "source_location": "4",
+      "weight": 1.0
+    },
+    {
+      "source": "wordpress_config",
+      "target": "concept_federated_mode",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/wordpress/config.yaml",
+      "source_location": "3",
+      "weight": 1.0
+    },
+    {
+      "source": "examples_rules",
+      "target": "concept_corroboration_rules",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/examples/rules.yaml",
+      "source_location": "11",
+      "weight": 1.0
+    },
+    {
+      "source": "honeypot_rules",
+      "target": "concept_corroboration_rules",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/rules.yaml",
+      "source_location": "9",
+      "weight": 1.0
+    },
+    {
+      "source": "mailcow_rules",
+      "target": "concept_corroboration_rules",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/mailcow/rules.yaml",
+      "source_location": "7",
+      "weight": 1.0
+    },
+    {
+      "source": "wordpress_rules",
+      "target": "concept_corroboration_rules",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/wordpress/rules.yaml",
+      "source_location": "7",
+      "weight": 1.0
+    },
+    {
+      "source": "honeypot_rules",
+      "target": "concept_sensor_node_strategy",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/rules.yaml",
+      "source_location": "1",
+      "weight": 1.0
+    },
+    {
+      "source": "honeypot_config",
+      "target": "concept_sensor_node_strategy",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/config.yaml",
+      "source_location": "14",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_architecture",
+      "target": "architecture_three_planes",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture.md",
+      "source_location": "6",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_architecture",
+      "target": "architecture_bloom_filter",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture.md",
+      "source_location": "37",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_architecture",
+      "target": "architecture_query_vs_replicate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture.md",
+      "source_location": "33",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_architecture",
+      "target": "architecture_federation_model",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture.md",
+      "source_location": "42",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_architecture",
+      "target": "architecture_good_neighbour",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture.md",
+      "source_location": "48",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_architecture",
+      "target": "concept_decay_gdpr",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/architecture.md",
+      "source_location": "38",
+      "weight": 1.0
+    },
+    {
+      "source": "architecture_bloom_filter",
+      "target": "architecture_query_vs_replicate",
+      "relation": "rationale_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/architecture.md",
+      "source_location": "37",
+      "weight": 0.85
+    },
+    {
+      "source": "concept_decay_gdpr",
+      "target": "architecture_query_vs_replicate",
+      "relation": "rationale_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/architecture.md",
+      "source_location": "38",
+      "weight": 0.85
+    },
+    {
+      "source": "architecture_federation_model",
+      "target": "concept_trust_discount",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/architecture.md",
+      "source_location": "45",
+      "weight": 0.85
+    },
+    {
+      "source": "datasources_prometheus_honeypot",
+      "target": "honeypot_config",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "deploy/grafana/provisioning/datasources/prometheus-honeypot.yml",
+      "source_location": "6",
+      "weight": 0.95
+    },
+    {
+      "source": "datasources_prometheus_mailcow",
+      "target": "mailcow_config",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "deploy/grafana/provisioning/datasources/prometheus-mailcow.yml",
+      "source_location": "6",
+      "weight": 0.95
+    },
+    {
+      "source": "datasources_prometheus_wordpress",
+      "target": "wordpress_config",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "deploy/grafana/provisioning/datasources/prometheus-wordpress.yml",
+      "source_location": "6",
+      "weight": 0.95
+    },
+    {
+      "source": "datasources_federloom_sqlite",
+      "target": "honeypot_config",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "deploy/grafana/provisioning/datasources/federloom-sqlite.yml",
+      "source_location": "9",
+      "weight": 0.85
+    },
+    {
+      "source": "dashboards_federloom",
+      "target": "datasources_federloom_sqlite",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "deploy/grafana/provisioning/dashboards/federloom.yml",
+      "source_location": null,
+      "weight": 0.95
+    },
+    {
+      "source": "dashboards_federloom",
+      "target": "datasources_prometheus_honeypot",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "deploy/grafana/provisioning/dashboards/federloom.yml",
+      "source_location": null,
+      "weight": 0.75
+    },
+    {
+      "source": "dashboards_federloom",
+      "target": "datasources_prometheus_mailcow",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "deploy/grafana/provisioning/dashboards/federloom.yml",
+      "source_location": null,
+      "weight": 0.75
+    },
+    {
+      "source": "dashboards_federloom",
+      "target": "datasources_prometheus_wordpress",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "deploy/grafana/provisioning/dashboards/federloom.yml",
+      "source_location": null,
+      "weight": 0.75
+    },
+    {
+      "source": "concept_sensor_node_strategy",
+      "target": "concept_corroboration_rules",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "deploy/honeypot/rules.yaml",
+      "source_location": null,
+      "weight": 0.85
+    },
+    {
+      "source": "concept_noninvasive_sidecar",
+      "target": "architecture_three_planes",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "deploy/mailcow/docker-compose.override.yml",
+      "source_location": null,
+      "weight": 0.65
+    },
+    {
+      "source": "concept_dnsbl_server",
+      "target": "architecture_query_vs_replicate",
+      "relation": "rationale_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/dnsbl-integration.md",
+      "source_location": null,
+      "weight": 0.85
+    },
+    {
+      "source": "concept_federated_mode",
+      "target": "architecture_federation_model",
+      "relation": "implements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "deploy/honeypot/config.yaml",
+      "source_location": "3",
+      "weight": 0.95
+    },
+    {
+      "source": "concept_isolated_federation_mode",
+      "target": "architecture_federation_model",
+      "relation": "implements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "deploy/examples/config.isolated.yaml",
+      "source_location": "2",
+      "weight": 0.95
+    },
+    {
+      "source": "concept_solo_federation_mode",
+      "target": "architecture_federation_model",
+      "relation": "implements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "deploy/examples/config.solo.yaml",
+      "source_location": "2",
+      "weight": 0.85
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "federated_production_node_configs",
+      "label": "Federated Production Node Configs (Honeypot, Mailcow, WordPress)",
+      "nodes": ["honeypot_config", "mailcow_config", "wordpress_config"],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/config.yaml"
+    },
+    {
+      "id": "production_docker_stacks",
+      "label": "Production Docker Compose Deployment Stacks",
+      "nodes": ["honeypot_docker_compose", "mailcow_docker_compose", "wordpress_docker_compose"],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/docker-compose.yml"
+    },
+    {
+      "id": "grafana_provisioned_datasources",
+      "label": "Grafana Provisioned Datasources for Observability Plane",
+      "nodes": ["datasources_federloom_sqlite", "datasources_prometheus_honeypot", "datasources_prometheus_mailcow", "datasources_prometheus_wordpress"],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "deploy/grafana/provisioning/dashboards/federloom.yml"
+    },
+    {
+      "id": "honeypot_sensor_stack_services",
+      "label": "Honeypot Sensor Stack: Cowrie + OpenCanary + FederLoom",
+      "nodes": ["concept_cowrie", "concept_opencanary", "honeypot_docker_compose", "honeypot_config"],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/honeypot/docker-compose.yml"
+    },
+    {
+      "id": "all_node_rules_files",
+      "label": "Per-Node Block Rules Files (All Deployment Targets)",
+      "nodes": ["examples_rules", "honeypot_rules", "mailcow_rules", "wordpress_rules"],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "deploy/examples/rules.yaml"
+    },
+    {
+      "id": "federation_mode_variants",
+      "label": "Federation Mode Variants (Solo, Isolated, Federated)",
+      "nodes": ["concept_solo_federation_mode", "concept_isolated_federation_mode", "concept_federated_mode"],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "deploy/examples/config.isolated.yaml"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
