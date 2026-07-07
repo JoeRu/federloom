@@ -49,7 +49,7 @@ func testNode(t *testing.T) (*Node, string) {
 		whitelist:  wl,
 		trust:      ts,
 		selfID:     "12D3KooWself",
-		rules:      rules.Load("", cfg.Reputation.BlockThreshold),
+		rules:      rules.Load("", cfg.Reputation.BlockThreshold, cfg.Trust.StrangerScoreCap),
 		burst:      rules.NewBurstStore(),
 	}, dir
 }

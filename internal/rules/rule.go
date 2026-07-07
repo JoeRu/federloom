@@ -69,20 +69,28 @@ type burstCacheKey struct {
 
 // RuleSet holds the loaded rules and hot-reloads them when the backing file changes.
 type RuleSet struct {
-	mu       sync.RWMutex // protects rules and lastStat for readers
-	reloadMu sync.Mutex   // serialises file reload attempts (Fix 1)
-	rules    []Rule
-	path     string
-	lastStat fileStat
-	fallback float64 // score threshold used when rules list is empty (legacy mode)
-	loaded   bool    // true after first successful file read (Fix 2)
+	mu          sync.RWMutex // protects rules and lastStat for readers
+	reloadMu    sync.Mutex   // serialises file reload attempts (Fix 1)
+	rules       []Rule
+	path        string
+	lastStat    fileStat
+	fallback    float64 // score threshold used when rules list is empty (legacy mode)
+	strangerCap float64 // stranger_score_cap; used only by the load-time lint (advisory)
+	loaded      bool    // true after first successful file read (Fix 2)
 }
 
 // Load returns a RuleSet backed by path. If path is empty or the file does not
 // exist, Evaluate uses fallbackThreshold for legacy score-based blocking.
-func Load(path string, fallbackThreshold float64) *RuleSet {
-	rs := &RuleSet{path: path, fallback: fallbackThreshold}
+// strangerScoreCap is used only by the advisory load-time lint (lintBlockRules).
+func Load(path string, fallbackThreshold, strangerScoreCap float64) *RuleSet {
+	rs := &RuleSet{path: path, fallback: fallbackThreshold, strangerCap: strangerScoreCap}
 	rs.reload()
+	// Legacy-mode advisory: with no rules file, a bare score >= fallback blocks.
+	// If fallback is below the stranger cap, stranger-only score could reach it —
+	// the node-level backstop still prevents the block, but warn the operator.
+	if len(rs.rules) == 0 && rs.fallback < rs.strangerCap {
+		log.Printf("rules: legacy fallback threshold (%.0f) is below stranger_score_cap (%.0f); stranger-only score could reach it, but the node-level backstop prevents the block", rs.fallback, rs.strangerCap)
+	}
 	return rs
 }
 
@@ -191,6 +199,9 @@ func (rs *RuleSet) reload() {
 	}
 	// Fix 4: drop misconfigured rules before installing them.
 	loaded = validateRules(loaded, rs.path)
+	for _, w := range lintBlockRules(loaded, rs.strangerCap) {
+		log.Printf("rules: %s", w)
+	}
 	info, _ := os.Stat(rs.path)
 	rs.mu.Lock()
 	rs.rules = loaded
@@ -230,4 +241,28 @@ func validateRules(rules []Rule, path string) []Rule {
 		valid = append(valid, r)
 	}
 	return valid
+}
+
+// lintBlockRules returns one advisory warning per block rule that could fire on
+// un-anchored (stranger) input. A block rule is stranger-safe when it requires
+// anchored evidence or a threshold strangers cannot reach:
+//   - min_corroboration >= 1  (corroboration counts anchored groups only, P0-1)
+//   - anchored_only            (gated on anchored evidence)
+//   - min_burst >= 1           (only anchored reporters feed the burst window, P0-2)
+//   - min_score >= strangerCap (a stranger's score is capped below this)
+//
+// Non-block rules are ignored. Warnings are advisory: the node-level backstop
+// already guarantees no stranger-only block is applied.
+func lintBlockRules(rules []Rule, strangerCap float64) []string {
+	var warnings []string
+	for _, r := range rules {
+		if r.Action != ActionBlock {
+			continue
+		}
+		safe := r.MinCorroboration >= 1 || r.AnchoredOnly || r.MinBurst >= 1 || r.MinScore >= strangerCap
+		if !safe {
+			warnings = append(warnings, fmt.Sprintf("rule %q can block on un-anchored (stranger) input: no min_corroboration, no anchored_only, no min_burst, and min_score (%.0f) < stranger_score_cap (%.0f); the node-level backstop will downgrade such blocks to watch", r.Name, r.MinScore, strangerCap))
+		}
+	}
+	return warnings
 }

@@ -163,7 +163,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		trust:       ts,
 		vouch:       vouch,
 		identityKey: identityKey,
-		rules:       rules.Load(cfg.RulesFilePath(), cfg.Reputation.BlockThreshold),
+		rules:       rules.Load(cfg.RulesFilePath(), cfg.Reputation.BlockThreshold, cfg.Trust.StrangerScoreCap),
 		burst:       rules.NewBurstStore(),
 		obs:         obs,
 		api:         apiSrv,

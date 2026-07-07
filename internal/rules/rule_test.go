@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/JoeRu/federloom/internal/store"
 	"github.com/JoeRu/federloom/pkg/proto"
 )
@@ -39,7 +41,7 @@ func emptyBurst() *BurstStore { return NewBurstStore() }
 // --- tests ---
 
 func TestEvaluate_LegacyFallback_Block(t *testing.T) {
-	rs := Load("", 75)
+	rs := Load("", 75, 15)
 	got := eval(rs, ev("ssh-probe"), recScore(80), emptyBurst())
 	if got != ActionBlock {
 		t.Errorf("score=80 > fallback=75: got %v, want block", got)
@@ -47,7 +49,7 @@ func TestEvaluate_LegacyFallback_Block(t *testing.T) {
 }
 
 func TestEvaluate_LegacyFallback_NoBlock(t *testing.T) {
-	rs := Load("", 75)
+	rs := Load("", 75, 15)
 	got := eval(rs, ev("ssh-probe"), recScore(50), emptyBurst())
 	if got != ActionNone {
 		t.Errorf("score=50 < fallback=75: got %v, want none", got)
@@ -61,7 +63,7 @@ func TestEvaluate_ReasonMatch(t *testing.T) {
   min_corroboration: 1
   action: block
 `)
-	rs := Load(path, 75)
+	rs := Load(path, 75, 15)
 	// matching reason
 	if got := eval(rs, ev("ssh-probe"), recCorr(1), emptyBurst()); got != ActionBlock {
 		t.Errorf("matching reason: got %v, want block", got)
@@ -83,7 +85,7 @@ func TestEvaluate_FirstMatchWins(t *testing.T) {
   min_corroboration: 1
   action: block
 `)
-	rs := Load(path, 75)
+	rs := Load(path, 75, 15)
 	got := eval(rs, ev("ssh-probe"), recCorr(1), emptyBurst())
 	if got != ActionWatch {
 		t.Errorf("first-match-wins: got %v, want watch", got)
@@ -97,7 +99,7 @@ func TestEvaluate_MinCorroboration(t *testing.T) {
   min_corroboration: 3
   action: block
 `)
-	rs := Load(path, 999)
+	rs := Load(path, 999, 15)
 	if got := eval(rs, ev("ssh-probe"), recCorr(2), emptyBurst()); got != ActionNone {
 		t.Errorf("corroboration=2 < 3: got %v, want none", got)
 	}
@@ -114,7 +116,7 @@ func TestEvaluate_AnchoredOnly(t *testing.T) {
   anchored_only: true
   action: block
 `)
-	rs := Load(path, 999)
+	rs := Load(path, 999, 15)
 	if got := eval(rs, ev("ssh-probe"), recStranger(), emptyBurst()); got != ActionNone {
 		t.Errorf("stranger: got %v, want none", got)
 	}
@@ -131,7 +133,7 @@ func TestEvaluate_MinBurst(t *testing.T) {
   burst_window: 1m
   action: block
 `)
-	rs := Load(path, 999)
+	rs := Load(path, 999, 15)
 	b := NewBurstStore()
 	base := time.Now()
 
@@ -160,7 +162,7 @@ func TestEvaluate_HotReload(t *testing.T) {
   min_corroboration: 1
   action: watch
 `)
-	rs := Load(path, 999)
+	rs := Load(path, 999, 15)
 	if got := eval(rs, ev("ssh-probe"), recCorr(1), emptyBurst()); got != ActionWatch {
 		t.Fatalf("before reload: got %v, want watch", got)
 	}
@@ -185,7 +187,7 @@ func TestEvaluate_CorruptFileKeepsLastGood(t *testing.T) {
   min_corroboration: 1
   action: block
 `)
-	rs := Load(path, 999)
+	rs := Load(path, 999, 15)
 	if got := eval(rs, ev("ssh-probe"), recCorr(1), emptyBurst()); got != ActionBlock {
 		t.Fatalf("initial load: got %v, want block", got)
 	}
@@ -210,7 +212,7 @@ func TestEvaluate_BurstCacheIsolatedByReason(t *testing.T) {
   burst_window: 1m
   action: block
 `)
-	rs := Load(path, 999)
+	rs := Load(path, 999, 15)
 	b := NewBurstStore()
 	base := time.Now()
 
@@ -239,7 +241,7 @@ func TestEvaluate_InvalidActionDropped(t *testing.T) {
   min_corroboration: 1
   action: watch
 `)
-	rs := Load(path, 999)
+	rs := Load(path, 999, 15)
 	// The typo rule must be dropped; the valid fallback fires instead
 	got := eval(rs, ev("ssh-probe"), recCorr(1), emptyBurst())
 	if got != ActionWatch {
@@ -258,7 +260,7 @@ func TestEvaluate_BurstWithoutWindowDropped(t *testing.T) {
   min_corroboration: 1
   action: watch
 `)
-	rs := Load(path, 999)
+	rs := Load(path, 999, 15)
 	// The misconfigured burst rule must be dropped; the valid fallback fires
 	got := eval(rs, ev("ssh-probe"), recCorr(1), emptyBurst())
 	if got != ActionWatch {
@@ -273,7 +275,7 @@ func TestEvaluate_ReturnsRuleName(t *testing.T) {
   min_corroboration: 1
   action: block
 `)
-	rs := Load(path, 75)
+	rs := Load(path, 75, 15)
 	action, name := rs.Evaluate(ev("ssh-probe"), recCorr(1), emptyBurst())
 	if action != ActionBlock {
 		t.Errorf("action = %v, want block", action)
@@ -284,7 +286,7 @@ func TestEvaluate_ReturnsRuleName(t *testing.T) {
 }
 
 func TestEvaluate_NoMatch_EmptyName(t *testing.T) {
-	rs := Load("", 75)
+	rs := Load("", 75, 15)
 	_, name := rs.Evaluate(ev("ssh-probe"), recScore(10), emptyBurst())
 	if name != "" {
 		t.Errorf("name = %q, want empty on no match", name)
@@ -316,5 +318,53 @@ func writeRulesAndBumpMtime(t *testing.T, path, content string) {
 	future := time.Now().Add(time.Second)
 	if err := os.Chtimes(path, future, future); err != nil {
 		t.Fatalf("bump mtime: %v", err)
+	}
+}
+
+// --- lint tests ---
+
+func TestLintBlockRulesFlagsUnsafe(t *testing.T) {
+	rules := []Rule{
+		{Name: "bare-block", Reason: "ssh-probe", Action: ActionBlock},
+		{Name: "low-score", MinScore: 10, Action: ActionBlock},
+	}
+	w := lintBlockRules(rules, 15)
+	if len(w) != 2 {
+		t.Fatalf("expected 2 warnings, got %d: %v", len(w), w)
+	}
+}
+
+func TestLintBlockRulesAllowsSafe(t *testing.T) {
+	rules := []Rule{
+		{Name: "corr", MinCorroboration: 1, Action: ActionBlock},
+		{Name: "anchored", AnchoredOnly: true, Action: ActionBlock},
+		{Name: "burst", MinBurst: 15, BurstWindow: duration{10 * time.Minute}, Action: ActionBlock},
+		{Name: "score", MinScore: 75, Action: ActionBlock},
+		{Name: "watch-bare", Reason: "ssh-probe", Action: ActionWatch},
+	}
+	if w := lintBlockRules(rules, 15); len(w) != 0 {
+		t.Errorf("expected no warnings, got %d: %v", len(w), w)
+	}
+}
+
+func TestShippedRulesAreStrangerSafe(t *testing.T) {
+	files := []string{
+		"../../deploy/examples/rules.yaml",
+		"../../deploy/mailcow/rules.yaml",
+		"../../deploy/wordpress/rules.yaml",
+		"../../deploy/honeypot/rules.yaml",
+	}
+	for _, f := range files {
+		data, err := os.ReadFile(f)
+		if err != nil {
+			t.Fatalf("read %s: %v", f, err)
+		}
+		var rules []Rule
+		if err := yaml.Unmarshal(data, &rules); err != nil {
+			t.Fatalf("parse %s: %v", f, err)
+		}
+		if w := lintBlockRules(rules, 15); len(w) != 0 {
+			t.Errorf("%s has stranger-exploitable block rules: %v", f, w)
+		}
 	}
 }
