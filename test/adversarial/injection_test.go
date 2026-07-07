@@ -30,14 +30,25 @@ const injectionRules = `
   action: block
 `
 
-// newInjectionNode builds a solo Node with injectionRules loaded and a mock
-// sink installed so Block calls are observable. Returns the node, its data dir,
-// and the mock sink.
-func newInjectionNode(t *testing.T) (*node.Node, string, *mockSink) {
+const bareReasonRules = `
+- name: bare-probe-block
+  reason: ssh-probe
+  action: block
+`
+
+const lowScoreRules = `
+- name: low-score-block
+  min_score: 10
+  action: block
+`
+
+// newNodeWithRules builds a solo Node with the given rules.yaml content and a
+// mock sink installed so Block calls are observable.
+func newNodeWithRules(t *testing.T, rulesYAML string) (*node.Node, string, *mockSink) {
 	t.Helper()
 	dir := t.TempDir()
 	rulesPath := filepath.Join(dir, "rules.yaml")
-	if err := os.WriteFile(rulesPath, []byte(injectionRules), 0o644); err != nil {
+	if err := os.WriteFile(rulesPath, []byte(rulesYAML), 0o644); err != nil {
 		t.Fatalf("write rules: %v", err)
 	}
 	cfg := config.Defaults()
@@ -53,6 +64,14 @@ func newInjectionNode(t *testing.T) (*node.Node, string, *mockSink) {
 	n.SetSinkForTest(sink)
 	t.Cleanup(func() { n.CloseStores() })
 	return n, dir, sink
+}
+
+// newInjectionNode builds a solo Node with injectionRules loaded and a mock
+// sink installed so Block calls are observable. Returns the node, its data dir,
+// and the mock sink.
+func newInjectionNode(t *testing.T) (*node.Node, string, *mockSink) {
+	t.Helper()
+	return newNodeWithRules(t, injectionRules)
 }
 
 // TestStrangerCannotInjectCorroborationBlock: a single un-anchored remote event
@@ -134,5 +153,48 @@ func TestAnchoredBurstStillBlocks(t *testing.T) {
 	}
 	if len(sink.blocked) == 0 {
 		t.Error("anchored burst of 15 must trip ssh-brute-burst; got 0 blocks")
+	}
+}
+
+// TestBareReasonBlockRuleStrangerDowngraded: a block rule with no min_* gates
+// (bare reason) must NOT let an un-anchored remote reporter force a block — the
+// node-level backstop downgrades it to watch (no anchored corroboration).
+func TestBareReasonBlockRuleStrangerDowngraded(t *testing.T) {
+	n, _, sink := newNodeWithRules(t, bareReasonRules)
+	n.ProcessRemote(transport.ReceivedEvent{
+		Event: proto.Event{IP: "203.0.113.20", Reason: "ssh-probe", ReporterID: "stranger-peer"},
+		From:  "stranger-peer",
+	})
+	if len(sink.blocked) != 0 {
+		t.Errorf("bare-reason block rule let a stranger block; want 0, got %d", len(sink.blocked))
+	}
+}
+
+// TestLowMinScoreBlockRuleStrangerDowngraded: a block rule whose min_score is
+// below the stranger cap must still not let a stranger flood force a block.
+func TestLowMinScoreBlockRuleStrangerDowngraded(t *testing.T) {
+	n, _, sink := newNodeWithRules(t, lowScoreRules)
+	// ssh-auth-success (weight 40) × stranger weight 0.3 → ~12 on the first event,
+	// capping toward 15 — always >= min_score:10, so the rule matches every time.
+	for i := 0; i < 3; i++ {
+		n.ProcessRemote(transport.ReceivedEvent{
+			Event: proto.Event{IP: "203.0.113.21", Reason: "ssh-auth-success", ReporterID: "stranger-peer"},
+			From:  "stranger-peer",
+		})
+	}
+	if len(sink.blocked) != 0 {
+		t.Errorf("low min_score block rule let a stranger flood block; want 0, got %d", len(sink.blocked))
+	}
+}
+
+// TestBareReasonBlockRuleAnchoredStillBlocks: the backstop only stops
+// stranger-only blocks — an anchored reporter still blocks via the same
+// bare-reason rule (regression).
+func TestBareReasonBlockRuleAnchoredStillBlocks(t *testing.T) {
+	n, dir, sink := newNodeWithRules(t, bareReasonRules)
+	re := anchoredEvent(t, n, dir, "203.0.113.22", "ssh-probe")
+	n.ProcessRemote(re)
+	if len(sink.blocked) != 1 || sink.blocked[0] != "203.0.113.22" {
+		t.Errorf("anchored reporter should block via bare-reason rule; got blocked=%v", sink.blocked)
 	}
 }

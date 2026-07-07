@@ -389,6 +389,15 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 	}
 	rec, _ := n.rep.GetRecord(e.IP)
 	action, ruleName := n.rules.Evaluate(e, rec, n.burst)
+	// Structural guarantee (spec Leitprinzip 8): a remote signal may never FORCE a
+	// block on stranger-only evidence. rec.Groups holds only anchored Person names
+	// (P0-1), so len==0 means no anchored voucher backs this IP; downgrade any block
+	// to watch regardless of rule configuration (bare-reason block, min_score below
+	// the stranger cap, or legacy fallback).
+	if action == rules.ActionBlock && len(rec.Groups) == 0 {
+		log.Printf("node: downgrading stranger-only block to watch for %s (rule %q, no anchored corroboration)", e.IP, ruleName)
+		action = rules.ActionWatch
+	}
 	switch action {
 	case rules.ActionBlock:
 		if err := n.sink.Block(e.IP); err != nil {
