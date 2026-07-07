@@ -125,7 +125,7 @@ func TestNeverBlockPoisoningLoopback(t *testing.T) {
 // that exceeds the 75-point threshold IS blocked, confirming the neverblock gate
 // does not over-protect legitimate enforcement targets.
 func TestNeverBlockPublicIPNotProtected(t *testing.T) {
-	const ip = "8.8.8.8"
+	const ip = "203.0.113.5"
 
 	s, err := store.Open(t.TempDir())
 	if err != nil {
