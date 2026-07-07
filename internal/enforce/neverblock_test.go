@@ -46,3 +46,16 @@ func TestNeverBlockIPv4MappedRFC1918(t *testing.T) {
 		t.Error("::ffff:10.0.0.1 (IPv4-mapped RFC1918) should be caught by 10.0.0.0/8")
 	}
 }
+
+func TestNeverBlockCoversPublicResolvers(t *testing.T) {
+	nbl := enforce.NewNeverBlockList(nil)
+	for _, ip := range []string{"8.8.8.8", "8.8.4.4", "1.1.1.1", "1.0.0.1", "9.9.9.9", "149.112.112.112"} {
+		if !nbl.Contains(ip) {
+			t.Errorf("public resolver %s must be never-blocked by default", ip)
+		}
+	}
+	// Sanity: an ordinary public IP is still blockable (not in the set).
+	if nbl.Contains("203.0.113.5") {
+		t.Error("203.0.113.5 must NOT be in the never-block default set")
+	}
+}

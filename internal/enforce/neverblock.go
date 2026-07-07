@@ -14,6 +14,15 @@ var defaultNeverBlock = []string{
 	"224.0.0.0/4",    // multicast
 	"fc00::/7",       // IPv6 ULA
 	"fe80::/10",      // IPv6 link-local
+	// Public resolvers — safe default per spec §10; operator-removable by
+	// editing this list. Broad provider/CDN ranges are documented in
+	// docs/config.md for opt-in via extra_whitelist (spec caveat N).
+	"8.8.8.8/32",         // Google DNS
+	"8.8.4.4/32",         // Google DNS secondary
+	"1.1.1.1/32",         // Cloudflare DNS
+	"1.0.0.1/32",         // Cloudflare DNS secondary
+	"9.9.9.9/32",         // Quad9
+	"149.112.112.112/32", // Quad9 secondary
 }
 
 // NeverBlockList is an immutable set of CIDRs that must never be blocked.
