@@ -433,6 +433,11 @@ func (n *Node) SetTrustReloadInterval(d time.Duration) {
 	n.trust.SetReloadInterval(d)
 }
 
+// SetSinkForTest replaces the enforce sink. Test-only: lets adversarial tests
+// observe Block/Unblock decisions through a mock sink without touching a real
+// firewall. Not called in production paths.
+func (n *Node) SetSinkForTest(s enforce.Sink) { n.sink = s }
+
 // CloseStores releases BadgerDB resources. Call in tests that build a Node
 // outside of Run (which closes the store via defer on return).
 func (n *Node) CloseStores() {
