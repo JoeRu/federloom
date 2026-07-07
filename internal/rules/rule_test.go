@@ -347,6 +347,15 @@ func TestLintBlockRulesAllowsSafe(t *testing.T) {
 	}
 }
 
+func TestLintBlockRulesFlagsMinScoreAtCap(t *testing.T) {
+	// A stranger's score can reach EXACTLY the cap, so min_score == cap is not
+	// stranger-safe; the lint must flag it (strict > boundary).
+	rules := []Rule{{Name: "at-cap", MinScore: 15, Action: ActionBlock}}
+	if w := lintBlockRules(rules, 15); len(w) != 1 {
+		t.Errorf("min_score at the cap must warn: got %d warnings, want 1: %v", len(w), w)
+	}
+}
+
 func TestShippedRulesAreStrangerSafe(t *testing.T) {
 	files := []string{
 		"../../deploy/examples/rules.yaml",

@@ -124,14 +124,14 @@ threshold) but not `strangerScoreCap`. Add it:
 //   - min_corroboration >= 1  (post-P0-1, corroboration counts anchored groups only)
 //   - anchored_only            (rule is gated on anchored evidence)
 //   - min_burst >= 1           (post-P0-2, only anchored reporters feed the burst window)
-//   - min_score >= strangerCap (a stranger's score is capped below this)
+//   - min_score > strangerCap (a stranger's score is capped at or below this)
 // Rules that are not block actions are ignored. The returned warnings are
 // advisory: the node-level backstop (spec §3) already guarantees safety.
 func lintBlockRules(rules []Rule, strangerCap float64) []string
 ```
 
 Logic per rule with `Action == ActionBlock`:
-- safe if `MinCorroboration >= 1 || AnchoredOnly || MinBurst >= 1 || (MinScore >= strangerCap)`.
+- safe if `MinCorroboration >= 1 || AnchoredOnly || MinBurst >= 1 || (MinScore > strangerCap)`.
 - otherwise append:
   `fmt.Sprintf("rule %q can block on un-anchored (stranger) input: no min_corroboration, no anchored_only, no min_burst, and min_score (%.0f) < stranger_score_cap (%.0f); the node-level backstop will downgrade such blocks to watch", r.Name, r.MinScore, strangerCap)`.
 

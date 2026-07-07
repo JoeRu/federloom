@@ -249,7 +249,7 @@ func validateRules(rules []Rule, path string) []Rule {
 //   - min_corroboration >= 1  (corroboration counts anchored groups only, P0-1)
 //   - anchored_only            (gated on anchored evidence)
 //   - min_burst >= 1           (only anchored reporters feed the burst window, P0-2)
-//   - min_score >= strangerCap (a stranger's score is capped below this)
+//   - min_score > strangerCap  (a stranger's score is capped at or below this)
 //
 // Non-block rules are ignored. Warnings are advisory: the node-level backstop
 // already guarantees no stranger-only block is applied.
@@ -259,7 +259,7 @@ func lintBlockRules(rules []Rule, strangerCap float64) []string {
 		if r.Action != ActionBlock {
 			continue
 		}
-		safe := r.MinCorroboration >= 1 || r.AnchoredOnly || r.MinBurst >= 1 || r.MinScore >= strangerCap
+		safe := r.MinCorroboration >= 1 || r.AnchoredOnly || r.MinBurst >= 1 || r.MinScore > strangerCap
 		if !safe {
 			warnings = append(warnings, fmt.Sprintf("rule %q can block on un-anchored (stranger) input: no min_corroboration, no anchored_only, no min_burst, and min_score (%.0f) < stranger_score_cap (%.0f); the node-level backstop will downgrade such blocks to watch", r.Name, r.MinScore, strangerCap))
 		}
