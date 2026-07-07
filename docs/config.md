@@ -309,6 +309,30 @@ api:
       - ssh-*
 ```
 
+### API authentication
+
+The REST API (`api.addr`) is **unauthenticated unless `FEDERLOOM_API_TOKEN` is
+set** in the daemon's environment; when set, all API requests require
+`Authorization: Bearer <token>`. Bind the API to loopback/VPN for local use, and
+**always set the token when the API is reachable off-host** — the blocklist
+endpoints are sensitive.
+
+### Recommended never-block additions
+
+Public DNS resolvers (Google, Cloudflare, Quad9) are never-blocked by default.
+Large mail/CDN provider ranges are **not** hardcoded (they are broad and change
+often — see spec caveat N); add the ones relevant to you via
+`enforce.extra_whitelist`, e.g.:
+
+```yaml
+enforce:
+  extra_whitelist:
+    - 35.190.247.0/24    # Google mail egress (example — verify current ranges)
+    - 40.92.0.0/15       # Microsoft/Outlook (example — verify current ranges)
+    - 104.16.0.0/13      # Cloudflare (example — verify current ranges)
+```
+Verify current provider ranges from their published SPF/IP lists before adding.
+
 ### dnsbl
 
 Controls the optional embedded DNSBL DNS server. Disabled when `addr` is empty.

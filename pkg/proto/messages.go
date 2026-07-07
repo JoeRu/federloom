@@ -12,9 +12,9 @@ const SchemaVersion = 1
 // Event is a single observed attack report (spec §7.1).
 type Event struct {
 	IP          string    `json:"ip"`              // cleartext IPv4/IPv6 (hashing rejected, spec §9)
-	Reason      string    `json:"reason"`          // e.g. "smtp-auth-bruteforce", "dict-attack", "spam"
+	Reason      string    `json:"reason"`          // attack scenario (spec §7.1 join-key `scenario`); e.g. "smtp-auth-bruteforce"
 	Timestamp   time.Time `json:"ts"`              // time of observation
-	PortClass   string    `json:"port_class"`      // target port class (for plausibility checks)
+	PortClass   string    `json:"port_class"`      // DEPRECATED (spec §7.1): retained for v0/v1 wire compat, superseded by Reason/scenario; removal is a future wire-protocol cycle
 	ReporterID  string    `json:"reporter"`        // pseudonymous node ID (public key)
 	Signature   []byte    `json:"sig"`             // signature of the reporter
 	SubnetID    string    `json:"subnet"`          // origin trust domain (federation, spec §5)
@@ -33,6 +33,8 @@ type PeerCert struct {
 }
 
 // ScoreEntry is the aggregated reputation for one IP within a trust domain (spec §7.2).
+// RESERVED: defined for the wire contract but not yet exchanged on the network —
+// nodes currently gossip Event, not ScoreEntry. See remediation sub-project E.
 type ScoreEntry struct {
 	IP            string    `json:"ip"`
 	Score         float64   `json:"score"`         // normalised, e.g. 0..100

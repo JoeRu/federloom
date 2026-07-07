@@ -38,11 +38,20 @@ instant and local. The local **threshold** is the real filter — your active
 enforcement set is thousands of IPs, not millions. **Decay** bounds the store and
 serves as GDPR storage limitation.
 
+> **Current status (2026-07):** the running system push-replicates every event
+> over gossipsub; the on-demand DHT query model and `EvidenceAggregate` import
+> are the *target*, not yet implemented (see spec traceability table §7.5/§11.4).
+
 ## Federation (Mastodon model)
 
 Each subnet is a trust domain with its own roots and governance. Subnets run
 isolated or federate — importing others' scores at a **trust discount**, with
 **origin tracing** to prevent A↔B double-counting. A bad subnet is **defederated**.
+
+> **Current status (2026-07):** the per-hop `FederationDiscount` and A↔B loop
+> guard are scaffolded but inert at runtime — gossipsub forwards raw bytes
+> without appending relay hops, so `OriginTrace` stays length 1. Making origin
+> tracing effective is tracked as remediation sub-project E.
 
 ## Good-neighbour behaviour
 

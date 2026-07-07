@@ -40,8 +40,9 @@ repository. To join:
 # 1. Set up your own node first (see getting-started.md)
 # 2. Verify the fingerprint out-of-band: 79bb d13a 114b 88fe
 
-# On your server, from the deploy directory (bootstrap.sh already copied federation.invite there):
-docker compose cp /opt/federloom/federation.invite federloom:/tmp/federation.invite
+# From the deploy directory on your server (the bootstrap rsync placed
+# federation.invite at the repo root, one level up from deploy/<stack>/):
+docker compose cp ../../federation.invite federloom:/tmp/federation.invite
 docker compose exec federloom federloomctl federation join /tmp/federation.invite \
     --config /etc/federloom/config.yaml
 ```
@@ -87,8 +88,9 @@ Federation invite exchange — all via `docker compose exec`:
 docker compose exec federloom federloomctl federation invite \
     --addr /dns4/your.host/tcp/7700 --config /etc/federloom/config.yaml
 
-# New operator: join using an invite file
-docker compose cp /opt/federloom/some.invite federloom:/tmp/some.invite
+# New operator: join using an invite file (path relative to wherever you saved it,
+# e.g. the deploy directory if the sender rsynced it there):
+docker compose cp ./some.invite federloom:/tmp/some.invite
 docker compose exec federloom federloomctl federation join /tmp/some.invite \
     --config /etc/federloom/config.yaml
 ```
