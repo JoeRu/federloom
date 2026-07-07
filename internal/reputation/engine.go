@@ -83,14 +83,14 @@ func (e *Engine) Record(ip, reason, reporterID string, trust float64, group stri
 		rec.Score = 100
 	}
 
-	// Corroboration: distinct anchored Person groups + at most one stranger vote.
+	// Corroboration counts distinct ANCHORED Person groups only. Strangers are
+	// deliberately excluded so a single un-anchored remote reporter can never
+	// satisfy a min_corroboration block rule (spec Leitprinzip 8; batch A P0-1).
+	// StrangerSeen/StrangerContrib still bound the stranger *score* (cap 15).
 	if anchored && group != "" && !containsString(rec.Groups, group) {
 		rec.Groups = append(rec.Groups, group)
 	}
 	rec.Corroboration = len(rec.Groups)
-	if rec.StrangerSeen {
-		rec.Corroboration++
-	}
 
 	// Audit trail and metadata.
 	if !containsString(rec.ReporterIDs, reporterID) {

@@ -86,8 +86,10 @@ func TestCorroborationCountsGroupsNotPeers(t *testing.T) {
 	}
 }
 
-// TestCorroborationStrangersCountOnce: all strangers together are one vote.
-func TestCorroborationStrangersCountOnce(t *testing.T) {
+// TestCorroborationStrangersNeverCount: any number of strangers contribute
+// zero corroboration votes; only the anchored Person group counts (batch A
+// P0-1: strangers must never satisfy a min_corroboration block rule).
+func TestCorroborationStrangersNeverCount(t *testing.T) {
 	e := openEngineCap(t, 15)
 	for _, peerID := range []string{"s1", "s2", "s3"} {
 		if _, err := e.Record("192.0.2.4", "ssh-probe", peerID, 0.3, "", false); err != nil {
@@ -98,8 +100,8 @@ func TestCorroborationStrangersCountOnce(t *testing.T) {
 		t.Fatalf("Record anchored: %v", err)
 	}
 	rec, _ := e.GetRecord("192.0.2.4")
-	if rec.Corroboration != 2 {
-		t.Errorf("corroboration = %d, want 2 (1 Person group + 1 stranger bucket)", rec.Corroboration)
+	if rec.Corroboration != 1 {
+		t.Errorf("corroboration = %d, want 1 (1 Person group; strangers never corroborate)", rec.Corroboration)
 	}
 }
 
@@ -123,6 +125,58 @@ func TestAnchoredAddsScoreOnTopOfSaturatedStrangers(t *testing.T) {
 	}
 	if score <= saturated.Score {
 		t.Errorf("anchored reporter added no score over saturated strangers: %v -> %v", saturated.Score, score)
+	}
+}
+
+// TestStrangerDoesNotCountAsCorroboration verifies that a lone un-anchored
+// reporter never bumps Corroboration, so it can never satisfy a
+// min_corroboration:1 block rule (spec Leitprinzip 8; batch A P0-1).
+func TestStrangerDoesNotCountAsCorroboration(t *testing.T) {
+	s, err := store.Open(t.TempDir())
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer s.Close()
+	eng := reputation.New(s, 7*24*time.Hour, 15)
+
+	// One un-anchored (stranger) report: anchored=false, group="".
+	if _, err := eng.Record("203.0.113.7", "ssh-post-auth-command", "stranger-1", 0.3, "", false); err != nil {
+		t.Fatalf("Record: %v", err)
+	}
+	rec, err := eng.GetRecord("203.0.113.7")
+	if err != nil {
+		t.Fatalf("GetRecord: %v", err)
+	}
+	if rec.Corroboration != 0 {
+		t.Errorf("stranger must not corroborate: Corroboration=%d, want 0", rec.Corroboration)
+	}
+	if !rec.StrangerSeen {
+		t.Error("StrangerSeen should still be true after a stranger report")
+	}
+}
+
+// TestAnchoredGroupsCountAsCorroboration verifies that only distinct anchored
+// Person groups count toward Corroboration; a stranger on the same IP adds
+// nothing.
+func TestAnchoredGroupsCountAsCorroboration(t *testing.T) {
+	s, err := store.Open(t.TempDir())
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer s.Close()
+	eng := reputation.New(s, 7*24*time.Hour, 15)
+
+	// Two distinct anchored groups + a stranger on the same IP.
+	_, _ = eng.Record("203.0.113.8", "ssh-probe", "peerA", 0.9, "alice", true)
+	_, _ = eng.Record("203.0.113.8", "ssh-probe", "peerB", 0.9, "bob", true)
+	_, _ = eng.Record("203.0.113.8", "ssh-probe", "peerC", 0.3, "", false)
+
+	rec, err := eng.GetRecord("203.0.113.8")
+	if err != nil {
+		t.Fatalf("GetRecord: %v", err)
+	}
+	if rec.Corroboration != 2 {
+		t.Errorf("two anchored groups (+1 stranger) must yield Corroboration=2, got %d", rec.Corroboration)
 	}
 }
 

@@ -67,8 +67,8 @@ func TestSybilStrangerFloodCapped(t *testing.T) {
 	if rec.Score > cap+0.0001 {
 		t.Errorf("100-Sybil flood exceeded strangerCap: score=%.4f, cap=%.0f", rec.Score, cap)
 	}
-	if rec.Corroboration != 1 {
-		t.Errorf("corroboration = %d, want 1 (all 100 strangers share one bucket)", rec.Corroboration)
+	if rec.Corroboration != 0 {
+		t.Errorf("corroboration = %d, want 0 (strangers never corroborate)", rec.Corroboration)
 	}
 }
 

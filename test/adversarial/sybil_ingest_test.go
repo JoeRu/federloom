@@ -44,8 +44,8 @@ func TestSybilFloodScoreCapped(t *testing.T) {
 	if rec.Score <= 0 {
 		t.Errorf("score should be > 0 after 50 reports, got %.4f", rec.Score)
 	}
-	if rec.Corroboration != 1 {
-		t.Errorf("corroboration: 50 strangers must count as 1 vote, got %d", rec.Corroboration)
+	if rec.Corroboration != 0 {
+		t.Errorf("corroboration: strangers must not corroborate, got %d (want 0)", rec.Corroboration)
 	}
 }
 
@@ -82,7 +82,7 @@ func TestSybilFloodHighTrustCapped(t *testing.T) {
 	if rec.Score <= 0 {
 		t.Errorf("score should be > 0 after 50 reports, got %.4f", rec.Score)
 	}
-	if rec.Corroboration != 1 {
-		t.Errorf("corroboration: 50 strangers must count as 1 vote, got %d", rec.Corroboration)
+	if rec.Corroboration != 0 {
+		t.Errorf("corroboration: strangers must not corroborate, got %d (want 0)", rec.Corroboration)
 	}
 }
