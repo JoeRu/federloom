@@ -382,7 +382,11 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 		log.Printf("node: record remote %s: %v", e.IP, err)
 		return
 	}
-	n.burst.Record(e.IP, e.Reason, time.Now())
+	// Only anchored reporters feed the burst window: an un-anchored remote peer
+	// must not be able to trip a min_burst block rule (spec Leitprinzip 8; P0-2).
+	if anchored {
+		n.burst.Record(e.IP, e.Reason, time.Now())
+	}
 	rec, _ := n.rep.GetRecord(e.IP)
 	action, ruleName := n.rules.Evaluate(e, rec, n.burst)
 	switch action {
