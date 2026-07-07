@@ -37,7 +37,7 @@ services:
       - "7700:7700"
       - "100.71.239.1:9101:9101"
       - "100.71.239.1:9102:9102"
-      - "5353:5353/udp"
+      - "100.71.239.1:5353:5353/udp"
     volumes:
       - ./config.yaml:/etc/federloom/config.yaml:ro
       - ./rules.yaml:/etc/federloom/rules.yaml:ro
