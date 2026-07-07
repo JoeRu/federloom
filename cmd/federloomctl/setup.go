@@ -127,4 +127,3 @@ Next: federloomctl federation invite --addr /ip4/YOUR_IP/tcp/7700 > invite.json
 `, fp)
 	return nil
 }
-

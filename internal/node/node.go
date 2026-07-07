@@ -34,24 +34,24 @@ const maxOriginTraceLen = 8
 
 // Node is the composition root that connects ingest, reputation, enforce, and transport.
 type Node struct {
-	cfg        *config.Config
-	transport  *transport.Node // may be nil (solo mode without bootstrap)
-	store      *store.BadgerStore
-	rep        *reputation.Engine
-	sources    []ingest.Source
-	sink       enforce.Sink
-	neverblock *enforce.NeverBlockList
-	whitelist  *store.WhitelistStore // local-only allowlist; never nil (may be empty)
-	selfID     string
-	trust      *trust.Store
-	vouch       *proto.PeerCert   // this node's own peer-cert, attached to published events
+	cfg         *config.Config
+	transport   *transport.Node // may be nil (solo mode without bootstrap)
+	store       *store.BadgerStore
+	rep         *reputation.Engine
+	sources     []ingest.Source
+	sink        enforce.Sink
+	neverblock  *enforce.NeverBlockList
+	whitelist   *store.WhitelistStore // local-only allowlist; never nil (may be empty)
+	selfID      string
+	trust       *trust.Store
+	vouch       *proto.PeerCert      // this node's own peer-cert, attached to published events
 	identityKey libp2pcrypto.PrivKey // nil in solo mode (no transport); set for signing events
-	rules       *rules.RuleSet    // NEW
-	burst       *rules.BurstStore // NEW
-	obs        *observability.Observer
-	api        *api.Server        // nil-safe: all methods no-op when cfg.API.Addr == ""
-	dnsbl      *dnsbl.Server      // nil-safe: Start is no-op when addr/zone are empty
-	discovery  *discovery.Manager // nil in solo mode (no transport)
+	rules       *rules.RuleSet       // NEW
+	burst       *rules.BurstStore    // NEW
+	obs         *observability.Observer
+	api         *api.Server        // nil-safe: all methods no-op when cfg.API.Addr == ""
+	dnsbl       *dnsbl.Server      // nil-safe: Start is no-op when addr/zone are empty
+	discovery   *discovery.Manager // nil in solo mode (no transport)
 }
 
 // New wires all subsystems from cfg. t may be nil for local-only operation.

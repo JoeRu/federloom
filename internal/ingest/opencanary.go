@@ -29,17 +29,17 @@ type openCanaryEvent struct {
 var openCanaryReasons = map[int]string{
 	2000: "ftp-login-attempt",
 	2001: "ftp-auth-attempt",
-	3000: "http-probe",            // LOG_HTTP_GET — fires for both HTTP and HTTPS GET
-	3001: "http-post-login",       // LOG_HTTP_POST_LOGIN_ATTEMPT
-	3002: "http-unimplemented",    // LOG_HTTP_UNIMPLEMENTED_METHOD
-	3003: "http-redirect",         // LOG_HTTP_REDIRECT
-	4000: "ssh-new-connection",    // LOG_SSH_NEW_CONNECTION
-	4001: "ssh-remote-version",    // LOG_SSH_REMOTE_VERSION_SENT
-	4002: "ssh-login-attempt",     // LOG_SSH_LOGIN_ATTEMPT
-	5000: "smb-file-open",         // LOG_SMB_FILE_OPEN
-	6001: "telnet-login-attempt",  // LOG_TELNET_LOGIN_ATTEMPT
-	7001: "http-proxy-login",      // LOG_HTTPPROXY_LOGIN_ATTEMPT
-	8001: "mysql-login-attempt",   // LOG_MYSQL_LOGIN_ATTEMPT
+	3000: "http-probe",           // LOG_HTTP_GET — fires for both HTTP and HTTPS GET
+	3001: "http-post-login",      // LOG_HTTP_POST_LOGIN_ATTEMPT
+	3002: "http-unimplemented",   // LOG_HTTP_UNIMPLEMENTED_METHOD
+	3003: "http-redirect",        // LOG_HTTP_REDIRECT
+	4000: "ssh-new-connection",   // LOG_SSH_NEW_CONNECTION
+	4001: "ssh-remote-version",   // LOG_SSH_REMOTE_VERSION_SENT
+	4002: "ssh-login-attempt",    // LOG_SSH_LOGIN_ATTEMPT
+	5000: "smb-file-open",        // LOG_SMB_FILE_OPEN
+	6001: "telnet-login-attempt", // LOG_TELNET_LOGIN_ATTEMPT
+	7001: "http-proxy-login",     // LOG_HTTPPROXY_LOGIN_ATTEMPT
+	8001: "mysql-login-attempt",  // LOG_MYSQL_LOGIN_ATTEMPT
 }
 
 // OpenCanary tails an OpenCanary JSONL log and emits proto.Events.

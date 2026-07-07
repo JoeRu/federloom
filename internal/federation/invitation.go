@@ -20,9 +20,9 @@ import (
 // and consumed by a new peer's `federloomctl federation join`. It carries enough
 // information to bootstrap trust without any out-of-band coordination.
 type Invitation struct {
-	Version    int          `json:"version"`      // always 1
+	Version    int          `json:"version"` // always 1
 	CreatedAt  time.Time    `json:"created_at"`
-	InvitedBy  string       `json:"invited_by"`   // fingerprint of inviting Person key
+	InvitedBy  string       `json:"invited_by"` // fingerprint of inviting Person key
 	Federation FedInfo      `json:"federation"`
 	Trust      trust.Bundle `json:"trust_bundle"`
 }
