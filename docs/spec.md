@@ -1,9 +1,9 @@
 # Spezifikation: Dezentrale P2P-Reputations-Blockliste
 
-**Arbeitstitel:** (offen – z. B. *FederLoom*, *HiveBlock*, *MeshBan*)
-**Status:** Entwurf / Brainstorming-Ergebnis
-**Primärer Anwendungsfall:** Add-On-Komponente für das Mailcow-Projekt
-**Datum:** 2026-06-05
+**Arbeitstitel:** *FederLoom* / https://github.com/JoeRu/federloom
+**Status:** Aktuelle Implementierung in Arbeit / Aktueller Stand
+**Primärer Anwendungsfall:** Gemeinsame Verteidung durch geteilte Informationen / https://github.com/JoeRu/Mailcow-Crowdsec-Override
+**Datum:** 2026-07-07
 
 ---
 
@@ -529,6 +529,34 @@ Umgebungen sollen `advertise: false` setzen. Die Onboarding-Dokumentation muss d
 prominent erklären.
 
 ---
+
+## 12a. Implementation Traceability (2026-07)
+
+Honest status of each design area in the current codebase. This table — not the
+§13 "Nächste Schritte" list — is the source of truth for what is live.
+`DONE` = implemented and tested · `PARTIAL` = present but incomplete/inert ·
+`PLANNED` = designed, not yet built (remediation sub-project in parentheses).
+
+| Spec § | Area | Package | Status |
+|---|---|---|---|
+| §4.1 | Ground-truth anchors | `internal/trust`, honeypot/spamtrap ingest | DONE |
+| §4.2 | Diversity-weighted corroboration (ASN/geo) | — | PLANNED (D) |
+| §4.3 | Asymmetric decay | `internal/reputation` | DONE |
+| §4.4 | Dispute / anti-trust votes | — | PLANNED (E) |
+| §4.5 | Applicability weighting | — | PLANNED (E) |
+| §5.1 | Trust anchors (Person keys, peer certs) | `internal/trust`, `internal/identity` | DONE |
+| §5.2 | Federation import / discount / origin-trace | `internal/node`, `internal/trust` | PARTIAL — discount + defederation present; origin-trace inert at runtime (E) |
+| §7.1 | Event model | `pkg/proto` | DONE — `port_class` deprecated-retained |
+| §7.1 | IPv6 `/64` prefix normalization | — | PLANNED (C) |
+| §7.2 | ScoreEntry aggregate | `pkg/proto` | RESERVED — defined, not exchanged |
+| §7.5 | EvidenceAggregate (federated import type) | — | PLANNED (E) |
+| §7.6 | System profile / SBOM | — | PLANNED (E) |
+| §8 | Score dynamics (logistic accumulation, decay) | `internal/reputation`, `internal/rules` | DONE |
+| §9 | GDPR framing (cleartext IP, decay = deletion) | `internal/store` (TTL) | DONE |
+| §10 | Never-block set | `internal/enforce` | DONE — incl. public resolvers |
+| §11.3 | O(1) enforcement (ipset/nftables) | `internal/enforce` | DONE |
+| §11.4 | On-demand query / pull transport | `internal/transport` | PLANNED (E) — current model is gossip push |
+| §14 | Federation discovery (DHT + relay list) | `internal/discovery` | DONE |
 
 ## 13. Nächste Schritte
 
