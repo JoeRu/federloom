@@ -47,17 +47,19 @@ type DNSBLConfig struct {
 
 // Config is the top-level runtime configuration.
 type Config struct {
-	FederationMode string              `yaml:"federation_mode"`
-	Store          StoreConfig         `yaml:"store"`
-	Reputation     ReputationConfig    `yaml:"reputation"`
-	Ingest         IngestConfig        `yaml:"ingest"`
-	Enforce        EnforceConfig       `yaml:"enforce"`
-	Trust          TrustConfig         `yaml:"trust"`
-	Observability  ObservabilityConfig `yaml:"observability"`
-	API            APIConfig           `yaml:"api"`
-	BootstrapPeers []string            `yaml:"bootstrap_peers"`
-	DNSBL          DNSBLConfig         `yaml:"dnsbl"`
-	Discovery      DiscoveryConfig     `yaml:"discovery"`
+	FederationMode          string              `yaml:"federation_mode"`
+	FederationSubnet        string              `yaml:"federation_subnet"`         // home trust domain; "" or "default" = base topic
+	FederationBridgeSubnets []string            `yaml:"federation_bridge_subnets"` // subnets this node bridges (empty = leaf)
+	Store                   StoreConfig         `yaml:"store"`
+	Reputation              ReputationConfig    `yaml:"reputation"`
+	Ingest                  IngestConfig        `yaml:"ingest"`
+	Enforce                 EnforceConfig       `yaml:"enforce"`
+	Trust                   TrustConfig         `yaml:"trust"`
+	Observability           ObservabilityConfig `yaml:"observability"`
+	API                     APIConfig           `yaml:"api"`
+	BootstrapPeers          []string            `yaml:"bootstrap_peers"`
+	DNSBL                   DNSBLConfig         `yaml:"dnsbl"`
+	Discovery               DiscoveryConfig     `yaml:"discovery"`
 }
 
 // StoreConfig configures the BadgerDB reputation store.
@@ -336,4 +338,17 @@ func (c *Config) RulesFilePath() string {
 		return c.Reputation.RulesFile
 	}
 	return filepath.Join(c.Store.Dir, "rules.yaml")
+}
+
+// EffectiveBridgeSubnets returns the configured bridge subnets minus any entry
+// that equals the home subnet (bridging to yourself is meaningless).
+func (c *Config) EffectiveBridgeSubnets() []string {
+	out := make([]string, 0, len(c.FederationBridgeSubnets))
+	for _, s := range c.FederationBridgeSubnets {
+		if s == c.FederationSubnet {
+			continue
+		}
+		out = append(out, s)
+	}
+	return out
 }

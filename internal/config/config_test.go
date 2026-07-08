@@ -331,3 +331,27 @@ func TestDefaultsIPv6Prefix(t *testing.T) {
 		t.Errorf("default IPv6Prefix = %d, want 64", got)
 	}
 }
+
+func TestEffectiveBridgeSubnets(t *testing.T) {
+	c := &config.Config{
+		FederationSubnet:        "a",
+		FederationBridgeSubnets: []string{"a", "b", "c"},
+	}
+	got := c.EffectiveBridgeSubnets()
+	want := []string{"b", "c"} // "a" == home subnet is dropped
+	if len(got) != len(want) {
+		t.Fatalf("EffectiveBridgeSubnets = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("index %d = %q, want %q", i, got[i], want[i])
+		}
+	}
+}
+
+func TestEffectiveBridgeSubnetsEmpty(t *testing.T) {
+	c := &config.Config{}
+	if got := c.EffectiveBridgeSubnets(); len(got) != 0 {
+		t.Errorf("expected no bridge subnets, got %v", got)
+	}
+}
