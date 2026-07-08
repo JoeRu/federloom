@@ -59,3 +59,13 @@ func TestNeverBlockCoversPublicResolvers(t *testing.T) {
 		t.Error("203.0.113.5 must NOT be in the never-block default set")
 	}
 }
+
+func TestNeverBlockAcceptsCIDRKey(t *testing.T) {
+	nbl := enforce.NewNeverBlockList([]string{"2001:db8:1::/48"})
+	if !nbl.Contains("2001:db8:1:2::/64") {
+		t.Error("/64 whose base is in a whitelisted /48 must be never-blocked")
+	}
+	if nbl.Contains("2001:db8:9:9::/64") {
+		t.Error("/64 outside all never-block ranges must be blockable")
+	}
+}

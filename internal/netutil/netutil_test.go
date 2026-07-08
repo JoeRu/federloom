@@ -39,3 +39,17 @@ func TestNormalizeIP(t *testing.T) {
 		})
 	}
 }
+
+func TestKeyAddr(t *testing.T) {
+	a, ok := KeyAddr("1.2.3.4")
+	if !ok || a.String() != "1.2.3.4" {
+		t.Errorf("KeyAddr(1.2.3.4) = %v,%v", a, ok)
+	}
+	a, ok = KeyAddr("2001:db8:1:2::/64")
+	if !ok || a.String() != "2001:db8:1:2::" {
+		t.Errorf("KeyAddr(/64) base = %v,%v, want 2001:db8:1:2::", a, ok)
+	}
+	if _, ok := KeyAddr("nonsense"); ok {
+		t.Error("KeyAddr(nonsense) ok=true, want false")
+	}
+}

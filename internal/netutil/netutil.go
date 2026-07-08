@@ -45,3 +45,16 @@ func NormalizeIP(s string, ipv6Prefix int) (string, error) {
 	}
 	return p.Masked().String(), nil
 }
+
+// KeyAddr returns the address to test for a reputation key: the address itself
+// for a bare IP, or the base address for a CIDR key. ok is false if s parses as
+// neither. Used by never-block/whitelist/API to match a normalized CIDR key.
+func KeyAddr(s string) (addr netip.Addr, ok bool) {
+	if a, err := netip.ParseAddr(s); err == nil {
+		return a.Unmap(), true
+	}
+	if p, err := netip.ParsePrefix(s); err == nil {
+		return p.Addr().Unmap(), true
+	}
+	return netip.Addr{}, false
+}

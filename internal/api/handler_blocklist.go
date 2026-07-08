@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/JoeRu/federloom/internal/netutil"
 	"github.com/JoeRu/federloom/internal/store"
 )
 
@@ -131,7 +132,7 @@ func (s *Server) handleCrowdSecCTI(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain")
 	_ = s.store.ScanScores(func(ip string, rec store.ScoreRecord) error {
-		if _, err := netip.ParseAddr(ip); err != nil {
+		if !validReputationKey(ip) {
 			return nil
 		}
 		if s.passRecord(rec, f, purposePatterns) {
@@ -139,4 +140,19 @@ func (s *Server) handleCrowdSecCTI(w http.ResponseWriter, r *http.Request) {
 		}
 		return nil
 	})
+}
+
+// validReputationKey reports whether ip is a well-formed reputation key: a
+// bare IP address (v4 or v6), or an IPv6 CIDR (never an IPv4 CIDR — see
+// netutil.NormalizeIP, which rejects IPv4-in-CIDR-form as malformed).
+func validReputationKey(ip string) bool {
+	addr, ok := netutil.KeyAddr(ip)
+	if !ok {
+		return false
+	}
+	if _, err := netip.ParseAddr(ip); err == nil {
+		return true // bare address
+	}
+	// Not a bare address, so it parsed as a CIDR: only IPv6 CIDR is valid.
+	return addr.Is6()
 }

@@ -8,6 +8,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/JoeRu/federloom/internal/netutil"
 	"github.com/JoeRu/federloom/pkg/proto"
 )
 
@@ -43,11 +44,10 @@ func LoadWhitelist(path string) (*WhitelistStore, error) {
 // Contains returns true if ip is covered by any entry in the store.
 // Handles exact IP matches, CIDR containment, IPv4 and IPv6, and IPv4-mapped IPv6.
 func (w *WhitelistStore) Contains(ip string) bool {
-	addr, err := netip.ParseAddr(ip)
-	if err != nil {
+	addr, ok := netutil.KeyAddr(ip)
+	if !ok {
 		return false
 	}
-	addr = addr.Unmap()
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 	for _, entry := range w.entries {

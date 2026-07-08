@@ -1,6 +1,10 @@
 package enforce
 
-import "net/netip"
+import (
+	"net/netip"
+
+	"github.com/JoeRu/federloom/internal/netutil"
+)
 
 // defaultNeverBlock contains CIDRs that must never be blocked (spec §6.2, invariant 3).
 var defaultNeverBlock = []string{
@@ -45,13 +49,13 @@ func NewNeverBlockList(extra []string) *NeverBlockList {
 	return &NeverBlockList{prefixes: prefixes}
 }
 
-// Contains returns true if ip is covered by any CIDR in the list.
+// Contains returns true if ip (a bare address or CIDR key) is covered by any
+// CIDR in the list. For a CIDR key, its base address is tested.
 func (l *NeverBlockList) Contains(ip string) bool {
-	addr, err := netip.ParseAddr(ip)
-	if err != nil {
+	addr, ok := netutil.KeyAddr(ip)
+	if !ok {
 		return false
 	}
-	addr = addr.Unmap()
 	for _, p := range l.prefixes {
 		if p.Contains(addr) {
 			return true
