@@ -144,8 +144,19 @@ func (n *Node) Publish(ctx context.Context, e proto.Event, subnet string) error 
 }
 
 // Subscribe returns a channel that delivers decoded events from the network
-// together with their verified publisher. Closed when the Node is closed.
+// together with their verified publisher. NOT closed when the Node is closed
+// (multiple read loops feed it); consumers must select on their own context
+// for shutdown instead of relying on channel closure.
 func (n *Node) Subscribe() <-chan ReceivedEvent { return n.events }
+
+// Subnets returns the canonical subnet keys this node is joined to (home + bridges).
+func (n *Node) Subnets() []string {
+	out := make([]string, 0, len(n.topics))
+	for s := range n.topics {
+		out = append(out, s)
+	}
+	return out
+}
 
 // Close shuts down the subscriptions, topics, DHT, and host.
 func (n *Node) Close() error {

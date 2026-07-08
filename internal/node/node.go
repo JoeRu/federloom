@@ -321,8 +321,20 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 		return
 	}
 	if e.ReporterID != re.From {
-		log.Printf("node: drop spoofed event: reporter %q != verified publisher %q", e.ReporterID, re.From)
-		return
+		// A relayed (bridged) event is re-published under the relaying node's peer
+		// ID, not the originator's. Authenticate it by the originator's signature
+		// (verified below against e.ReporterID) and require the verified publisher
+		// to be the last hop in OriginTrace — the bridge that re-emitted it. This
+		// keeps the anti-spoofing guarantee: a relay cannot forge an event from
+		// someone else (it cannot produce that peer's signature).
+		if len(e.Signature) == 0 {
+			log.Printf("node: drop relayed event from %s: reporter %q != publisher and no signature", re.From, e.ReporterID)
+			return
+		}
+		if len(e.OriginTrace) == 0 || e.OriginTrace[len(e.OriginTrace)-1] != re.From {
+			log.Printf("node: drop relayed event: publisher %q is not the last OriginTrace hop", re.From)
+			return
+		}
 	}
 	if n.trust.IsBlocked(re.From) {
 		log.Printf("node: drop event from blocked peer %s", re.From)
@@ -424,10 +436,11 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 	n.reemitIfBridge(re)
 }
 
-// reemitIfBridge re-publishes an accepted remote event onto the other subnets
-// this node bridges, appending selfID to OriginTrace. Leaves (no bridge subnets)
-// and loop/cap conditions are no-ops. The originator's signature is preserved
-// (OriginTrace is not signed).
+// reemitIfBridge re-publishes an accepted remote event onto every subnet this
+// node is joined to (home + bridges) except the one it arrived on, appending
+// selfID to OriginTrace. Leaves (no bridge subnets configured) and loop/cap
+// conditions are no-ops. The originator's signature is preserved (OriginTrace
+// is not signed).
 func (n *Node) reemitIfBridge(re transport.ReceivedEvent) {
 	if n.transport == nil || n.selfID == "" {
 		return
@@ -450,7 +463,7 @@ func (n *Node) reemitIfBridge(re transport.ReceivedEvent) {
 	out.OriginTrace = append(append([]string{}, e.OriginTrace...), n.selfID)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	for _, sn := range bridges {
+	for _, sn := range n.transport.Subnets() {
 		if sn == re.Subnet {
 			continue // don't echo back onto the subnet it arrived from
 		}

@@ -3,10 +3,13 @@
 package adversarial
 
 import (
+	"crypto/rand"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
+
+	libp2pcrypto "github.com/libp2p/go-libp2p/core/crypto"
 
 	"github.com/JoeRu/federloom/internal/config"
 	"github.com/JoeRu/federloom/internal/identity"
@@ -236,8 +239,9 @@ func TestIPv6AddressesAggregatePer64(t *testing.T) {
 
 // TestFederationDiscountPerBridgeHop verifies the discount is applied per bridge
 // hop = len(OriginTrace)-1: a direct (len 1) stranger event is NOT discounted,
-// and each extra hop multiplies by FederationDiscount. Score after one stranger
-// event = stranger_weight * reasonWeight * discount^(hops), read via GetScore.
+// and a two-hop (len 3) relayed event is discounted by discount^2. The two-hop
+// event must be a REAL signed relay (publisher = last OriginTrace hop) to pass
+// the C1 spoof guard, so this also exercises the relayed-event path end to end.
 func TestFederationDiscountPerBridgeHop(t *testing.T) {
 	// Two IPs, same reason/weight; one arrives direct (len 1), one via 2 hops (len 3).
 	n, _, _ := newNodeWithRules(t, injectionRules)
@@ -246,23 +250,104 @@ func TestFederationDiscountPerBridgeHop(t *testing.T) {
 		Event: proto.Event{IP: "203.0.113.40", Reason: "ssh-probe", ReporterID: "strangerD", OriginTrace: []string{"strangerD"}},
 		From:  "strangerD",
 	}
-	twoHop := transport.ReceivedEvent{
-		Event: proto.Event{IP: "203.0.113.41", Reason: "ssh-probe", ReporterID: "strangerH", OriginTrace: []string{"strangerH", "bridge1", "bridge2"}},
-		From:  "strangerH",
+
+	priv, _, err := libp2pcrypto.GenerateEd25519Key(rand.Reader)
+	if err != nil {
+		t.Fatalf("genkey: %v", err)
 	}
+	origID, err := identity.PeerIDFromPrivKey(priv)
+	if err != nil {
+		t.Fatalf("peerid: %v", err)
+	}
+	twoHopEvent := proto.Event{
+		IP:          "203.0.113.41",
+		Reason:      "ssh-probe",
+		ReporterID:  origID,
+		Timestamp:   time.Now().UTC(),
+		OriginTrace: []string{origID, "bridge1", "bridge2"},
+	}
+	if err := identity.SignEvent(&twoHopEvent, priv); err != nil {
+		t.Fatalf("sign: %v", err)
+	}
+	// Relayed: publisher is the last OriginTrace hop ("bridge2"), not the originator.
+	twoHop := transport.ReceivedEvent{Event: twoHopEvent, From: "bridge2"}
+
 	n.ProcessRemote(direct)
 	n.ProcessRemote(twoHop)
 
 	rd, _ := n.GetScore("203.0.113.40")
 	rh, _ := n.GetScore("203.0.113.41")
 	// Direct event: no discount. Two-bridge event: discount^2 (0.25 with default 0.5).
-	// So the direct score must be strictly greater than the two-hop score.
 	if !(rd.Score > rh.Score) {
 		t.Errorf("direct (len 1) score %.4f must exceed two-hop (len 3) score %.4f", rd.Score, rh.Score)
 	}
-	// And the two-hop score must be positive (event still recorded, just discounted).
 	if rh.Score <= 0 {
 		t.Errorf("two-hop event should still record a positive score, got %.4f", rh.Score)
+	}
+	const discount = 0.5
+	want := rd.Score * discount * discount
+	const epsilon = 0.01
+	if diff := rh.Score - want; diff > epsilon || diff < -epsilon {
+		t.Errorf("two-hop score %.4f not within %.2f of direct*discount^2 = %.4f", rh.Score, epsilon, want)
+	}
+}
+
+// TestRelayedEventAcceptedWhenSigned proves the C1 fix: a relayed (bridged)
+// event — publisher (From) is a bridge peer ID that differs from ReporterID —
+// is accepted and scored when it carries a valid originator signature and the
+// publisher is the last OriginTrace hop. Uses the real libp2p signing path so
+// identity.VerifyEventSig actually runs.
+func TestRelayedEventAcceptedWhenSigned(t *testing.T) {
+	n, _, _ := newNodeWithRules(t, injectionRules)
+
+	// Build a real originator key + signed event.
+	priv, _, err := libp2pcrypto.GenerateEd25519Key(rand.Reader)
+	if err != nil {
+		t.Fatalf("genkey: %v", err)
+	}
+	origID, err := identity.PeerIDFromPrivKey(priv)
+	if err != nil {
+		t.Fatalf("peerid: %v", err)
+	}
+	ev := proto.Event{IP: "203.0.113.60", Reason: "ssh-probe", ReporterID: origID, Timestamp: time.Now().UTC(), OriginTrace: []string{origID, "bridgeX"}}
+	if err := identity.SignEvent(&ev, priv); err != nil {
+		t.Fatalf("sign: %v", err)
+	}
+	// Relayed: publisher is the bridge (last OriginTrace hop), not the originator.
+	n.ProcessRemote(transport.ReceivedEvent{Event: ev, From: "bridgeX", Subnet: "b"})
+
+	rec, _ := n.GetScore("203.0.113.60")
+	if rec.LastSeen.IsZero() {
+		t.Fatal("signed relayed event must be scored, not dropped as spoofed")
+	}
+}
+
+// TestRelayedEventDroppedWhenUnsigned proves the anti-spoofing guarantee still
+// holds: a relayed event (ReporterID != From) with no signature must be
+// dropped — the bridge cannot forge an event from a different reporter.
+func TestRelayedEventDroppedWhenUnsigned(t *testing.T) {
+	n, _, _ := newNodeWithRules(t, injectionRules)
+	ev := proto.Event{IP: "203.0.113.61", Reason: "ssh-probe", ReporterID: "origZ", Timestamp: time.Now().UTC(), OriginTrace: []string{"origZ", "bridgeX"}}
+	n.ProcessRemote(transport.ReceivedEvent{Event: ev, From: "bridgeX", Subnet: "b"}) // no signature
+	if rec, _ := n.GetScore("203.0.113.61"); !rec.LastSeen.IsZero() {
+		t.Error("unsigned relayed event (reporter != publisher) must be dropped")
+	}
+}
+
+// TestRelayedEventDroppedWhenPublisherNotLastHop proves the second half of the
+// C1 guard: even a validly signed event must be dropped if the verified
+// publisher is not the last OriginTrace hop (it can't prove it's the relay
+// that actually forwarded this event).
+func TestRelayedEventDroppedWhenPublisherNotLastHop(t *testing.T) {
+	n, _, _ := newNodeWithRules(t, injectionRules)
+	priv, _, _ := libp2pcrypto.GenerateEd25519Key(rand.Reader)
+	origID, _ := identity.PeerIDFromPrivKey(priv)
+	ev := proto.Event{IP: "203.0.113.62", Reason: "ssh-probe", ReporterID: origID, Timestamp: time.Now().UTC(), OriginTrace: []string{origID, "someOtherBridge"}}
+	_ = identity.SignEvent(&ev, priv)
+	// Publisher claims to relay but is NOT the last OriginTrace hop.
+	n.ProcessRemote(transport.ReceivedEvent{Event: ev, From: "bridgeX", Subnet: "b"})
+	if rec, _ := n.GetScore("203.0.113.62"); !rec.LastSeen.IsZero() {
+		t.Error("relayed event whose publisher is not the last OriginTrace hop must be dropped")
 	}
 }
 
