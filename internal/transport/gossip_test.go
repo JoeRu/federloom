@@ -102,3 +102,24 @@ func TestSubscribeSurfacesVerifiedPublisher(t *testing.T) {
 		t.Fatal("no event within 3s")
 	}
 }
+
+// TestNewDedupesDefaultSubnetAlias proves that a home subnet of "" combined
+// with a bridge subnet of "default" (both aliases of the same base topic per
+// SubnetTopic) do not cause a duplicate ps.Join() on the identical topic
+// string, which previously failed with "topic already exists".
+func TestNewDedupesDefaultSubnetAlias(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	opts := testOpts(t, transport.ModeLeaf)
+	opts.Subnet = ""
+	opts.BridgeSubnets = []string{"default"}
+
+	node, err := transport.New(ctx, opts)
+	if err != nil {
+		t.Fatalf("create node with aliased subnets: %v", err)
+	}
+	if err := node.Close(); err != nil {
+		t.Fatalf("close node: %v", err)
+	}
+}

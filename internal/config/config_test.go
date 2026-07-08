@@ -355,3 +355,25 @@ func TestEffectiveBridgeSubnetsEmpty(t *testing.T) {
 		t.Errorf("expected no bridge subnets, got %v", got)
 	}
 }
+
+// TestEffectiveBridgeSubnetsDropsDefaultAlias proves that when the home
+// subnet is "" (the base topic), a bridge subnet of "default" — its documented
+// synonym — is dropped too, since both map to the same gossip topic
+// (transport.SubnetTopic). Without this, transport.New would try to join the
+// identical topic twice and fail with "topic already exists".
+func TestEffectiveBridgeSubnetsDropsDefaultAlias(t *testing.T) {
+	c := &config.Config{
+		FederationSubnet:        "",
+		FederationBridgeSubnets: []string{"default", "b"},
+	}
+	got := c.EffectiveBridgeSubnets()
+	want := []string{"b"}
+	if len(got) != len(want) {
+		t.Fatalf("EffectiveBridgeSubnets = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("index %d = %q, want %q", i, got[i], want[i])
+		}
+	}
+}

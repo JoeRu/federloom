@@ -341,11 +341,20 @@ func (c *Config) RulesFilePath() string {
 }
 
 // EffectiveBridgeSubnets returns the configured bridge subnets minus any entry
-// that equals the home subnet (bridging to yourself is meaningless).
+// that equals the home subnet (bridging to yourself is meaningless). Comparison
+// is on the canonical subnet name: "" and "default" both alias the base topic
+// (see transport.SubnetTopic), so either form of the home subnet is dropped.
 func (c *Config) EffectiveBridgeSubnets() []string {
+	canon := func(s string) string {
+		if s == "default" {
+			return ""
+		}
+		return s
+	}
+	home := canon(c.FederationSubnet)
 	out := make([]string, 0, len(c.FederationBridgeSubnets))
 	for _, s := range c.FederationBridgeSubnets {
-		if s == c.FederationSubnet {
+		if canon(s) == home {
 			continue
 		}
 		out = append(out, s)

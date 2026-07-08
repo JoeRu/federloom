@@ -39,6 +39,15 @@ type topicHandle struct {
 	sub    *pubsub.Subscription
 }
 
+// canonicalSubnet collapses the "" / "default" aliases (which map to the base
+// topic) to a single canonical name so a node never joins the same topic twice.
+func canonicalSubnet(s string) string {
+	if s == "default" {
+		return ""
+	}
+	return s
+}
+
 // New creates and starts a Node. Call Close() to release all resources.
 func New(ctx context.Context, opts Options) (*Node, error) {
 	if opts.Topic == "" {
@@ -75,13 +84,16 @@ func New(ctx context.Context, opts Options) (*Node, error) {
 		base = DefaultTopic
 	}
 
-	// Join the home subnet + each bridge subnet (deduplicated by subnet name).
-	subnets := []string{opts.Subnet}
-	seen := map[string]bool{opts.Subnet: true}
+	// Join the home subnet + each bridge subnet (deduplicated by canonical
+	// subnet name, since "" and "default" both map to the base topic).
+	homeSubnet := canonicalSubnet(opts.Subnet)
+	subnets := []string{homeSubnet}
+	seen := map[string]bool{homeSubnet: true}
 	for _, s := range opts.BridgeSubnets {
-		if !seen[s] {
-			seen[s] = true
-			subnets = append(subnets, s)
+		cs := canonicalSubnet(s)
+		if !seen[cs] {
+			seen[cs] = true
+			subnets = append(subnets, cs)
 		}
 	}
 
@@ -94,18 +106,18 @@ func New(ctx context.Context, opts Options) (*Node, error) {
 		events:   make(chan ReceivedEvent, 64),
 		stopLoop: stopLoop,
 	}
-	for _, s := range subnets {
-		t, err := ps.Join(SubnetTopic(base, s))
+	for _, cs := range subnets {
+		t, err := ps.Join(SubnetTopic(base, cs))
 		if err != nil {
-			return nil, fmt.Errorf("transport: join subnet %q: %w", s, err)
+			return nil, fmt.Errorf("transport: join subnet %q: %w", cs, err)
 		}
 		sub, err := t.Subscribe()
 		if err != nil {
-			return nil, fmt.Errorf("transport: subscribe subnet %q: %w", s, err)
+			return nil, fmt.Errorf("transport: subscribe subnet %q: %w", cs, err)
 		}
-		h := &topicHandle{subnet: s, topic: t, sub: sub}
-		n.topics[s] = h
-		go n.readLoop(loopCtx, h)
+		th := &topicHandle{subnet: cs, topic: t, sub: sub}
+		n.topics[cs] = th
+		go n.readLoop(loopCtx, th)
 	}
 	ok = true
 	return n, nil
@@ -120,7 +132,7 @@ func (n *Node) DHT() *dht.IpfsDHT { return n.dht }
 // Publish JSON-encodes e and publishes it to the given subnet's topic. The node
 // must be joined to that subnet (home or a bridge subnet), else an error.
 func (n *Node) Publish(ctx context.Context, e proto.Event, subnet string) error {
-	h, ok := n.topics[subnet]
+	h, ok := n.topics[canonicalSubnet(subnet)]
 	if !ok {
 		return fmt.Errorf("transport: not joined to subnet %q", subnet)
 	}
