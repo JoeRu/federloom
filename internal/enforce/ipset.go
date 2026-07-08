@@ -14,6 +14,7 @@ import (
 type IpsetSink struct {
 	setName string
 	chains  []string
+	run     func(ctx context.Context, name string, args ...string) error
 }
 
 // NewIpset creates an IpsetSink. setName is the ipset name; chains lists the
@@ -27,7 +28,11 @@ func NewIpset(setName string, chains []string) *IpsetSink {
 	if len(chains) == 0 {
 		chains = []string{"DOCKER-USER"}
 	}
-	return &IpsetSink{setName: setName, chains: chains}
+	s := &IpsetSink{setName: setName, chains: chains}
+	s.run = func(ctx context.Context, name string, args ...string) error {
+		return exec.CommandContext(ctx, name, args...).Run()
+	}
+	return s
 }
 
 func (s *IpsetSink) Name() string { return "ipset" }
@@ -38,9 +43,21 @@ func (s *IpsetSink) Start(ctx context.Context) error {
 	if err := s.run(ctx, "ipset", "create", s.setName, "hash:ip", "family", "inet", "-exist"); err != nil {
 		return fmt.Errorf("enforce/ipset: create IPv4 set %q: %w", s.setName, err)
 	}
-	// IPv6 set — best-effort; ip6tables may not be present on all hosts
-	if err := s.run(ctx, "ipset", "create", s.setName+"6", "hash:ip", "family", "inet6", "-exist"); err != nil {
-		log.Printf("enforce/ipset: IPv6 set creation failed (ip6tables may be unavailable): %v", err)
+	// IPv6 set is hash:net so a whole /64 (or configured prefix) blocks as one
+	// entry. Migrate a pre-existing hash:ip set: -exist errors on a type
+	// mismatch, which we use as the migration trigger. Best-effort (IPv6 may be
+	// unavailable on some hosts).
+	set6 := s.setName + "6"
+	if err := s.run(ctx, "ipset", "create", set6, "hash:net", "family", "inet6", "-exist"); err != nil {
+		// Likely a stale hash:ip set from a prior version. Drop referencing
+		// ip6tables rules so the set can be destroyed, then recreate as hash:net.
+		for _, chain := range s.chains {
+			_ = s.run(ctx, "ip6tables", "-D", chain, "-m", "set", "--match-set", set6, "src", "-j", "DROP")
+		}
+		_ = s.run(ctx, "ipset", "destroy", set6)
+		if err2 := s.run(ctx, "ipset", "create", set6, "hash:net", "family", "inet6", "-exist"); err2 != nil {
+			log.Printf("enforce/ipset: IPv6 hash:net set creation failed (ip6tables may be unavailable): %v", err2)
+		}
 	}
 
 	for _, chain := range s.chains {
@@ -91,10 +108,6 @@ func (s *IpsetSink) ipSet(ip string) string {
 
 // Close is a no-op: the set persists across daemon restarts so blocks survive.
 func (s *IpsetSink) Close() error { return nil }
-
-func (s *IpsetSink) run(ctx context.Context, name string, args ...string) error {
-	return exec.CommandContext(ctx, name, args...).Run()
-}
 
 // Compile-time interface check.
 var _ Sink = (*IpsetSink)(nil)
