@@ -229,3 +229,35 @@ func TestIPv6AddressesAggregatePer64(t *testing.T) {
 		t.Error("a /128 in another /64 should score under that /64 key")
 	}
 }
+
+// TestFederationDiscountPerBridgeHop verifies the discount is applied per bridge
+// hop = len(OriginTrace)-1: a direct (len 1) stranger event is NOT discounted,
+// and each extra hop multiplies by FederationDiscount. Score after one stranger
+// event = stranger_weight * reasonWeight * discount^(hops), read via GetScore.
+func TestFederationDiscountPerBridgeHop(t *testing.T) {
+	// Two IPs, same reason/weight; one arrives direct (len 1), one via 2 hops (len 3).
+	n, _, _ := newNodeWithRules(t, injectionRules)
+
+	direct := transport.ReceivedEvent{
+		Event: proto.Event{IP: "203.0.113.40", Reason: "ssh-probe", ReporterID: "strangerD", OriginTrace: []string{"strangerD"}},
+		From:  "strangerD",
+	}
+	twoHop := transport.ReceivedEvent{
+		Event: proto.Event{IP: "203.0.113.41", Reason: "ssh-probe", ReporterID: "strangerH", OriginTrace: []string{"strangerH", "bridge1", "bridge2"}},
+		From:  "strangerH",
+	}
+	n.ProcessRemote(direct)
+	n.ProcessRemote(twoHop)
+
+	rd, _ := n.GetScore("203.0.113.40")
+	rh, _ := n.GetScore("203.0.113.41")
+	// Direct event: no discount. Two-bridge event: discount^2 (0.25 with default 0.5).
+	// So the direct score must be strictly greater than the two-hop score.
+	if !(rd.Score > rh.Score) {
+		t.Errorf("direct (len 1) score %.4f must exceed two-hop (len 3) score %.4f", rd.Score, rh.Score)
+	}
+	// And the two-hop score must be positive (event still recorded, just discounted).
+	if rh.Score <= 0 {
+		t.Errorf("two-hop event should still record a positive score, got %.4f", rh.Score)
+	}
+}

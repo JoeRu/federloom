@@ -366,18 +366,16 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 	}
 
 	weight, group, anchored := n.trust.Resolve(e.ReporterID)
-	// Federation discount: non-anchored reporters lose weight per hop (spec §5.2).
-	// Anchored reporters are exempt — their trust is explicitly established.
-	// NOTE: gossipsub forwards raw bytes without appending relay hops to OriginTrace,
-	// so len(OriginTrace) is always 1 (set by the originator in processLocal) and the
-	// cross-node A→B→A feedback-loop guard above is not yet active at runtime. Both
-	// become effective when the forwarding path appends selfID before re-broadcast.
-	if !anchored && len(e.OriginTrace) > 0 {
+	// Federation discount: a non-anchored reporter loses weight per BRIDGE hop —
+	// bridgeHops = len(OriginTrace)-1 (the originator itself is not a hop), so a
+	// same-subnet direct event (len 1) is NOT discounted, and each subnet crossing
+	// multiplies by FederationDiscount (spec §5.2). Anchored reporters are exempt.
+	if bridgeHops := len(e.OriginTrace) - 1; !anchored && bridgeHops > 0 {
 		discount := n.cfg.Trust.FederationDiscount
 		if discount <= 0 || discount > 1 {
 			discount = 0.5 // safe fallback for misconfigured values
 		}
-		for i := 0; i < len(e.OriginTrace); i++ {
+		for i := 0; i < bridgeHops; i++ {
 			weight *= discount
 		}
 	}
