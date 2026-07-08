@@ -198,3 +198,34 @@ func TestBareReasonBlockRuleAnchoredStillBlocks(t *testing.T) {
 		t.Errorf("anchored reporter should block via bare-reason rule; got blocked=%v", sink.blocked)
 	}
 }
+
+// TestIPv6AddressesAggregatePer64: two different /128s in the same /64 collapse
+// to one reputation key; a /128 in a different /64 stays separate.
+func TestIPv6AddressesAggregatePer64(t *testing.T) {
+	n, _, _ := newNodeWithRules(t, injectionRules)
+	send := func(ip string) {
+		n.ProcessRemote(transport.ReceivedEvent{
+			Event: proto.Event{IP: ip, Reason: "ssh-probe", ReporterID: "stranger-peer"},
+			From:  "stranger-peer",
+		})
+	}
+	send("2001:db8:1:2:aaaa::1")
+	send("2001:db8:1:2:ffff::9") // same /64
+	send("2001:db8:1:3::1")      // different /64
+
+	rec64, _ := n.GetScore("2001:db8:1:2::/64")
+	if rec64.LastSeen.IsZero() {
+		t.Fatal("expected an aggregated record under the /64 key")
+	}
+	if len(rec64.ReporterIDs) == 0 || rec64.Score <= 0 {
+		t.Errorf("aggregated /64 record looks empty: %+v", rec64)
+	}
+	// The raw /128s must NOT be separate keys.
+	if r, _ := n.GetScore("2001:db8:1:2:aaaa::1"); !r.LastSeen.IsZero() {
+		t.Error("raw /128 must not be recorded as its own key")
+	}
+	// A different /64 is a distinct key.
+	if r, _ := n.GetScore("2001:db8:1:3::/64"); r.LastSeen.IsZero() {
+		t.Error("a /128 in another /64 should score under that /64 key")
+	}
+}

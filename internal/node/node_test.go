@@ -378,12 +378,18 @@ func TestProcessLocalNormalizesIPv6(t *testing.T) {
 
 	n.processLocal(ctx, proto.Event{IP: "2001:0db8::0001", Reason: "test"})
 
-	rec, err := n.rep.GetRecord("2001:db8::1")
+	// With the configured (default /64) IPv6 prefix, the event is keyed under
+	// the masked CIDR, not the bare /128 address.
+	rec, err := n.rep.GetRecord("2001:db8::/64")
 	if err != nil {
 		t.Fatalf("GetRecord: %v", err)
 	}
 	if rec.Score == 0 {
-		t.Error("expected non-zero score stored under canonical key 2001:db8::1")
+		t.Error("expected non-zero score stored under canonical key 2001:db8::/64")
+	}
+	recBare, _ := n.rep.GetRecord("2001:db8::1")
+	if recBare.Score != 0 {
+		t.Error("bare /128 key must not be recorded — event should aggregate under the /64 key")
 	}
 }
 

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/netip"
 	"os"
 	"sync"
 	"time"
@@ -19,6 +18,7 @@ import (
 	"github.com/JoeRu/federloom/internal/enforce"
 	"github.com/JoeRu/federloom/internal/identity"
 	"github.com/JoeRu/federloom/internal/ingest"
+	"github.com/JoeRu/federloom/internal/netutil"
 	"github.com/JoeRu/federloom/internal/observability"
 	"github.com/JoeRu/federloom/internal/reputation"
 	"github.com/JoeRu/federloom/internal/rules"
@@ -247,12 +247,12 @@ func (n *Node) Run(ctx context.Context) error {
 }
 
 func (n *Node) processLocal(ctx context.Context, e proto.Event) {
-	addr, err := netip.ParseAddr(e.IP)
+	key, err := netutil.NormalizeIP(e.IP, n.cfg.Reputation.EffectiveIPv6Prefix())
 	if err != nil {
-		log.Printf("node: drop event with invalid IP %q", e.IP)
+		log.Printf("node: drop event with invalid IP %q: %v", e.IP, err)
 		return
 	}
-	e.IP = addr.Unmap().String()
+	e.IP = key
 	if n.neverblock.Contains(e.IP) {
 		return
 	}
@@ -325,12 +325,12 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 			return
 		}
 	}
-	addr, err := netip.ParseAddr(e.IP)
+	key, err := netutil.NormalizeIP(e.IP, n.cfg.Reputation.EffectiveIPv6Prefix())
 	if err != nil {
-		log.Printf("node: drop event with invalid IP %q", e.IP)
+		log.Printf("node: drop event with invalid IP %q: %v", e.IP, err)
 		return
 	}
-	e.IP = addr.Unmap().String()
+	e.IP = key
 	// Feedback loop guard: drop events that have already passed through this node.
 	if n.selfID != "" {
 		for _, hop := range e.OriginTrace {
