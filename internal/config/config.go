@@ -71,7 +71,17 @@ type ReputationConfig struct {
 	BlockThreshold   float64  `yaml:"block_threshold"`
 	UnblockThreshold float64  `yaml:"unblock_threshold"`
 	DecayInterval    Duration `yaml:"decay_interval"`
-	RulesFile        string   `yaml:"rules_file"` // empty = legacy threshold mode
+	RulesFile        string   `yaml:"rules_file"`  // empty = legacy threshold mode
+	IPv6Prefix       int      `yaml:"ipv6_prefix"` // IPv6 reputation/enforcement prefix; default 64
+}
+
+// EffectiveIPv6Prefix returns the IPv6 normalization prefix, clamped to [1,128]
+// with 64 as the default for unset (0) or out-of-range values.
+func (c ReputationConfig) EffectiveIPv6Prefix() int {
+	if c.IPv6Prefix < 1 || c.IPv6Prefix > 128 {
+		return 64
+	}
+	return c.IPv6Prefix
 }
 
 // IngestConfig groups all ingest source configs.
@@ -207,6 +217,7 @@ func Defaults() *Config {
 			BlockThreshold:   75,
 			UnblockThreshold: 60,
 			DecayInterval:    Duration{time.Hour},
+			IPv6Prefix:       64,
 		},
 		Enforce: EnforceConfig{
 			Backend: "ipset",

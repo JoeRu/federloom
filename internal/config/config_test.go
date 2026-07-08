@@ -308,3 +308,26 @@ func TestBlockedPeersFileOverride(t *testing.T) {
 		t.Errorf("TrustBlockedPeersFile() = %q want /custom/blocked.json", got)
 	}
 }
+
+func TestEffectiveIPv6Prefix(t *testing.T) {
+	cases := []struct{ in, want int }{
+		{0, 64},    // unset → default
+		{64, 64},   // valid
+		{56, 56},   // router allocation
+		{128, 128}, // single host
+		{-1, 64},   // out of range → default
+		{129, 64},  // out of range → default
+	}
+	for _, c := range cases {
+		got := config.ReputationConfig{IPv6Prefix: c.in}.EffectiveIPv6Prefix()
+		if got != c.want {
+			t.Errorf("EffectiveIPv6Prefix(%d) = %d, want %d", c.in, got, c.want)
+		}
+	}
+}
+
+func TestDefaultsIPv6Prefix(t *testing.T) {
+	if got := config.Defaults().Reputation.IPv6Prefix; got != 64 {
+		t.Errorf("default IPv6Prefix = %d, want 64", got)
+	}
+}
