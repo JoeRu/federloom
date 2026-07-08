@@ -421,6 +421,43 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 	}
 	n.obs.RecordEvent(e, rec.Score, ruleName, string(action))
 	n.api.Broadcast(e.IP, rec.Score, e.Reason, e.ReporterID)
+	n.reemitIfBridge(re)
+}
+
+// reemitIfBridge re-publishes an accepted remote event onto the other subnets
+// this node bridges, appending selfID to OriginTrace. Leaves (no bridge subnets)
+// and loop/cap conditions are no-ops. The originator's signature is preserved
+// (OriginTrace is not signed).
+func (n *Node) reemitIfBridge(re transport.ReceivedEvent) {
+	if n.transport == nil || n.selfID == "" {
+		return
+	}
+	bridges := n.cfg.EffectiveBridgeSubnets()
+	if len(bridges) == 0 {
+		return // leaf
+	}
+	e := re.Event
+	// Loop guard: never re-emit an event that already passed through us.
+	for _, hop := range e.OriginTrace {
+		if hop == n.selfID {
+			return
+		}
+	}
+	if len(e.OriginTrace) >= maxOriginTraceLen {
+		return
+	}
+	out := e
+	out.OriginTrace = append(append([]string{}, e.OriginTrace...), n.selfID)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	for _, sn := range bridges {
+		if sn == re.Subnet {
+			continue // don't echo back onto the subnet it arrived from
+		}
+		if err := n.transport.Publish(ctx, out, sn); err != nil {
+			log.Printf("node: bridge re-emit to subnet %q failed: %v", sn, err)
+		}
+	}
 }
 
 func (n *Node) runDecay() {
