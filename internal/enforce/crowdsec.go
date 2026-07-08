@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -53,6 +54,15 @@ func NewCrowdSec(cfg config.EnforceConfig, halfLife time.Duration) *CrowdSecSink
 }
 
 func (s *CrowdSecSink) Name() string { return "crowdsec" }
+
+// csScopeFor returns the CrowdSec decision scope for a reputation key: "Range"
+// for a CIDR (IPv6 /prefix), "Ip" for a bare address.
+func csScopeFor(value string) string {
+	if strings.Contains(value, "/") {
+		return "Range"
+	}
+	return "Ip"
+}
 
 // Start authenticates with the LAPI. Returns an error if the LAPI is
 // unreachable or rejects the credentials.
@@ -110,7 +120,7 @@ func (s *CrowdSecSink) Block(ip string) error {
 			IP:       ip,
 			Origin:   "federloom",
 			Scenario: "federloom/reputation",
-			Scope:    "Ip",
+			Scope:    csScopeFor(ip),
 			Type:     "ban",
 			Value:    ip,
 		}},
@@ -124,7 +134,7 @@ func (s *CrowdSecSink) Block(ip string) error {
 		Simulated:       false,
 		Source: csSource{
 			IP:    ip,
-			Scope: "Ip",
+			Scope: csScopeFor(ip),
 			Value: ip,
 		},
 		StartAt: now,
