@@ -268,6 +268,22 @@ trust:
   federation_discount: 0.5
 ```
 
+### `federation_subnet` and `federation_bridge_subnets`
+
+`federation_subnet` names this node's home trust domain (gossip topic). Empty or
+`default` uses the single base topic (the default — a flat federation). A named
+subnet joins a dedicated topic `federloom/events/v0/<subnet>`.
+
+`federation_bridge_subnets` lists other subnets this node **bridges**: it joins
+their topics and re-emits events between them, appending its own id to the
+event's origin trace so downstream nodes apply the per-hop `federation_discount`.
+Leave empty for a normal leaf node.
+
+**Security:** a bridge can drop, delay, or inject events between subnets. It
+cannot force a downstream block (that still requires anchored corroboration) and
+imported events are scored by the originator's trust, not the bridge's. Bridge
+only subnets you trust; stop bridging a subnet to defederate it.
+
 ### observability
 
 Controls the optional observability plane (spec §11.2). Both outputs are

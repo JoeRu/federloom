@@ -545,7 +545,7 @@ Honest status of each design area in the current codebase. This table — not th
 | §4.4 | Dispute / anti-trust votes | — | PLANNED (E) |
 | §4.5 | Applicability weighting | — | PLANNED (E) |
 | §5.1 | Trust anchors (Person keys, peer certs) | `internal/trust`, `internal/identity` | DONE |
-| §5.2 | Federation import / discount / origin-trace | `internal/node`, `internal/trust` | PARTIAL — discount + defederation present; origin-trace inert at runtime (E) |
+| §5.2 | Federation import / discount / origin-trace | `internal/node`, `internal/transport`, `internal/trust` | PARTIAL — subnet-bridge forwarding makes origin-trace + per-hop discount active (E1); evidence-aggregate import PLANNED (E2) |
 | §7.1 | Event model | `pkg/proto` | DONE — `port_class` deprecated-retained |
 | §7.1 | IPv6 `/64` prefix normalization | `internal/netutil`, `internal/node`, `internal/enforce` | DONE |
 | §7.2 | ScoreEntry aggregate | `pkg/proto` | RESERVED — defined, not exchanged |

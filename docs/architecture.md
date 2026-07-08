@@ -48,10 +48,10 @@ Each subnet is a trust domain with its own roots and governance. Subnets run
 isolated or federate — importing others' scores at a **trust discount**, with
 **origin tracing** to prevent A↔B double-counting. A bad subnet is **defederated**.
 
-> **Current status (2026-07):** the per-hop `FederationDiscount` and A↔B loop
-> guard are scaffolded but inert at runtime — gossipsub forwards raw bytes
-> without appending relay hops, so `OriginTrace` stays length 1. Making origin
-> tracing effective is tracked as remediation sub-project E.
+> **Current status (2026-07):** origin-tracing and the per-bridge-hop discount are
+> **active** under the subnet-bridge forwarding model — a bridge appends its id on
+> re-emit. Flat single-subnet deployments have no hops and thus no discount, which
+> is correct.
 
 ## Good-neighbour behaviour
 
