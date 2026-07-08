@@ -13,3 +13,17 @@ func TestNodeModeConstants(t *testing.T) {
 		t.Fatalf("unexpected DefaultTopic: %q", DefaultTopic)
 	}
 }
+
+func TestSubnetTopic(t *testing.T) {
+	base := DefaultTopic
+	cases := []struct{ subnet, want string }{
+		{"", base},
+		{"default", base},
+		{"acme", base + "/acme"},
+	}
+	for _, c := range cases {
+		if got := SubnetTopic(base, c.subnet); got != c.want {
+			t.Errorf("SubnetTopic(%q, %q) = %q, want %q", base, c.subnet, got, c.want)
+		}
+	}
+}

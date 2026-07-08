@@ -55,9 +55,11 @@ func main() {
 	}
 
 	t, err := transport.New(ctx, transport.Options{
-		ListenAddrs: []multiaddr.Multiaddr{listenMA},
-		Mode:        mode,
-		PrivKey:     priv,
+		ListenAddrs:   []multiaddr.Multiaddr{listenMA},
+		Mode:          mode,
+		PrivKey:       priv,
+		Subnet:        cfg.FederationSubnet,
+		BridgeSubnets: cfg.EffectiveBridgeSubnets(),
 	})
 	if err != nil {
 		log.Fatalf("start transport: %v", err)

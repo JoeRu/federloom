@@ -54,7 +54,7 @@ func TestTwoNodeGossip(t *testing.T) {
 	time.Sleep(500 * time.Millisecond) // allow gossipsub to graft
 
 	want := proto.Event{IP: "192.0.2.1", Reason: "test-bruteforce", ReporterID: "tester"}
-	if err := nodeA.Publish(ctx, want); err != nil {
+	if err := nodeA.Publish(ctx, want, ""); err != nil {
 		t.Fatalf("publish: %v", err)
 	}
 
@@ -89,7 +89,7 @@ func TestSubscribeSurfacesVerifiedPublisher(t *testing.T) {
 	connect(t, nodeA, nodeB)
 	time.Sleep(500 * time.Millisecond)
 
-	if err := nodeA.Publish(ctx, proto.Event{IP: "192.0.2.9", Reason: "test"}); err != nil {
+	if err := nodeA.Publish(ctx, proto.Event{IP: "192.0.2.9", Reason: "test"}, ""); err != nil {
 		t.Fatalf("publish: %v", err)
 	}
 

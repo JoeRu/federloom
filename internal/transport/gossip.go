@@ -17,19 +17,26 @@ import (
 // publisher. From is authenticated by libp2p message signing — the node layer
 // rejects events whose ReporterID does not match it (spec §5.1 spoof guard).
 type ReceivedEvent struct {
-	Event proto.Event
-	From  string
+	Event  proto.Event
+	From   string
+	Subnet string // subnet whose topic delivered this copy
 }
 
 // Node is a FederLoom P2P peer: libp2p host + gossipsub topic + Kademlia DHT.
 type Node struct {
 	host     host.Host
 	ps       *pubsub.PubSub
-	topic    *pubsub.Topic
-	sub      *pubsub.Subscription
 	dht      *dht.IpfsDHT
+	topics   map[string]*topicHandle // keyed by subnet name (canonical config string)
 	events   chan ReceivedEvent
 	stopLoop context.CancelFunc
+}
+
+// topicHandle bundles a joined topic + its subscription for one subnet.
+type topicHandle struct {
+	subnet string
+	topic  *pubsub.Topic
+	sub    *pubsub.Subscription
 }
 
 // New creates and starts a Node. Call Close() to release all resources.
@@ -63,27 +70,43 @@ func New(ctx context.Context, opts Options) (*Node, error) {
 		return nil, fmt.Errorf("transport: create gossipsub: %w", err)
 	}
 
-	t, err := ps.Join(opts.Topic)
-	if err != nil {
-		return nil, fmt.Errorf("transport: join topic %q: %w", opts.Topic, err)
+	base := opts.Topic
+	if base == "" {
+		base = DefaultTopic
 	}
 
-	sub, err := t.Subscribe()
-	if err != nil {
-		return nil, fmt.Errorf("transport: subscribe: %w", err)
+	// Join the home subnet + each bridge subnet (deduplicated by subnet name).
+	subnets := []string{opts.Subnet}
+	seen := map[string]bool{opts.Subnet: true}
+	for _, s := range opts.BridgeSubnets {
+		if !seen[s] {
+			seen[s] = true
+			subnets = append(subnets, s)
+		}
 	}
 
 	loopCtx, stopLoop := context.WithCancel(ctx)
 	n := &Node{
 		host:     h,
 		ps:       ps,
-		topic:    t,
-		sub:      sub,
 		dht:      d,
+		topics:   make(map[string]*topicHandle, len(subnets)),
 		events:   make(chan ReceivedEvent, 64),
 		stopLoop: stopLoop,
 	}
-	go n.readLoop(loopCtx)
+	for _, s := range subnets {
+		t, err := ps.Join(SubnetTopic(base, s))
+		if err != nil {
+			return nil, fmt.Errorf("transport: join subnet %q: %w", s, err)
+		}
+		sub, err := t.Subscribe()
+		if err != nil {
+			return nil, fmt.Errorf("transport: subscribe subnet %q: %w", s, err)
+		}
+		h := &topicHandle{subnet: s, topic: t, sub: sub}
+		n.topics[s] = h
+		go n.readLoop(loopCtx, h)
+	}
 	ok = true
 	return n, nil
 }
@@ -94,32 +117,38 @@ func (n *Node) Host() host.Host { return n.host }
 // DHT returns the underlying Kademlia DHT (needed by the discovery manager).
 func (n *Node) DHT() *dht.IpfsDHT { return n.dht }
 
-// Publish JSON-encodes e and publishes it to the gossipsub topic.
-func (n *Node) Publish(ctx context.Context, e proto.Event) error {
+// Publish JSON-encodes e and publishes it to the given subnet's topic. The node
+// must be joined to that subnet (home or a bridge subnet), else an error.
+func (n *Node) Publish(ctx context.Context, e proto.Event, subnet string) error {
+	h, ok := n.topics[subnet]
+	if !ok {
+		return fmt.Errorf("transport: not joined to subnet %q", subnet)
+	}
 	data, err := json.Marshal(e)
 	if err != nil {
 		return fmt.Errorf("transport: marshal event: %w", err)
 	}
-	return n.topic.Publish(ctx, data)
+	return h.topic.Publish(ctx, data)
 }
 
 // Subscribe returns a channel that delivers decoded events from the network
 // together with their verified publisher. Closed when the Node is closed.
 func (n *Node) Subscribe() <-chan ReceivedEvent { return n.events }
 
-// Close shuts down the subscription, topic, DHT, and host.
+// Close shuts down the subscriptions, topics, DHT, and host.
 func (n *Node) Close() error {
 	n.stopLoop()
-	n.sub.Cancel()
-	_ = n.topic.Close()
+	for _, h := range n.topics {
+		h.sub.Cancel()
+		_ = h.topic.Close()
+	}
 	_ = n.dht.Close()
 	return n.host.Close()
 }
 
-func (n *Node) readLoop(ctx context.Context) {
-	defer close(n.events)
+func (n *Node) readLoop(ctx context.Context, h *topicHandle) {
 	for {
-		msg, err := n.sub.Next(ctx)
+		msg, err := h.sub.Next(ctx)
 		if err != nil {
 			return
 		}
@@ -132,7 +161,7 @@ func (n *Node) readLoop(ctx context.Context) {
 			continue
 		}
 		select {
-		case n.events <- ReceivedEvent{Event: e, From: msg.GetFrom().String()}:
+		case n.events <- ReceivedEvent{Event: e, From: msg.GetFrom().String(), Subnet: h.subnet}:
 		case <-ctx.Done():
 			return
 		}

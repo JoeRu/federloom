@@ -293,7 +293,7 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 	n.obs.RecordEvent(e, rec.Score, ruleName, string(action))
 	n.api.Broadcast(e.IP, rec.Score, e.Reason, e.ReporterID)
 	if n.transport != nil {
-		if err := n.transport.Publish(ctx, e); err != nil {
+		if err := n.transport.Publish(ctx, e, n.cfg.FederationSubnet); err != nil {
 			log.Printf("node: publish %s: %v", e.IP, err)
 		} else {
 			n.obs.RecordFederated("out")

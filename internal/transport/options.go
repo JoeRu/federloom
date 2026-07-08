@@ -31,4 +31,17 @@ type Options struct {
 	PrivKey crypto.PrivKey
 	// Topic is the gossipsub topic to join. Default: DefaultTopic.
 	Topic string
+	// Subnet is this node's home trust domain. "" or "default" = the base topic.
+	Subnet string
+	// BridgeSubnets are additional subnets this node joins and relays between.
+	BridgeSubnets []string
+}
+
+// SubnetTopic returns the gossipsub topic for a subnet. "" or "default" maps to
+// the base topic (backward compatible); a named subnet s maps to base+"/"+s.
+func SubnetTopic(base, subnet string) string {
+	if subnet == "" || subnet == "default" {
+		return base
+	}
+	return base + "/" + subnet
 }

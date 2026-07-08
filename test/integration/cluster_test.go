@@ -61,7 +61,7 @@ func TestStarTopologyGossipForward(t *testing.T) {
 	}
 
 	want := proto.Event{IP: "198.51.100.42", Reason: "smtp-auth-bruteforce", ReporterID: "forward-test"}
-	if err := leaves[0].Publish(ctx, want); err != nil {
+	if err := leaves[0].Publish(ctx, want, ""); err != nil {
 		t.Fatalf("publish: %v", err)
 	}
 
@@ -91,7 +91,7 @@ func TestStarTopologyGossipSymmetric(t *testing.T) {
 	}
 
 	want := proto.Event{IP: "203.0.113.99", Reason: "dict-attack", ReporterID: "symmetric-test"}
-	if err := leaves[2].Publish(ctx, want); err != nil {
+	if err := leaves[2].Publish(ctx, want, ""); err != nil {
 		t.Fatalf("publish: %v", err)
 	}
 
