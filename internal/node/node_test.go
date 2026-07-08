@@ -51,6 +51,7 @@ func testNode(t *testing.T) (*Node, string) {
 		selfID:     "12D3KooWself",
 		rules:      rules.Load("", cfg.Reputation.BlockThreshold, cfg.Trust.StrangerScoreCap),
 		burst:      rules.NewBurstStore(),
+		dedup:      newDedupCache(100_000, 10*time.Minute),
 	}, dir
 }
 

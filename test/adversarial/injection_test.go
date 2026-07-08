@@ -146,9 +146,13 @@ func TestAnchoredBurstStillBlocks(t *testing.T) {
 	n, dir, sink := newInjectionNode(t)
 	// Build the anchored setup + cert ONCE (anchoredEvent generates the Person
 	// key and writes anchors.json; calling it in the loop would regenerate the
-	// key each iteration). Reuse the same event 15 times to fill the window.
+	// key each iteration). Reuse the same event 15 times to fill the window,
+	// but vary the timestamp per attempt: a real burst is 15 distinct attempts,
+	// and the dedup cache (keyed on ReporterID/IP/Reason/Timestamp) would
+	// otherwise collapse 15 identical events into one.
 	re := anchoredEvent(t, n, dir, "203.0.113.13", "ssh-auth-bruteforce")
 	for i := 0; i < 15; i++ {
+		re.Event.Timestamp = time.Now()
 		n.ProcessRemote(re)
 	}
 	if len(sink.blocked) == 0 {
@@ -259,5 +263,25 @@ func TestFederationDiscountPerBridgeHop(t *testing.T) {
 	// And the two-hop score must be positive (event still recorded, just discounted).
 	if rh.Score <= 0 {
 		t.Errorf("two-hop event should still record a positive score, got %.4f", rh.Score)
+	}
+}
+
+// TestDuplicateRemoteEventScoredOnce verifies the dedup cache: the same event
+// delivered twice (e.g. via two topology paths) is recorded once, not twice.
+func TestDuplicateRemoteEventScoredOnce(t *testing.T) {
+	n, dir, _ := newNodeWithRules(t, injectionRules)
+	_ = dir
+	ts := time.Now().UTC()
+	ev := transport.ReceivedEvent{
+		Event: proto.Event{IP: "203.0.113.50", Reason: "ssh-probe", ReporterID: "strangerX", Timestamp: ts, OriginTrace: []string{"strangerX"}},
+		From:  "strangerX",
+	}
+	n.ProcessRemote(ev)
+	first, _ := n.GetScore("203.0.113.50")
+	n.ProcessRemote(ev) // identical event (same reporter/ip/reason/timestamp)
+	second, _ := n.GetScore("203.0.113.50")
+
+	if second.Score != first.Score {
+		t.Errorf("duplicate event changed score: first=%.4f second=%.4f (want equal — deduped)", first.Score, second.Score)
 	}
 }

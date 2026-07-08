@@ -52,6 +52,7 @@ type Node struct {
 	api         *api.Server        // nil-safe: all methods no-op when cfg.API.Addr == ""
 	dnsbl       *dnsbl.Server      // nil-safe: Start is no-op when addr/zone are empty
 	discovery   *discovery.Manager // nil in solo mode (no transport)
+	dedup       *dedupCache
 }
 
 // New wires all subsystems from cfg. t may be nil for local-only operation.
@@ -153,6 +154,8 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		disc = discovery.New(t.Host(), t.DHT(), cfg.Discovery)
 	}
 
+	dedup := newDedupCache(100_000, 10*time.Minute)
+
 	return &Node{
 		cfg:         cfg,
 		transport:   t,
@@ -172,6 +175,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		api:         apiSrv,
 		dnsbl:       dnsblSrv,
 		discovery:   disc,
+		dedup:       dedup,
 	}, nil
 }
 
@@ -264,6 +268,7 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 	}
 	e.ReporterID = n.selfID
 	e.Vouch = n.vouch
+	e.SubnetID = n.cfg.FederationSubnet
 	if n.selfID != "" {
 		e.OriginTrace = []string{n.selfID}
 	}
@@ -273,6 +278,7 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 			// non-fatal: publish unsigned rather than drop local observation
 		}
 	}
+	_ = n.dedup.Seen(dedupKey(e.ReporterID, e.IP, e.Reason, e.Timestamp), time.Now())
 	if _, err := n.rep.Record(e.IP, e.Reason, n.selfID, 1.0, n.selfID, true); err != nil {
 		log.Printf("node: record local %s: %v", e.IP, err)
 		return
@@ -363,6 +369,10 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 		} else if err := n.trust.AddCert(*e.Vouch, time.Now()); err != nil {
 			log.Printf("node: invalid vouch from %q: %v", e.ReporterID, err)
 		}
+	}
+
+	if n.dedup.Seen(dedupKey(e.ReporterID, e.IP, e.Reason, e.Timestamp), time.Now()) {
+		return // already processed this exact event via another path
 	}
 
 	weight, group, anchored := n.trust.Resolve(e.ReporterID)
