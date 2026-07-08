@@ -66,7 +66,7 @@ Tunes the scoring engine and decay behaviour.
 | `reputation.unblock_threshold` | float64 | `60` | Score below which a previously blocked IP is removed from the blocklist. Must be ≤ `block_threshold`. |
 | `reputation.decay_interval` | duration | `1h` | How often the decay GC runs. Lower = smoother decay, higher CPU cost. |
 | `reputation.rules_file` | string | `""` | Path to `rules.yaml`. Empty string means legacy threshold mode (block when score ≥ `block_threshold`). Default auto-discovery: `<store.dir>/rules.yaml` (absent = legacy mode). |
-| `reputation.ipv6_prefix` | int | `64` | IPv6 reputation and enforcement granularity. IPv6 addresses are normalized to this prefix, so an attacker's whole allocation aggregates to one reputation entry and blocks as one firewall range. Use `56` for router-sized allocations. IPv4 is always keyed per single address. Valid range `1`–`128`; out-of-range values fall back to `64`. |
+| `reputation.ipv6_prefix` | int | `64` | IPv6 reputation and enforcement granularity. IPv6 addresses are normalized to this prefix, so an attacker's whole allocation aggregates to one reputation entry and blocks as one firewall range. Use `56` for router-sized allocations. IPv4 is always keyed per single address. Valid range `1`–`128`; out-of-range values fall back to `64`. Note: to shield an IPv6 range from blocking, never-block and `extra_whitelist` entries must be at least as wide as this prefix (e.g. a `/64` or shorter prefix); a narrower entry such as a single `/128` will not protect the enclosing `/64` block. |
 
 ```yaml
 reputation:

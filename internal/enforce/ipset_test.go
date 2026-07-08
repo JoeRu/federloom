@@ -2,6 +2,7 @@ package enforce
 
 import (
 	"context"
+	"fmt"
 	"testing"
 )
 
@@ -71,5 +72,40 @@ func TestIpsetStartCreatesHashNetIPv6Set(t *testing.T) {
 	}
 	if !hasCall(calls, "ipset", "create", "federloom", "hash:ip", "family", "inet", "-exist") {
 		t.Errorf("IPv4 set must stay hash:ip; calls=%v", calls)
+	}
+}
+
+func TestIpsetStartMigratesHashIpToHashNet(t *testing.T) {
+	var calls [][]string
+	firstCreateFailed := false
+	s := NewIpset("federloom", []string{"INPUT"})
+	s.run = func(ctx context.Context, name string, args ...string) error {
+		calls = append(calls, append([]string{name}, args...))
+		// Fail the FIRST create of the hash:net IPv6 set to simulate a stale hash:ip set.
+		if !firstCreateFailed && name == "ipset" && len(args) >= 2 && args[0] == "create" && args[1] == "federloom6" {
+			firstCreateFailed = true
+			return fmt.Errorf("set with the same name already exists")
+		}
+		return nil
+	}
+	if err := s.Start(context.Background()); err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+	// Migration must drop the ip6tables rule for the chain, destroy the stale set, then recreate as hash:net.
+	if !hasCall(calls, "ip6tables", "-D", "INPUT", "-m", "set", "--match-set", "federloom6", "src", "-j", "DROP") {
+		t.Errorf("migration must delete the ip6tables rule; calls=%v", calls)
+	}
+	if !hasCall(calls, "ipset", "destroy", "federloom6") {
+		t.Errorf("migration must destroy the stale set; calls=%v", calls)
+	}
+	// After destroy, it recreates as hash:net (this is the SECOND create call).
+	recreates := 0
+	for _, c := range calls {
+		if len(c) >= 5 && c[0] == "ipset" && c[1] == "create" && c[2] == "federloom6" && c[3] == "hash:net" {
+			recreates++
+		}
+	}
+	if recreates < 2 {
+		t.Errorf("expected two hash:net create attempts (initial + post-destroy recreate); got %d; calls=%v", recreates, calls)
 	}
 }

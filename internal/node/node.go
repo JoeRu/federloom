@@ -65,6 +65,9 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 	if halfLife <= 0 {
 		halfLife = 7 * 24 * time.Hour
 	}
+	if p := cfg.Reputation.IPv6Prefix; p != 0 && (p < 1 || p > 128) {
+		log.Printf("node: reputation.ipv6_prefix %d out of range [1,128]; using default 64", p)
+	}
 	eng := reputation.New(s, halfLife, cfg.Trust.StrangerScoreCap)
 
 	var sink enforce.Sink
