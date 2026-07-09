@@ -105,13 +105,14 @@ stays local-only. You cannot fetch a full list on demand without materialising
 the global set — the exact anti-pattern §11 rejects. On-demand federation is a
 *point* query for an IP that contacted you, never a list dump.
 
-**Score-scale caveat (§5.2):** a raw foreign `ScoreEntry` is scored in the
-*aggregator's* trust domain, not yours; merging raw scores across domains is the
-exact thing §5.2 warns about. For the MVP this is accepted as *advisory evidence
-from a trusted, explicitly-configured aggregator* (like an anchor), and the
-operator's own threshold is applied to the merged view. E2 replaces the payload
-with `EvidenceAggregate` for scale-free local recompute — that is the proper
-fix, deferred by design.
+**Score-scale caveat (§5.2) — ⚠ REVISIT LATER (MVP-approved simplification):**
+a raw foreign `ScoreEntry` is scored in the *aggregator's* trust domain, not
+yours; merging raw scores across domains is the exact thing §5.2 warns about.
+For the MVP this is accepted as *advisory evidence from a trusted,
+explicitly-configured aggregator* (like an anchor), and the operator's own
+threshold is applied to the merged view. E2 replaces the payload with
+`EvidenceAggregate` for scale-free local recompute — that is the proper fix,
+deferred by design. Tracked in §11.
 
 ---
 
@@ -142,9 +143,10 @@ peer: open a stream to `/federloom/repquery/v1`, send `RepQuery{ip}`, read the
 `ScoreEntry`, close. Run concurrently with a per-query deadline
 (`federation.query_timeout`, default 150ms). Collect the non-empty answers.
 
-**Merge:** MVP takes the **max score** across answers (plus the union of
-reasons) — "some trusted aggregator considers this bad". Deliberately simple;
-E2's evidence-weighted recompute replaces it.
+**Merge — ⚠ REVISIT LATER (MVP-approved simplification):** MVP takes the **max
+score** across answers (plus the union of reasons) — "some trusted aggregator
+considers this bad". Deliberately simple; E2's evidence-weighted recompute
+replaces it. Tracked in §11.
 
 **Cache:** a bounded TTL cache keyed by IP (reuse the `dedupCache` pattern from
 E1, or a small parallel unit): a miss triggers a `Query`; the merged result is
@@ -224,6 +226,10 @@ scale that isn't yours. E3 stops at the advisory read; E2 makes the push safe.
 
 ## 11. Out-of-scope / follow-ups
 
+- **⚠ Revisit points from this MVP** (approved as simplifications, to reconsider
+  when E2 lands): the raw-`ScoreEntry` score-scale merge (§4) and the max-score
+  combiner + synchronous-tight-timeout query (§6). E2's `EvidenceAggregate` +
+  evidence-weighted recompute is the intended resolution for both.
 - E2: `EvidenceAggregate` as the query payload + scale-free local recompute +
   `diversity_buckets` → then D (diversity-weighted corroboration).
 - Materialise-on-verdict push into the firewall (§8), post-E2.
