@@ -60,3 +60,9 @@ type WhitelistEntry struct {
 	Scope     string `json:"scope"`  // "local-only" (never shared) | "shared-vote"
 	Source    string `json:"source"` // "install-script" | "manual" | "federation"
 }
+
+// RepQuery is an on-demand request for one IP's reputation (spec §11.4, E3).
+// The response reuses ScoreEntry.
+type RepQuery struct {
+	IP string `json:"ip"`
+}
