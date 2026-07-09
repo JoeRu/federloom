@@ -44,7 +44,7 @@ serves as GDPR storage limitation.
 
 ## Reputation: push enforcement path vs query read path
 
-Reputation engines two paths: a **push** path where locally-sourced scoring events flow to the firewall (control plane → data plane, L3, engine to ipset, unchanged), and a **query** read path where DNSBL/API lookups miss the local store and consult federated aggregators on-demand over authenticated libp2p. The query path is read-only and advisory — scores feed the operator's own threshold to decide listing. This MVP (E3) ships the query read path; materialise-on-verdict (flowing federated answers back into firewall decisions) lands with E2's scale-free evidence model.
+Reputation has two paths: a **push** path where locally-sourced scoring events flow to the firewall (control plane → data plane, L3, engine to ipset, unchanged), and a **query** read path where DNSBL/API lookups miss the local store and consult federated aggregators on-demand over authenticated libp2p. The query path is read-only and advisory — scores feed the operator's own threshold to decide listing. This MVP (E3) ships the query read path; materialise-on-verdict (flowing federated answers back into firewall decisions) lands with E2's scale-free evidence model.
 
 ## Federation (Mastodon model)
 
