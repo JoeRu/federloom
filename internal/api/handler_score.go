@@ -17,7 +17,7 @@ func (s *Server) handleScore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rec, err := s.store.GetScore(ip)
+	rec, err := s.pointReader.GetScore(ip)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)

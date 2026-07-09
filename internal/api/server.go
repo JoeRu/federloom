@@ -19,6 +19,12 @@ type StoreReader interface {
 	ScanScores(fn func(ip string, r store.ScoreRecord) error) error
 }
 
+// scoreReader is the point-lookup surface for the per-IP score endpoint. The
+// concrete store satisfies it; a repquery.Resolver injects federated fallback.
+type scoreReader interface {
+	GetScore(ip string) (store.ScoreRecord, error)
+}
+
 // EventMsg is the payload sent to SSE subscribers on every scored event.
 type EventMsg struct {
 	IP       string    `json:"ip"`
@@ -31,24 +37,32 @@ type EventMsg struct {
 // Server is the optional local HTTP API (spec §3).
 // A zero-addr Server is inert: all methods are safe to call but do nothing.
 type Server struct {
-	cfg      config.APIConfig
-	store    StoreReader
-	repCfg   config.ReputationConfig
-	taxonomy config.TaxonomyConfig // resolved via ResolveTaxonomy
-	mu       sync.RWMutex
-	subs     map[chan EventMsg]struct{}
+	cfg         config.APIConfig
+	store       StoreReader
+	pointReader scoreReader // point-lookup reader, may be injected with a Resolver
+	repCfg      config.ReputationConfig
+	taxonomy    config.TaxonomyConfig // resolved via ResolveTaxonomy
+	mu          sync.RWMutex
+	subs        map[chan EventMsg]struct{}
 }
 
 // New creates a Server.  The taxonomy from cfg is merged with DefaultTaxonomy
 // via ResolveTaxonomy so callers can pass a partial or nil taxonomy.
 func New(cfg config.APIConfig, s StoreReader, repCfg config.ReputationConfig) *Server {
 	return &Server{
-		cfg:      cfg,
-		store:    s,
-		repCfg:   repCfg,
-		taxonomy: ResolveTaxonomy(cfg.Taxonomy),
-		subs:     make(map[chan EventMsg]struct{}),
+		cfg:         cfg,
+		store:       s,
+		pointReader: s,
+		repCfg:      repCfg,
+		taxonomy:    ResolveTaxonomy(cfg.Taxonomy),
+		subs:        make(map[chan EventMsg]struct{}),
 	}
+}
+
+// SetPointReader injects a point-lookup reader (e.g., a Resolver) for the
+// per-IP score endpoint. By default, the store itself is used (local-only).
+func (s *Server) SetPointReader(r scoreReader) {
+	s.pointReader = r
 }
 
 // bearerTokenMiddleware wraps a handler to require a Bearer token in the
