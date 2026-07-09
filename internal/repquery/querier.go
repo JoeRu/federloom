@@ -83,20 +83,31 @@ func (q *Querier) fanout(ctx context.Context, ip string) (proto.ScoreEntry, bool
 	merged.IP = ip
 	found := false
 	reasons := map[string]bool{}
-	for range q.aggregators {
-		r := <-ch
-		if !r.ok {
-			continue
-		}
-		found = true
-		if r.e.Score > merged.Score {
-			merged.Score = r.e.Score
-			merged.Corroboration = r.e.Corroboration
-			merged.FirstSeen = r.e.FirstSeen
-			merged.LastSeen = r.e.LastSeen
-		}
-		for _, rs := range r.e.Reasons {
-			reasons[rs] = true
+collect:
+	for i := 0; i < len(q.aggregators); i++ {
+		select {
+		case r := <-ch:
+			if !r.ok {
+				continue
+			}
+			// Copy scalar/meta fields on the first found answer or a strictly
+			// higher score. Gating only on "> merged.Score" from a zero start
+			// would drop a known-but-clean answer (Score 0, LastSeen set),
+			// leaving a zero LastSeen that reads as the "not found" sentinel.
+			if !found || r.e.Score > merged.Score {
+				merged.Score = r.e.Score
+				merged.Corroboration = r.e.Corroboration
+				merged.FirstSeen = r.e.FirstSeen
+				merged.LastSeen = r.e.LastSeen
+			}
+			found = true
+			for _, rs := range r.e.Reasons {
+				reasons[rs] = true
+			}
+		case <-qctx.Done():
+			// Deadline hit: return whatever answered in time rather than
+			// blocking on a straggler that may never send.
+			break collect
 		}
 	}
 	for rs := range reasons {
@@ -115,6 +126,11 @@ func (q *Querier) ask(ctx context.Context, a peer.AddrInfo, ip string) (proto.Sc
 		return proto.ScoreEntry{}, false
 	}
 	defer s.Close()
+	// The context bounds dial + protocol negotiation only; set a stream
+	// deadline so the encode/decode below cannot block past the query timeout.
+	if dl, ok := ctx.Deadline(); ok {
+		_ = s.SetDeadline(dl)
+	}
 	if err := json.NewEncoder(s).Encode(proto.RepQuery{IP: ip}); err != nil {
 		return proto.ScoreEntry{}, false
 	}
