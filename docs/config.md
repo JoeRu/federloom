@@ -268,6 +268,19 @@ trust:
   federation_discount: 0.5
 ```
 
+### `federation_aggregators`, `federation_query_timeout`, `federation_query_cache_ttl`
+
+When a reputation lookup (DNSBL or the per-IP score API) misses the local store,
+the node queries these trusted aggregator peers on demand over libp2p and caches
+the answer. `federation_aggregators` is a list of aggregator multiaddrs (empty =
+feature off). `federation_query_timeout` (default `150ms`) bounds each query;
+`federation_query_cache_ttl` (default `5m`) caches answers.
+
+Aggregators are trusted like anchors — their answer is advisory evidence and
+your own threshold decides "listed". The DNSBL/API stay on the private interface;
+the query itself rides authenticated libp2p. Push-to-firewall (L3) is unchanged;
+the blocklist *list* endpoint is never federated (point lookups only).
+
 ### `federation_subnet` and `federation_bridge_subnets`
 
 `federation_subnet` names this node's home trust domain (gossip topic). Empty or

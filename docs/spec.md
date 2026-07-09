@@ -548,14 +548,14 @@ Honest status of each design area in the current codebase. This table — not th
 | §5.2 | Federation import / discount / origin-trace | `internal/node`, `internal/transport`, `internal/trust` | PARTIAL — subnet-bridge forwarding makes origin-trace + per-hop discount active (E1); evidence-aggregate import PLANNED (E2) |
 | §7.1 | Event model | `pkg/proto` | DONE — `port_class` deprecated-retained |
 | §7.1 | IPv6 `/64` prefix normalization | `internal/netutil`, `internal/node`, `internal/enforce` | DONE |
-| §7.2 | ScoreEntry aggregate | `pkg/proto` | RESERVED — defined, not exchanged |
+| §7.2 | ScoreEntry aggregate | `pkg/proto`, `internal/repquery` | DONE — exchanged as the on-demand query answer (E3) |
 | §7.5 | EvidenceAggregate (federated import type) | — | PLANNED (E) |
 | §7.6 | System profile / SBOM | — | PLANNED (E) |
 | §8 | Score dynamics (logistic accumulation, decay) | `internal/reputation`, `internal/rules` | DONE |
 | §9 | GDPR framing (cleartext IP, decay = deletion) | `internal/store` (TTL) | DONE |
 | §10 | Never-block set | `internal/enforce` | DONE — incl. public resolvers |
 | §11.3 | O(1) enforcement (ipset/nftables) | `internal/enforce` | DONE |
-| §11.4 | On-demand query / pull transport | `internal/transport` | PLANNED (E) — current model is gossip push |
+| §11.4 | On-demand query / pull transport | `internal/repquery` | PARTIAL — read path via configured aggregators (E3); DHT/bloom + materialise-on-verdict PLANNED |
 | §14 | Federation discovery (DHT + relay list) | `internal/discovery` | DONE |
 
 ## 13. Nächste Schritte
