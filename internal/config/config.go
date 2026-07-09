@@ -48,8 +48,11 @@ type DNSBLConfig struct {
 // Config is the top-level runtime configuration.
 type Config struct {
 	FederationMode          string              `yaml:"federation_mode"`
-	FederationSubnet        string              `yaml:"federation_subnet"`         // home trust domain; "" or "default" = base topic
-	FederationBridgeSubnets []string            `yaml:"federation_bridge_subnets"` // subnets this node bridges (empty = leaf)
+	FederationSubnet        string              `yaml:"federation_subnet"`          // home trust domain; "" or "default" = base topic
+	FederationBridgeSubnets []string            `yaml:"federation_bridge_subnets"`  // subnets this node bridges (empty = leaf)
+	FederationAggregators   []string            `yaml:"federation_aggregators"`     // aggregator peer multiaddrs to query on a local miss (empty = off)
+	FederationQueryTimeout  Duration            `yaml:"federation_query_timeout"`   // per-query deadline; default 150ms
+	FederationQueryCacheTTL Duration            `yaml:"federation_query_cache_ttl"` // cache TTL for federated answers; default 5m
 	Store                   StoreConfig         `yaml:"store"`
 	Reputation              ReputationConfig    `yaml:"reputation"`
 	Ingest                  IngestConfig        `yaml:"ingest"`
@@ -360,4 +363,20 @@ func (c *Config) EffectiveBridgeSubnets() []string {
 		out = append(out, s)
 	}
 	return out
+}
+
+// EffectiveQueryTimeout returns the federated-query deadline, defaulting to 150ms.
+func (c *Config) EffectiveQueryTimeout() time.Duration {
+	if c.FederationQueryTimeout.Duration <= 0 {
+		return 150 * time.Millisecond
+	}
+	return c.FederationQueryTimeout.Duration
+}
+
+// EffectiveQueryCacheTTL returns the federated-answer cache TTL, defaulting to 5m.
+func (c *Config) EffectiveQueryCacheTTL() time.Duration {
+	if c.FederationQueryCacheTTL.Duration <= 0 {
+		return 5 * time.Minute
+	}
+	return c.FederationQueryCacheTTL.Duration
 }

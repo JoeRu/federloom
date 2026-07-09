@@ -377,3 +377,23 @@ func TestEffectiveBridgeSubnetsDropsDefaultAlias(t *testing.T) {
 		}
 	}
 }
+
+func TestEffectiveQueryDefaults(t *testing.T) {
+	c := &config.Config{} // unset
+	if got := c.EffectiveQueryTimeout(); got != 150*time.Millisecond {
+		t.Errorf("EffectiveQueryTimeout default = %v, want 150ms", got)
+	}
+	if got := c.EffectiveQueryCacheTTL(); got != 5*time.Minute {
+		t.Errorf("EffectiveQueryCacheTTL default = %v, want 5m", got)
+	}
+	c2 := &config.Config{
+		FederationQueryTimeout:  config.Duration{Duration: 300 * time.Millisecond},
+		FederationQueryCacheTTL: config.Duration{Duration: 2 * time.Minute},
+	}
+	if got := c2.EffectiveQueryTimeout(); got != 300*time.Millisecond {
+		t.Errorf("EffectiveQueryTimeout = %v, want 300ms", got)
+	}
+	if got := c2.EffectiveQueryCacheTTL(); got != 2*time.Minute {
+		t.Errorf("EffectiveQueryCacheTTL = %v, want 2m", got)
+	}
+}
