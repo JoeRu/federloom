@@ -65,6 +65,12 @@ func (s *Server) SetPointReader(r scoreReader) {
 	s.pointReader = r
 }
 
+// PointLookupForTest exercises the per-IP point reader (the resolver when
+// federation is wired, else the store). Test-only.
+func (s *Server) PointLookupForTest(ip string) (store.ScoreRecord, error) {
+	return s.pointReader.GetScore(ip)
+}
+
 // bearerTokenMiddleware wraps a handler to require a Bearer token in the
 // Authorization header. If the token does not match, it returns 401 Unauthorized.
 func bearerTokenMiddleware(token string, next http.Handler) http.Handler {

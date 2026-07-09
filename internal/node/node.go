@@ -150,10 +150,14 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 
 	var resolver *repquery.Resolver
 	if t != nil && len(cfg.FederationAggregators) > 0 {
-		repquery.RegisterResponder(t.Host(), s) // serve our local store
 		aggs := parseAggregators(cfg.FederationAggregators)
-		q := repquery.NewQuerier(t.Host(), aggs, cfg.EffectiveQueryTimeout(), cfg.EffectiveQueryCacheTTL())
-		resolver = repquery.NewResolver(s, q)
+		if len(aggs) == 0 {
+			log.Printf("node: federation_aggregators set but none parsed to a valid peer; federated query disabled")
+		} else {
+			repquery.RegisterResponder(t.Host(), s) // serve our local store
+			q := repquery.NewQuerier(t.Host(), aggs, cfg.EffectiveQueryTimeout(), cfg.EffectiveQueryCacheTTL())
+			resolver = repquery.NewResolver(s, q)
+		}
 	}
 
 	var dnsblReader dnsbl.StoreReader = s

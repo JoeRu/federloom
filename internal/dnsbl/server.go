@@ -47,6 +47,12 @@ func New(cfg config.DNSBLConfig, s StoreReader, repCfg config.ReputationConfig) 
 	return srv
 }
 
+// LookupForTest exercises the configured store reader (the resolver when
+// federation is wired, else the store). Test-only.
+func (s *Server) LookupForTest(ip string) (store.ScoreRecord, error) {
+	return s.store.GetScore(ip)
+}
+
 // Start starts the DNSBL server on both UDP and TCP.
 // It is a no-op when cfg.Addr or cfg.Zone is empty, or when s is nil.
 // The servers shut down when ctx is cancelled.
