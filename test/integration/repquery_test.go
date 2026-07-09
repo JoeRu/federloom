@@ -1,0 +1,52 @@
+package integration_test
+
+import (
+	"testing"
+	"time"
+
+	"github.com/libp2p/go-libp2p"
+	"github.com/libp2p/go-libp2p/core/peer"
+
+	"github.com/JoeRu/federloom/internal/repquery"
+	"github.com/JoeRu/federloom/internal/store"
+)
+
+// storeStub is a minimal repquery.Store for the integration test.
+type storeStub struct{ m map[string]store.ScoreRecord }
+
+func (s storeStub) GetScore(ip string) (store.ScoreRecord, error) { return s.m[ip], nil }
+
+func TestFederatedLookupFetchesFromAggregator(t *testing.T) {
+	// Aggregator B: has 203.0.113.9 scored, serves the responder.
+	bHost, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
+	if err != nil {
+		t.Fatalf("bHost: %v", err)
+	}
+	defer bHost.Close()
+	repquery.RegisterResponder(bHost, storeStub{m: map[string]store.ScoreRecord{
+		"203.0.113.9": {Score: 92, Corroboration: 4, LastSeen: time.Now()},
+	}})
+
+	// Querier A: empty local store, B configured as aggregator.
+	aHost, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
+	if err != nil {
+		t.Fatalf("aHost: %v", err)
+	}
+	defer aHost.Close()
+	q := repquery.NewQuerier(aHost, []peer.AddrInfo{{ID: bHost.ID(), Addrs: bHost.Addrs()}}, 2*time.Second, time.Minute)
+	resolver := repquery.NewResolver(storeStub{m: map[string]store.ScoreRecord{}}, q)
+
+	// A resolves an IP it does not hold → fetched from B.
+	rec, err := resolver.GetScore("203.0.113.9")
+	if err != nil {
+		t.Fatalf("GetScore: %v", err)
+	}
+	if rec.LastSeen.IsZero() || rec.Score != 92 {
+		t.Errorf("federated lookup = %+v, want score 92", rec)
+	}
+
+	// An IP nobody has → empty.
+	if rec, _ := resolver.GetScore("203.0.113.10"); !rec.LastSeen.IsZero() {
+		t.Errorf("unknown IP should stay empty, got %+v", rec)
+	}
+}

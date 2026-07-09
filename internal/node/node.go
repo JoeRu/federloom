@@ -10,6 +10,7 @@ import (
 	"time"
 
 	libp2pcrypto "github.com/libp2p/go-libp2p/core/crypto"
+	"github.com/libp2p/go-libp2p/core/peer"
 
 	"github.com/JoeRu/federloom/internal/api"
 	"github.com/JoeRu/federloom/internal/config"
@@ -20,6 +21,7 @@ import (
 	"github.com/JoeRu/federloom/internal/ingest"
 	"github.com/JoeRu/federloom/internal/netutil"
 	"github.com/JoeRu/federloom/internal/observability"
+	"github.com/JoeRu/federloom/internal/repquery"
 	"github.com/JoeRu/federloom/internal/reputation"
 	"github.com/JoeRu/federloom/internal/rules"
 	"github.com/JoeRu/federloom/internal/store"
@@ -146,8 +148,24 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		return nil, fmt.Errorf("node: observability: %w", err)
 	}
 
+	var resolver *repquery.Resolver
+	if t != nil && len(cfg.FederationAggregators) > 0 {
+		repquery.RegisterResponder(t.Host(), s) // serve our local store
+		aggs := parseAggregators(cfg.FederationAggregators)
+		q := repquery.NewQuerier(t.Host(), aggs, cfg.EffectiveQueryTimeout(), cfg.EffectiveQueryCacheTTL())
+		resolver = repquery.NewResolver(s, q)
+	}
+
+	var dnsblReader dnsbl.StoreReader = s
+	if resolver != nil {
+		dnsblReader = resolver
+	}
+
 	apiSrv := api.New(cfg.API, s, cfg.Reputation)
-	dnsblSrv := dnsbl.New(cfg.DNSBL, s, cfg.Reputation)
+	if resolver != nil {
+		apiSrv.SetPointReader(resolver)
+	}
+	dnsblSrv := dnsbl.New(cfg.DNSBL, dnsblReader, cfg.Reputation)
 
 	var disc *discovery.Manager
 	if t != nil {
@@ -520,6 +538,20 @@ func (n *Node) CloseStores() {
 
 // SelfID returns this node's libp2p peer ID string (empty in solo mode).
 func (n *Node) SelfID() string { return n.selfID }
+
+// parseAggregators turns configured multiaddrs into libp2p AddrInfos, skipping bad ones.
+func parseAggregators(addrs []string) []peer.AddrInfo {
+	var out []peer.AddrInfo
+	for _, a := range addrs {
+		info, err := peer.AddrInfoFromString(a)
+		if err != nil {
+			log.Printf("node: bad federation aggregator %q: %v", a, err)
+			continue
+		}
+		out = append(out, *info)
+	}
+	return out
+}
 
 // fanIn merges multiple event channels into one.
 func fanIn(ctx context.Context, chans ...<-chan proto.Event) <-chan proto.Event {
