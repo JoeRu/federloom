@@ -560,6 +560,11 @@ Honest status of each design area in the current codebase. This table — not th
 
 ## 13. Nächste Schritte
 
+> **Superseded (2026-07-10):** Die Sequenzierung liegt jetzt in
+> [docs/roadmap.md](roadmap.md); der Live-Status in §12a. Diese Liste bleibt
+> als historischer Design-Kontext erhalten — mehrere Punkte (u. a. 5, 8, 10,
+> 11, 15) sind inzwischen umgesetzt.
+
 1. **Decay-Halbwertszeit** modellieren (ggf. pro Angriffstyp) – Problem D.
 2. **Melder-Privacy** entscheiden (Anonymität ↔ Accountability) – Problem E.
 3. **Ground-Truth-Betriebsmodell** wählen (Honeypot vs. Echtsystem+Spamtrap; A/B) – §4.1/§6.1.

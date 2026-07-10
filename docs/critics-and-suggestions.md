@@ -5,6 +5,10 @@
 implementation under `internal/`, `pkg/`, `cmd/`, plus the shipped `deploy/`
 configs and rules.
 **Date:** 2026-07-07
+**Resolution status (2026-07-10):** all P0s, all P2/P3, P1-4 and P1-5 are
+resolved; P1-1 partially (pull read path shipped as E3). Remaining items and
+their sequence live in [roadmap.md](roadmap.md) — this document is preserved
+as the original findings record.
 **Method:** read the two design docs first, then traced the real event path
 (`ingest → reputation → rules → enforce → transport`) against what the spec
 claims. Findings are grouped for two audiences: a candid limitations summary
