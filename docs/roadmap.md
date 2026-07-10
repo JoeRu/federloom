@@ -1,6 +1,6 @@
 # FederLoom Roadmap
 
-**Status:** 2026-07-10 · supersedes spec §13 "Nächste Schritte" as the
+**Status:** 2026-07-10 · supersedes spec §13 "Next Steps" as the
 sequencing document. Ground truth for *what is live* remains the spec §12a
 traceability table; ground truth for *what was wrong* is
 [critics-and-suggestions.md](critics-and-suggestions.md). This file orders
@@ -68,7 +68,7 @@ DHT/bloom + materialise-on-verdict remain). Open: P1-2 (diversity), P1-3
 | # | Item |
 |---|---|
 | C1 | `port_class` is deprecated-retained in `pkg/proto` (P2-1). Removal is a breaking wire change — bundle into the next protocol version bump (`federloom/events/v1`), ideally together with signing `OriginTrace` (B2), so the network pays for one migration, not two. |
-| C2 | Spec §13 "Nächste Schritte" is stale again (items 5, 8, 10, 11, 15, 17 are done or superseded). Point it at this roadmap. |
+| C2 | Spec §13 "Next Steps" is stale again (items 5, 8, 10, 11, 15, 17 are done or superseded). Point it at this roadmap. ✅ done 2026-07-10 (superseded-note added; spec translated to English) |
 
 ---
 

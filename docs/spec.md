@@ -1,532 +1,559 @@
-# Spezifikation: Dezentrale P2P-Reputations-Blockliste
+# Specification: Decentralized P2P Reputation Blocklist
 
-**Arbeitstitel:** *FederLoom* / https://github.com/JoeRu/federloom
-**Status:** Aktuelle Implementierung in Arbeit / Aktueller Stand
-**Primärer Anwendungsfall:** Gemeinsame Verteidung durch geteilte Informationen / https://github.com/JoeRu/Mailcow-Crowdsec-Override
-**Datum:** 2026-07-07
-
----
-
-## 1. Zielsetzung
-
-Ein dezentrales Peer-to-Peer-Netz, in dem Server (initial: Mailserver) beobachtete
-Angriffe melden und gemeinsam einen **Reputations-Score pro IP-Adresse** aufbauen.
-Jeder Betreiber bleibt souverän: Er konsumiert den Score und entscheidet anhand
-**eigener Schwellwerte und Whitelists** lokal über Sperren.
-
-Inspiriert von Torrent-/Tor-/Ethereum-Konzepten (Gossip-Verteilung, kein zentraler
-Single-Point-of-Failure, ökonomisch/reputativ verankertes Vertrauen), aber bewusst
-**ohne echte Blockchain und ohne Token/Geld** gehalten – so einfach wie möglich,
-so funktional wie nötig.
+**Working title:** *FederLoom* / https://github.com/JoeRu/federloom
+**Status:** Current implementation in progress / current state
+**Primary use case:** Shared defense through shared information / https://github.com/JoeRu/Mailcow-Crowdsec-Override
+**Date:** 2026-07-07
 
 ---
 
-## 2. Leitprinzipien
+## 1. Objective
 
-1. **Lokale Souveränität zuerst.** Das Netz liefert ein *Signal* (Score), keine
-   bindende Anweisung. Schwellen, Whitelists und Block-Aktionen entscheidet der Admin.
-2. **Vertrauen ist verdient, nicht gegeben.** Trust wächst langsam, fällt schnell.
-3. **Strukturelle Angriffseigenschaften ausnutzen.** Echte Angriffe sind *breit
-   gestreut* und *unabhängig*; Poisoning ist es nur unter hohen Kosten.
-4. **Eventual Consistency.** Kein globaler Konsens nötig – Gossip/DHT-artige
-   Verbreitung, lokale Sicht ist die Wahrheit.
-5. **DSGVO by Design.** Rechtsgrundlage berechtigtes Interesse + automatische
-   Löschung via Decay + Verantwortlichkeit beim lokalen Admin.
-6. **Föderiertes Vertrauen.** Trust spiegelt soziale/organisatorische Strukturen
-   wider (Mastodon-Modell). Kein globaler Trust-Zwang; Teilnetze und Trust-Anchors
-   sind lokal wähl- und widerrufbar.
-7. **Listen sind Hilfsmittel, kein Gesetz.** Der Nutzer kann **einzelne oder alle
-   Parameter überschreiben**. Block- und Allow-Listen sind „nur" ein Hilfsmittel –
-   die finale Entscheidung liegt immer lokal.
-8. **Lokal souverän, remote nur beratend.** Der Operator darf lokal **alles**
-   tunen (Whitelists, Peer-/Föderations-Trust, Regeln). Die harte Invariante gilt
-   **gegenüber dem Netz**: kein importiertes Signal, kein Peer, keine Föderation darf
-   bei dir einen Block, eine Whitelist- oder eine Trust-Änderung **erzwingen** —
-   Remote-Input ist immer *beratend*. Sichere Defaults werden ausgeliefert;
-   Runtertunen geschieht auf eigenes Risiko. (Schärft #1/#7 gegen Netzwerk-Poisoning.)
+A decentralized peer-to-peer network in which servers (initially: mail servers) report
+observed attacks and jointly build up a **reputation score per IP address**.
+Every operator remains sovereign: they consume the score and decide locally on
+blocks based on **their own thresholds and whitelists**.
+
+Inspired by Torrent/Tor/Ethereum concepts (gossip distribution, no central
+single point of failure, economically/reputationally anchored trust), but
+deliberately kept **without a real blockchain and without tokens/money** — as
+simple as possible, as functional as necessary.
 
 ---
 
-## 3. Outputs (für Konsumenten)
+## 2. Guiding Principles (Leitprinzipien)
 
-Drei Abstraktionsebenen, je nach Anwendungsfall:
+1. **Local sovereignty first.** The network delivers a *signal* (score), not
+   a binding instruction. Thresholds, whitelists, and block actions are decided by the admin.
+2. **Trust is earned, not given.** Trust grows slowly, falls quickly.
+3. **Exploit structural attack properties.** Real attacks are *broadly
+   distributed* and *independent*; poisoning is only so under high cost.
+4. **Eventual consistency.** No global consensus needed — gossip/DHT-like
+   propagation, local view is the truth.
+5. **GDPR by design.** Legal basis: legitimate interest + automatic
+   deletion via decay + responsibility resting with the local admin.
+6. **Federated trust.** Trust reflects social/organizational structures
+   (Mastodon model). No global trust compulsion; subnets and trust anchors
+   are locally selectable and revocable.
+7. **Lists are aids, not law.** The user can **override individual or all
+   parameters**. Block and allow lists are "only" an aid —
+   the final decision always rests locally.
+8. **Locally sovereign, remote only advisory.** The operator may tune
+   **everything** locally (whitelists, peer/federation trust, rules). The hard
+   invariant applies **toward the network**: no imported signal, no peer, no
+   federation may **force** a block, whitelist, or trust change upon
+   you — remote input is always *advisory*. Secure defaults are shipped;
+   loosening them is at your own risk. (Sharpens #1/#7 against network poisoning.)
 
-| Ebene | Beschreibung | Zielgruppe |
+---
+
+## 3. Outputs (for Consumers)
+
+Three levels of abstraction, depending on use case:
+
+| Level | Description | Target audience |
 |-------|--------------|------------|
-| **Reputations-Score pro IP** *(Default)* | Normalisierter Wert (z. B. 0–100) | Die meisten Admins |
-| **Fertige Blockliste** | Score + lokaler Threshold → drop-in für Fail2Ban/CrowdSec | „Plug & Play"-Admins |
-| **Roh-Events** | Einzelmeldungen mit Evidenz | Power-User / eigene Auswertung |
-| **Föderations-Feed-Export (STIX/TAXII)** | Client *liest* die Föderation und publiziert Events downstream (SIEM/TIP) | Integratoren |
+| **Reputation score per IP** *(default)* | Normalized value (e.g., 0–100) | Most admins |
+| **Ready-made blocklist** | Score + local threshold → drop-in for Fail2Ban/CrowdSec | "Plug & play" admins |
+| **Raw events** | Individual reports with evidence | Power users / own analysis |
+| **Federation feed export (STIX/TAXII)** | Client *reads* the federation and publishes events downstream (SIEM/TIP) | Integrators |
 
-Decay und Eskalation sind **Funktionen des Scores**, keine harten An/Aus-Regeln.
+Decay and escalation are **functions of the score**, not hard on/off rules.
 
-Der STIX/TAXII-Export ist **Egress über die bestehende REST-API** (Poll-Modell,
-downstream pollt — kein Push-Connector). STIX `confidence`/`valid_until` mappen auf
-Score/Decay; das Szenario (§7.1) auf STIX `attack-pattern`. **Eigene Reason-Codes
-bleiben Source of Truth**, STIX-Mapping nur an der Kante.
-
----
-
-## 4. Verteidigungs-Stack gegen Poisoning (Kern des Designs)
-
-Gewählter **schlanker Stack** – drei Schichten tragen ~80 % der Last:
-
-### 4.1 Ground-Truth-Anchor-Systeme
-- Quellen unbestechlicher Wahrheit, maximal gewichtet (Trust ≈ 1.0). Zwei Bauformen,
-  Detail-Pflichten je Föderation in §6.1:
-  - **Dedizierte Honeypots:** IPs/Mailboxen, die **niemals legitim genutzt** werden →
-    jede Verbindung ist per Definition bösartig → **null False Positives**.
-  - **Echtsysteme unter Last** mit **honeypot-artigen Signalen** (Spamtraps,
-    Auth gegen nicht existierende Accounts, ungenutzte Ports).
-- Doppelnutzen:
-  - **Bootstrapping/Genesis-Trust** (löst das Henne-Ei-Problem neuer Knoten).
-  - **Kalibrierung:** Knoten, die bekannte Ground-Truth-Angreifer *nicht* melden oder
-    Ground-Truth-IPs whitelisten, verlieren Trust.
-- **Betriebsmodelle (beide dokumentiert, wählbar):**
-  - **A) Zentral:** Projekt betreibt Anker + signiert Genesis-Peers. → einfacher
-    Start, klarer Trust-Anchor, aber zentrale Abhängigkeit.
-  - **B) Dezentral:** Freiwillige betreiben Anker, deren Status wird im Netz
-    attestiert. → robuster, aber komplexere Verifikation nötig.
-
-### 4.2 Diversitäts-gewichtete Korroboration
-- Score steigt erst, wenn **N *unabhängige* Melder** dieselbe IP sehen.
-- Unabhängigkeit zählt, nicht Anzahl: Gewichtung nach **Diversität der Quellen**
-  (verschiedene ASNs, Länder, Trust-Herkunft).
-  - 10 Meldungen aus *einem* ASN ≈ 1 Stimme.
-  - 10 Meldungen aus 10 Ländern = echtes Signal.
-- Nutzt die strukturelle Eigenschaft echter Angriffe (breit, unabhängig); Fälschung
-  erfordert teure, breit verteilte Angreifer-Infrastruktur.
-
-### 4.3 Reputation-Stake mit asymmetrischem Decay
-- **Kein Geld/Token** – auf dem Spiel steht der über Zeit aufgebaute **Trust**.
-- Trust-Formel (Richtung):
-  `Trust = f(Alter × nachgewiesene legitime Aktivität × Konsens-Übereinstimmung)`
-  - **Wichtig:** Alter *allein* ist Sybil-anfällig (*patient Sybil*: Knoten 6 Monate
-    brav laufen lassen, dann koordiniert aktivieren). Alter daher **nur in Kopplung**
-    an Aktivität und Konsens-Übereinstimmung werten.
-- **Asymmetrie als Sicherheit:** Trust steigt **langsam**, fällt **schnell** bei
-  Anomalie oder Dispute (Schutz gegen gekaperte High-Trust-Knoten, die plötzlich
-  z. B. `8.8.8.8` melden).
-
-### 4.4 Anti-Trust / Dispute-Rückkopplung (ergänzend)
-- **Lokale Whitelist = negativer, trust-gewichteter Vote.** Whitelisten viele Admins
-  eine IP, ist das ein starkes „legitim"-Signal.
-- Meldet ein Knoten wiederholt breit-whitelistete IPs, sinkt **sein eigener Trust**
-  → Poisoning beschädigt den Poisoner.
-- **Achtung Gegenangriff:** Massen-Whitelisting durch Sybils könnte echte Angreifer
-  schützen → Whitelist-Votes brauchen **dieselbe Diversitäts-/Trust-Gewichtung** wie
-  Block-Votes.
-
-> **Optional / spätere Ausbaustufe (nicht im schlanken Stack):**
-> Proof-of-Work pro Meldung als Flut-Bremse; Web-of-Trust mit Bürgschaft;
-> Reputation-Slashing; strukturierte Plausibilitätsprüfung der Evidenz.
-
-### 4.5 Applicability-Gewichtung (lokal, consume-time)
-- Beim **Konsumieren** wird ein Signal danach gewichtet, wie **anwendbar** der
-  angegriffene Dienst auf das *eigene* System ist (System-Profil §7.6, ggf.
-  SBOM-abgeleitet). Ein `ssh-brute-force`-Signal wiegt für einen SSH-exponierten
-  Peer mehr.
-- **Soft down-weight, kein Hard-Filter** (Default): Dienste ändern sich, Angreifer
-  pivotieren, und die IP bleibt für die Korroboration wertvoll. Hartes Filtern nur
-  als optionale lokale Policy.
-- **Rein lokale Transformation:** ändert die *geteilte* Reputation nicht → die
-  Föderations-Konsistenz bleibt erhalten, während jeder Peer auf das Relevante
-  reagiert.
-- Resultierende lokale Formel:
-  `effektives Gewicht = Korroboration × Source-Trust × lokale-Anwendbarkeit`.
+The STIX/TAXII export is **egress via the existing REST API** (poll model,
+downstream polls — no push connector). STIX `confidence`/`valid_until` map to
+score/decay; the scenario (§7.1) to STIX `attack-pattern`. **Our own reason
+codes remain the source of truth**, STIX mapping only at the edge.
 
 ---
 
-## 5. Föderation, Trust-Anchors & Teilnetze
+## 4. Defense Stack Against Poisoning (Core of the Design)
 
-Verschiebt das System von *einem* globalen Trust-Graphen zu **föderierten
-Trust-Domänen** – konsistent mit Leitprinzip 4 (lokale Sicht ist Wahrheit) und dem
-**Mastodon-Modell** föderierter sozialer Netze mit eigenen Vertrauensmitteln.
+Chosen **lean stack** — three layers carry ~80% of the load:
 
-### 5.1 Trust-Anchor-Liste (signaturbasiert)
-- Lokal kuratierbare Liste vertrauenswürdiger **Signaturschlüssel** (Trust Anchors).
-- Eine Meldung/ein Score von einem Anchor – oder von jemandem, den ein Anchor
-  verbürgt – erhält **erhöhtes Gewicht**.
-- Das Projekt kann über **organisatorische Maßnahmen** vertrauenswürdige Signaturen
-  bereitstellen/verteilen, z. B.:
-  - signierte „bekannte gute Betreiber",
-  - Ground-Truth-Anchor-Betreiber (Brücke zu §4.1),
-  - kuratierte CERT-/Threat-Intel-Feeds.
-- **Kritisch – gegen Re-Zentralisierung:** Anchors müssen lokal **ergänz- UND
-  entfernbar** sein. Projekt-Anchors sind sinnvoller **Default, kein Zwang**.
-  Andernfalls wird das Projekt durch die Hintertür zur zentralen Autorität.
-- **Schlüssel-Lebenszyklus:** Rotation, Revocation (Revocation-Liste bzw. kurze
-  Gültigkeiten), Umgang mit kompromittierten Anchor-Keys (Details §6.3).
-- **Vereinheitlichendes Primitiv:** Honeypot-/Ground-Truth-Anker (§4.1) und das
-  Never-Block-Set (§10) sind Spezialfälle dieser Anchor-Mechanik – gleiche Logik,
-  unterschiedliches Gewicht und unterschiedliche Quelle.
+### 4.1 Ground-truth Anchor Systems
+- Sources of incorruptible truth, weighted maximally (trust ≈ 1.0). Two
+  forms; detailed obligations per federation in §6.1:
+  - **Dedicated honeypots:** IPs/mailboxes that are **never used
+    legitimately** → every connection is malicious by definition →
+    **zero false positives**.
+  - **Real systems under load** with honeypot-like signals (spamtraps,
+    auth attempts against non-existent accounts, unused ports).
+- Dual use:
+  - **Bootstrapping/genesis trust** (solves the chicken-and-egg problem of
+    new nodes).
+  - **Calibration:** nodes that fail to report known ground-truth attackers,
+    or that whitelist ground-truth IPs, lose trust.
+- **Operating models** (both documented, selectable):
+  - **A) Centralized:** the project operates anchors + signs genesis peers →
+    simpler start, clear trust anchor, but central dependency.
+  - **B) Decentralized:** volunteers operate anchors, whose status is
+    attested within the network → more robust, but requires more complex verification.
 
-### 5.2 Eigene Teilnetze (Federation, Mastodon-Modell)
-- Betreiber können **eigene Trust-Domänen/Teilnetze** mit eigenen Trust-Wurzeln und
-  eigener Governance aufspannen.
-- **Analogie Mastodon:** jede Instanz moderiert selbst, föderiert aber selektiv.
-- Betriebsarten eines Teilnetzes:
-  - **Isoliert:** eigener Trust, kein Import (z. B. Firmen-/Verbund-internes Netz).
-  - **Föderiert:** es werden **Evidenz-Aggregate** (nicht fertige Scores) anderer
-    Teilnetze importiert und **lokal regelbasiert neu berechnet**. Der frühere
-    Trust-Discount wird zum **Evidenz-Gewicht** pro Quelle/Subnetz. Damit entfällt
-    das Problem, fremde Score-Skalen zu kombinieren (vgl. Matrix MSC3845, das genau
-    daran als Draft hängt — s. `docs/prior-art.md`).
-- **Föderationsmodus** (wie Mastodon):
-  - **Allowlist / default-deny:** nur explizit vertraute Teilnetze.
-  - **Blocklist / default-allow:** alle außer explizit geblockten.
-  - *Empfehlung:* Föderation als Default (mit Discount), Isolation als bewusste
-    Ausnahme – sonst zersplittert die Abdeckung vor dem Netzwerkeffekt.
-- **Defederation als Sicherheitsmechanismus:** ein bösartiges/kompromittiertes
-  Teilnetz wird wie eine schlechte Mastodon-Instanz „defederiert" → die Sybil-Antwort
-  auf **Teilnetz-Ebene**.
-- **Achtung Rückkopplung:** Gegenseitiger Import (A↔B) kann dieselbe Information
-  mehrfach zählen lassen → **Herkunfts-Tracking** pro Meldung oder streng abklingender
-  Discount über Föderations-Hops nötig (Problem K).
+### 4.2 Diversity-weighted Corroboration
+- The score rises only once **N *independent* reporters** see the same IP.
+- Independence counts, not count: weighting by **diversity of sources**
+  (different ASNs, countries, trust origin).
+  - 10 reports from *one* ASN ≈ 1 vote.
+  - 10 reports from 10 countries = a genuine signal.
+- Exploits the structural property of real attacks (broad, independent);
+  forging this requires expensive, widely distributed attacker infrastructure.
 
-### 5.3 Resultierendes Modell
-- Statt *einer* globalen Wahrheit ein **Geflecht von Trust-Domänen**, das soziale und
-  organisatorische Vertrauensstrukturen abbildet.
-- Jeder Knoten/jedes Teilnetz berechnet seinen **eigenen** Score aus:
-  `eigene Evidenz + importierte (evidenz-gewichtete) fremde Evidenz + Anchor-Signale`,
-  lokal über die Regel-Engine zu einem **eigenen** Score verrechnet.
+### 4.3 Reputation Stake with Asymmetric Decay
+- **No money/tokens** — what is at stake is the **trust** built up over time.
+- Trust formula (directional):
+  `Trust = f(Age × demonstrated legitimate activity × consensus agreement)`
+  - **Important:** age *alone* is Sybil-vulnerable (*patient Sybil*: run a
+    node well-behaved for 6 months, then activate it in a coordinated
+    fashion). Age is therefore only counted **coupled with** activity and
+    consensus agreement.
+- **Asymmetry as security:** trust rises **slowly**, falls **quickly** on
+  anomaly or dispute (protection against hijacked high-trust nodes that
+  suddenly report e.g. `8.8.8.8`).
 
----
+### 4.4 Anti-trust / Dispute Feedback (Supplementary)
+- **Local whitelist = negative, trust-weighted vote.** If many admins
+  whitelist an IP, that is a strong "legitimate" signal.
+- If a node repeatedly reports IPs that are broadly whitelisted, **its own
+  trust** drops → poisoning damages the poisoner.
+- **Caution, counter-attack:** mass whitelisting by Sybils could protect
+  real attackers → whitelist votes need **the same diversity/trust
+  weighting** as block votes.
 
-## 6. Organisatorische Pflichten je Föderation (Onboarding & Repo-Doku)
+> **Optional / later expansion stage (not in the lean stack):**
+> Proof-of-work per report as a flood brake; web-of-trust with vouching;
+> reputation slashing; structured plausibility checking of evidence.
 
-Jede Föderation/Gruppe muss diese Punkte **initial ausprägen**; beitretende Nutzer
-fordern einen sinnvollen Anschluss daran. **Das Repository MUSS dies klar erklären**
-(prominenter Onboarding-Guide, nicht nur Referenz-Anhang).
-
-### 6.1 Ground-Truth-Anchor-Systeme festlegen
-- Eintragung der entsprechenden **Signaturen als hoch gewichtete Trust-Anchors** (§5.1).
-- Quelle wahlweise:
-  - **Dedizierte Honeypots** – Null False Positives, aber Extra-Infrastruktur.
-  - **„Echte Systeme unter Last"** – sehen reale Angriffsmuster, keine Extra-Box nötig.
-- **Kritischer Caveat:** Ein Echtsystem hat **keine** Null-False-Positive-Eigenschaft
-  (es empfängt auch legitimen Traffic). Empfehlung: nicht das ganze System als Ground
-  Truth werten, sondern **honeypot-artige Signale innerhalb des Echtsystems**, die die
-  Garantie bewahren:
-  - Spamtrap-Adressen (nie real genutzte Mailboxen),
-  - Auth-Versuche gegen nicht existierende Accounts,
-  - Verbindungen auf ungenutzte/geschlossene Ports.
-
-### 6.2 Massen-Whitelist pflegen (zentral + lokale Wahrheit)
-- Föderations-weite Whitelist (entspricht Never-Block-Set, §10) wird zentral gepflegt.
-- **Ergänzt immer um die „lokale Wahrheit"** je Installation, idealerweise per
-  **Installationsscript**, das automatisch ausliest und listet:
-  - eigene öffentliche IP(s),
-  - Gateways,
-  - eigene/konfigurierte DNS-Server,
-  - lokale Docker-IP-Ranges (z. B. Bridge-Netze 172.16.0.0/12),
-  - RFC1918 / Loopback.
-- **Zwingende Trennung (Privacy, Problem E):**
-  - **Lokal-only-Whitelist:** lokale Infrastruktur – wird **nie ins Netz geteilt**
-    (irrelevant für andere + leakt Topologie). Unterdrückt nur lokale Blocks.
-  - **Geteilte Whitelist-Votes:** bewusste „diese öffentliche IP ist legitim"-Signale
-    (trust-gewichtet, §4.4).
-- **Caveat Auto-Detection:** darf nicht zu breit whitelisten (z. B. ganze öffentliche
-  Provider-Ranges) → konservativ, nur eindeutig lokale Bereiche.
-- → adressiert **Problem F**.
-
-### 6.3 Schlüssel-Management
-- Festlegen, **wer Anchor-/Knoten-Schlüssel ausgibt und verbürgt**.
-- Rotation- und Revocation-Policy: Verteilung der Revocation-Liste, Gültigkeitsdauern.
-- Verfahren für **kompromittierte Schlüssel**: schneller Widerruf + Trust-Reset.
-- → adressiert **Problem J**.
-
-### 6.4 Übergeordnetes Prinzip (Erinnerung)
-Der Nutzer kann am Ende **einzelne oder alle Parameter überschreiben**. Die Listen
-(Block & Allow) sind **„nur" ein Hilfsmittel** – siehe Leitprinzip 7. Das Onboarding
-muss dies explizit machen, damit niemand die Föderations-Defaults für bindend hält.
+### 4.5 Applicability Weighting (Local, Consume-time)
+- At **consumption** time, a signal is weighted by how **applicable** the
+  attacked service is to the *own* system (system profile §7.6, possibly
+  SBOM-derived). An `ssh-brute-force` signal weighs more for an
+  SSH-exposed peer.
+- **Soft down-weight, not a hard filter** (default): services change,
+  attackers pivot, and the IP remains valuable for corroboration. Hard
+  filtering only as an optional local policy.
+- **Purely local transformation:** does not change the *shared* reputation
+  → federation consistency is preserved while each peer reacts to what is
+  relevant to it.
+- Resulting local formula:
+  `effective weight = corroboration × source trust × local applicability`.
 
 ---
 
-## 7. Datenmodell (Entwurf)
+## 5. Federation, Trust Anchors & Subnets
 
-### 7.1 Meldung (Event)
-| Feld | Beschreibung |
+Shifts the system from *one* global trust graph to **federated trust
+domains** — consistent with Leitprinzip 4 (local view is truth) and the
+**Mastodon model** of federated social networks with their own trust instruments.
+
+### 5.1 Trust Anchor List (Signature-based)
+- Locally curatable list of trustworthy **signature keys** (trust anchors).
+- A report/score from an anchor — or from someone vouched for by an anchor —
+  receives **increased weight**.
+- The project can provide/distribute trustworthy signatures through
+  **organizational measures**, e.g.:
+  - signed "known good operators",
+  - ground-truth anchor operators (bridge to §4.1),
+  - curated CERT/threat-intel feeds.
+- **Critical — against re-centralization:** anchors must be locally
+  **addable AND removable**. Project anchors are a sensible **default, not a
+  mandate**. Otherwise the project becomes a central authority through the
+  back door.
+- **Key lifecycle:** rotation, revocation (revocation list or short validity
+  periods), handling compromised anchor keys (details in §6.3).
+- **Unifying primitive:** honeypot/ground-truth anchors (§4.1) and the
+  never-block set (§10) are special cases of this anchor mechanism — same
+  logic, different weight and different source.
+
+### 5.2 Own Subnets (Federation, Mastodon Model)
+- Operators can span their own **trust domains/subnets** with their own
+  trust roots and their own governance.
+- **Mastodon analogy:** every instance moderates itself but federates selectively.
+- Modes of operation of a subnet:
+  - **Isolated:** own trust, no import (e.g. company-/association-internal network).
+  - **Federated:** **evidence aggregates** (not finished scores) from other
+    subnets are imported and **recomputed locally by rule**. The former
+    trust discount becomes an **evidence weight** per source/subnet. This
+    eliminates the problem of combining foreign score scales (cf. Matrix
+    MSC3845, which is stuck as a draft on exactly this — see `docs/prior-art.md`).
+- **Federation mode** (like Mastodon):
+  - **Allowlist / default-deny:** only explicitly trusted subnets.
+  - **Blocklist / default-allow:** all except those explicitly blocked.
+  - *Recommendation:* federation as default (with discount), isolation as a
+    deliberate exception — otherwise coverage fragments before the network
+    effect can take hold.
+- **Defederation as a security mechanism:** a malicious/compromised subnet
+  gets "defederated" like a bad Mastodon instance → the Sybil response at
+  the **subnet level**.
+- **Caution, feedback loop:** mutual import (A↔B) can let the same
+  information be counted multiple times → **origin tracking** per report or
+  a strictly decaying discount over federation hops is needed (Problem K).
+
+### 5.3 Resulting Model
+- Instead of *one* global truth, a **mesh of trust domains** that mirrors
+  social and organizational trust structures.
+- Every node/subnet computes its **own** score from:
+  `own evidence + imported (evidence-weighted) foreign evidence + anchor signals`,
+  combined locally via the rule engine into an **own** score.
+
+---
+
+## 6. Organizational Obligations per Federation (Onboarding & Repo Documentation)
+
+Every federation/group must initially define these points; joining users
+require a sensible way to connect to them. **The repository MUST explain
+this clearly** (a prominent onboarding guide, not just a reference appendix).
+
+### 6.1 Define Ground-truth Anchor Systems
+- Registration of the corresponding signatures as **highly weighted trust
+  anchors** (§5.1).
+- Source, either:
+  - **Dedicated honeypots** — zero false positives, but extra infrastructure.
+  - **"Real systems under load"** — see real attack patterns, no extra box needed.
+- **Critical caveat:** a real system does **not** have the
+  zero-false-positive property (it also receives legitimate traffic).
+  Recommendation: do not treat the whole system as ground truth, but rather
+  the **honeypot-like signals within the real system** that preserve the
+  guarantee:
+  - spamtrap addresses (mailboxes never actually used),
+  - auth attempts against non-existent accounts,
+  - connections to unused/closed ports.
+
+### 6.2 Maintain the Bulk Whitelist (Central + Local Truth)
+- Federation-wide whitelist (corresponds to the never-block set, §10) is
+  maintained centrally.
+- Always supplemented with the **"local truth"** per installation, ideally
+  via an **install script** that automatically reads out and lists:
+  - own public IP(s),
+  - gateways,
+  - own/configured DNS servers,
+  - local Docker IP ranges (e.g. bridge networks 172.16.0.0/12),
+  - RFC1918 / loopback.
+- **Mandatory separation** (privacy, Problem E):
+  - **Local-only whitelist:** local infrastructure — **never shared with
+    the network** (irrelevant to others + leaks topology). Only suppresses
+    local blocks.
+  - **Shared whitelist votes:** deliberate "this public IP is legitimate"
+    signals (trust-weighted, §4.4).
+- **Caveat, auto-detection:** must not whitelist too broadly (e.g. entire
+  public provider ranges) → conservative, only unambiguously local ranges.
+- → addresses **Problem F**.
+
+### 6.3 Key Management
+- Define **who issues and vouches for anchor/node keys**.
+- Rotation and revocation policy: distribution of the revocation list,
+  validity periods.
+- Procedure for **compromised keys**: fast revocation + trust reset.
+- → addresses **Problem J**.
+
+### 6.4 Overarching Principle (Reminder)
+In the end, the user can **override individual or all parameters**. The
+lists (block & allow) are "only" an aid — see Leitprinzip 7. Onboarding
+must make this explicit so that nobody mistakes the federation defaults for binding.
+
+---
+
+## 7. Data Model (Draft)
+
+### 7.1 Report (Event)
+| Field | Description |
 |------|--------------|
-| `ip` | Klartext-IPv4 (Einzeladresse) / IPv6 **präfix-normalisiert** (Default `/64`, konfigurierbar — Einzel-`/128` korroboriert nie). Hashing verworfen (§9). |
-| `scenario` | Abstraktes Angriffs-**Szenario** aus dem Reason-Code-Katalog (z. B. `ssh-brute-force`, `smtp-auth-bruteforce`). **Join-Key**: Scoring ↔ SBOM/Profil ↔ Regeln ↔ STIX `attack-pattern`. **Keine konkreten Ports.** |
-| `timestamp` | Zeitpunkt der Beobachtung |
-| `port_class` *(optional, deprecated)* | Grobe Portklasse; entfällt zugunsten von `scenario`, um keine Dienst-Details zu leaken |
-| `reporter_id` | Pseudonyme Knoten-ID (kryptografischer Schlüssel) |
-| `signature` | Signatur des Melders |
-| `subnet_id` | Herkunfts-Teilnetz/Trust-Domäne (für Föderation, §5) |
-| `origin_trace` | Herkunfts-Kette (gegen Föderations-Rückkopplung, §5.2) |
+| `ip` | Cleartext IPv4 (single address) / IPv6 **prefix-normalized** (default `/64`, configurable — a single `/128` never corroborates). Hashing rejected (§9). |
+| `scenario` | Abstract attack **scenario** from the reason-code catalog (e.g. `ssh-brute-force`, `smtp-auth-bruteforce`). **Join key**: scoring ↔ SBOM/profile ↔ rules ↔ STIX `attack-pattern`. **No concrete ports.** |
+| `timestamp` | Time of observation |
+| `port_class` *(optional, deprecated)* | Coarse port class; superseded by `scenario`, to avoid leaking service details |
+| `reporter_id` | Pseudonymous node ID (cryptographic key) |
+| `signature` | Reporter's signature |
+| `subnet_id` | Origin subnet/trust domain (for federation, §5) |
+| `origin_trace` | Origin chain (against federation feedback loops, §5.2) |
 
-### 7.2 Aggregierter Reputations-Eintrag pro IP
-| Feld | Beschreibung |
+### 7.2 Aggregated Reputation Entry per IP
+| Field | Description |
 |------|--------------|
-| `ip` | Adresse |
-| `score` | Aktueller normalisierter Reputations-Score (pro Trust-Domäne!) |
-| `corroboration` | Anzahl + Diversität unabhängiger Melder |
-| `first_seen` / `last_seen` | Für Decay |
-| `reasons[]` | Aggregierte Angriffsgründe |
-| `disputes` | Whitelist-/Anti-Trust-Votes |
+| `ip` | Address |
+| `score` | Current normalized reputation score (**per trust domain!**) |
+| `corroboration` | Count + diversity of independent reporters |
+| `first_seen` / `last_seen` | For decay |
+| `reasons[]` | Aggregated attack reasons |
+| `disputes` | Whitelist/anti-trust votes |
 
-### 7.3 Trust-Anchor-Eintrag
-| Feld | Beschreibung |
+### 7.3 Trust Anchor Entry
+| Field | Description |
 |------|--------------|
-| `key_id` | Öffentlicher Schlüssel des Anchors |
-| `label` | Bezeichnung/Herkunft (z. B. „Mailcow-Projekt", „Spamtrap-Cluster-DE") |
-| `weight` | Lokales Vertrauensgewicht |
-| `valid_until` | Gültigkeit (für Rotation/Revocation) |
+| `key_id` | Anchor's public key |
+| `label` | Designation/origin (e.g. "Mailcow project", "Spamtrap cluster DE") |
+| `weight` | Local trust weight |
+| `valid_until` | Validity (for rotation/revocation) |
 | `source` | `project-default` \| `self-added` \| `subnet` |
 
-### 7.4 Whitelist-Eintrag
-| Feld | Beschreibung |
+### 7.4 Whitelist Entry
+| Field | Description |
 |------|--------------|
-| `ip_or_range` | Adresse/CIDR |
-| `scope` | `local-only` (nie geteilt) \| `shared-vote` (trust-gewichtet) |
+| `ip_or_range` | Address/CIDR |
+| `scope` | `local-only` (never shared) \| `shared-vote` (trust-weighted) |
 | `source` | `install-script` \| `manual` \| `federation` |
 
-### 7.5 Evidenz-Aggregat (föderierter Import-Typ)
-Was zwischen Teilnetzen geteilt und **lokal neu verrechnet** wird (Option b, §5.2).
-Leichter als Roh-Events, reicher als ein opaker Score.
+### 7.5 Evidence Aggregate (Federated Import Type)
+What is shared between subnets and **recomputed locally** (option b, §5.2).
+Lighter than raw events, richer than an opaque score.
 
-| Feld | Beschreibung |
+| Field | Description |
 |------|--------------|
-| `ip` | Quelle (IPv4 einzeln / IPv6 präfix-normalisiert) |
-| `scenario` | Angriffs-Szenario (§7.1) |
-| `window` | Zeitfenster (für Decay + Korroborations-Frische) |
-| `diversity_buckets` | **Pseudonymisierte** Zähler distinkter *unabhängiger* Melder je Bucket (ASN / Region / Subnetz; aus `origin_trace`/`subnet_id`) — **nie Melder-Identität**. Trägt §4.2 über den Import. |
-| `evidence_weight` | Quell-/Subnetz-Gewicht (ehem. Trust-Discount) |
+| `ip` | Source (IPv4 single / IPv6 prefix-normalized) |
+| `scenario` | Attack scenario (§7.1) |
+| `window` | Time window (for decay + corroboration freshness) |
+| `diversity_buckets` | **Pseudonymized** counters of distinct *independent* reporters per bucket (ASN / region / subnet; from `origin_trace`/`subnet_id`) — **never reporter identity**. Carries §4.2 across the import. |
+| `evidence_weight` | Source/subnet weight (formerly trust discount) |
 
-> On-Demand abrufen (DNSBL-Stil) für IPs, die dich real kontaktieren — Roh-Events
-> bleiben optional (Observability-Plane). Reconciliation mit §11.
+> Fetched **on demand** (DNSBL-style) for IPs that actually contact you — raw
+> events remain optional (observability plane). Reconciliation with §11.
 
-### 7.6 System-Profil (lokal, nie föderiert)
-Treibt die Applicability-Gewichtung (§4.5) und die Regel-Auswahl.
+### 7.6 System Profile (Local, Never Federated)
+Drives applicability weighting (§4.5) and rule selection.
 
-| Feld | Beschreibung |
+| Field | Description |
 |------|--------------|
-| `roles[]` | Wofür das System da ist (`mail`, `web`, `ssh`, …) — deklariert |
-| `sbom_derived` | Ob/inwiefern aus lokaler SBOM verfeinert (semi-automatischer Matchmaker) |
-| `applicable_scenarios[]` | Szenarien, die für dieses System relevant sind |
+| `roles[]` | What the system is for (`mail`, `web`, `ssh`, …) — declared |
+| `sbom_derived` | Whether/to what extent refined from a local SBOM (semi-automatic matchmaker) |
+| `applicable_scenarios[]` | Scenarios relevant to this system |
 
-> **Invariante:** Profil **und** SBOM bleiben **strikt lokal** (eine SBOM ist die
-> Karte der eigenen Angriffsfläche) — gleiche Familie wie die `local-only`-Whitelist.
-
----
-
-## 8. Score-Dynamik
-
-- **Eskalation:** Mehrfach-Angriffe / breitere Korroboration → Score steigt
-  (überlinear bei hoher Quellen-Diversität).
-- **Lokale Neuberechnung aus Evidenz (Kernmechanik).** Der Score ist **kein**
-  importierter Fremdwert: jeder Knoten verrechnet **eigene + importierte Evidenz-
-  Aggregate** (§7.5) über die **Regel-Engine** zu einem eigenen Score. Die Regeln
-  sind operator-anpassbar (über den Defaults), Remote-Input bleibt beratend (§2 #8).
-- **Effektives Gewicht** `= Korroboration (diversitätsgewichtet) × Evidenz-Gewicht
-  (Quelle) × lokale Applicability (Profil, §4.5)`.
-- **Decay (Degeneration):** Ohne neue Meldungen sinkt der Score über die Zeit gegen 0.
-  - Funktioniert zugleich als **DSGVO-Löschfrist** (s. §9).
-  - Halbwertszeit ist ein **kritischer Tuning-Parameter**:
-    - zu kurz → Liste nutzlos
-    - zu lang → bestraft unschuldige IP-Nachfolger (DHCP/CGNAT)
-  - **Offen:** konkrete Halbwertszeit, ggf. abhängig vom Angriffstyp.
+> **Invariant:** the profile **and** the SBOM remain **strictly local** (an
+> SBOM is the map of one's own attack surface) — same family as the
+> `local-only` whitelist.
 
 ---
 
-## 9. DSGVO / Rechtliches
+## 8. Score Dynamics
 
-**Korrektes Framing (entscheidend für Projekt-Vertrauen):**
-Nicht „IP ist keine PII" — das hält rechtlich nicht. Sondern:
-
-> **„IP = personenbezogenes Datum, verarbeitet auf Basis berechtigten Interesses an
-> Netz-/Informationssicherheit (Art. 6(1)(f), ErwG 49), mit eingebauter Löschung via
-> Decay (Art. 17) und lokaler Verantwortlichkeit."**
-
-**Begründung / gegen die ursprüngliche Annahme:**
-- **EuGH *Breyer* (C-582/14):** Auch dynamische IPs sind personenbezogen, sobald über
-  Dritte (ISP) rechtlich identifizierbar. Das Projekt liefert *mehr* Kontext
-  (IP + Zeit + Verhalten), nicht weniger → fest im personenbezogenen Bereich.
-- **Art. 10 DSGVO:** Daten über (mutmaßliche) Straftaten genießen *erhöhten* Schutz,
-  nicht weniger. Es sind **mutmaßliche** Angriffe → Falsch-Positive (CGNAT-Nachbarn,
-  gekaperte Hosts, neu vergebene IPs) sind der eigentliche DSGVO-Kern.
-
-**Hashing als Anonymisierung – verworfen:**
-- IPv4-Raum (2³², ~4,3 Mrd.) ist trivial per Rainbow-Table umkehrbar → SHA-256(IP)
-  ist **Pseudonymisierung, nicht Anonymisierung** (ErwG 26 → weiterhin PII).
-- Hätte juristisch fast nichts gebracht, aber CIDR-Aggregation + Decay technisch
-  zerstört. → **Klartext-IPs im Netz.**
-
-**Eingebaute Compliance-Mechanismen:**
-- Decay = automatische Löschung / Storage Limitation.
-- Lokale Schwellen + Whitelist = Verantwortlicher ist der Admin, nicht das Netz.
-- Berechtigtes Interesse Netzsicherheit = stärkste Rechtsgrundlage.
+- **Escalation:** repeated attacks / broader corroboration → score rises
+  (super-linearly under high source diversity).
+- **Local recomputation from evidence (core mechanic).** The score is
+  **not** an imported foreign value: every node combines its **own +
+  imported evidence aggregates** (§7.5) via the **rule engine** into its own
+  score. The rules are operator-adjustable (on top of the defaults);
+  remote input remains advisory (§2 #8).
+- **Effective weight** `= corroboration (diversity-weighted) × evidence
+  weight (source) × local applicability (profile, §4.5)`.
+- **Decay (degeneration):** without new reports the score falls toward 0 over time.
+  - Simultaneously functions as the **GDPR deletion period** (see §9).
+  - Half-life is a **critical tuning parameter**:
+    - too short → the list becomes useless
+    - too long → punishes innocent IP successors (DHCP/CGNAT)
+  - **Open:** concrete half-life, possibly dependent on attack type.
 
 ---
 
-## 10. Pflicht-Schutzliste (Never-Block-Set)
+## 9. GDPR / Legal
 
-**Sicherer Default, lokal tunebar, remote-immutabel.** Verhindert Selbst-Aussperrung
-naiver Admins, ist aber **kein** harter Boden gegenüber dem Operator (Whitelists sind
-tunebar, §2 #8) — die Unantastbarkeit gilt nur **gegenüber dem Netz**: kein Remote-
-Signal kann das Set ändern. Empfohlene Default-Einträge:
-- RFC1918 / private Ranges
-- Root-DNS, öffentliche Resolver (z. B. 8.8.8.8, 1.1.1.1)
-- Große Mail-Provider-Ranges (Google, Microsoft/Outlook)
-- Cloudflare u. ä. CDN/Infra-Ranges
+**Correct framing (decisive for project trust):** Not "an IP is not PII" —
+that does not hold up legally. Rather:
 
-Wird je Föderation gepflegt (§6.2) und ist modellierbar als Spezialfall eines
-Projekt-Trust-Anchors (§5.1). Lokal um die „lokale Wahrheit" ergänzt (Install-Script).
+> **"IP = personal data, processed on the basis of legitimate interest
+> (berechtigtes Interesse) in network/information security (Art. 6(1)(f),
+> Recital 49), with built-in deletion via decay (Art. 17) and local accountability."**
+
+**Rationale / against the original assumption:**
+- **CJEU *Breyer* (C-582/14):** even dynamic IPs are personal data as soon
+  as they are legally identifiable via a third party (ISP). The project
+  delivers *more* context (IP + time + behavior), not less → firmly within
+  the scope of personal data.
+- **Art. 10 GDPR:** data about (alleged) criminal offenses enjoys
+  *increased* protection, not less. These are **alleged** attacks → false
+  positives (CGNAT neighbors, hijacked hosts, newly reassigned IPs) are the
+  actual GDPR core concern.
+
+**Hashing as anonymization — rejected:**
+- The IPv4 space (2³², ~4.3 billion) is trivially reversible via rainbow
+  table → SHA-256(IP) is **pseudonymization, not anonymization** (Recital 26
+  → still PII).
+- Would have gained almost nothing legally, but would technically destroy
+  CIDR aggregation + decay. → **Cleartext IPs on the wire.**
+
+**Built-in compliance mechanisms:**
+- Decay = automatic deletion / storage limitation.
+- Local thresholds + whitelist = the controller is the admin, not the network.
+- Legitimate interest in network security = strongest legal basis.
 
 ---
 
-## 11. Skalierung, Performance & Datenflüsse
+## 10. Mandatory Protection List (Never-Block-Set)
 
-Zwei Skalierungsrisiken bei großen Netzen: (a) die Liste gemeldeter IPs wird zu groß,
-um damit sinnvoll zu filtern; (b) Echtzeit-Gossip jedes Events erzeugt eine
-Traffic-/CPU-Lawine. **Kernumkehr:** Die globale Liste wird **nicht lokal
-materialisiert** („Torrent-Modell" verworfen) – stattdessen **Abfrage on-demand**
-(DNSBL-Prinzip) + kompakter lokaler Vorfilter. Das löst beide Probleme zugleich.
+**Secure default, locally tunable, remote-immutable.** Prevents naive admins
+from locking themselves out, but is **not** a hard floor against the
+operator (whitelists are tunable, §2 #8) — the untouchability applies only
+**toward the network**: no remote signal can change the set. Recommended
+default entries:
+- RFC1918 / private ranges
+- Root DNS, public resolvers (e.g. 8.8.8.8, 1.1.1.1)
+- Large mail provider ranges (Google, Microsoft/Outlook)
+- Cloudflare and similar CDN/infra ranges
 
-### 11.1 Größenordnung (Realitätscheck)
-- Aktiv bösartige IPs weltweit: **einstelliger Millionenbereich** zu jedem Zeitpunkt
-  (vgl. CrowdSec ~1–3 Mio., Spamhaus), **nicht** der 4,3-Mrd.-IPv4-Raum.
-- Ständig rotierend → Decay (§8) begrenzt die DB nach oben (Garbage Collector).
+Maintained per federation (§6.2) and can be modeled as a special case of a
+project trust anchor (§5.1). Locally supplemented with the "local truth"
+(install script).
 
-### 11.2 Drei-Ebenen-Architektur (Entkopplung)
-| Ebene | Inhalt | Eigenschaft |
+---
+
+## 11. Scaling, Performance & Data Flows
+
+Two scaling risks in large networks: (a) the list of reported IPs becomes
+too large to filter with meaningfully; (b) real-time gossiping of every
+event creates a traffic/CPU avalanche. **Core inversion:** the global list
+is **not materialized locally** (the "torrent model" is rejected) —
+instead, **on-demand querying** (DNSBL principle) + a compact local
+pre-filter. This solves both problems at once.
+
+### 11.1 Order of Magnitude (Reality Check)
+- Actively malicious IPs worldwide: **single-digit millions** at any given
+  time (cf. CrowdSec ~1–3 million, Spamhaus), **not** the 4.3-billion IPv4 space.
+- Constantly rotating → decay (§8) bounds the DB from above (garbage collector).
+
+### 11.2 Three-plane Architecture (Decoupling)
+| Plane | Content | Property |
 |-------|--------|-------------|
-| **Data Plane** (Enforcement) | nur IPs über lokalem Threshold, die dich real kontaktieren | schlank, O(1)-Lookup |
-| **Control Plane** (Reputation) | Score-DB / -Sync | eventual consistency, gebatcht, niedrige Prio |
-| **Observability Plane** (Firehose) | Echtzeit-Eventstream für Angriffswellen-Monitoring | **Opt-in, default AUS** |
+| **Data plane** (enforcement) | only IPs above the local threshold that actually contact you | lean, O(1) lookup |
+| **Control plane** (reputation) | score DB / sync | eventual consistency, batched, low priority |
+| **Observability plane** (firehose) | real-time event stream for attack-wave monitoring | **opt-in, default OFF** |
 
-Der normale Admin belastet nur Data + Control Plane; der Live-Feed ist für
-SOC/Forschung optional zuschaltbar (Beobachtung von Angriffswellen).
+The normal admin only loads the data + control plane; the live feed is
+optionally switchable on for SOC/research (observation of attack waves).
 
-### 11.3 Listengröße beherrschen
-- **DB ≠ Enforcement-Set:** Die schwere Reputations-DB ist nicht das, was die Firewall
-  sieht. Der **lokale Threshold ist der natürliche Filter** – du konsumierst einen
-  Score, importierst keine globale Liste. Aktives Set = Tausende, nicht Millionen.
-- **Enforcement-Backend ist der eigentliche Engpass (Footgun):**
-  - **Falsch:** eine `iptables`-Regel pro IP (Fail2Ban-Stil) → **O(n) pro Paket**,
-    schmilzt bei Zehntausenden Einträgen.
-  - **Richtig:** `ipset`/`nftables`-Hash-Sets → **O(1)**, tragen Hunderttausende+.
-- **Bloom-Filter als Vorfilter:** 1 Mio. IPs @ 1 % FP ≈ ~1,2 MB. Der häufige Fall
-  („IP unverdächtig?") wird lokal in µs mit „nein" beantwortet; nur Treffer brauchen
-  einen echten Lookup.
-- **CIDR-Aggregation (optional):** Wiederholungstäter-Subnetze zu Ranges verdichten →
-  weniger Einträge. **Trade-off:** Kollateralschaden an Nachbarn (Spannung mit
-  Problem D, IP ≠ Identität).
+### 11.3 Controlling List Size
+- **DB ≠ enforcement set:** the heavy reputation DB is not what the
+  firewall sees. The **local threshold is the natural filter** — you
+  consume a score, you don't import a global list. Active set = thousands,
+  not millions.
+- **The enforcement backend is the actual bottleneck (footgun):**
+  - **Wrong:** one `iptables` rule per IP (Fail2Ban style) → **O(n) per
+    packet**, melts down at tens of thousands of entries.
+  - **Right:** `ipset`/`nftables` hash sets → **O(1)**, handle hundreds of thousands+.
+- **Bloom filter as a pre-filter:** 1 million IPs @ 1% FP ≈ ~1.2 MB. The
+  common case ("is this IP unsuspicious?") is answered locally in µs with
+  "no"; only hits require a real lookup.
+- **CIDR aggregation (optional):** condense repeat-offender subnets into
+  ranges → fewer entries. **Trade-off:** collateral damage to neighbors
+  (tension with Problem D, IP ≠ identity).
 
-### 11.4 Traffic beherrschen
-- **On-Demand-Abfrage (DNSBL-Modell):** Reputation per DHT-Lookup nur abfragen, wenn
-  eine IP dich tatsächlich kontaktiert + lokaler TTL-Cache. Du fragst nur, was dich
-  betrifft → kein Dauer-Traffic.
-- **Aggregation am Rand:** keine 500 Einzel-Events gossipen, sondern periodische
-  Summaries („IP X: 500 Auth-Versuche/5 Min"). Granularität gegen Bandbreite getauscht.
-- **Relay-Hierarchie statt Full-Mesh:** Vollvermaschung ist O(N²). Aggregator-/Relay-
-  Knoten je Föderation konsolidieren und verteilen (vgl. Tor Directory Authorities /
-  Mastodon-Relays) – die **Föderation ist die natürliche Aggregationsgrenze**.
-- **Signaturverifikation:** pro-Event-Verifikation ist CPU-teuer im großen Netz →
-  Batch-Verifikation / Verifikation aggregierter Digests statt jedes Einzelevents.
+### 11.4 Controlling Traffic
+- **On-demand query (DNSBL model):** query reputation via DHT lookup only
+  when an IP actually contacts you + a local TTL cache. You only query what
+  concerns you → no continuous traffic.
+- **Aggregation at the edge:** don't gossip 500 individual events, but
+  rather periodic summaries ("IP X: 500 auth attempts/5 min"). Granularity
+  traded for bandwidth.
+- **Relay hierarchy instead of full mesh:** full meshing is O(N²).
+  Aggregator/relay nodes per federation consolidate and distribute (cf. Tor
+  directory authorities / Mastodon relays) — **the federation is the
+  natural aggregation boundary**.
+- **Signature verification:** per-event verification is CPU-expensive in a
+  large network → batch verification / verification of aggregated digests
+  instead of every single event.
 
-### 11.5 Gutes-Nachbar-Prinzip (Nutzerperspektive)
-> **Der Schutzmechanismus darf niemals selbst das Performance-Problem werden.**
-- **Ressourcen-Budget:** konfigurierbares CPU-/Bandbreiten-Limit, niedrige Priorität
+### 11.5 Good-neighbor Principle (User Perspective)
+> **The protection mechanism must never itself become the performance problem.**
+- **Resource budget:** configurable CPU/bandwidth limit, low priority
   (`nice`/cgroups).
-- **Graceful degradation / Lastabwurf:** steht die Box selbst unter Angriffswelle,
-  stellt der Daemon Fremd-Verifikation/Gossip zurück, schützt nur lokal und
-  synchronisiert später nach (lokaler Schutz hat Vorrang vor Netz-Beitrag).
-- **Sync-Modus wählbar:** Push (Full-Sync, kleine Föderationen) ↔ Pull-on-demand
-  (große Netze) ↔ Hybrid.
+- **Graceful degradation / load shedding:** if the box itself is under an
+  attack wave, the daemon defers third-party verification/gossip, protects
+  only locally, and synchronizes later (local protection takes precedence
+  over network contribution).
+- **Sync mode selectable:** push (full sync, small federations) ↔
+  pull-on-demand (large networks) ↔ hybrid.
 
 ---
 
-## 12. Offene Probleme & Risiken
+## 12. Open Problems & Risks
 
 | # | Problem | Status |
 |---|---------|--------|
-| A | **Poisoning** grundsätzlich nie „gelöst", nur teuer/auffällig gemacht | mitigiert via §4 |
-| B | **Bootstrapping/Henne-Ei** neuer Low-Trust-Knoten | gelöst via Ground-Truth-Genesis (§4.1) |
-| C | **Verifizierbarkeit** einzelner Meldungen (High-Trust-Knoten gehackt) | mitigiert via Korroboration + schnellem Trust-Decay |
-| D | **IP ≠ Identität** (CGNAT, DHCP) → Decay-Tuning | offen (Halbwertszeit, §8) |
-| E | **Privacy des Melders** (leakt Infra-Topologie, Whitelist-Präferenzen) | teils gelöst via Lokal-only-Whitelist (§6.2); Tor-artige Einreichung vs. Sybil-Accountability **offen** |
-| F | **Pflege Never-Block-Set + lokale Wahrheit** | adressiert via §6.2 (Install-Script); Governance offen |
-| G | **Ground-Truth-Verifikation** im dezentralen Modell B | offen |
-| H | **Massen-Whitelist-Angriff** zum Schutz echter Angreifer | mitigiert via gewichtete Whitelist-Votes (§4.4) |
-| I | **Re-Zentralisierung** durch flächige Übernahme von Projekt-Anchors | mitigiert via lokal entfernbarer Anchors (§5.1), Default ≠ Zwang |
-| J | **Schlüssel-Management** (Rotation, Revocation, kompromittierte Keys) | adressiert via §6.3; Detail-Format offen |
-| K | **Föderations-Rückkopplung & Fragmentierung** (Mehrfachzählung A↔B; verdünnter Netzwerkeffekt) | mitigiert via Herkunfts-Tracking/Hop-Discount (§5.2) |
-| L | **Bösartiges/kompromittiertes Teilnetz** | mitigiert via Defederation (§5.2) |
-| M | **Echtsystem als Ground Truth** → Verlust der Null-False-Positive-Eigenschaft | mitigiert via Honeypot-Semantik im Echtsystem / Spamtraps (§6.1) |
-| N | **Zu breite Auto-Whitelist** durch Install-Script | mitigiert via konservativer Erkennung (§6.2) |
-| O | **Listengröße** sprengt Filter | mitigiert via DB≠Enforcement-Set, Threshold-Filter, Bloom, Decay (§11.3) |
-| P | **Traffic-Lawine** im großen Netz (Echtzeit-Gossip) | mitigiert via On-Demand/DNSBL, Aggregation, Relay-Hierarchie (§11.4) |
-| Q | **Enforcement-Backend O(n)** (Fail2Ban-Stil) schmilzt | gelöst via ipset/nftables O(1) (§11.3) |
-| R | **CPU-Last durch Signaturverifikation** im großen Netz | mitigiert via Batch-Verifikation + Lastabwurf (§11.4/§11.5) |
-| S | **Sybil via Discovery** – viele DHT-Phantome fluten den Stranger-Pool | mitigiert via bestehendem `strangerCap` pro IP (§4.2/§4.3) |
-| T | **Privacy des Advertisers** – DHT-Eintrag leakt IP + Peer-ID | mitigiert via `advertise: false` Opt-out (§14.1/§14.5); Onboarding-Pflicht |
-| U | **Quell-Reputation als Meta-Poisoning** (eine *gute* Föderation als „Vergifter" markieren) | mitigiert: dieselben strukturellen Abwehren wie IP-Signale + bleibt **beratend**, nie erzwungener globaler Ban (Future-Feature, §13) |
-| V | **IPv6 `/128`-Reputation nutzlos** (Angreifer besitzt 2^64 Adressen pro `/64`) | gelöst via **Präfix-Normalisierung** (`/64` Default, §7.1) |
-| W | **Regel-Fehlkonfiguration** senkt lokale Schutzwirkung | mitigiert via **sichere Defaults** + Remote-advisory-Invariante (§2 #8); Schutzregeln in der UI markiert |
-| X | **Evidenz-Import-Volumen** (Option b) bedroht §11-Schlankheit | mitigiert via **On-Demand-Evidenz-Aggregate** (§7.5) statt Roh-Events/opaker Scores |
+| A | **Poisoning** fundamentally never "solved", only made expensive/conspicuous | mitigated via §4 |
+| B | **Bootstrapping/chicken-and-egg** for new low-trust nodes | solved via ground-truth genesis (§4.1) |
+| C | **Verifiability** of individual reports (high-trust node hacked) | mitigated via corroboration + fast trust decay |
+| D | **IP ≠ identity** (CGNAT, DHCP) → decay tuning | open (half-life, §8) |
+| E | **Reporter privacy** (leaks infra topology, whitelist preferences) | partly solved via local-only whitelist (§6.2); Tor-like submission vs. Sybil accountability **open** |
+| F | **Maintaining the never-block set + local truth** | addressed via §6.2 (install script); governance open |
+| G | **Ground-truth verification** in the decentralized model B | open |
+| H | **Mass whitelist attack** to protect real attackers | mitigated via weighted whitelist votes (§4.4) |
+| I | **Re-centralization** through blanket adoption of project anchors | mitigated via locally removable anchors (§5.1), default ≠ mandate |
+| J | **Key management** (rotation, revocation, compromised keys) | addressed via §6.3; detailed format open |
+| K | **Federation feedback loop & fragmentation** (double-counting A↔B; diluted network effect) | mitigated via origin tracking/hop discount (§5.2) |
+| L | **Malicious/compromised subnet** | mitigated via defederation (§5.2) |
+| M | **Real system as ground truth** → loss of the zero-false-positive property | mitigated via honeypot semantics within the real system / spamtraps (§6.1) |
+| N | **Overly broad auto-whitelist** via the install script | mitigated via conservative detection (§6.2) |
+| O | **List size** overwhelms the filter | mitigated via DB≠enforcement-set, threshold filter, Bloom, decay (§11.3) |
+| P | **Traffic avalanche** in a large network (real-time gossip) | mitigated via on-demand/DNSBL, aggregation, relay hierarchy (§11.4) |
+| Q | **Enforcement backend O(n)** (Fail2Ban style) melts down | solved via ipset/nftables O(1) (§11.3) |
+| R | **CPU load from signature verification** in a large network | mitigated via batch verification + load shedding (§11.4/§11.5) |
+| S | **Sybil via discovery** — many DHT phantoms flood the stranger pool | mitigated via the existing `strangerCap` per IP (§4.2/§4.3) |
+| T | **Advertiser privacy** — DHT entry leaks IP + peer ID | mitigated via `advertise: false` opt-out (§14.1/§14.5); onboarding obligation |
+| U | **Source reputation as meta-poisoning** (marking a *good* federation as a "poisoner") | mitigated: the same structural defenses as IP signals + remains advisory, never a forced global ban (future feature, §13) |
+| V | **IPv6 `/128` reputation useless** (attacker owns 2^64 addresses per `/64`) | solved via **prefix normalization** (`/64` default, §7.1) |
+| W | **Rule misconfiguration** reduces local protective effect | mitigated via secure defaults + the remote-advisory invariant (§2 #8); protective rules marked in the UI |
+| X | **Evidence import volume** (option b) threatens §11 leanness | mitigated via on-demand evidence aggregates (§7.5) instead of raw events/opaque scores |
 
 ---
 
-## 14. Föderations-Entdeckung (Federation Discovery)
+## 14. Federation Discovery
 
-Das Schwarm ist nur wirksam ab einer kritischen Masse. Das manuelle Invite/Join-Protokoll
-(§5.2) erzeugt hochvertrauenswürdige Föderationen, aber auch Bootstrapping-Reibung:
-Ein Knoten ohne bestehende Kontakte nimmt nicht am Netz teil. Discovery löst das, indem
-Knoten sich gegenseitig automatisch finden – **ohne eine vorhandene Vertrauensbeziehung
-vorauszusetzen** und ohne das Trust-Modell zu umgehen.
+The swarm is only effective above a critical mass. The manual invite/join
+protocol (§5.2) produces highly trustworthy federations, but also
+bootstrapping friction: a node without existing contacts does not
+participate in the network. Discovery solves this by letting nodes find
+each other automatically — **without presupposing an existing trust
+relationship** and without bypassing the trust model.
 
-### 14.1 Zwei Opt-out-Flags (beide Default: **an**)
+### 14.1 Two Opt-out Flags (Both Default: On)
 
-| Flag | Funktion |
+| Flag | Function |
 |------|----------|
-| `discovery.advertise` | Veröffentlicht diesen Knoten am DHT-Rendezvous-Punkt |
-| `discovery.discover` | Sucht aktiv im DHT nach weiteren Peers |
+| `discovery.advertise` | Publishes this node at the DHT rendezvous point |
+| `discovery.discover` | Actively searches the DHT for further peers |
 
-Beide unabhängig konfigurierbar (lokale Souveränität, Leitprinzip 7). Betreiber,
-die vollständige Privatheit wollen (z. B. firmeneigene Netze), setzen `advertise: false`
-und verlassen sich auf manuelles Invite/Join.
+Both independently configurable (local sovereignty, Leitprinzip 7).
+Operators who want complete privacy (e.g. company-internal networks) set
+`advertise: false` and rely on manual invite/join.
 
-### 14.2 Entdeckungsmechanismus
+### 14.2 Discovery Mechanism
 
-**Primär – DHT-Rendezvous (dezentral):**
-Knoten melden sich unter einem festen Schlüssel (`/federloom/v1/peers`) im bestehenden
-Kademlia-DHT an. Kein Projekt-Server nötig; nutzt die bereits aufgebaute Transport-Schicht.
+**Primary — DHT rendezvous (decentralized):**
+Nodes register under a fixed key (`/federloom/v1/peers`) in the existing
+Kademlia DHT. No project server needed; uses the already-established
+transport layer.
 
-**Fallback – Signierte Relay-Liste (Kalt-Start):**
-Eine vom Projekt signierte, versionierte JSON-Datei mit bekannten Bootstrap-/Relay-Knoten
-(analog zu Tor-Directory-Authorities). Wird mit dem Release ausgeliefert, ist lokal
-überschreibbar. Wird nur verwendet, wenn der DHT noch nicht erreichbar ist (Erstinstallation,
-keine Peers vorhanden).
+**Fallback — signed relay list (cold start):**
+A project-signed, versioned JSON file with known bootstrap/relay nodes
+(analogous to Tor directory authorities). Shipped with the release, locally
+overridable. Only used when the DHT is not yet reachable (fresh install, no
+peers present).
 
-Die Relay-Liste folgt dem Anchor-Prinzip (§5.1): projekt-signiert als sinnvoller **Default,
-kein Zwang**. Betreiber können eigene Bootstrap-Listen eintragen und die Projektliste
-entfernen.
+The relay list follows the anchor principle (§5.1): project-signed as a
+sensible **default, not a mandate**. Operators can add their own bootstrap
+lists and remove the project list.
 
-### 14.3 Trust neu entdeckter Knoten
+### 14.3 Trust of Newly Discovered Nodes
 
-Neu entdeckte (nicht eingeladene) Knoten erhalten `trust.stranger_weight` – denselben
-Wert wie jeder nicht verankerte Melder. Das bestehende `strangerCap` pro IP begrenzt
-den koordinierten Sybil-Beitrag vieler entdeckter Fremder (Problem S, §12).
+Newly discovered (not invited) nodes receive `trust.stranger_weight` — the
+same value as any non-anchored reporter. The existing `strangerCap` per IP
+limits the coordinated Sybil contribution of many discovered strangers
+(Problem S, §12).
 
-Um einen entdeckten Knoten hochzustufen: `federloomctl trust import` (manuelles Verbürgen).
-Das Trust-Modell bleibt unverändert; Discovery erweitert nur den Pool erreichbarer Knoten.
+To upgrade a discovered node: `federloomctl trust import` (manual
+vouching). The trust model remains unchanged; discovery merely extends the
+pool of reachable nodes.
 
-### 14.4 Zusammenspiel mit Föderations-Modus
+### 14.4 Interaction with Federation Mode
 
-Der bestehende `federation.mode` (allowlist / blocklist, §5.2) gilt unverändert.
-Discovery liefert mehr Fremde in den Pool; ihr Gewicht ist durch die Stranger-Mechanik
-gedeckelt. Ein `allowlist`-Knoten verbindet sich mit entdeckten Peers, gewichtet deren
-Meldungen aber nur mit `stranger_weight`.
+The existing `federation.mode` (allowlist / blocklist, §5.2) applies
+unchanged. Discovery delivers more strangers into the pool; their weight is
+capped by the stranger mechanism. An `allowlist` node connects to
+discovered peers but weights their reports only with `stranger_weight`.
 
-### 14.5 Datenschutz-Hinweis
+### 14.5 Privacy Notice
 
-`advertise: true` veröffentlicht die IP-Adresse und Peer-ID dieses Knotens im DHT –
-**öffentlich sichtbar für jeden DHT-Teilnehmer**. Betreiber in datenschutzsensiblen
-Umgebungen sollen `advertise: false` setzen. Die Onboarding-Dokumentation muss dies
-prominent erklären.
+`advertise: true` publishes this node's IP address and peer ID in the DHT —
+**publicly visible to every DHT participant**. Operators in
+privacy-sensitive environments should set `advertise: false`. The
+onboarding documentation must explain this prominently.
 
 ---
 
@@ -558,43 +585,43 @@ Honest status of each design area in the current codebase. This table — not th
 | §11.4 | On-demand query / pull transport | `internal/repquery` | PARTIAL — read path via configured aggregators (E3); DHT/bloom + materialise-on-verdict PLANNED |
 | §14 | Federation discovery (DHT + relay list) | `internal/discovery` | DONE |
 
-## 13. Nächste Schritte
+## 13. Next Steps
 
-> **Superseded (2026-07-10):** Die Sequenzierung liegt jetzt in
-> [docs/roadmap.md](roadmap.md); der Live-Status in §12a. Diese Liste bleibt
-> als historischer Design-Kontext erhalten — mehrere Punkte (u. a. 5, 8, 10,
-> 11, 15) sind inzwischen umgesetzt.
+> **Superseded (2026-07-10):** The sequencing now lives in
+> [docs/roadmap.md](roadmap.md); the live status is in §12a. This list
+> remains preserved as historical design context — several items (among
+> them 5, 8, 10, 11, 15) have since been implemented.
 
-1. **Decay-Halbwertszeit** modellieren (ggf. pro Angriffstyp) – Problem D.
-2. **Melder-Privacy** entscheiden (Anonymität ↔ Accountability) – Problem E.
-3. **Ground-Truth-Betriebsmodell** wählen (Honeypot vs. Echtsystem+Spamtrap; A/B) – §4.1/§6.1.
-4. **Score-Normalisierung & Schwellwert-Defaults** für Mailcow festlegen.
-5. **Transport/Gossip-Protokoll** spezifizieren (DHT vs. Gossip vs. hybrid).
-6. **Föderations-Semantik:** Trust-Discount-Funktion, Herkunfts-Tracking,
-   Allowlist- vs. Blocklist-Default, Defederation – Probleme K/L.
-7. **Anchor-Schlüssel-Lebenszyklus** spezifizieren (Format, Rotation, Revocation) – Problem J.
-8. **Install-Script** bauen: Auto-Detection lokaler Wahrheit → Lokal-only-Whitelist – §6.2.
-9. **Repository-Onboarding-Doku** schreiben, die §6 prominent erklärt (Gründungspflichten
-   jeder Föderation: Ground-Truth-Anker, Whitelist-Pflege, Schlüssel-Management, Override-Prinzip).
-10. **Enforcement-Backend** festlegen: ipset/nftables (nicht iptables-Regel-pro-IP) – Problem Q.
-11. **Sync-Modell** entscheiden: Push vs. Pull-on-demand (DNSBL) vs. Hybrid; Bloom-Vorfilter – §11.
-12. **Ressourcen-Budget & Lastabwurf** spezifizieren (CPU/Bandbreite, graceful degradation) – §11.5.
-13. **Observability-Plane** als Opt-in entwerfen (Angriffswellen-Monitoring, default aus) – §11.2.
-14. Prototyp-Reihenfolge: Ground-Truth + Diversitäts-Korroboration zuerst (80 %),
-    danach Trust-Anchors, zuletzt Teilnetz-Föderation.
-15. **Föderations-Entdeckung** implementieren: DHT-Rendezvous + signierte Relay-Liste
-    als Fallback; zwei Opt-out-Flags (`advertise`/`discover`, beide default an) – §14.
-16. **System-Profil + Applicability** (§4.5/§7.6): Rollen + SBOM-Matchmaker,
-    soft down-weighting beim Konsumieren.
-17. **Evidenz-Import-Modell (Option b)**: `EvidenceAggregate` (§7.5), lokale
-    Regel-Neuberechnung (§8), Diversity-Buckets, IPv6-Präfix.
-18. **STIX/TAXII-Egress** über die bestehende REST-API (Poll) – §3.
-19. **MISP-Ingest-Adapter** (`ingest.Source`) – **post-MVP**.
-20. **Quell-Reputations-Schicht** als **Future-Feature**: „diese Föderation
-    vergiftet" teilen (mappt auf MSC2313 `m.policy.rule.server`), beratend, strukturell
-    abgesichert (Risiko U).
-21. **Szenario-/Reason-Code-Katalog-Governance** + festes Mapping nach STIX
-    `attack-pattern` (Szenario ist jetzt Lastträger über 5 Schichten).
-22. **Key-Handling** gegen das Matrix-Signing-Key-Modell benchmarken (optional) –
-    s. `docs/prior-art.md`.
-23. **`docs/prior-art.md`** ins Repo aufnehmen (Positionierung + Honesty-Boundary).
+1. Model the **decay half-life** (possibly per attack type) – Problem D.
+2. Decide on **reporter privacy** (anonymity ↔ accountability) – Problem E.
+3. Choose the **ground-truth operating model** (honeypot vs. real system + spamtrap; A/B) – §4.1/§6.1.
+4. Define **score normalization & threshold defaults** for Mailcow.
+5. Specify the **transport/gossip protocol** (DHT vs. gossip vs. hybrid).
+6. **Federation semantics:** trust discount function, origin tracking,
+   allowlist vs. blocklist default, defederation – Problems K/L.
+7. Specify the **anchor key lifecycle** (format, rotation, revocation) – Problem J.
+8. Build the **install script**: auto-detection of local truth → local-only whitelist – §6.2.
+9. Write **repository onboarding documentation** that prominently explains §6 (founding obligations of
+   every federation: ground-truth anchors, whitelist maintenance, key management, override principle).
+10. Define the **enforcement backend**: ipset/nftables (not iptables-rule-per-IP) – Problem Q.
+11. Decide the **sync model**: push vs. pull-on-demand (DNSBL) vs. hybrid; Bloom pre-filter – §11.
+12. Specify **resource budget & load shedding** (CPU/bandwidth, graceful degradation) – §11.5.
+13. Design the **observability plane** as opt-in (attack-wave monitoring, default off) – §11.2.
+14. **Prototype order:** ground truth + diversity corroboration first (80%),
+    then trust anchors, subnet federation last.
+15. Implement **federation discovery**: DHT rendezvous + signed relay list
+    as fallback; two opt-out flags (`advertise`/`discover`, both default on) – §14.
+16. **System profile + applicability** (§4.5/§7.6): roles + SBOM matchmaker,
+    soft down-weighting at consumption time.
+17. **Evidence import model** (option b): `EvidenceAggregate` (§7.5), local
+    rule recomputation (§8), diversity buckets, IPv6 prefix.
+18. **STIX/TAXII egress** via the existing REST API (poll) – §3.
+19. **MISP ingest adapter** (`ingest.Source`) – **post-MVP**.
+20. **Source reputation layer** as a **future feature**: sharing "this
+    federation is poisoning" (maps to MSC2313 `m.policy.rule.server`),
+    advisory, structurally secured (Risk U).
+21. **Scenario/reason-code catalog governance** + fixed mapping to STIX
+    `attack-pattern` (scenario is now the load-bearing element across 5 layers).
+22. Benchmark **key handling** against the Matrix signing-key model
+    (optional) – see `docs/prior-art.md`.
+23. Add **`docs/prior-art.md`** to the repo (positioning + honesty boundary).
