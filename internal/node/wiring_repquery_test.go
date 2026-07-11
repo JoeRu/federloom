@@ -2,17 +2,23 @@ package node
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/libp2p/go-libp2p"
+	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/multiformats/go-multiaddr"
 
 	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/identity"
 	"github.com/JoeRu/federloom/internal/repquery"
 	"github.com/JoeRu/federloom/internal/store"
 	"github.com/JoeRu/federloom/internal/transport"
+	"github.com/JoeRu/federloom/internal/trust"
+	"github.com/JoeRu/federloom/pkg/proto"
 )
 
 // wiringStoreStub is a minimal repquery.Store for the aggregator side of the
@@ -124,4 +130,85 @@ func TestNodeWiringFederatesBothReadSurfaces(t *testing.T) {
 	if !ctrlRec.LastSeen.IsZero() {
 		t.Errorf("control node with federation disabled must not resolve remote IP, got %+v", ctrlRec)
 	}
+}
+
+// TestResponderServeRoleAuthz: a federated node (transport, NO aggregators)
+// registers the responder; an anchored client is answered, a stranger is reset.
+func TestResponderServeRoleAuthz(t *testing.T) {
+	ctx := context.Background()
+
+	cfg := config.Defaults()
+	cfg.Store.Dir = t.TempDir()
+	// NO cfg.FederationAggregators — pure serve role.
+
+	// Anchor a person and vouch the client host's peer ID BEFORE node.New,
+	// so the trust store loads both at construction.
+	client, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
+	if err != nil {
+		t.Fatalf("client: %v", err)
+	}
+	defer client.Close()
+	priv, err := identity.GeneratePersonKey(filepath.Join(t.TempDir(), "p.key"))
+	if err != nil {
+		t.Fatalf("person key: %v", err)
+	}
+	if err := trust.SaveAnchors(cfg.TrustAnchorsFile(), []trust.Anchor{{
+		Person: "p", IdentityPubkey: identity.EncodePub(identity.PersonPub(priv)),
+		Weight: 0.9, Source: "test",
+	}}); err != nil {
+		t.Fatalf("save anchors: %v", err)
+	}
+	cert := identity.IssueCert(priv, client.ID().String(), time.Now().Add(time.Hour))
+	if err := trust.SaveCerts(cfg.TrustCertsFile(), []proto.PeerCert{cert}); err != nil {
+		t.Fatalf("save certs: %v", err)
+	}
+
+	tr, err := transport.New(ctx, wiringLeafOpts(t))
+	if err != nil {
+		t.Fatalf("transport: %v", err)
+	}
+	defer tr.Close()
+
+	n, err := New(cfg, tr)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	defer n.CloseStores()
+
+	// Anchored client: stream completes, decodes an (empty) ScoreEntry.
+	if err := client.Connect(ctx, peer.AddrInfo{ID: tr.Host().ID(), Addrs: tr.Host().Addrs()}); err != nil {
+		t.Fatalf("connect: %v", err)
+	}
+	s, err := client.NewStream(ctx, tr.Host().ID(), repquery.ProtocolID)
+	if err != nil {
+		t.Fatalf("anchored newstream: %v", err)
+	}
+	if err := json.NewEncoder(s).Encode(proto.RepQuery{IP: "203.0.113.50"}); err != nil {
+		t.Fatalf("encode: %v", err)
+	}
+	var e proto.ScoreEntry
+	if err := json.NewDecoder(s).Decode(&e); err != nil {
+		t.Fatalf("anchored client should get an answer, got: %v", err)
+	}
+	_ = s.Close()
+
+	// Stranger: stream is reset before an answer.
+	stranger, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
+	if err != nil {
+		t.Fatalf("stranger: %v", err)
+	}
+	defer stranger.Close()
+	if err := stranger.Connect(ctx, peer.AddrInfo{ID: tr.Host().ID(), Addrs: tr.Host().Addrs()}); err != nil {
+		t.Fatalf("stranger connect: %v", err)
+	}
+	s2, err := stranger.NewStream(ctx, tr.Host().ID(), repquery.ProtocolID)
+	if err != nil {
+		t.Fatalf("stranger newstream: %v", err)
+	}
+	_ = json.NewEncoder(s2).Encode(proto.RepQuery{IP: "203.0.113.50"})
+	var e2 proto.ScoreEntry
+	if err := json.NewDecoder(s2).Decode(&e2); err == nil {
+		t.Errorf("stranger should be reset, got answer %+v", e2)
+	}
+	_ = s2.Close()
 }

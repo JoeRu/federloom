@@ -148,13 +148,19 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		return nil, fmt.Errorf("node: observability: %w", err)
 	}
 
+	if t != nil {
+		// Serve role (design 2026-07-10 §4): always answer anchored,
+		// non-blocked peers when federated. Defederation (blocked_peers)
+		// is the per-peer off switch.
+		repquery.RegisterResponder(t.Host(), s, ts)
+	}
+
 	var resolver *repquery.Resolver
 	if t != nil && len(cfg.FederationAggregators) > 0 {
 		aggs := parseAggregators(cfg.FederationAggregators)
 		if len(aggs) == 0 {
 			log.Printf("node: federation_aggregators set but none parsed to a valid peer; federated query disabled")
 		} else {
-			repquery.RegisterResponder(t.Host(), s, ts) // serve our local store
 			q := repquery.NewQuerier(t.Host(), aggs, cfg.EffectiveQueryTimeout(), cfg.EffectiveQueryCacheTTL())
 			resolver = repquery.NewResolver(s, q)
 		}
