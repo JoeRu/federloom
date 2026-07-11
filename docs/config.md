@@ -281,6 +281,13 @@ your own threshold decides "listed". The DNSBL/API stay on the private interface
 the query itself rides authenticated libp2p. Push-to-firewall (L3) is unchanged;
 the blocklist *list* endpoint is never federated (point lookups only).
 
+**Serving queries (no config needed):** every federated node (i.e. with a
+transport) answers `/federloom/repquery/v1` queries — but only from peers
+that are **anchored** in its trust store and **not** on its `blocked_peers`
+list. Strangers are rejected before their request is read. Defederation
+(adding a peer to `blocked_peers`) is the per-peer off switch; a node with
+no trust anchors answers nobody.
+
 ### `federation_subnet` and `federation_bridge_subnets`
 
 `federation_subnet` names this node's home trust domain (gossip topic). Empty or

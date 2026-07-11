@@ -57,11 +57,11 @@ DHT/bloom + materialise-on-verdict remain). Open: P1-2 (diversity), P1-3
 
 | # | Item | Severity | Origin |
 |---|---|---|---|
-| B1 | **Responder answers *any* peer**: `/federloom/repquery/v1` is registered on the shared transport host with no aggregator/subnet authorization. Enabling `federation_aggregators` (client role) silently makes the node an unauthenticated reputation oracle for the swarm. Stream deadline (shipped) bounds slowloris, but authorization is required **before the protocol is exposed beyond explicitly trusted peers**. | Important | E3 whole-branch review |
+| B1 | **Responder answers *any* peer**: `/federloom/repquery/v1` is registered on the shared transport host with no aggregator/subnet authorization. Enabling `federation_aggregators` (client role) silently makes the node an unauthenticated reputation oracle for the swarm. Stream deadline (shipped) bounds slowloris, but authorization is required **before the protocol is exposed beyond explicitly trusted peers**. ✅ resolved — trust-store authz, fail closed | Important | E3 whole-branch review |
 | B2 | `OriginTrace` is unsigned — a malicious relay can under-report hop count to reduce the federation discount. Bounded by the stranger-block backstop + dedup + decay. | Minor (advisory) | E1 final re-review |
-| B3 | Querier cache is unbounded (grows per distinct IP, incl. negatives); no in-flight de-dup (concurrent misses for the same IP each fan out). | Minor | E3 Task-4 review |
+| B3 | Querier cache is unbounded (grows per distinct IP, incl. negatives); no in-flight de-dup (concurrent misses for the same IP each fan out). ✅ resolved — bounded cache + singleflight | Minor | E3 Task-4 review |
 | B4 | E3 MVP-approved simplifications to *replace*, not patch: raw cross-domain `ScoreEntry` merge (foreign score scale, §5.2 warning) and max-score combiner. Resolved by design when A1 lands. | Accepted-MVP | E3 design §4/§6 |
-| B5 | Small polish: responder `Close()` vs `Reset()` on decode error; `SetDeadline` error swallowed; redundant explicit `Connect`; E1 strict lowest-hop re-scoring; E1 echo-suppression only single-bridge tested. | Trivial | various reviews |
+| B5 | Small polish: responder `Close()` vs `Reset()` on decode error; `SetDeadline` error swallowed; redundant explicit `Connect`; E1 strict lowest-hop re-scoring; E1 echo-suppression only single-bridge tested. ✅ resolved — Reset/deadline-log/peerstore-seeding; multi-bridge echo test added; lowest-hop re-scoring stays parked | Trivial | various reviews |
 
 ### C. Wire/protocol housekeeping
 
@@ -80,7 +80,7 @@ depend on it, so it goes early; **(3)** research-grade features (A2–A4) after
 their data substrate exists; **(4)** scale hardening last, when there is
 something to scale.
 
-### Step 1 — Repquery hardening (small, security) → B1, B3, B5
+### Step 1 — Repquery hardening (small, security) → B1, B3, B5 ✅ done 2026-07-11
 Add responder authorization: answer `/federloom/repquery/v1` only for peers in
 a configured allow-set (default: the node's own `federation_aggregators` plus
 explicitly listed peers; empty ⇒ responder not registered — mirrors the
