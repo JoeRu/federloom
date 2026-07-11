@@ -26,15 +26,44 @@ type Store interface {
 	GetScore(ip string) (store.ScoreRecord, error)
 }
 
+// Authorizer decides which peers may query this node's reputation
+// (design 2026-07-10 §3: anchored AND not blocked; nil = reject all).
+// *trust.Store satisfies it verbatim.
+type Authorizer interface {
+	Resolve(peerID string) (weight float64, group string, anchored bool)
+	IsBlocked(peerID string) bool
+}
+
 // RegisterResponder installs the stream handler on h. Each stream is one
-// RepQuery → one ScoreEntry, then closed. Read-only.
-func RegisterResponder(h host.Host, s Store) {
+// RepQuery → one ScoreEntry, then closed. Read-only. Only peers authorized
+// by auth are answered; unauthorized streams are reset before the request
+// is read (fail closed: a nil auth rejects everyone).
+func RegisterResponder(h host.Host, s Store, auth Authorizer) {
 	h.SetStreamHandler(ProtocolID, func(str network.Stream) {
+		peerID := str.Conn().RemotePeer().String()
+		if auth == nil {
+			log.Printf("repquery: reject %s: no authorizer configured", peerID)
+			_ = str.Reset()
+			return
+		}
+		if auth.IsBlocked(peerID) {
+			log.Printf("repquery: reject blocked peer %s", peerID)
+			_ = str.Reset()
+			return
+		}
+		if _, _, anchored := auth.Resolve(peerID); !anchored {
+			log.Printf("repquery: reject unanchored peer %s", peerID)
+			_ = str.Reset()
+			return
+		}
 		defer str.Close()
-		_ = str.SetDeadline(time.Now().Add(responderStreamTimeout))
+		if err := str.SetDeadline(time.Now().Add(responderStreamTimeout)); err != nil {
+			log.Printf("repquery: set deadline for %s: %v", peerID, err)
+		}
 		var q proto.RepQuery
 		if err := json.NewDecoder(str).Decode(&q); err != nil {
-			log.Printf("repquery: bad request from %s: %v", str.Conn().RemotePeer(), err)
+			log.Printf("repquery: bad request from %s: %v", peerID, err)
+			_ = str.Reset()
 			return
 		}
 		rec, err := s.GetScore(q.IP)

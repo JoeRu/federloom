@@ -16,6 +16,12 @@ type storeStub struct{ m map[string]store.ScoreRecord }
 
 func (s storeStub) GetScore(ip string) (store.ScoreRecord, error) { return s.m[ip], nil }
 
+// allowAllAuth is a test repquery.Authorizer that authorizes every peer.
+type allowAllAuth struct{}
+
+func (allowAllAuth) Resolve(string) (float64, string, bool) { return 1, "test", true }
+func (allowAllAuth) IsBlocked(string) bool                  { return false }
+
 func TestFederatedLookupFetchesFromAggregator(t *testing.T) {
 	// Aggregator B: has 203.0.113.9 scored, serves the responder.
 	bHost, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
@@ -25,7 +31,7 @@ func TestFederatedLookupFetchesFromAggregator(t *testing.T) {
 	defer bHost.Close()
 	repquery.RegisterResponder(bHost, storeStub{m: map[string]store.ScoreRecord{
 		"203.0.113.9": {Score: 92, Corroboration: 4, LastSeen: time.Now()},
-	}})
+	}}, allowAllAuth{})
 
 	// Querier A: empty local store, B configured as aggregator.
 	aHost, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))

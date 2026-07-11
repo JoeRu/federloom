@@ -24,7 +24,7 @@ func TestQuerierFetchesAndCaches(t *testing.T) {
 	}
 	defer agg.Close()
 	counter := &countStore{ip: "9.9.9.9", rec: store.ScoreRecord{Score: 70, Corroboration: 1, LastSeen: time.Now()}}
-	RegisterResponder(agg, counter)
+	RegisterResponder(agg, counter, fakeAuth{anchored: true})
 
 	client, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
 	if err != nil {
@@ -106,7 +106,7 @@ func TestQuerierPreservesScoreZeroAnswer(t *testing.T) {
 		t.Fatalf("agg: %v", err)
 	}
 	defer agg.Close()
-	RegisterResponder(agg, &countStore{ip: "7.7.7.7", rec: store.ScoreRecord{Score: 0, Corroboration: 2, LastSeen: time.Now()}})
+	RegisterResponder(agg, &countStore{ip: "7.7.7.7", rec: store.ScoreRecord{Score: 0, Corroboration: 2, LastSeen: time.Now()}}, fakeAuth{anchored: true})
 
 	client, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
 	if err != nil {

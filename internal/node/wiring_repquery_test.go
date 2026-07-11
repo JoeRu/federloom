@@ -21,6 +21,12 @@ type wiringStoreStub struct{ m map[string]store.ScoreRecord }
 
 func (s wiringStoreStub) GetScore(ip string) (store.ScoreRecord, error) { return s.m[ip], nil }
 
+// allowAllAuth is a test repquery.Authorizer that authorizes every peer.
+type allowAllAuth struct{}
+
+func (allowAllAuth) Resolve(string) (float64, string, bool) { return 1, "test", true }
+func (allowAllAuth) IsBlocked(string) bool                  { return false }
+
 // wiringLeafOpts builds transport.Options for a loopback leaf node.
 func wiringLeafOpts(t *testing.T) transport.Options {
 	t.Helper()
@@ -52,7 +58,7 @@ func TestNodeWiringFederatesBothReadSurfaces(t *testing.T) {
 	defer bHost.Close()
 	repquery.RegisterResponder(bHost, wiringStoreStub{m: map[string]store.ScoreRecord{
 		"203.0.113.9": {Score: 91, Corroboration: 3, LastSeen: time.Now()},
-	}})
+	}}, allowAllAuth{})
 
 	if len(bHost.Addrs()) == 0 {
 		t.Fatalf("bHost has no listen addrs")

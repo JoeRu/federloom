@@ -7,7 +7,9 @@ import (
 	"time"
 
 	"github.com/libp2p/go-libp2p"
+	"github.com/libp2p/go-libp2p/core/host"
 	"github.com/libp2p/go-libp2p/core/peer"
+	"github.com/multiformats/go-multiaddr"
 
 	"github.com/JoeRu/federloom/internal/store"
 	"github.com/JoeRu/federloom/pkg/proto"
@@ -39,7 +41,7 @@ func TestResponderServesLocalScore(t *testing.T) {
 	}
 	defer h2.Close()
 
-	RegisterResponder(h1, fakeStore{ip: "1.2.3.4", rec: store.ScoreRecord{Score: 88, Corroboration: 2, LastSeen: time.Now()}})
+	RegisterResponder(h1, fakeStore{ip: "1.2.3.4", rec: store.ScoreRecord{Score: 88, Corroboration: 2, LastSeen: time.Now()}}, fakeAuth{anchored: true})
 
 	if err := h2.Connect(ctx, peer.AddrInfo{ID: h1.ID(), Addrs: h1.Addrs()}); err != nil {
 		t.Fatalf("connect: %v", err)
@@ -74,7 +76,7 @@ func TestResponderUnknownIPIsEmpty(t *testing.T) {
 	}
 	defer h2.Close()
 
-	RegisterResponder(h1, fakeStore{ip: "1.2.3.4", rec: store.ScoreRecord{Score: 88, Corroboration: 2, LastSeen: time.Now()}})
+	RegisterResponder(h1, fakeStore{ip: "1.2.3.4", rec: store.ScoreRecord{Score: 88, Corroboration: 2, LastSeen: time.Now()}}, fakeAuth{anchored: true})
 
 	if err := h2.Connect(ctx, peer.AddrInfo{ID: h1.ID(), Addrs: h1.Addrs()}); err != nil {
 		t.Fatalf("connect: %v", err)
@@ -118,7 +120,7 @@ func TestResponderStreamDeadlineClosesIdleStream(t *testing.T) {
 	}
 	defer h2.Close()
 
-	RegisterResponder(h1, fakeStore{ip: "1.2.3.4", rec: store.ScoreRecord{Score: 88, Corroboration: 2, LastSeen: time.Now()}})
+	RegisterResponder(h1, fakeStore{ip: "1.2.3.4", rec: store.ScoreRecord{Score: 88, Corroboration: 2, LastSeen: time.Now()}}, fakeAuth{anchored: true})
 
 	if err := h2.Connect(ctx, peer.AddrInfo{ID: h1.ID(), Addrs: h1.Addrs()}); err != nil {
 		t.Fatalf("connect: %v", err)
@@ -147,5 +149,79 @@ func TestResponderStreamDeadlineClosesIdleStream(t *testing.T) {
 		}
 	case <-time.After(2 * time.Second):
 		t.Fatal("idle stream was never closed by the responder (deadline not honored)")
+	}
+}
+
+// fakeAuth is a test Authorizer: anchored/blocked are fixed answers.
+type fakeAuth struct {
+	anchored bool
+	blocked  bool
+}
+
+func (f fakeAuth) Resolve(string) (float64, string, bool) { return 0.9, "test", f.anchored }
+func (f fakeAuth) IsBlocked(string) bool                  { return f.blocked }
+
+// queryOnce opens a stream to h1 from h2, sends a RepQuery for ip and returns
+// the decode result of the answer.
+func queryOnce(t *testing.T, ctx context.Context, h2 host.Host, id peer.ID, addrs []multiaddr.Multiaddr, ip string) (proto.ScoreEntry, error) {
+	t.Helper()
+	if err := h2.Connect(ctx, peer.AddrInfo{ID: id, Addrs: addrs}); err != nil {
+		t.Fatalf("connect: %v", err)
+	}
+	s, err := h2.NewStream(ctx, id, ProtocolID)
+	if err != nil {
+		t.Fatalf("newstream: %v", err)
+	}
+	defer s.Close()
+	if err := json.NewEncoder(s).Encode(proto.RepQuery{IP: ip}); err != nil {
+		t.Fatalf("encode: %v", err)
+	}
+	var e proto.ScoreEntry
+	err = json.NewDecoder(s).Decode(&e)
+	return e, err
+}
+
+func TestResponderAuthorization(t *testing.T) {
+	ctx := context.Background()
+	rec := store.ScoreRecord{Score: 88, Corroboration: 2, LastSeen: time.Now()}
+
+	cases := []struct {
+		name    string
+		auth    Authorizer
+		wantErr bool
+	}{
+		{"anchored peer answered", fakeAuth{anchored: true}, false},
+		{"stranger reset", fakeAuth{anchored: false}, true},
+		{"blocked anchored peer reset", fakeAuth{anchored: true, blocked: true}, true},
+		{"nil authorizer rejects all", nil, true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			h1, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
+			if err != nil {
+				t.Fatalf("h1: %v", err)
+			}
+			defer h1.Close()
+			h2, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
+			if err != nil {
+				t.Fatalf("h2: %v", err)
+			}
+			defer h2.Close()
+			RegisterResponder(h1, fakeStore{ip: "1.2.3.4", rec: rec}, tc.auth)
+
+			e, err := queryOnce(t, ctx, h2, h1.ID(), h1.Addrs(), "1.2.3.4")
+			if tc.wantErr {
+				if err == nil {
+					t.Errorf("expected reset/decode error for unauthorized peer, got answer %+v", e)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("authorized query failed: %v", err)
+			}
+			if e.Score != 88 {
+				t.Errorf("answer score = %v, want 88", e.Score)
+			}
+		})
 	}
 }
