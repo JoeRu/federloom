@@ -13,6 +13,10 @@ import (
 	"github.com/JoeRu/federloom/pkg/proto"
 )
 
+// maxCacheEntries bounds the per-IP answer cache. Package var so tests can
+// shrink it (same precedent as responderStreamTimeout).
+var maxCacheEntries = 65536
+
 // Querier fetches reputation from configured aggregators on demand and caches
 // the merged answer per IP.
 type Querier struct {
@@ -57,6 +61,9 @@ func (q *Querier) Query(ctx context.Context, ip string) (proto.ScoreEntry, bool)
 	merged, ok := q.fanout(ctx, ip)
 
 	q.mu.Lock()
+	if len(q.cache) >= maxCacheEntries {
+		q.evictLocked(now)
+	}
 	q.cache[ip] = cacheEntry{entry: merged, ok: ok, at: now}
 	q.mu.Unlock()
 	return merged, ok
@@ -143,4 +150,33 @@ func (q *Querier) ask(ctx context.Context, a peer.AddrInfo, ip string) (proto.Sc
 		return proto.ScoreEntry{}, false
 	}
 	return e, true
+}
+
+// evictLocked drops expired entries first, then the single oldest if still at
+// capacity. Caller holds q.mu. Negative entries expire at cacheTTL/5, positive
+// at cacheTTL (same rule the read path applies).
+func (q *Querier) evictLocked(now time.Time) {
+	for k, c := range q.cache {
+		ttl := q.cacheTTL
+		if !c.ok {
+			ttl = q.cacheTTL / 5
+		}
+		if now.Sub(c.at) >= ttl {
+			delete(q.cache, k)
+		}
+	}
+	if len(q.cache) < maxCacheEntries {
+		return
+	}
+	var oldestKey string
+	var oldest time.Time
+	first := true
+	for k, c := range q.cache {
+		if first || c.at.Before(oldest) {
+			oldest, oldestKey, first = c.at, k, false
+		}
+	}
+	if oldestKey != "" {
+		delete(q.cache, oldestKey)
+	}
 }

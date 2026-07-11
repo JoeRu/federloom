@@ -127,6 +127,29 @@ func TestQuerierPreservesScoreZeroAnswer(t *testing.T) {
 	}
 }
 
+func TestQuerierCacheBounded(t *testing.T) {
+	old := maxCacheEntries
+	maxCacheEntries = 3
+	defer func() { maxCacheEntries = old }()
+
+	// No aggregators: every Query is an instant negative, exercising only the cache.
+	q := NewQuerier(nil, nil, 100*time.Millisecond, time.Minute)
+	ips := []string{"10.0.0.1", "10.0.0.2", "10.0.0.3", "10.0.0.4", "10.0.0.5"}
+	for _, ip := range ips {
+		q.Query(context.Background(), ip)
+	}
+	q.mu.Lock()
+	size := len(q.cache)
+	_, oldestPresent := q.cache["10.0.0.1"]
+	q.mu.Unlock()
+	if size > 3 {
+		t.Errorf("cache size = %d, want <= 3", size)
+	}
+	if oldestPresent {
+		t.Error("oldest entry should have been evicted")
+	}
+}
+
 type countStore struct {
 	ip    string
 	rec   store.ScoreRecord
