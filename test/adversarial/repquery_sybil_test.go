@@ -37,6 +37,7 @@ func TestSybilStrangerQueriersGainNothing(t *testing.T) {
 	defer srv.Close()
 	repquery.RegisterResponder(srv, sybilStore{rec: store.ScoreRecord{Score: 99, LastSeen: time.Now()}}, denyAllAuth{})
 
+	attempted := 0
 	for i := 0; i < 5; i++ {
 		sybil, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
 		if err != nil {
@@ -48,8 +49,9 @@ func TestSybilStrangerQueriersGainNothing(t *testing.T) {
 		s, err := sybil.NewStream(ctx, srv.ID(), repquery.ProtocolID)
 		if err != nil {
 			sybil.Close()
-			continue // stream refused outright is also a pass
+			continue // rejection at stream-open is a valid reject, but must not be ALL outcomes
 		}
+		attempted++
 		_ = json.NewEncoder(s).Encode(proto.RepQuery{IP: "1.2.3.4"})
 		var e proto.ScoreEntry
 		if err := json.NewDecoder(s).Decode(&e); err == nil {
@@ -57,5 +59,8 @@ func TestSybilStrangerQueriersGainNothing(t *testing.T) {
 		}
 		_ = s.Close()
 		sybil.Close()
+	}
+	if attempted == 0 {
+		t.Fatal("no sybil ever reached the query stage — responder missing entirely (wiring regression), not rejecting")
 	}
 }

@@ -151,6 +151,9 @@ func TestMultiBridgeEchoScoredOnce(t *testing.T) {
 	if err != nil || rec1.LastSeen.IsZero() {
 		t.Fatalf("first bridged copy was not scored: %+v err=%v", rec1, err)
 	}
+	if rec1.Score >= 15 { // config.Defaults() Trust.StrangerScoreCap
+		t.Fatalf("precondition: first stranger contribution (%v) already at/near the stranger cap — a second scoring would be undetectable; adjust weights", rec1.Score)
+	}
 
 	c.ProcessRemote(transport.ReceivedEvent{Event: copy2, From: "12D3KooWbridge2", Subnet: "b"})
 	rec2, _ := c.GetScore("198.51.100.88")
