@@ -7,8 +7,10 @@ import (
 	"time"
 
 	"github.com/libp2p/go-libp2p/core/host"
-	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/libp2p/go-libp2p/core/peer"
+	"github.com/libp2p/go-libp2p/core/peerstore"
+
+	"golang.org/x/sync/singleflight"
 
 	"github.com/JoeRu/federloom/pkg/proto"
 )
@@ -25,6 +27,8 @@ type Querier struct {
 	timeout     time.Duration
 	cacheTTL    time.Duration
 
+	sf singleflight.Group
+
 	mu    sync.Mutex
 	cache map[string]cacheEntry
 }
@@ -35,8 +39,15 @@ type cacheEntry struct {
 	at    time.Time
 }
 
-// NewQuerier builds a Querier. aggregators is the trusted set to ask.
+// NewQuerier builds a Querier. aggregators is the trusted set to ask; their
+// addresses are seeded into the host peerstore so NewStream can dial them
+// without an explicit Connect per query.
 func NewQuerier(h host.Host, aggregators []peer.AddrInfo, timeout, cacheTTL time.Duration) *Querier {
+	if h != nil {
+		for _, a := range aggregators {
+			h.Peerstore().AddAddrs(a.ID, a.Addrs, peerstore.PermanentAddrTTL)
+		}
+	}
 	return &Querier{host: h, aggregators: aggregators, timeout: timeout, cacheTTL: cacheTTL, cache: map[string]cacheEntry{}}
 }
 
@@ -58,15 +69,22 @@ func (q *Querier) Query(ctx context.Context, ip string) (proto.ScoreEntry, bool)
 	}
 	q.mu.Unlock()
 
-	merged, ok := q.fanout(ctx, ip)
-
-	q.mu.Lock()
-	if len(q.cache) >= maxCacheEntries {
-		q.evictLocked(now)
+	type qres struct {
+		entry proto.ScoreEntry
+		ok    bool
 	}
-	q.cache[ip] = cacheEntry{entry: merged, ok: ok, at: now}
-	q.mu.Unlock()
-	return merged, ok
+	v, _, _ := q.sf.Do(ip, func() (interface{}, error) {
+		merged, ok := q.fanout(ctx, ip)
+		q.mu.Lock()
+		if len(q.cache) >= maxCacheEntries {
+			q.evictLocked(time.Now())
+		}
+		q.cache[ip] = cacheEntry{entry: merged, ok: ok, at: time.Now()}
+		q.mu.Unlock()
+		return qres{merged, ok}, nil
+	})
+	r := v.(qres)
+	return r.entry, r.ok
 }
 
 // fanout asks every aggregator concurrently within the timeout and merges by max score.
@@ -125,9 +143,6 @@ collect:
 
 // ask opens a stream to one aggregator, sends the query, reads the answer.
 func (q *Querier) ask(ctx context.Context, a peer.AddrInfo, ip string) (proto.ScoreEntry, bool) {
-	if q.host.Network().Connectedness(a.ID) != network.Connected {
-		_ = q.host.Connect(ctx, a)
-	}
 	s, err := q.host.NewStream(ctx, a.ID, ProtocolID)
 	if err != nil {
 		return proto.ScoreEntry{}, false

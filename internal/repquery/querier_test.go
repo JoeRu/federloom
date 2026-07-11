@@ -3,6 +3,7 @@ package repquery
 import (
 	"context"
 	"encoding/json"
+	"sync"
 	"testing"
 	"time"
 
@@ -39,12 +40,12 @@ func TestQuerierFetchesAndCaches(t *testing.T) {
 		t.Fatalf("Query = %+v ok=%v, want score 70 ok true", e, ok)
 	}
 	// Second query within TTL must hit the cache (no new responder call).
-	before := counter.calls
+	before := counter.callCount()
 	if _, ok := q.Query(ctx, "9.9.9.9"); !ok {
 		t.Fatal("cached query lost the answer")
 	}
-	if counter.calls != before {
-		t.Errorf("cache miss: responder called again (%d -> %d)", before, counter.calls)
+	if counter.callCount() != before {
+		t.Errorf("cache miss: responder called again (%d -> %d)", before, counter.callCount())
 	}
 
 	// Unknown IP: no aggregator has it → ok false.
@@ -153,13 +154,56 @@ func TestQuerierCacheBounded(t *testing.T) {
 type countStore struct {
 	ip    string
 	rec   store.ScoreRecord
+	mu    sync.Mutex
 	calls int
 }
 
 func (c *countStore) GetScore(ip string) (store.ScoreRecord, error) {
+	c.mu.Lock()
 	c.calls++
+	c.mu.Unlock()
 	if ip == c.ip {
 		return c.rec, nil
 	}
 	return store.ScoreRecord{}, nil
+}
+
+func (c *countStore) callCount() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.calls
+}
+
+func TestQuerierSingleflight(t *testing.T) {
+	ctx := context.Background()
+	agg, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
+	if err != nil {
+		t.Fatalf("agg: %v", err)
+	}
+	defer agg.Close()
+	counter := &countStore{ip: "6.6.6.6", rec: store.ScoreRecord{Score: 60, LastSeen: time.Now()}}
+	RegisterResponder(agg, counter, fakeAuth{anchored: true})
+
+	client, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
+	if err != nil {
+		t.Fatalf("client: %v", err)
+	}
+	defer client.Close()
+
+	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 2*time.Second, time.Minute)
+
+	var wg sync.WaitGroup
+	for i := 0; i < 8; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if _, ok := q.Query(ctx, "6.6.6.6"); !ok {
+				t.Error("concurrent query lost the answer")
+			}
+		}()
+	}
+	wg.Wait()
+	if counter.calls != 1 {
+		t.Errorf("responder called %d times for one IP, want 1 (singleflight)", counter.calls)
+	}
 }

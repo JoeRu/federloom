@@ -17,6 +17,7 @@ require (
 	github.com/miekg/dns v1.1.72
 	github.com/multiformats/go-multiaddr v0.16.1
 	github.com/prometheus/client_golang v1.23.2
+	golang.org/x/sync v0.20.0
 	gopkg.in/yaml.v3 v3.0.1
 	modernc.org/sqlite v1.52.0
 )
@@ -126,7 +127,6 @@ require (
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
 	golang.org/x/mod v0.35.0 // indirect
 	golang.org/x/net v0.55.0 // indirect
-	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/telemetry v0.0.0-20260409153401-be6f6cb8b1fa // indirect
 	golang.org/x/text v0.37.0 // indirect
