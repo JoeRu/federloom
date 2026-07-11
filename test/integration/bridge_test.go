@@ -2,13 +2,16 @@ package integration_test
 
 import (
 	"context"
+	"crypto/rand"
 	"testing"
 	"time"
 
+	"github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/multiformats/go-multiaddr"
 
 	"github.com/JoeRu/federloom/internal/config"
+	"github.com/JoeRu/federloom/internal/identity"
 	"github.com/JoeRu/federloom/internal/node"
 	"github.com/JoeRu/federloom/internal/transport"
 	"github.com/JoeRu/federloom/pkg/proto"
@@ -100,5 +103,58 @@ func TestBridgeReemitsAcrossSubnets(t *testing.T) {
 		}
 	case <-time.After(3 * time.Second):
 		t.Fatal("observer on subnet b did not receive the bridged event within 3s")
+	}
+}
+
+// TestMultiBridgeEchoScoredOnce: a node reachable via TWO bridges receives two
+// copies of the same origin event (identical signed content, different
+// OriginTrace last hop). The dedup cache must score it exactly once.
+// E1 design §4: first-seen wins; ledger minor "echo-suppression only
+// single-bridge tested" closed here.
+func TestMultiBridgeEchoScoredOnce(t *testing.T) {
+	cfg := config.Defaults()
+	cfg.Store.Dir = t.TempDir()
+	cfg.FederationSubnet = "b"
+	c, err := node.New(cfg, nil) // leaf in subnet b; ProcessRemote driven directly
+	if err != nil {
+		t.Fatalf("node.New: %v", err)
+	}
+	defer c.CloseStores()
+
+	// A signed origin event. The signature covers IP|Reason|Timestamp|ReporterID
+	// — NOT OriginTrace — so both bridged copies carry the same valid signature.
+	priv, _, err := crypto.GenerateEd25519Key(rand.Reader)
+	if err != nil {
+		t.Fatalf("keygen: %v", err)
+	}
+	origID, err := identity.PeerIDFromPrivKey(priv)
+	if err != nil {
+		t.Fatalf("peer id: %v", err)
+	}
+	base := proto.Event{
+		IP:         "198.51.100.88",
+		Reason:     "ssh-probe",
+		ReporterID: origID,
+		Timestamp:  time.Now().UTC(),
+	}
+	if err := identity.SignEvent(&base, priv); err != nil {
+		t.Fatalf("sign: %v", err)
+	}
+
+	copy1 := base
+	copy1.OriginTrace = []string{origID, "12D3KooWbridge1"}
+	copy2 := base
+	copy2.OriginTrace = []string{origID, "12D3KooWbridge2"}
+
+	c.ProcessRemote(transport.ReceivedEvent{Event: copy1, From: "12D3KooWbridge1", Subnet: "b"})
+	rec1, err := c.GetScore("198.51.100.88")
+	if err != nil || rec1.LastSeen.IsZero() {
+		t.Fatalf("first bridged copy was not scored: %+v err=%v", rec1, err)
+	}
+
+	c.ProcessRemote(transport.ReceivedEvent{Event: copy2, From: "12D3KooWbridge2", Subnet: "b"})
+	rec2, _ := c.GetScore("198.51.100.88")
+	if rec2.Score != rec1.Score || rec2.Corroboration != rec1.Corroboration {
+		t.Errorf("second copy via other bridge changed the record: %+v -> %+v (dedup failed)", rec1, rec2)
 	}
 }
