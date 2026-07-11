@@ -81,12 +81,16 @@ their data substrate exists; **(4)** scale hardening last, when there is
 something to scale.
 
 ### Step 1 — Repquery hardening (small, security) → B1, B3, B5 ✅ done 2026-07-11
-Add responder authorization: answer `/federloom/repquery/v1` only for peers in
-a configured allow-set (default: the node's own `federation_aggregators` plus
-explicitly listed peers; empty ⇒ responder not registered — mirrors the
-querier gate). Bound the querier cache (LRU or size cap) and add in-flight
-de-dup (singleflight). Fold in the B5 trivia. Contained, no design debate,
-closes the one Important finding on `main`.
+As built (design 2026-07-10; the allow-list sketch originally here was
+superseded during brainstorming): responder authorization is **trust-store
+based** — answer `/federloom/repquery/v1` iff the peer is anchored and not
+blocked (fail closed, `Reset` before reading a byte); the serve role is
+**always-on when federated** (decoupled from the client role, fixing the
+"pure aggregator serves nothing" hole found during design; zero new config,
+defederation is the per-peer off switch). Querier cache bounded (65536,
+evict expired→oldest) + singleflight de-dup + peerstore seeding replacing
+the per-ask `Connect`. B5 folded in; multi-bridge echo + adversarial
+Sybil-querier tests added.
 
 ### Step 2 — E2: `EvidenceAggregate` + scale-free recompute → A1, resolves B4
 The keystone. New wire type (§7.5): per-IP evidence summary (reporter counts,
