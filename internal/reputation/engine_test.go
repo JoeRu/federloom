@@ -205,3 +205,35 @@ func TestSMTPWeightsHigherThanDefault(t *testing.T) {
 		})
 	}
 }
+
+func TestAccumulateMatchesKnownContribution(t *testing.T) {
+	// One anchored ssh-probe (weight 2) at trust 0.9 onto an empty record:
+	// contrib = 0.9 * 2 * (1 - 0/100) = 1.8.
+	now := time.Now()
+	rec := reputation.Accumulate(store.ScoreRecord{}, reputation.Observation{
+		Reason: "ssh-probe", ReporterID: "r1", Group: "jo", Trust: 0.9, Anchored: true,
+	}, now, 7*24*time.Hour, 15)
+	if rec.Score < 1.79 || rec.Score > 1.81 {
+		t.Errorf("Score = %v, want ~1.8", rec.Score)
+	}
+	if len(rec.Groups) != 1 || rec.Groups[0] != "jo" || rec.Corroboration != 1 {
+		t.Errorf("anchored group not recorded: %+v", rec)
+	}
+	// Stranger contribution is capped at strangerCap.
+	rec2 := store.ScoreRecord{}
+	for i := 0; i < 100; i++ {
+		rec2 = reputation.Accumulate(rec2, reputation.Observation{Reason: "smtp-spamtrap", ReporterID: "s", Trust: 0.3, Anchored: false}, now, 7*24*time.Hour, 15)
+	}
+	if rec2.Score > 15.001 || !rec2.StrangerSeen {
+		t.Errorf("stranger cap not honored: score=%v", rec2.Score)
+	}
+	if len(rec2.Groups) != 0 {
+		t.Errorf("stranger must not add groups: %+v", rec2.Groups)
+	}
+}
+
+func TestWeightForExported(t *testing.T) {
+	if reputation.WeightFor("ssh-auth-success") != 40 || reputation.WeightFor("unknown-reason") != 2 {
+		t.Errorf("WeightFor: got %v/%v", reputation.WeightFor("ssh-auth-success"), reputation.WeightFor("unknown-reason"))
+	}
+}

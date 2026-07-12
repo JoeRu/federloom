@@ -32,6 +32,63 @@ func weightFor(reason string) float64 {
 	return 2
 }
 
+// WeightFor returns the score-contribution weight for a reason code (the local
+// weight table). Exported so the federated recompute can pick the highest-weight
+// scenario as its vote reason (§8: recomputed under the consumer's own rules).
+func WeightFor(reason string) float64 { return weightFor(reason) }
+
+// Observation is one scoring input — a native event or a synthetic evidence vote.
+type Observation struct {
+	Reason     string
+	ReporterID string
+	Group      string
+	Trust      float64
+	Anchored   bool
+}
+
+// Accumulate applies obs to rec (lazily decayed to now) and returns the updated
+// record. Pure: no store access. This is the single accumulation path — both
+// Record (native events) and the federated recompute (internal/repquery) fold
+// through it, so a federated score is computed under the same math as a local one.
+func Accumulate(rec store.ScoreRecord, obs Observation, now time.Time, halfLife time.Duration, strangerCap float64) store.ScoreRecord {
+	if !rec.LastSeen.IsZero() {
+		rec.Score = DecayScore(rec.Score, rec.LastSeen, now, halfLife)
+	}
+	contrib := obs.Trust * weightFor(obs.Reason) * (1 - rec.Score/100)
+	if !obs.Anchored {
+		remaining := strangerCap - rec.StrangerContrib
+		if remaining < 0 {
+			remaining = 0
+		}
+		if contrib > remaining {
+			contrib = remaining
+		}
+		rec.StrangerContrib += contrib
+		rec.StrangerSeen = true
+	}
+	rec.Score += contrib
+	if rec.Score > 100 {
+		rec.Score = 100
+	}
+	// Corroboration counts distinct ANCHORED Person groups only (spec Leitprinzip 8;
+	// batch A P0-1) — strangers never satisfy a min_corroboration block rule.
+	if obs.Anchored && obs.Group != "" && !containsString(rec.Groups, obs.Group) {
+		rec.Groups = append(rec.Groups, obs.Group)
+	}
+	rec.Corroboration = len(rec.Groups)
+	if !containsString(rec.ReporterIDs, obs.ReporterID) {
+		rec.ReporterIDs = append(rec.ReporterIDs, obs.ReporterID)
+	}
+	rec.LastSeen = now
+	if rec.FirstSeen.IsZero() {
+		rec.FirstSeen = now
+	}
+	if !containsString(rec.Reasons, obs.Reason) {
+		rec.Reasons = append(rec.Reasons, obs.Reason)
+	}
+	return rec
+}
+
 // Engine computes IP reputation scores using lazy decay, logistic accumulation,
 // Person-group corroboration, and a cumulative cap on stranger contributions
 // (spec §4.2/§8; design docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md).
@@ -57,53 +114,9 @@ func (e *Engine) Record(ip, reason, reporterID string, trust float64, group stri
 	if err != nil {
 		return 0, fmt.Errorf("reputation: get %q: %w", ip, err)
 	}
-
-	now := time.Now()
-
-	// Lazy decay: apply time-based decay since last observation.
-	if !rec.LastSeen.IsZero() {
-		rec.Score = DecayScore(rec.Score, rec.LastSeen, now, e.halfLife)
-	}
-
-	// Logistic accumulation: score approaches 100 asymptotically.
-	contrib := trust * weightFor(reason) * (1 - rec.Score/100)
-	if !anchored {
-		remaining := e.strangerCap - rec.StrangerContrib
-		if remaining < 0 {
-			remaining = 0
-		}
-		if contrib > remaining {
-			contrib = remaining
-		}
-		rec.StrangerContrib += contrib
-		rec.StrangerSeen = true
-	}
-	rec.Score += contrib
-	if rec.Score > 100 {
-		rec.Score = 100
-	}
-
-	// Corroboration counts distinct ANCHORED Person groups only. Strangers are
-	// deliberately excluded so a single un-anchored remote reporter can never
-	// satisfy a min_corroboration block rule (spec Leitprinzip 8; batch A P0-1).
-	// StrangerSeen/StrangerContrib still bound the stranger *score* (cap 15).
-	if anchored && group != "" && !containsString(rec.Groups, group) {
-		rec.Groups = append(rec.Groups, group)
-	}
-	rec.Corroboration = len(rec.Groups)
-
-	// Audit trail and metadata.
-	if !containsString(rec.ReporterIDs, reporterID) {
-		rec.ReporterIDs = append(rec.ReporterIDs, reporterID)
-	}
-	rec.LastSeen = now
-	if rec.FirstSeen.IsZero() {
-		rec.FirstSeen = now
-	}
-	if !containsString(rec.Reasons, reason) {
-		rec.Reasons = append(rec.Reasons, reason)
-	}
-
+	rec = Accumulate(rec, Observation{
+		Reason: reason, ReporterID: reporterID, Group: group, Trust: trust, Anchored: anchored,
+	}, time.Now(), e.halfLife, e.strangerCap)
 	ttl := 3 * e.halfLife
 	if err := e.store.PutScore(ip, rec, ttl); err != nil {
 		return 0, fmt.Errorf("reputation: put %q: %w", ip, err)
