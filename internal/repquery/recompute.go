@@ -41,7 +41,7 @@ func RecordFromEvidence(ev proto.EvidenceAggregate, now time.Time, halfLife time
 		return store.ScoreRecord{} // not found
 	}
 	weight := ev.EvidenceWeight
-	if weight < 0 {
+	if weight != weight || weight < 0 { // NaN or negative -> 0
 		weight = 0
 	}
 	if weight > 1 {

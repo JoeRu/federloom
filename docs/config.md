@@ -290,7 +290,7 @@ carries anchored corroboration, so it can raise a DNSBL/API score (advisory,
 against your threshold) but can never force a block.
 
 **Serving queries (no config needed):** every federated node (i.e. with a
-transport) answers `/federloom/repquery/v1` queries — but only from peers
+transport) answers `/federloom/repquery/v2` queries — but only from peers
 that are **anchored** in its trust store and **not** on its `blocked_peers`
 list. Strangers are rejected before their request is read. Defederation
 (adding a peer to `blocked_peers`) is the per-peer off switch; a node with

@@ -20,7 +20,7 @@ func NewResolver(local Store, q *Querier) *Resolver {
 }
 
 // GetScore returns the local record if present, else a federated answer
-// (converted to a ScoreRecord), else an empty record. Never errors on the
+// recomputed from evidence, else an empty record. Never errors on the
 // federated path — a miss/timeout degrades to the local (empty) answer.
 func (r *Resolver) GetScore(ip string) (store.ScoreRecord, error) {
 	rec, err := r.local.GetScore(ip)

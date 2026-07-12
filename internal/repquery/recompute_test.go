@@ -1,6 +1,7 @@
 package repquery
 
 import (
+	"math"
 	"testing"
 	"time"
 
@@ -133,5 +134,32 @@ func TestRecordFromEvidenceClampsWeight(t *testing.T) {
 	recNeg := RecordFromEvidence(mk(-3.0), now, 7*24*time.Hour, 15, 0.5)
 	if recNeg.Score != 0 {
 		t.Errorf("EvidenceWeight=-3.0 should clamp to 0 trust and yield score 0, got %v", recNeg.Score)
+	}
+}
+
+// TestRecordFromEvidenceNaNWeightYieldsFiniteScore proves a NaN EvidenceWeight
+// (which compares false to both < 0 and > 1, so it can slip past a naive
+// clamp) is treated as 0 trust and never propagates into the returned Score.
+// Wire-unreachable today (the JSON decoder rejects NaN literals), but a
+// defense-in-depth guard for the planned gossip-side evidence import.
+func TestRecordFromEvidenceNaNWeightYieldsFiniteScore(t *testing.T) {
+	now := time.Now().UTC()
+	ev := proto.EvidenceAggregate{
+		IP:               "203.0.113.10",
+		Scenarios:        []string{"ssh-probe"},
+		WindowLast:       now,
+		DiversityBuckets: map[string]int{"groups": 3},
+		EvidenceWeight:   math.NaN(),
+	}
+	rec := RecordFromEvidence(ev, now, 7*24*time.Hour, 15, 0.5)
+
+	if rec.Score != rec.Score { // NaN != NaN
+		t.Fatalf("expected finite Score, got NaN")
+	}
+	if rec.Score < 0 || rec.Score > 100 {
+		t.Errorf("Score out of [0,100] range: %v", rec.Score)
+	}
+	if len(rec.Groups) != 0 {
+		t.Errorf("federated record must never carry Groups: %+v", rec.Groups)
 	}
 }
