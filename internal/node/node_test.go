@@ -465,3 +465,39 @@ func TestProcessRemoteRespectsWhitelistCIDR(t *testing.T) {
 		t.Error("IP in whitelisted CIDR must not be scored")
 	}
 }
+
+// TestDiversityKeysOnOriginSubnet: two remote reports for the same IP that
+// originated in the SAME subnet (e.SubnetID) but arrived via DIFFERENT arrival
+// subnets (re.Subnet) must count as ONE subnet for diversity — a bridge cannot
+// launder a same-origin report into a fresh diversity vote.
+func TestDiversityKeysOnOriginSubnet(t *testing.T) {
+	n, _ := testNode(t)
+	mk := func(arrival string) transport.ReceivedEvent {
+		return transport.ReceivedEvent{
+			Event: proto.Event{
+				IP: "198.51.100.5", Reason: "ssh-probe", ReporterID: "origX",
+				Timestamp: time.Now().UTC(), SubnetID: "home", OriginTrace: []string{"origX"},
+			},
+			From: "origX", Subnet: arrival,
+		}
+	}
+	n.ProcessRemote(mk("bridgepath1"))
+	rec1, _ := n.GetScore("198.51.100.5")
+	n.ProcessRemote(transport.ReceivedEvent{ // second copy, same origin subnet "home", different arrival
+		Event: proto.Event{
+			IP: "198.51.100.5", Reason: "ssh-probe", ReporterID: "origX",
+			Timestamp: time.Now().UTC(), SubnetID: "home", OriginTrace: []string{"origX"},
+		},
+		From: "origX", Subnet: "bridgepath2",
+	})
+	rec2, _ := n.GetScore("198.51.100.5")
+
+	if len(rec2.SubnetsSeen) != 1 || rec2.SubnetsSeen[0] != "home" {
+		t.Errorf("diversity must key on origin SubnetID; SubnetsSeen = %v, want [home]", rec2.SubnetsSeen)
+	}
+	// The second (same-origin-subnet) report is damped, so the score gain is small.
+	gain := rec2.Score - rec1.Score
+	if gain >= (rec1.Score - 0) { // second gain must be strictly less than the first full contribution
+		t.Errorf("same-subnet repeat not damped: first=%v secondGain=%v", rec1.Score, gain)
+	}
+}
