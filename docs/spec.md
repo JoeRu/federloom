@@ -567,7 +567,7 @@ Honest status of each design area in the current codebase. This table — not th
 | Spec § | Area | Package | Status |
 |---|---|---|---|
 | §4.1 | Ground-truth anchors | `internal/trust`, honeypot/spamtrap ingest | DONE |
-| §4.2 | Diversity-weighted corroboration (ASN/geo) | — | PLANNED (D) |
+| §4.2 | Diversity-weighted corroboration | `internal/reputation`, `internal/repquery` | DONE — subnet-diversity weighting (D); ASN/geo dimensions PLANNED |
 | §4.3 | Asymmetric decay | `internal/reputation` | DONE |
 | §4.4 | Dispute / anti-trust votes | — | PLANNED (E) |
 | §4.5 | Applicability weighting | — | PLANNED (E) |

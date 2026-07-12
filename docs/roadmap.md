@@ -46,7 +46,7 @@ DHT/bloom + materialise-on-verdict remain). Open: P1-2 (diversity), P1-3
 | # | Item | Spec | Critique |
 |---|---|---|---|
 | A1 | `EvidenceAggregate` federated import + scale-free local recompute + attested `diversity_buckets`. ✅ resolved | §5.2, §7.5, §8 | P1-1 core |
-| A2 | Diversity-weighted corroboration (ASN/geo buckets) | §4.2 | P1-2 |
+| A2 | Diversity-weighted corroboration (ASN/geo buckets) ✅ resolved — subnet-diversity weighting (score-only; ASN/geo later) | §4.2 | P1-2 |
 | A3 | Dispute / anti-trust votes (the `Disputes` field is on the wire but never populated) | §4.4 | P1-3 |
 | A4 | Applicability weighting / system profile (SBOM matchmaker) | §4.5, §7.6 | P1-6 |
 | A5 | Materialise-on-verdict: a block-worthy *federated* verdict for an IP that contacted you pushes into ipset (O(1) path) — explicitly deferred from E3 until evidence is scale-free | E3 design §8 | P1-1 |
@@ -102,7 +102,7 @@ problem and the max-score combiner in one move. Needs its own brainstorm
 (bucket attestation model is the hard part: who vouches that "3 distinct ASNs"
 is true?).
 
-### Step 3 — D: diversity-weighted corroboration → A2
+### Step 3 — D  diversity-weighted corroboration → A2 ✅ done 2026-07-12
 Consumes E2's `diversity_buckets`. Corroboration counts distinct ASN/geo
 buckets, not raw reporters — the actual Sybil-resistance upgrade (§4.2).
 Open question from the critique still to decide at brainstorm: offline ASN

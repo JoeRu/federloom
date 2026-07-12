@@ -46,6 +46,8 @@ serves as GDPR storage limitation.
 
 Reputation has two paths: a **push** path where locally-sourced scoring events flow to the firewall (control plane → data plane, L3, engine to ipset, unchanged), and a **query** read path where DNSBL/API lookups miss the local store and consult federated aggregators on-demand over authenticated libp2p. The query path transports **evidence** (reporter diversity counts per IP) that your node recomputes into a score under your own rules, not foreign scores. The query path is read-only and advisory — the recomputed score feeds the operator's own threshold to decide listing. E3 shipped the query read path with opaque scores; E2 replaced that with scale-free evidence aggregates (federated answers never carry anchored corroboration, so they can raise an advisory score but cannot force a block). Materialise-on-verdict (flowing federated verdicts back into firewall decisions) is the next step.
 
+Corroboration is **subnet-diversity weighted** — breadth across subnets outweighs volume from one (score only; the block gate stays anchored-Person). A report from a subnet that has already reported an IP counts for only a fraction (config `diversity_repeat_factor`, default 0.15) of a report from a new subnet, preventing single-subnet floods from buying breadth signals.
+
 ## Federation (Mastodon model)
 
 Each subnet is a trust domain with its own roots and governance. Subnets run

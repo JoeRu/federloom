@@ -78,6 +78,15 @@ reputation:
   ipv6_prefix: 64
 ```
 
+### `diversity_repeat_factor`
+
+Weights corroboration by federation-subnet diversity (spec §4.2). A report for
+an IP from a subnet that has **already** reported it counts for this fraction
+of a first report from a *new* subnet (default `0.15`). Lower = stronger
+diversity weighting; `1.0` disables it (repeats count fully). Diversity shapes
+the advisory score only — it never changes the block gate (a block still needs
+anchored-Person corroboration). A solo / single-subnet node is unaffected.
+
 ### ingest
 
 All ingest adapters are opt-in (`enabled: false` by default). Enable only the
