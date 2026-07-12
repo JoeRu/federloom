@@ -34,3 +34,18 @@ func TestAggregateFromRecord(t *testing.T) {
 		t.Errorf("empty record should yield zero WindowLast, got %v", empty.WindowLast)
 	}
 }
+
+func TestAggregateShipsSubnetsBucket(t *testing.T) {
+	r := store.ScoreRecord{
+		LastSeen:    time.Now(),
+		Groups:      []string{"jo", "al"},
+		ReporterIDs: []string{"p1", "p2", "p3"},
+		SubnetsSeen: []string{"a", "b", "c"},
+	}
+	ev := AggregateFromRecord("203.0.113.7", r)
+	if ev.DiversityBuckets["subnets"] != 3 {
+		t.Errorf("subnets bucket = %d, want 3", ev.DiversityBuckets["subnets"])
+	}
+	// Names never leave the node — only the count.
+	// (Structural: EvidenceAggregate has no subnet-names field.)
+}

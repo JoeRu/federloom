@@ -17,6 +17,7 @@ func AggregateFromRecord(ip string, r store.ScoreRecord) proto.EvidenceAggregate
 		DiversityBuckets: map[string]int{
 			"groups":    len(r.Groups),
 			"reporters": len(r.ReporterIDs),
+			"subnets":   len(r.SubnetsSeen),
 		},
 		StrangersPresent: r.StrangerSeen,
 		EvidenceWeight:   1.0,
