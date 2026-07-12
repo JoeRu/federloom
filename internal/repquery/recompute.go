@@ -8,6 +8,11 @@ import (
 	"github.com/JoeRu/federloom/pkg/proto"
 )
 
+// maxEvidenceFolds bounds how many synthetic votes an EvidenceAggregate can
+// drive — the logistic score saturates within a handful, so a large attacker-
+// supplied "groups" count buys nothing but CPU. Cap it.
+const maxEvidenceFolds = 64
+
 // maxWeightScenario returns the scenario with the highest local weight (the vote
 // reason for the recompute). "" if scenarios is empty (weightFor("") = default).
 func maxWeightScenario(scenarios []string) string {
@@ -54,6 +59,12 @@ func RecordFromEvidence(ev proto.EvidenceAggregate, now time.Time, halfLife time
 	// stays length ≤ 1 either way (we never return it — the invariant).
 	folded := store.ScoreRecord{}
 	groups := ev.DiversityBuckets["groups"]
+	if groups > maxEvidenceFolds {
+		groups = maxEvidenceFolds
+	}
+	if groups < 0 {
+		groups = 0
+	}
 	for i := 0; i < groups; i++ {
 		folded = reputation.Accumulate(folded, reputation.Observation{
 			Reason: reason, ReporterID: "fed", Group: "fed", Trust: trust, Anchored: true,
@@ -65,9 +76,12 @@ func RecordFromEvidence(ev proto.EvidenceAggregate, now time.Time, halfLife time
 		}, ev.WindowLast, halfLife, strangerCap)
 	}
 
-	score := folded.Score
-	if !ev.WindowLast.IsZero() {
-		score = reputation.DecayScore(score, ev.WindowLast, now, halfLife)
+	score := reputation.DecayScore(folded.Score, ev.WindowLast, now, halfLife)
+	if score > 100 {
+		score = 100
+	}
+	if score < 0 {
+		score = 0
 	}
 
 	// Rebuild a record that carries the recomputed SCORE and provenance-safe

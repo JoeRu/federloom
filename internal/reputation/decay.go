@@ -14,6 +14,10 @@ func DecayScore(score float64, lastSeen, now time.Time, halfLife time.Duration) 
 	if score == 0 || halfLife <= 0 {
 		return score
 	}
-	elapsed := now.Sub(lastSeen).Seconds()
-	return score * math.Exp(-math.Log(2)*elapsed/halfLife.Seconds())
+	elapsed := now.Sub(lastSeen)
+	if elapsed < 0 {
+		elapsed = 0
+	}
+	elapsedSeconds := elapsed.Seconds()
+	return score * math.Exp(-math.Log(2)*elapsedSeconds/halfLife.Seconds())
 }

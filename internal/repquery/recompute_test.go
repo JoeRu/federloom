@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JoeRu/federloom/internal/store"
 	"github.com/JoeRu/federloom/pkg/proto"
 )
 
@@ -60,5 +61,77 @@ func TestRecordFromEvidenceNotFoundAndStrangerOnly(t *testing.T) {
 	}
 	if len(rec.Groups) != 0 {
 		t.Errorf("stranger-only must not add groups: %+v", rec.Groups)
+	}
+}
+
+// TestRecordFromEvidenceFoldCapBounds proves an attacker-supplied "groups"
+// bucket count can't drive an unbounded number of folds: a huge count must
+// return promptly and score identically to the capped value (maxEvidenceFolds).
+func TestRecordFromEvidenceFoldCapBounds(t *testing.T) {
+	now := time.Now().UTC()
+	base := proto.EvidenceAggregate{
+		IP:               "203.0.113.8",
+		Scenarios:        []string{"ssh-probe", "ssh-auth-success"},
+		WindowFirst:      now.Add(-time.Hour),
+		WindowLast:       now,
+		StrangersPresent: false,
+		EvidenceWeight:   1.0,
+	}
+
+	huge := base
+	huge.DiversityBuckets = map[string]int{"groups": 1_000_000}
+
+	capped := base
+	capped.DiversityBuckets = map[string]int{"groups": 64}
+
+	done := make(chan store.ScoreRecord, 1)
+	go func() {
+		done <- RecordFromEvidence(huge, now, 7*24*time.Hour, 15, 0.5)
+	}()
+	var recHuge store.ScoreRecord
+	select {
+	case recHuge = <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("RecordFromEvidence with groups=1_000_000 did not return promptly; fold cap not applied")
+	}
+
+	recCapped := RecordFromEvidence(capped, now, 7*24*time.Hour, 15, 0.5)
+
+	if recHuge.Score != recCapped.Score {
+		t.Errorf("groups=1_000_000 should score identically to capped groups=64: %v != %v", recHuge.Score, recCapped.Score)
+	}
+	// Groups-empty invariant still holds under the cap.
+	if len(recHuge.Groups) != 0 || recHuge.Corroboration != 0 || len(recHuge.ReporterIDs) != 0 {
+		t.Errorf("capped federated record leaked corroboration state: %+v", recHuge)
+	}
+}
+
+// TestRecordFromEvidenceClampsWeight proves EvidenceWeight is clamped to
+// [0,1] before it becomes trust: a weight >1 must not out-score weight==1,
+// and a negative weight must clamp to 0 (zero contribution from anchored
+// votes, so with no strangers present the score is 0).
+func TestRecordFromEvidenceClampsWeight(t *testing.T) {
+	now := time.Now().UTC()
+	mk := func(weight float64) proto.EvidenceAggregate {
+		return proto.EvidenceAggregate{
+			IP:               "203.0.113.9",
+			Scenarios:        []string{"ssh-probe", "ssh-auth-success"},
+			WindowFirst:      now.Add(-time.Hour),
+			WindowLast:       now,
+			DiversityBuckets: map[string]int{"groups": 3},
+			StrangersPresent: false,
+			EvidenceWeight:   weight,
+		}
+	}
+
+	recHigh := RecordFromEvidence(mk(5.0), now, 7*24*time.Hour, 15, 0.5)
+	recOne := RecordFromEvidence(mk(1.0), now, 7*24*time.Hour, 15, 0.5)
+	if recHigh.Score != recOne.Score {
+		t.Errorf("EvidenceWeight=5.0 should clamp to 1.0: %v != %v", recHigh.Score, recOne.Score)
+	}
+
+	recNeg := RecordFromEvidence(mk(-3.0), now, 7*24*time.Hour, 15, 0.5)
+	if recNeg.Score != 0 {
+		t.Errorf("EvidenceWeight=-3.0 should clamp to 0 trust and yield score 0, got %v", recNeg.Score)
 	}
 }
