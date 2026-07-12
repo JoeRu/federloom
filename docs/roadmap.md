@@ -62,6 +62,7 @@ DHT/bloom + materialise-on-verdict remain). Open: P1-2 (diversity), P1-3
 | B3 | Querier cache is unbounded (grows per distinct IP, incl. negatives); no in-flight de-dup (concurrent misses for the same IP each fan out). ✅ resolved — bounded cache + singleflight | Minor | E3 Task-4 review |
 | B4 | E3 MVP-approved simplifications to *replace*, not patch: raw cross-domain `ScoreEntry` merge (foreign score scale, §5.2 warning) and max-score combiner. ✅ resolved — replaced by EvidenceAggregate + local recompute | Accepted-MVP | E3 design §4/§6 |
 | B5 | Small polish: responder `Close()` vs `Reset()` on decode error; `SetDeadline` error swallowed; redundant explicit `Connect`; E1 strict lowest-hop re-scoring; E1 echo-suppression only single-bridge tested. ✅ resolved — Reset/deadline-log/peerstore-seeding; multi-bridge echo test added; lowest-hop re-scoring stays parked | Trivial | various reviews |
+| B6 | `RecordFromEvidence` (E2) does not cap the `Scenarios` slice / `DiversityBuckets` map size, unlike the `groups` fold-cap (`maxEvidenceFolds=64`) — a lying aggregator can force O(n) alloc + per-IP cache-memory amplification. Bounded by the stream deadline + defederation (matches the trusted-aggregator model). Cap after max-weight scenario selection when hardening the gossip-side import. | Low | E2 whole-branch review |
 
 ### C. Wire/protocol housekeeping
 
