@@ -397,3 +397,25 @@ func TestEffectiveQueryDefaults(t *testing.T) {
 		t.Errorf("EffectiveQueryCacheTTL = %v, want 2m", got)
 	}
 }
+
+func TestEffectiveDiversityRepeatFactor(t *testing.T) {
+	// Unset (<=0) → default 0.15.
+	if got := (&config.Config{}).EffectiveDiversityRepeatFactor(); got != 0.15 {
+		t.Errorf("default = %v, want 0.15", got)
+	}
+	// In-range value passes through.
+	c := &config.Config{}
+	c.Trust.DiversityRepeatFactor = 0.4
+	if got := c.EffectiveDiversityRepeatFactor(); got != 0.4 {
+		t.Errorf("in-range = %v, want 0.4", got)
+	}
+	// Out-of-range clamps to 1.0.
+	c.Trust.DiversityRepeatFactor = 2.5
+	if got := c.EffectiveDiversityRepeatFactor(); got != 1.0 {
+		t.Errorf("over-range = %v, want 1.0", got)
+	}
+	// Defaults() ships the documented default.
+	if got := config.Defaults().Trust.DiversityRepeatFactor; got != 0.15 {
+		t.Errorf("Defaults DiversityRepeatFactor = %v, want 0.15", got)
+	}
+}

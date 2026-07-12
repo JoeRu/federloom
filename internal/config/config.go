@@ -184,14 +184,15 @@ func (e EnforceConfig) EffectiveChains() []string {
 // docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md).
 // Every value is operator-overridable (Invariant 1).
 type TrustConfig struct {
-	AnchorsFile        string  `yaml:"anchors_file"`        // default <store.dir>/anchors.json
-	PersonKeyFile      string  `yaml:"person_key_file"`     // default <store.dir>/person.key
-	PeerCertFile       string  `yaml:"peer_cert_file"`      // default <store.dir>/peer.cert
-	AnchorWeight       float64 `yaml:"anchor_weight"`       // default weight for a newly anchored Person
-	StrangerWeight     float64 `yaml:"stranger_weight"`     // trust for un-vouched reporters
-	StrangerScoreCap   float64 `yaml:"stranger_score_cap"`  // max total score strangers add per IP
-	FederationDiscount float64 `yaml:"federation_discount"` // weight multiplier per hop for non-anchored reporters (default 0.5)
-	BlockedPeersFile   string  `yaml:"blocked_peers_file"`  // default <store.dir>/blocked-peers.json
+	AnchorsFile           string  `yaml:"anchors_file"`            // default <store.dir>/anchors.json
+	PersonKeyFile         string  `yaml:"person_key_file"`         // default <store.dir>/person.key
+	PeerCertFile          string  `yaml:"peer_cert_file"`          // default <store.dir>/peer.cert
+	AnchorWeight          float64 `yaml:"anchor_weight"`           // default weight for a newly anchored Person
+	StrangerWeight        float64 `yaml:"stranger_weight"`         // trust for un-vouched reporters
+	StrangerScoreCap      float64 `yaml:"stranger_score_cap"`      // max total score strangers add per IP
+	FederationDiscount    float64 `yaml:"federation_discount"`     // weight multiplier per hop for non-anchored reporters (default 0.5)
+	DiversityRepeatFactor float64 `yaml:"diversity_repeat_factor"` // weight of a repeat report from an already-counted subnet vs. a first-from-new-subnet report; lower = stronger diversity weighting (default 0.15)
+	BlockedPeersFile      string  `yaml:"blocked_peers_file"`      // default <store.dir>/blocked-peers.json
 }
 
 // ObservabilityConfig controls the optional observability plane (spec §11.2).
@@ -256,10 +257,11 @@ func Defaults() *Config {
 			},
 		},
 		Trust: TrustConfig{
-			AnchorWeight:       0.9,
-			StrangerWeight:     0.3,
-			StrangerScoreCap:   15,
-			FederationDiscount: 0.5,
+			AnchorWeight:          0.9,
+			StrangerWeight:        0.3,
+			StrangerScoreCap:      15,
+			FederationDiscount:    0.5,
+			DiversityRepeatFactor: 0.15,
 		},
 		Discovery: DiscoveryConfig{
 			Advertise: true,
@@ -379,4 +381,18 @@ func (c *Config) EffectiveQueryCacheTTL() time.Duration {
 		return 5 * time.Minute
 	}
 	return c.FederationQueryCacheTTL.Duration
+}
+
+// EffectiveDiversityRepeatFactor returns the subnet-diversity repeat weight,
+// defaulting to 0.15 when unset and clamping to (0,1]. A repeat report from a
+// subnet that already reported an IP is worth this fraction of a first report.
+func (c *Config) EffectiveDiversityRepeatFactor() float64 {
+	f := c.Trust.DiversityRepeatFactor
+	if f <= 0 {
+		return 0.15
+	}
+	if f > 1 {
+		return 1.0
+	}
+	return f
 }
