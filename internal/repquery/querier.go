@@ -12,6 +12,7 @@ import (
 
 	"golang.org/x/sync/singleflight"
 
+	"github.com/JoeRu/federloom/internal/store"
 	"github.com/JoeRu/federloom/pkg/proto"
 )
 
@@ -27,6 +28,10 @@ type Querier struct {
 	timeout     time.Duration
 	cacheTTL    time.Duration
 
+	halfLife           time.Duration
+	strangerCap        float64
+	federationDiscount float64
+
 	sf singleflight.Group
 
 	mu    sync.Mutex
@@ -34,27 +39,35 @@ type Querier struct {
 }
 
 type cacheEntry struct {
-	entry proto.ScoreEntry
+	entry store.ScoreRecord
 	ok    bool
 	at    time.Time
 }
 
 // NewQuerier builds a Querier. aggregators is the trusted set to ask; their
 // addresses are seeded into the host peerstore so NewStream can dial them
-// without an explicit Connect per query.
-func NewQuerier(h host.Host, aggregators []peer.AddrInfo, timeout, cacheTTL time.Duration) *Querier {
+// without an explicit Connect per query. halfLife/strangerCap/federationDiscount
+// are the CONSUMER's own reputation parameters, used to recompute each federated
+// EvidenceAggregate answer under local rules (§8).
+func NewQuerier(h host.Host, aggregators []peer.AddrInfo, timeout, cacheTTL time.Duration, halfLife time.Duration, strangerCap, federationDiscount float64) *Querier {
 	if h != nil {
 		for _, a := range aggregators {
 			h.Peerstore().AddAddrs(a.ID, a.Addrs, peerstore.PermanentAddrTTL)
 		}
 	}
-	return &Querier{host: h, aggregators: aggregators, timeout: timeout, cacheTTL: cacheTTL, cache: map[string]cacheEntry{}}
+	return &Querier{
+		host: h, aggregators: aggregators, timeout: timeout, cacheTTL: cacheTTL,
+		halfLife: halfLife, strangerCap: strangerCap, federationDiscount: federationDiscount,
+		cache: map[string]cacheEntry{},
+	}
 }
 
-// Query returns the merged (max-score) reputation for ip across aggregators.
-// ok is false if no aggregator returned a non-empty record. Cached by IP; a
-// negative result is cached for a fraction of the TTL to avoid hammering.
-func (q *Querier) Query(ctx context.Context, ip string) (proto.ScoreEntry, bool) {
+// Query returns the merged (max-score) reputation for ip across aggregators,
+// each aggregator's EvidenceAggregate recomputed into a ScoreRecord under the
+// consumer's own parameters. ok is false if no aggregator returned a
+// non-empty record. Cached by IP; a negative result is cached for a fraction
+// of the TTL to avoid hammering.
+func (q *Querier) Query(ctx context.Context, ip string) (store.ScoreRecord, bool) {
 	now := time.Now()
 	q.mu.Lock()
 	if c, hit := q.cache[ip]; hit {
@@ -70,7 +83,7 @@ func (q *Querier) Query(ctx context.Context, ip string) (proto.ScoreEntry, bool)
 	q.mu.Unlock()
 
 	type qres struct {
-		entry proto.ScoreEntry
+		entry store.ScoreRecord
 		ok    bool
 	}
 	v, _, _ := q.sf.Do(ip, func() (interface{}, error) {
@@ -87,25 +100,26 @@ func (q *Querier) Query(ctx context.Context, ip string) (proto.ScoreEntry, bool)
 	return r.entry, r.ok
 }
 
-// fanout asks every aggregator concurrently within the timeout and merges by max score.
-func (q *Querier) fanout(ctx context.Context, ip string) (proto.ScoreEntry, bool) {
+// fanout asks every aggregator concurrently within the timeout, recomputes
+// each returned EvidenceAggregate into a ScoreRecord under the consumer's own
+// parameters, and merges by max recomputed score.
+func (q *Querier) fanout(ctx context.Context, ip string) (store.ScoreRecord, bool) {
 	qctx, cancel := context.WithTimeout(ctx, q.timeout)
 	defer cancel()
 
 	type res struct {
-		e  proto.ScoreEntry
+		ev proto.EvidenceAggregate
 		ok bool
 	}
 	ch := make(chan res, len(q.aggregators))
 	for _, agg := range q.aggregators {
 		go func(a peer.AddrInfo) {
-			e, ok := q.ask(qctx, a, ip)
-			ch <- res{e, ok}
+			ev, ok := q.ask(qctx, a, ip)
+			ch <- res{ev, ok}
 		}(agg)
 	}
 
-	var merged proto.ScoreEntry
-	merged.IP = ip
+	var best store.ScoreRecord
 	found := false
 	reasons := map[string]bool{}
 collect:
@@ -115,37 +129,37 @@ collect:
 			if !r.ok {
 				continue
 			}
-			// Copy scalar/meta fields on the first found answer or a strictly
-			// higher score. Gating only on "> merged.Score" from a zero start
-			// would drop a known-but-clean answer (Score 0, LastSeen set),
-			// leaving a zero LastSeen that reads as the "not found" sentinel.
-			if !found || r.e.Score > merged.Score {
-				merged.Score = r.e.Score
-				merged.Corroboration = r.e.Corroboration
-				merged.FirstSeen = r.e.FirstSeen
-				merged.LastSeen = r.e.LastSeen
+			rec := RecordFromEvidence(r.ev, time.Now(), q.halfLife, q.strangerCap, q.federationDiscount)
+			if rec.LastSeen.IsZero() {
+				continue
 			}
-			found = true
-			for _, rs := range r.e.Reasons {
+			for _, rs := range rec.Reasons {
 				reasons[rs] = true
 			}
+			if !found || rec.Score > best.Score {
+				best = rec
+			}
+			found = true
 		case <-qctx.Done():
 			// Deadline hit: return whatever answered in time rather than
 			// blocking on a straggler that may never send.
 			break collect
 		}
 	}
-	for rs := range reasons {
-		merged.Reasons = append(merged.Reasons, rs)
+	if found {
+		best.Reasons = best.Reasons[:0]
+		for rs := range reasons {
+			best.Reasons = append(best.Reasons, rs)
+		}
 	}
-	return merged, found
+	return best, found
 }
 
 // ask opens a stream to one aggregator, sends the query, reads the answer.
-func (q *Querier) ask(ctx context.Context, a peer.AddrInfo, ip string) (proto.ScoreEntry, bool) {
+func (q *Querier) ask(ctx context.Context, a peer.AddrInfo, ip string) (proto.EvidenceAggregate, bool) {
 	s, err := q.host.NewStream(ctx, a.ID, ProtocolID)
 	if err != nil {
-		return proto.ScoreEntry{}, false
+		return proto.EvidenceAggregate{}, false
 	}
 	defer s.Close()
 	// The context bounds dial + protocol negotiation only; set a stream
@@ -154,17 +168,17 @@ func (q *Querier) ask(ctx context.Context, a peer.AddrInfo, ip string) (proto.Sc
 		_ = s.SetDeadline(dl)
 	}
 	if err := json.NewEncoder(s).Encode(proto.RepQuery{IP: ip}); err != nil {
-		return proto.ScoreEntry{}, false
+		return proto.EvidenceAggregate{}, false
 	}
-	var e proto.ScoreEntry
-	if err := json.NewDecoder(s).Decode(&e); err != nil {
-		return proto.ScoreEntry{}, false
+	var ev proto.EvidenceAggregate
+	if err := json.NewDecoder(s).Decode(&ev); err != nil {
+		return proto.EvidenceAggregate{}, false
 	}
-	// Empty answer (LastSeen zero) means the aggregator has no record.
-	if e.LastSeen.IsZero() {
-		return proto.ScoreEntry{}, false
+	// Empty answer (WindowLast zero) means the aggregator has no record.
+	if ev.WindowLast.IsZero() {
+		return proto.EvidenceAggregate{}, false
 	}
-	return e, true
+	return ev, true
 }
 
 // evictLocked drops expired entries first, then the single oldest if still at

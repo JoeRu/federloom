@@ -30,7 +30,7 @@ func TestFederatedLookupFetchesFromAggregator(t *testing.T) {
 	}
 	defer bHost.Close()
 	repquery.RegisterResponder(bHost, storeStub{m: map[string]store.ScoreRecord{
-		"203.0.113.9": {Score: 92, Corroboration: 4, LastSeen: time.Now()},
+		"203.0.113.9": {Score: 92, Corroboration: 4, Groups: []string{"p1", "p2"}, LastSeen: time.Now()},
 	}}, allowAllAuth{})
 
 	// Querier A: empty local store, B configured as aggregator.
@@ -39,16 +39,16 @@ func TestFederatedLookupFetchesFromAggregator(t *testing.T) {
 		t.Fatalf("aHost: %v", err)
 	}
 	defer aHost.Close()
-	q := repquery.NewQuerier(aHost, []peer.AddrInfo{{ID: bHost.ID(), Addrs: bHost.Addrs()}}, 2*time.Second, time.Minute)
+	q := repquery.NewQuerier(aHost, []peer.AddrInfo{{ID: bHost.ID(), Addrs: bHost.Addrs()}}, 2*time.Second, time.Minute, 7*24*time.Hour, 15, 0.5)
 	resolver := repquery.NewResolver(storeStub{m: map[string]store.ScoreRecord{}}, q)
 
-	// A resolves an IP it does not hold → fetched from B.
+	// A resolves an IP it does not hold → fetched from B, recomputed under A's own parameters.
 	rec, err := resolver.GetScore("203.0.113.9")
 	if err != nil {
 		t.Fatalf("GetScore: %v", err)
 	}
-	if rec.LastSeen.IsZero() || rec.Score != 92 {
-		t.Errorf("federated lookup = %+v, want score 92", rec)
+	if rec.LastSeen.IsZero() || rec.Score <= 0 {
+		t.Errorf("federated lookup = %+v, want a positive recomputed score with non-zero LastSeen", rec)
 	}
 
 	// An IP nobody has → empty.

@@ -161,7 +161,8 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		if len(aggs) == 0 {
 			log.Printf("node: federation_aggregators set but none parsed to a valid peer; federated query disabled")
 		} else {
-			q := repquery.NewQuerier(t.Host(), aggs, cfg.EffectiveQueryTimeout(), cfg.EffectiveQueryCacheTTL())
+			q := repquery.NewQuerier(t.Host(), aggs, cfg.EffectiveQueryTimeout(), cfg.EffectiveQueryCacheTTL(),
+				halfLife, cfg.Trust.StrangerScoreCap, cfg.Trust.FederationDiscount)
 			resolver = repquery.NewResolver(s, q)
 		}
 	}

@@ -13,7 +13,7 @@ import (
 )
 
 // ProtocolID is the libp2p stream protocol for on-demand reputation queries.
-const ProtocolID = "/federloom/repquery/v1"
+const ProtocolID = "/federloom/repquery/v2"
 
 // responderStreamTimeout bounds a single query exchange (read request +
 // write answer). A peer that opens a stream and stalls cannot pin the
@@ -35,7 +35,7 @@ type Authorizer interface {
 }
 
 // RegisterResponder installs the stream handler on h. Each stream is one
-// RepQuery → one ScoreEntry, then closed. Read-only. Only peers authorized
+// RepQuery → one EvidenceAggregate, then closed. Read-only. Only peers authorized
 // by auth are answered; unauthorized streams are reset before the request
 // is read (fail closed: a nil auth rejects everyone).
 func RegisterResponder(h host.Host, s Store, auth Authorizer) {
@@ -71,9 +71,9 @@ func RegisterResponder(h host.Host, s Store, auth Authorizer) {
 			log.Printf("repquery: store error for %s: %v", q.IP, err)
 			return
 		}
-		// Empty record → empty ScoreEntry (LastSeen zero) means "not found".
-		if err := json.NewEncoder(str).Encode(EntryFromRecord(q.IP, rec)); err != nil {
-			log.Printf("repquery: write answer for %s: %v", q.IP, err)
+		// Empty record → EvidenceAggregate with zero WindowLast means "not found".
+		if err := json.NewEncoder(str).Encode(AggregateFromRecord(q.IP, rec)); err != nil {
+			log.Printf("repquery: write answer for %s: %v", peerID, err)
 		}
 	})
 }

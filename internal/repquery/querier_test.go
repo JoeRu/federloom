@@ -16,6 +16,15 @@ import (
 	"github.com/JoeRu/federloom/internal/store"
 )
 
+// testHalfLife/testStrangerCap/testFederationDiscount are the fixed recompute
+// parameters every NewQuerier call in this file passes, so a querier answer
+// is a deterministic function of the aggregator's advertised evidence.
+const (
+	testHalfLife           = 7 * 24 * time.Hour
+	testStrangerCap        = 15.0
+	testFederationDiscount = 0.5
+)
+
 func TestQuerierFetchesAndCaches(t *testing.T) {
 	ctx := context.Background()
 	// Aggregator host with a responder holding IP X.
@@ -24,7 +33,7 @@ func TestQuerierFetchesAndCaches(t *testing.T) {
 		t.Fatalf("agg: %v", err)
 	}
 	defer agg.Close()
-	counter := &countStore{ip: "9.9.9.9", rec: store.ScoreRecord{Score: 70, Corroboration: 1, LastSeen: time.Now()}}
+	counter := &countStore{ip: "9.9.9.9", rec: store.ScoreRecord{Score: 70, Corroboration: 1, Groups: []string{"p1", "p2"}, LastSeen: time.Now()}}
 	RegisterResponder(agg, counter, fakeAuth{anchored: true})
 
 	client, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
@@ -33,11 +42,11 @@ func TestQuerierFetchesAndCaches(t *testing.T) {
 	}
 	defer client.Close()
 
-	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 2*time.Second, time.Minute)
+	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 2*time.Second, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount)
 
-	e, ok := q.Query(ctx, "9.9.9.9")
-	if !ok || e.Score != 70 {
-		t.Fatalf("Query = %+v ok=%v, want score 70 ok true", e, ok)
+	rec, ok := q.Query(ctx, "9.9.9.9")
+	if !ok || rec.Score <= 0 || rec.LastSeen.IsZero() {
+		t.Fatalf("Query = %+v ok=%v, want a positive recomputed score with non-zero LastSeen", rec, ok)
 	}
 	// Second query within TTL must hit the cache (no new responder call).
 	before := counter.callCount()
@@ -79,7 +88,7 @@ func TestQuerierTimeoutDoesNotHang(t *testing.T) {
 	}
 	defer client.Close()
 
-	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 200*time.Millisecond, time.Minute)
+	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 200*time.Millisecond, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount)
 
 	done := make(chan struct{})
 	var gotOK bool
@@ -107,7 +116,7 @@ func TestQuerierPreservesScoreZeroAnswer(t *testing.T) {
 		t.Fatalf("agg: %v", err)
 	}
 	defer agg.Close()
-	RegisterResponder(agg, &countStore{ip: "7.7.7.7", rec: store.ScoreRecord{Score: 0, Corroboration: 2, LastSeen: time.Now()}}, fakeAuth{anchored: true})
+	RegisterResponder(agg, &countStore{ip: "7.7.7.7", rec: store.ScoreRecord{Score: 0, Corroboration: 2, ReporterIDs: []string{"peer1"}, LastSeen: time.Now()}}, fakeAuth{anchored: true})
 
 	client, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
 	if err != nil {
@@ -115,16 +124,16 @@ func TestQuerierPreservesScoreZeroAnswer(t *testing.T) {
 	}
 	defer client.Close()
 
-	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 2*time.Second, time.Minute)
-	e, ok := q.Query(ctx, "7.7.7.7")
+	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 2*time.Second, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount)
+	rec, ok := q.Query(ctx, "7.7.7.7")
 	if !ok {
 		t.Fatal("known-but-clean answer (score 0) should return ok=true")
 	}
-	if e.LastSeen.IsZero() {
-		t.Errorf("score-0 answer lost its fields: LastSeen is zero, got %+v", e)
-	}
-	if e.Corroboration != 2 {
-		t.Errorf("score-0 answer lost Corroboration: got %d want 2", e.Corroboration)
+	// A federated answer never carries Corroboration (invariant: recompute
+	// never manufactures anchored corroboration) — the real check here is that
+	// a known-but-clean IP is not lost as a "not found" (zero LastSeen).
+	if rec.LastSeen.IsZero() {
+		t.Errorf("score-0 answer lost its fields: LastSeen is zero, got %+v", rec)
 	}
 }
 
@@ -134,7 +143,7 @@ func TestQuerierCacheBounded(t *testing.T) {
 	defer func() { maxCacheEntries = old }()
 
 	// No aggregators: every Query is an instant negative, exercising only the cache.
-	q := NewQuerier(nil, nil, 100*time.Millisecond, time.Minute)
+	q := NewQuerier(nil, nil, 100*time.Millisecond, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount)
 	ips := []string{"10.0.0.1", "10.0.0.2", "10.0.0.3", "10.0.0.4", "10.0.0.5"}
 	for _, ip := range ips {
 		q.Query(context.Background(), ip)
@@ -181,7 +190,7 @@ func TestQuerierSingleflight(t *testing.T) {
 		t.Fatalf("agg: %v", err)
 	}
 	defer agg.Close()
-	counter := &countStore{ip: "6.6.6.6", rec: store.ScoreRecord{Score: 60, LastSeen: time.Now()}}
+	counter := &countStore{ip: "6.6.6.6", rec: store.ScoreRecord{Score: 60, Groups: []string{"p1"}, LastSeen: time.Now()}}
 	RegisterResponder(agg, counter, fakeAuth{anchored: true})
 
 	client, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
@@ -190,14 +199,14 @@ func TestQuerierSingleflight(t *testing.T) {
 	}
 	defer client.Close()
 
-	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 2*time.Second, time.Minute)
+	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 2*time.Second, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount)
 
 	var wg sync.WaitGroup
 	for i := 0; i < 8; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if _, ok := q.Query(ctx, "6.6.6.6"); !ok {
+			if rec, ok := q.Query(ctx, "6.6.6.6"); !ok || rec.Score <= 0 {
 				t.Error("concurrent query lost the answer")
 			}
 		}()

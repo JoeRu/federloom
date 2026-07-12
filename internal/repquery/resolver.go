@@ -30,8 +30,8 @@ func (r *Resolver) GetScore(ip string) (store.ScoreRecord, error) {
 	if !rec.LastSeen.IsZero() || r.q == nil {
 		return rec, nil // local hit, or federation disabled
 	}
-	if e, ok := r.q.Query(context.Background(), ip); ok {
-		return RecordFromEntry(e), nil
+	if rec2, ok := r.q.Query(context.Background(), ip); ok {
+		return rec2, nil
 	}
 	return rec, nil // federated miss → the (empty) local record
 }

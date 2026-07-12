@@ -63,7 +63,7 @@ func TestNodeWiringFederatesBothReadSurfaces(t *testing.T) {
 	}
 	defer bHost.Close()
 	repquery.RegisterResponder(bHost, wiringStoreStub{m: map[string]store.ScoreRecord{
-		"203.0.113.9": {Score: 91, Corroboration: 3, LastSeen: time.Now()},
+		"203.0.113.9": {Score: 91, Corroboration: 3, Groups: []string{"p1", "p2", "p3"}, LastSeen: time.Now()},
 	}}, allowAllAuth{})
 
 	if len(bHost.Addrs()) == 0 {
@@ -93,8 +93,8 @@ func TestNodeWiringFederatesBothReadSurfaces(t *testing.T) {
 	if err != nil {
 		t.Fatalf("api.PointLookupForTest: %v", err)
 	}
-	if apiRec.Score != 91 || apiRec.LastSeen.IsZero() {
-		t.Errorf("api surface: got %+v, want Score 91 with non-zero LastSeen (resolver not wired into api.Server)", apiRec)
+	if apiRec.Score <= 0 || apiRec.LastSeen.IsZero() {
+		t.Errorf("api surface: got %+v, want a positive recomputed Score with non-zero LastSeen (resolver not wired into api.Server)", apiRec)
 	}
 
 	// DNSBL surface.
@@ -102,8 +102,8 @@ func TestNodeWiringFederatesBothReadSurfaces(t *testing.T) {
 	if err != nil {
 		t.Fatalf("dnsbl.LookupForTest: %v", err)
 	}
-	if dnsblRec.Score != 91 {
-		t.Errorf("dnsbl surface: got %+v, want Score 91 (resolver not wired into dnsbl.Server)", dnsblRec)
+	if dnsblRec.Score <= 0 || dnsblRec.LastSeen.IsZero() {
+		t.Errorf("dnsbl surface: got %+v, want a positive recomputed Score with non-zero LastSeen (resolver not wired into dnsbl.Server)", dnsblRec)
 	}
 
 	// --- Control node A2: federation OFF, must stay local-only. ---
@@ -175,7 +175,15 @@ func TestResponderServeRoleAuthz(t *testing.T) {
 	}
 	defer n.CloseStores()
 
-	// Anchored client: stream completes, decodes an (empty) ScoreEntry.
+	// Seed a known record directly in the node's store so the anchored query
+	// below exercises a real answer, not just "stream didn't error".
+	if err := n.store.PutScore("203.0.113.50", store.ScoreRecord{
+		Score: 77, Corroboration: 1, Groups: []string{"p1"}, LastSeen: time.Now(),
+	}, time.Hour); err != nil {
+		t.Fatalf("seed score: %v", err)
+	}
+
+	// Anchored client: stream completes, decodes a real EvidenceAggregate.
 	if err := client.Connect(ctx, peer.AddrInfo{ID: tr.Host().ID(), Addrs: tr.Host().Addrs()}); err != nil {
 		t.Fatalf("connect: %v", err)
 	}
@@ -186,9 +194,12 @@ func TestResponderServeRoleAuthz(t *testing.T) {
 	if err := json.NewEncoder(s).Encode(proto.RepQuery{IP: "203.0.113.50"}); err != nil {
 		t.Fatalf("encode: %v", err)
 	}
-	var e proto.ScoreEntry
-	if err := json.NewDecoder(s).Decode(&e); err != nil {
+	var ev proto.EvidenceAggregate
+	if err := json.NewDecoder(s).Decode(&ev); err != nil {
 		t.Fatalf("anchored client should get an answer, got: %v", err)
+	}
+	if ev.WindowLast.IsZero() {
+		t.Errorf("anchored client got an empty answer for a known IP: %+v", ev)
 	}
 	_ = s.Close()
 
@@ -206,9 +217,9 @@ func TestResponderServeRoleAuthz(t *testing.T) {
 		t.Fatalf("stranger newstream: %v", err)
 	}
 	_ = json.NewEncoder(s2).Encode(proto.RepQuery{IP: "203.0.113.50"})
-	var e2 proto.ScoreEntry
-	if err := json.NewDecoder(s2).Decode(&e2); err == nil {
-		t.Errorf("stranger should be reset, got answer %+v", e2)
+	var ev2 proto.EvidenceAggregate
+	if err := json.NewDecoder(s2).Decode(&ev2); err == nil {
+		t.Errorf("stranger should be reset, got answer %+v", ev2)
 	}
 	_ = s2.Close()
 }

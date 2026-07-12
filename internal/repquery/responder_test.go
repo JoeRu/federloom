@@ -28,7 +28,7 @@ func (f fakeStore) GetScore(ip string) (store.ScoreRecord, error) {
 	return store.ScoreRecord{}, nil
 }
 
-func TestResponderServesLocalScore(t *testing.T) {
+func TestResponderServesLocalEvidence(t *testing.T) {
 	ctx := context.Background()
 	h1, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
 	if err != nil {
@@ -41,7 +41,8 @@ func TestResponderServesLocalScore(t *testing.T) {
 	}
 	defer h2.Close()
 
-	RegisterResponder(h1, fakeStore{ip: "1.2.3.4", rec: store.ScoreRecord{Score: 88, Corroboration: 2, LastSeen: time.Now()}}, fakeAuth{anchored: true})
+	rec := store.ScoreRecord{Score: 88, Corroboration: 2, ReporterIDs: []string{"peer1", "peer2"}, LastSeen: time.Now()}
+	RegisterResponder(h1, fakeStore{ip: "1.2.3.4", rec: rec}, fakeAuth{anchored: true})
 
 	if err := h2.Connect(ctx, peer.AddrInfo{ID: h1.ID(), Addrs: h1.Addrs()}); err != nil {
 		t.Fatalf("connect: %v", err)
@@ -54,12 +55,15 @@ func TestResponderServesLocalScore(t *testing.T) {
 	if err := json.NewEncoder(s).Encode(proto.RepQuery{IP: "1.2.3.4"}); err != nil {
 		t.Fatalf("encode: %v", err)
 	}
-	var e proto.ScoreEntry
-	if err := json.NewDecoder(s).Decode(&e); err != nil {
+	var ev proto.EvidenceAggregate
+	if err := json.NewDecoder(s).Decode(&ev); err != nil {
 		t.Fatalf("decode: %v", err)
 	}
-	if e.IP != "1.2.3.4" || e.Score != 88 {
-		t.Errorf("responder answer = %+v, want IP 1.2.3.4 score 88", e)
+	if ev.IP != "1.2.3.4" || ev.WindowLast.IsZero() {
+		t.Errorf("responder answer = %+v, want IP 1.2.3.4 with non-zero WindowLast", ev)
+	}
+	if ev.DiversityBuckets["reporters"] != len(rec.ReporterIDs) {
+		t.Errorf("DiversityBuckets[reporters] = %d, want %d", ev.DiversityBuckets["reporters"], len(rec.ReporterIDs))
 	}
 }
 
@@ -89,12 +93,12 @@ func TestResponderUnknownIPIsEmpty(t *testing.T) {
 	if err := json.NewEncoder(s).Encode(proto.RepQuery{IP: "8.8.8.8"}); err != nil {
 		t.Fatalf("encode: %v", err)
 	}
-	var e proto.ScoreEntry
-	if err := json.NewDecoder(s).Decode(&e); err != nil {
+	var ev proto.EvidenceAggregate
+	if err := json.NewDecoder(s).Decode(&ev); err != nil {
 		t.Fatalf("decode: %v", err)
 	}
-	if !e.LastSeen.IsZero() {
-		t.Errorf("unknown IP should return empty entry, got LastSeen=%v", e.LastSeen)
+	if !ev.WindowLast.IsZero() {
+		t.Errorf("unknown IP should return empty aggregate, got WindowLast=%v", ev.WindowLast)
 	}
 }
 
@@ -163,7 +167,7 @@ func (f fakeAuth) IsBlocked(string) bool                  { return f.blocked }
 
 // queryOnce opens a stream to h1 from h2, sends a RepQuery for ip and returns
 // the decode result of the answer.
-func queryOnce(t *testing.T, ctx context.Context, h2 host.Host, id peer.ID, addrs []multiaddr.Multiaddr, ip string) (proto.ScoreEntry, error) {
+func queryOnce(t *testing.T, ctx context.Context, h2 host.Host, id peer.ID, addrs []multiaddr.Multiaddr, ip string) (proto.EvidenceAggregate, error) {
 	t.Helper()
 	if err := h2.Connect(ctx, peer.AddrInfo{ID: id, Addrs: addrs}); err != nil {
 		t.Fatalf("connect: %v", err)
@@ -176,14 +180,14 @@ func queryOnce(t *testing.T, ctx context.Context, h2 host.Host, id peer.ID, addr
 	if err := json.NewEncoder(s).Encode(proto.RepQuery{IP: ip}); err != nil {
 		t.Fatalf("encode: %v", err)
 	}
-	var e proto.ScoreEntry
-	err = json.NewDecoder(s).Decode(&e)
-	return e, err
+	var ev proto.EvidenceAggregate
+	err = json.NewDecoder(s).Decode(&ev)
+	return ev, err
 }
 
 func TestResponderAuthorization(t *testing.T) {
 	ctx := context.Background()
-	rec := store.ScoreRecord{Score: 88, Corroboration: 2, LastSeen: time.Now()}
+	rec := store.ScoreRecord{Score: 88, Corroboration: 2, ReporterIDs: []string{"peer1"}, LastSeen: time.Now()}
 
 	cases := []struct {
 		name    string
@@ -209,18 +213,21 @@ func TestResponderAuthorization(t *testing.T) {
 			defer h2.Close()
 			RegisterResponder(h1, fakeStore{ip: "1.2.3.4", rec: rec}, tc.auth)
 
-			e, err := queryOnce(t, ctx, h2, h1.ID(), h1.Addrs(), "1.2.3.4")
+			ev, err := queryOnce(t, ctx, h2, h1.ID(), h1.Addrs(), "1.2.3.4")
 			if tc.wantErr {
 				if err == nil {
-					t.Errorf("expected reset/decode error for unauthorized peer, got answer %+v", e)
+					t.Errorf("expected reset/decode error for unauthorized peer, got answer %+v", ev)
 				}
 				return
 			}
 			if err != nil {
 				t.Fatalf("authorized query failed: %v", err)
 			}
-			if e.Score != 88 {
-				t.Errorf("answer score = %v, want 88", e.Score)
+			if ev.WindowLast.IsZero() {
+				t.Errorf("answer WindowLast is zero, want a real answer for a known IP")
+			}
+			if ev.DiversityBuckets["reporters"] < 1 {
+				t.Errorf("answer DiversityBuckets[reporters] = %d, want >= 1", ev.DiversityBuckets["reporters"])
 			}
 		})
 	}
