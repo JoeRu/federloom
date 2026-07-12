@@ -281,6 +281,14 @@ your own threshold decides "listed". The DNSBL/API stay on the private interface
 the query itself rides authenticated libp2p. Push-to-firewall (L3) is unchanged;
 the blocklist *list* endpoint is never federated (point lookups only).
 
+**What the answer is:** an aggregator returns an *evidence aggregate*
+(distinct-reporter counts per bucket, scenarios, window) — never a finished
+score. Your node **recomputes** the score locally from that evidence using
+your own weight table, stranger cap, half-life, and `federation_discount`
+(which doubles as the evidence-import discount). A federated answer never
+carries anchored corroboration, so it can raise a DNSBL/API score (advisory,
+against your threshold) but can never force a block.
+
 **Serving queries (no config needed):** every federated node (i.e. with a
 transport) answers `/federloom/repquery/v1` queries — but only from peers
 that are **anchored** in its trust store and **not** on its `blocked_peers`

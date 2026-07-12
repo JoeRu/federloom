@@ -572,11 +572,11 @@ Honest status of each design area in the current codebase. This table — not th
 | §4.4 | Dispute / anti-trust votes | — | PLANNED (E) |
 | §4.5 | Applicability weighting | — | PLANNED (E) |
 | §5.1 | Trust anchors (Person keys, peer certs) | `internal/trust`, `internal/identity` | DONE |
-| §5.2 | Federation import / discount / origin-trace | `internal/node`, `internal/transport`, `internal/trust` | PARTIAL — subnet-bridge forwarding makes origin-trace + per-hop discount active (E1); evidence-aggregate import PLANNED (E2) |
+| §5.2 | Federation import / discount / origin-trace | `internal/node`, `internal/transport`, `internal/repquery` | PARTIAL — origin-trace + per-hop discount (E1); evidence import via query path DONE (E2); gossip-side evidence import PLANNED |
 | §7.1 | Event model | `pkg/proto` | DONE — `port_class` deprecated-retained |
 | §7.1 | IPv6 `/64` prefix normalization | `internal/netutil`, `internal/node`, `internal/enforce` | DONE |
-| §7.2 | ScoreEntry aggregate | `pkg/proto`, `internal/repquery` | DONE — exchanged as the on-demand query answer (E3) |
-| §7.5 | EvidenceAggregate (federated import type) | — | PLANNED (E) |
+| §7.2 | ScoreEntry aggregate | `pkg/proto` | RESERVED — replaced by EvidenceAggregate (E2); slated for C1 removal |
+| §7.5 | EvidenceAggregate (federated import type) | `pkg/proto`, `internal/repquery` | DONE — the on-demand query answer, recomputed locally (E2) |
 | §7.6 | System profile / SBOM | — | PLANNED (E) |
 | §8 | Score dynamics (logistic accumulation, decay) | `internal/reputation`, `internal/rules` | DONE |
 | §9 | GDPR framing (cleartext IP, decay = deletion) | `internal/store` (TTL) | DONE |

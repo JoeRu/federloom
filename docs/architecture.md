@@ -39,12 +39,12 @@ enforcement set is thousands of IPs, not millions. **Decay** bounds the store an
 serves as GDPR storage limitation.
 
 > **Current status (2026-07):** the running system push-replicates every event
-> over gossipsub; the on-demand DHT query model and `EvidenceAggregate` import
-> are the *target*, not yet implemented (see spec traceability table §7.5/§11.4).
+> over gossipsub; the on-demand DHT query model and materialize-on-verdict are the
+> *target* (E2 `EvidenceAggregate` import via query path is DONE; see spec traceability table §7.5/§11.4).
 
 ## Reputation: push enforcement path vs query read path
 
-Reputation has two paths: a **push** path where locally-sourced scoring events flow to the firewall (control plane → data plane, L3, engine to ipset, unchanged), and a **query** read path where DNSBL/API lookups miss the local store and consult federated aggregators on-demand over authenticated libp2p. The query path is read-only and advisory — scores feed the operator's own threshold to decide listing. This MVP (E3) ships the query read path; materialise-on-verdict (flowing federated answers back into firewall decisions) lands with E2's scale-free evidence model.
+Reputation has two paths: a **push** path where locally-sourced scoring events flow to the firewall (control plane → data plane, L3, engine to ipset, unchanged), and a **query** read path where DNSBL/API lookups miss the local store and consult federated aggregators on-demand over authenticated libp2p. The query path transports **evidence** (reporter diversity counts per IP) that your node recomputes into a score under your own rules, not foreign scores. The query path is read-only and advisory — the recomputed score feeds the operator's own threshold to decide listing. E3 shipped the query read path with opaque scores; E2 replaced that with scale-free evidence aggregates (federated answers never carry anchored corroboration, so they can raise an advisory score but cannot force a block). Materialise-on-verdict (flowing federated verdicts back into firewall decisions) is the next step.
 
 ## Federation (Mastodon model)
 

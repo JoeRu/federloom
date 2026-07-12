@@ -45,7 +45,7 @@ DHT/bloom + materialise-on-verdict remain). Open: P1-2 (diversity), P1-3
 
 | # | Item | Spec | Critique |
 |---|---|---|---|
-| A1 | `EvidenceAggregate` federated import + scale-free local recompute + attested `diversity_buckets` | §5.2, §7.5, §8 | P1-1 core |
+| A1 | `EvidenceAggregate` federated import + scale-free local recompute + attested `diversity_buckets`. ✅ resolved | §5.2, §7.5, §8 | P1-1 core |
 | A2 | Diversity-weighted corroboration (ASN/geo buckets) | §4.2 | P1-2 |
 | A3 | Dispute / anti-trust votes (the `Disputes` field is on the wire but never populated) | §4.4 | P1-3 |
 | A4 | Applicability weighting / system profile (SBOM matchmaker) | §4.5, §7.6 | P1-6 |
@@ -60,14 +60,14 @@ DHT/bloom + materialise-on-verdict remain). Open: P1-2 (diversity), P1-3
 | B1 | **Responder answers *any* peer**: `/federloom/repquery/v1` is registered on the shared transport host with no aggregator/subnet authorization. Enabling `federation_aggregators` (client role) silently makes the node an unauthenticated reputation oracle for the swarm. Stream deadline (shipped) bounds slowloris, but authorization is required **before the protocol is exposed beyond explicitly trusted peers**. ✅ resolved — trust-store authz, fail closed | Important | E3 whole-branch review |
 | B2 | `OriginTrace` is unsigned — a malicious relay can under-report hop count to reduce the federation discount. Bounded by the stranger-block backstop + dedup + decay. | Minor (advisory) | E1 final re-review |
 | B3 | Querier cache is unbounded (grows per distinct IP, incl. negatives); no in-flight de-dup (concurrent misses for the same IP each fan out). ✅ resolved — bounded cache + singleflight | Minor | E3 Task-4 review |
-| B4 | E3 MVP-approved simplifications to *replace*, not patch: raw cross-domain `ScoreEntry` merge (foreign score scale, §5.2 warning) and max-score combiner. Resolved by design when A1 lands. | Accepted-MVP | E3 design §4/§6 |
+| B4 | E3 MVP-approved simplifications to *replace*, not patch: raw cross-domain `ScoreEntry` merge (foreign score scale, §5.2 warning) and max-score combiner. ✅ resolved — replaced by EvidenceAggregate + local recompute | Accepted-MVP | E3 design §4/§6 |
 | B5 | Small polish: responder `Close()` vs `Reset()` on decode error; `SetDeadline` error swallowed; redundant explicit `Connect`; E1 strict lowest-hop re-scoring; E1 echo-suppression only single-bridge tested. ✅ resolved — Reset/deadline-log/peerstore-seeding; multi-bridge echo test added; lowest-hop re-scoring stays parked | Trivial | various reviews |
 
 ### C. Wire/protocol housekeeping
 
 | # | Item |
 |---|---|
-| C1 | `port_class` is deprecated-retained in `pkg/proto` (P2-1). Removal is a breaking wire change — bundle into the next protocol version bump (`federloom/events/v1`), ideally together with signing `OriginTrace` (B2), so the network pays for one migration, not two. |
+| C1 | `port_class` and `ScoreEntry` are deprecated-retained in `pkg/proto` (P2-1). Removal is a breaking wire change — bundle into the next protocol version bump (`federloom/events/v1`), ideally together with signing `OriginTrace` (B2), so the network pays for one migration, not two. |
 | C2 | Spec §13 "Next Steps" is stale again (items 5, 8, 10, 11, 15, 17 are done or superseded). Point it at this roadmap. ✅ done 2026-07-10 (superseded-note added; spec translated to English) |
 
 ---
@@ -92,7 +92,7 @@ evict expired→oldest) + singleflight de-dup + peerstore seeding replacing
 the per-ask `Connect`. B5 folded in; multi-bridge echo + adversarial
 Sybil-querier tests added.
 
-### Step 2 — E2: `EvidenceAggregate` + scale-free recompute → A1, resolves B4
+### Step 2 — E2: `EvidenceAggregate` + scale-free recompute → A1, resolves B4 ✅ done 2026-07-12
 The keystone. New wire type (§7.5): per-IP evidence summary (reporter counts,
 attested `diversity_buckets`, first/last seen, reason histogram) instead of a
 domain-scaled score. The repquery answer carries it; the consumer recomputes
