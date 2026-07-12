@@ -42,7 +42,7 @@ func TestQuerierFetchesAndCaches(t *testing.T) {
 	}
 	defer client.Close()
 
-	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 2*time.Second, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount)
+	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 2*time.Second, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount, 0.15)
 
 	rec, ok := q.Query(ctx, "9.9.9.9")
 	if !ok || rec.Score <= 0 || rec.LastSeen.IsZero() {
@@ -88,7 +88,7 @@ func TestQuerierTimeoutDoesNotHang(t *testing.T) {
 	}
 	defer client.Close()
 
-	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 200*time.Millisecond, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount)
+	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 200*time.Millisecond, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount, 0.15)
 
 	done := make(chan struct{})
 	var gotOK bool
@@ -124,7 +124,7 @@ func TestQuerierPreservesScoreZeroAnswer(t *testing.T) {
 	}
 	defer client.Close()
 
-	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 2*time.Second, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount)
+	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 2*time.Second, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount, 0.15)
 	rec, ok := q.Query(ctx, "7.7.7.7")
 	if !ok {
 		t.Fatal("known-but-clean answer (score 0) should return ok=true")
@@ -143,7 +143,7 @@ func TestQuerierCacheBounded(t *testing.T) {
 	defer func() { maxCacheEntries = old }()
 
 	// No aggregators: every Query is an instant negative, exercising only the cache.
-	q := NewQuerier(nil, nil, 100*time.Millisecond, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount)
+	q := NewQuerier(nil, nil, 100*time.Millisecond, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount, 0.15)
 	ips := []string{"10.0.0.1", "10.0.0.2", "10.0.0.3", "10.0.0.4", "10.0.0.5"}
 	for _, ip := range ips {
 		q.Query(context.Background(), ip)
@@ -199,7 +199,7 @@ func TestQuerierSingleflight(t *testing.T) {
 	}
 	defer client.Close()
 
-	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 2*time.Second, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount)
+	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 2*time.Second, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount, 0.15)
 
 	var wg sync.WaitGroup
 	for i := 0; i < 8; i++ {

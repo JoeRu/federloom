@@ -1,6 +1,7 @@
 package repquery
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/JoeRu/federloom/internal/reputation"
@@ -36,7 +37,7 @@ func maxWeightScenario(scenarios []string) string {
 // Corroboration is 0. The synthetic anchored votes drive the SCORE only; the
 // answer must never satisfy the anchored-corroboration block backstop
 // (len(rec.Groups) > 0). The score alone is advisory (DNSBL/API), threshold-governed.
-func RecordFromEvidence(ev proto.EvidenceAggregate, now time.Time, halfLife time.Duration, strangerCap, federationDiscount float64) store.ScoreRecord {
+func RecordFromEvidence(ev proto.EvidenceAggregate, now time.Time, halfLife time.Duration, strangerCap, federationDiscount, diversityRepeat float64) store.ScoreRecord {
 	if ev.WindowLast.IsZero() {
 		return store.ScoreRecord{} // not found
 	}
@@ -50,14 +51,6 @@ func RecordFromEvidence(ev proto.EvidenceAggregate, now time.Time, halfLife time
 	trust := weight * federationDiscount
 	reason := maxWeightScenario(ev.Scenarios)
 
-	// Fold one synthetic anchored vote per counted group at the evidence window
-	// instant (intra-fold decay is therefore zero; one real-time decay follows).
-	// The labels are constant on purpose: reputation.Accumulate adds each vote's
-	// contribution to the score BEFORE the group/reporter dedup, so N folds raise
-	// the score with N regardless of label distinctness — diversity (group count)
-	// drives the score through the NUMBER of folds, and the discarded Groups slice
-	// stays length ≤ 1 either way (we never return it — the invariant).
-	folded := store.ScoreRecord{}
 	groups := ev.DiversityBuckets["groups"]
 	if groups > maxEvidenceFolds {
 		groups = maxEvidenceFolds
@@ -65,10 +58,29 @@ func RecordFromEvidence(ev proto.EvidenceAggregate, now time.Time, halfLife time
 	if groups < 0 {
 		groups = 0
 	}
+	// Subnet diversity caps how many group-votes count at FULL weight (§4.2):
+	// the rest are damped by Accumulate's own repeat mechanic. subnets==0 (older
+	// aggregate) → treat as 1 (a known IP came from at least one subnet).
+	subnets := ev.DiversityBuckets["subnets"]
+	if subnets < 1 {
+		subnets = 1
+	}
+	fullVotes := groups
+	if subnets < fullVotes {
+		fullVotes = subnets
+	}
+
+	folded := store.ScoreRecord{}
 	for i := 0; i < groups; i++ {
+		// First `fullVotes` folds get distinct synthetic subnets (full weight);
+		// the rest share one subnet so Accumulate damps them as repeats.
+		subnet := "fed-" + strconv.Itoa(i)
+		if i >= fullVotes {
+			subnet = "fed-repeat"
+		}
 		folded = reputation.Accumulate(folded, reputation.Observation{
-			Reason: reason, ReporterID: "fed", Group: "fed", Trust: trust, Anchored: true,
-		}, ev.WindowLast, halfLife, strangerCap, 1.0)
+			Reason: reason, ReporterID: "fed", Group: "fed", Subnet: subnet, Trust: trust, Anchored: true,
+		}, ev.WindowLast, halfLife, strangerCap, diversityRepeat)
 	}
 	if ev.StrangersPresent {
 		folded = reputation.Accumulate(folded, reputation.Observation{

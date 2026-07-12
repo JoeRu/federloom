@@ -31,6 +31,7 @@ type Querier struct {
 	halfLife           time.Duration
 	strangerCap        float64
 	federationDiscount float64
+	diversityRepeat    float64
 
 	sf singleflight.Group
 
@@ -49,7 +50,7 @@ type cacheEntry struct {
 // without an explicit Connect per query. halfLife/strangerCap/federationDiscount
 // are the CONSUMER's own reputation parameters, used to recompute each federated
 // EvidenceAggregate answer under local rules (§8).
-func NewQuerier(h host.Host, aggregators []peer.AddrInfo, timeout, cacheTTL time.Duration, halfLife time.Duration, strangerCap, federationDiscount float64) *Querier {
+func NewQuerier(h host.Host, aggregators []peer.AddrInfo, timeout, cacheTTL time.Duration, halfLife time.Duration, strangerCap, federationDiscount, diversityRepeat float64) *Querier {
 	if h != nil {
 		for _, a := range aggregators {
 			h.Peerstore().AddAddrs(a.ID, a.Addrs, peerstore.PermanentAddrTTL)
@@ -58,7 +59,8 @@ func NewQuerier(h host.Host, aggregators []peer.AddrInfo, timeout, cacheTTL time
 	return &Querier{
 		host: h, aggregators: aggregators, timeout: timeout, cacheTTL: cacheTTL,
 		halfLife: halfLife, strangerCap: strangerCap, federationDiscount: federationDiscount,
-		cache: map[string]cacheEntry{},
+		diversityRepeat: diversityRepeat,
+		cache:           map[string]cacheEntry{},
 	}
 }
 
@@ -129,7 +131,7 @@ collect:
 			if !r.ok {
 				continue
 			}
-			rec := RecordFromEvidence(r.ev, time.Now(), q.halfLife, q.strangerCap, q.federationDiscount)
+			rec := RecordFromEvidence(r.ev, time.Now(), q.halfLife, q.strangerCap, q.federationDiscount, q.diversityRepeat)
 			if rec.LastSeen.IsZero() {
 				continue
 			}
