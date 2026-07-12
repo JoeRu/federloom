@@ -33,8 +33,8 @@ type PeerCert struct {
 }
 
 // ScoreEntry is the aggregated reputation for one IP within a trust domain (spec §7.2).
-// RESERVED: defined for the wire contract but not yet exchanged on the network —
-// nodes currently gossip Event, not ScoreEntry. See remediation sub-project E.
+// RESERVED / currently unused: E2 replaced the query answer with EvidenceAggregate.
+// Slated for removal in the events-v1 wire cleanup (roadmap C1).
 type ScoreEntry struct {
 	IP            string    `json:"ip"`
 	Score         float64   `json:"score"`         // normalised, e.g. 0..100
@@ -62,7 +62,21 @@ type WhitelistEntry struct {
 }
 
 // RepQuery is an on-demand request for one IP's reputation (spec §11.4, E3).
-// The response reuses ScoreEntry.
+// The response is an EvidenceAggregate over /federloom/repquery/v2.
 type RepQuery struct {
 	IP string `json:"ip"`
+}
+
+// EvidenceAggregate is the federated import type (spec §7.5): what subnets
+// share and every consumer recomputes locally (§8). Carries NO reporter
+// identity — only distinct-reporter counts per bucket dimension. It is the
+// answer to a RepQuery over /federloom/repquery/v2.
+type EvidenceAggregate struct {
+	IP               string         `json:"ip"`                // IPv4 single / IPv6 prefix-normalized
+	Scenarios        []string       `json:"scenarios"`         // distinct reason codes observed (§7.1)
+	WindowFirst      time.Time      `json:"window_first"`      // evidence window start
+	WindowLast       time.Time      `json:"window_last"`       // zero = "not found" sentinel
+	DiversityBuckets map[string]int `json:"diversity_buckets"` // dimension -> distinct reporter count; MVP: "groups","reporters"
+	StrangersPresent bool           `json:"strangers_present"` // un-anchored reporters contributed
+	EvidenceWeight   float64        `json:"evidence_weight"`   // aggregator source weight; consumer clamps to [0,1]
 }

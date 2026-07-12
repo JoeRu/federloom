@@ -78,3 +78,28 @@ func TestSchemaVersionBumped(t *testing.T) {
 		t.Errorf("SchemaVersion = %d, want 1 (vouching added)", proto.SchemaVersion)
 	}
 }
+
+func TestEvidenceAggregateJSONRoundTrip(t *testing.T) {
+	ev := proto.EvidenceAggregate{
+		IP:               "203.0.113.7",
+		Scenarios:        []string{"ssh-probe", "ssh-auth-bruteforce"},
+		WindowFirst:      time.Unix(1000, 0).UTC(),
+		WindowLast:       time.Unix(2000, 0).UTC(),
+		DiversityBuckets: map[string]int{"groups": 3, "reporters": 9},
+		StrangersPresent: true,
+		EvidenceWeight:   1.0,
+	}
+	b, err := json.Marshal(ev)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var back proto.EvidenceAggregate
+	if err := json.Unmarshal(b, &back); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if back.IP != ev.IP || back.DiversityBuckets["groups"] != 3 ||
+		!back.StrangersPresent || !back.WindowLast.Equal(ev.WindowLast) ||
+		len(back.Scenarios) != 2 {
+		t.Errorf("round trip lost fields: %+v", back)
+	}
+}
