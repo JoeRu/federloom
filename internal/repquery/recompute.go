@@ -68,12 +68,12 @@ func RecordFromEvidence(ev proto.EvidenceAggregate, now time.Time, halfLife time
 	for i := 0; i < groups; i++ {
 		folded = reputation.Accumulate(folded, reputation.Observation{
 			Reason: reason, ReporterID: "fed", Group: "fed", Trust: trust, Anchored: true,
-		}, ev.WindowLast, halfLife, strangerCap)
+		}, ev.WindowLast, halfLife, strangerCap, 1.0)
 	}
 	if ev.StrangersPresent {
 		folded = reputation.Accumulate(folded, reputation.Observation{
 			Reason: reason, ReporterID: "fed-stranger", Trust: trust, Anchored: false,
-		}, ev.WindowLast, halfLife, strangerCap)
+		}, ev.WindowLast, halfLife, strangerCap, 1.0)
 	}
 
 	score := reputation.DecayScore(folded.Score, ev.WindowLast, now, halfLife)

@@ -15,7 +15,7 @@ func openEngineCap(t *testing.T, cap float64) *reputation.Engine {
 		t.Fatalf("open store: %v", err)
 	}
 	t.Cleanup(func() { s.Close() })
-	return reputation.New(s, 7*24*time.Hour, cap)
+	return reputation.New(s, 7*24*time.Hour, cap, 0.15)
 }
 
 // TestStrangerContributionCapped: strangers can never add more than the cap,
@@ -25,7 +25,7 @@ func TestStrangerContributionCapped(t *testing.T) {
 	var last float64
 	for i := 0; i < 100; i++ {
 		var err error
-		last, err = e.Record("192.0.2.1", "ssh-auth-success", "stranger", 1.0, "", false)
+		last, err = e.Record("192.0.2.1", "ssh-auth-success", "stranger", 1.0, "", "", false)
 		if err != nil {
 			t.Fatalf("Record[%d]: %v", i, err)
 		}
@@ -39,12 +39,12 @@ func TestStrangerContributionCapped(t *testing.T) {
 func TestStrangerAtCapAddsZero(t *testing.T) {
 	e := openEngineCap(t, 15)
 	for i := 0; i < 50; i++ {
-		if _, err := e.Record("192.0.2.1", "ssh-auth-success", "s1", 1.0, "", false); err != nil {
+		if _, err := e.Record("192.0.2.1", "ssh-auth-success", "s1", 1.0, "", "", false); err != nil {
 			t.Fatalf("Record: %v", err)
 		}
 	}
 	before, _ := e.GetRecord("192.0.2.1")
-	if _, err := e.Record("192.0.2.1", "ssh-auth-success", "s2", 1.0, "", false); err != nil {
+	if _, err := e.Record("192.0.2.1", "ssh-auth-success", "s2", 1.0, "", "", false); err != nil {
 		t.Fatalf("Record at cap: %v", err)
 	}
 	after, _ := e.GetRecord("192.0.2.1")
@@ -59,7 +59,7 @@ func TestAnchoredNotCapped(t *testing.T) {
 	var score float64
 	for i := 0; i < 10; i++ {
 		var err error
-		score, err = e.Record("192.0.2.2", "ssh-auth-success", "joA", 0.9, "jo", true)
+		score, err = e.Record("192.0.2.2", "ssh-auth-success", "joA", 0.9, "jo", "", true)
 		if err != nil {
 			t.Fatalf("Record: %v", err)
 		}
@@ -73,7 +73,7 @@ func TestAnchoredNotCapped(t *testing.T) {
 func TestCorroborationCountsGroupsNotPeers(t *testing.T) {
 	e := openEngineCap(t, 15)
 	for _, peerID := range []string{"joA", "joB", "joC"} {
-		if _, err := e.Record("192.0.2.3", "ssh-probe", peerID, 0.9, "jo", true); err != nil {
+		if _, err := e.Record("192.0.2.3", "ssh-probe", peerID, 0.9, "jo", "", true); err != nil {
 			t.Fatalf("Record %s: %v", peerID, err)
 		}
 	}
@@ -92,11 +92,11 @@ func TestCorroborationCountsGroupsNotPeers(t *testing.T) {
 func TestCorroborationStrangersNeverCount(t *testing.T) {
 	e := openEngineCap(t, 15)
 	for _, peerID := range []string{"s1", "s2", "s3"} {
-		if _, err := e.Record("192.0.2.4", "ssh-probe", peerID, 0.3, "", false); err != nil {
+		if _, err := e.Record("192.0.2.4", "ssh-probe", peerID, 0.3, "", "", false); err != nil {
 			t.Fatalf("Record %s: %v", peerID, err)
 		}
 	}
-	if _, err := e.Record("192.0.2.4", "ssh-probe", "joA", 0.9, "jo", true); err != nil {
+	if _, err := e.Record("192.0.2.4", "ssh-probe", "joA", 0.9, "jo", "", true); err != nil {
 		t.Fatalf("Record anchored: %v", err)
 	}
 	rec, _ := e.GetRecord("192.0.2.4")
@@ -111,7 +111,7 @@ func TestCorroborationStrangersNeverCount(t *testing.T) {
 func TestAnchoredAddsScoreOnTopOfSaturatedStrangers(t *testing.T) {
 	e := openEngineCap(t, 15)
 	for i := 0; i < 50; i++ {
-		if _, err := e.Record("192.0.2.5", "ssh-auth-success", "stranger", 1.0, "", false); err != nil {
+		if _, err := e.Record("192.0.2.5", "ssh-auth-success", "stranger", 1.0, "", "", false); err != nil {
 			t.Fatalf("stranger Record: %v", err)
 		}
 	}
@@ -119,7 +119,7 @@ func TestAnchoredAddsScoreOnTopOfSaturatedStrangers(t *testing.T) {
 	if saturated.Score > 15.0001 {
 		t.Fatalf("precondition: strangers exceeded cap (%v)", saturated.Score)
 	}
-	score, err := e.Record("192.0.2.5", "ssh-auth-success", "joA", 0.9, "jo", true)
+	score, err := e.Record("192.0.2.5", "ssh-auth-success", "joA", 0.9, "jo", "", true)
 	if err != nil {
 		t.Fatalf("anchored Record: %v", err)
 	}
@@ -137,10 +137,10 @@ func TestStrangerDoesNotCountAsCorroboration(t *testing.T) {
 		t.Fatalf("open store: %v", err)
 	}
 	defer s.Close()
-	eng := reputation.New(s, 7*24*time.Hour, 15)
+	eng := reputation.New(s, 7*24*time.Hour, 15, 0.15)
 
 	// One un-anchored (stranger) report: anchored=false, group="".
-	if _, err := eng.Record("203.0.113.7", "ssh-post-auth-command", "stranger-1", 0.3, "", false); err != nil {
+	if _, err := eng.Record("203.0.113.7", "ssh-post-auth-command", "stranger-1", 0.3, "", "", false); err != nil {
 		t.Fatalf("Record: %v", err)
 	}
 	rec, err := eng.GetRecord("203.0.113.7")
@@ -164,12 +164,12 @@ func TestAnchoredGroupsCountAsCorroboration(t *testing.T) {
 		t.Fatalf("open store: %v", err)
 	}
 	defer s.Close()
-	eng := reputation.New(s, 7*24*time.Hour, 15)
+	eng := reputation.New(s, 7*24*time.Hour, 15, 0.15)
 
 	// Two distinct anchored groups + a stranger on the same IP.
-	_, _ = eng.Record("203.0.113.8", "ssh-probe", "peerA", 0.9, "alice", true)
-	_, _ = eng.Record("203.0.113.8", "ssh-probe", "peerB", 0.9, "bob", true)
-	_, _ = eng.Record("203.0.113.8", "ssh-probe", "peerC", 0.3, "", false)
+	_, _ = eng.Record("203.0.113.8", "ssh-probe", "peerA", 0.9, "alice", "", true)
+	_, _ = eng.Record("203.0.113.8", "ssh-probe", "peerB", 0.9, "bob", "", true)
+	_, _ = eng.Record("203.0.113.8", "ssh-probe", "peerC", 0.3, "", "", false)
 
 	rec, err := eng.GetRecord("203.0.113.8")
 	if err != nil {
@@ -195,7 +195,7 @@ func TestSMTPWeightsHigherThanDefault(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.reason, func(t *testing.T) {
 			e := openEngineCap(t, 15) // helper already defined in this file
-			score, err := e.Record("192.0.2.10", tc.reason, "self", 1.0, "self", true)
+			score, err := e.Record("192.0.2.10", tc.reason, "self", 1.0, "self", "", true)
 			if err != nil {
 				t.Fatalf("Record: %v", err)
 			}
@@ -212,7 +212,7 @@ func TestAccumulateMatchesKnownContribution(t *testing.T) {
 	now := time.Now()
 	rec := reputation.Accumulate(store.ScoreRecord{}, reputation.Observation{
 		Reason: "ssh-probe", ReporterID: "r1", Group: "jo", Trust: 0.9, Anchored: true,
-	}, now, 7*24*time.Hour, 15)
+	}, now, 7*24*time.Hour, 15, 0.15)
 	if rec.Score < 1.79 || rec.Score > 1.81 {
 		t.Errorf("Score = %v, want ~1.8", rec.Score)
 	}
@@ -222,7 +222,7 @@ func TestAccumulateMatchesKnownContribution(t *testing.T) {
 	// Stranger contribution is capped at strangerCap.
 	rec2 := store.ScoreRecord{}
 	for i := 0; i < 100; i++ {
-		rec2 = reputation.Accumulate(rec2, reputation.Observation{Reason: "smtp-spamtrap", ReporterID: "s", Trust: 0.3, Anchored: false}, now, 7*24*time.Hour, 15)
+		rec2 = reputation.Accumulate(rec2, reputation.Observation{Reason: "smtp-spamtrap", ReporterID: "s", Trust: 0.3, Anchored: false}, now, 7*24*time.Hour, 15, 0.15)
 	}
 	if rec2.Score > 15.001 || !rec2.StrangerSeen {
 		t.Errorf("stranger cap not honored: score=%v", rec2.Score)
@@ -235,5 +235,34 @@ func TestAccumulateMatchesKnownContribution(t *testing.T) {
 func TestWeightForExported(t *testing.T) {
 	if reputation.WeightFor("ssh-auth-success") != 40 || reputation.WeightFor("unknown-reason") != 2 {
 		t.Errorf("WeightFor: got %v/%v", reputation.WeightFor("ssh-auth-success"), reputation.WeightFor("unknown-reason"))
+	}
+}
+
+func TestAccumulateSubnetDiversity(t *testing.T) {
+	now := time.Now()
+	hl := 7 * 24 * time.Hour
+	// Ten reports from ONE subnet: first full, nine damped.
+	one := store.ScoreRecord{}
+	for i := 0; i < 10; i++ {
+		one = reputation.Accumulate(one, reputation.Observation{Reason: "ssh-probe", ReporterID: "r", Group: "g", Trust: 0.9, Anchored: true, Subnet: "a"}, now, hl, 15, 0.15)
+	}
+	// Ten reports from TEN distinct subnets: all full.
+	ten := store.ScoreRecord{}
+	for i := 0; i < 10; i++ {
+		ten = reputation.Accumulate(ten, reputation.Observation{Reason: "ssh-probe", ReporterID: "r", Group: "g", Trust: 0.9, Anchored: true, Subnet: string(rune('a' + i))}, now, hl, 15, 0.15)
+	}
+	if !(ten.Score > one.Score) {
+		t.Errorf("ten subnets (%v) must outscore one subnet (%v)", ten.Score, one.Score)
+	}
+	if len(one.SubnetsSeen) != 1 {
+		t.Errorf("one-subnet SubnetsSeen = %v, want len 1", one.SubnetsSeen)
+	}
+	if len(ten.SubnetsSeen) != 10 {
+		t.Errorf("ten-subnet SubnetsSeen = %v, want len 10", ten.SubnetsSeen)
+	}
+	// Empty subnet reproduces today's math (factor 1.0, no SubnetsSeen tracking).
+	empty := reputation.Accumulate(store.ScoreRecord{}, reputation.Observation{Reason: "ssh-probe", ReporterID: "r", Group: "g", Trust: 0.9, Anchored: true, Subnet: ""}, now, hl, 15, 0.15)
+	if empty.Score < 1.79 || empty.Score > 1.81 || len(empty.SubnetsSeen) != 0 {
+		t.Errorf("empty-subnet obs must score ~1.8 with no SubnetsSeen, got %v / %v", empty.Score, empty.SubnetsSeen)
 	}
 }

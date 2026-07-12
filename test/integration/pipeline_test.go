@@ -44,7 +44,7 @@ func TestPipelineBlockAfterThreshold(t *testing.T) {
 	}
 	defer s.Close()
 
-	engine := reputation.New(s, 7*24*time.Hour, 15)
+	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
 	sink := &mockSink{}
 
 	const (
@@ -54,7 +54,7 @@ func TestPipelineBlockAfterThreshold(t *testing.T) {
 	)
 
 	for i := 0; i < 3; i++ {
-		score, err := engine.Record(ip, "ssh-auth-success", "peer1", 1.0, "peer1", true)
+		score, err := engine.Record(ip, "ssh-auth-success", "peer1", 1.0, "peer1", "", true)
 		if err != nil {
 			t.Fatalf("engine.Record (iteration %d): %v", i+1, err)
 		}
@@ -84,7 +84,7 @@ func TestPipelineNeverBlockProtected(t *testing.T) {
 	}
 	defer s.Close()
 
-	engine := reputation.New(s, 7*24*time.Hour, 15)
+	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
 	sink := &mockSink{}
 	nbl := enforce.NewNeverBlockList(nil)
 
@@ -94,7 +94,7 @@ func TestPipelineNeverBlockProtected(t *testing.T) {
 	)
 
 	for i := 0; i < 3; i++ {
-		score, err := engine.Record(ip, "ssh-auth-success", "peer1", 1.0, "peer1", true)
+		score, err := engine.Record(ip, "ssh-auth-success", "peer1", 1.0, "peer1", "", true)
 		if err != nil {
 			t.Fatalf("engine.Record (iteration %d): %v", i+1, err)
 		}
@@ -129,7 +129,7 @@ func TestPipelineUnblockAfterDecay(t *testing.T) {
 	}
 	defer s.Close()
 
-	engine := reputation.New(s, 500*time.Millisecond, 15)
+	engine := reputation.New(s, 500*time.Millisecond, 15, 0.15)
 	sink := &mockSink{}
 
 	const (
@@ -140,7 +140,7 @@ func TestPipelineUnblockAfterDecay(t *testing.T) {
 
 	// Drive the score above the block threshold (3 records, same logistic progression).
 	for i := 0; i < 3; i++ {
-		score, err := engine.Record(ip, "ssh-auth-success", "peer1", 1.0, "peer1", true)
+		score, err := engine.Record(ip, "ssh-auth-success", "peer1", 1.0, "peer1", "", true)
 		if err != nil {
 			t.Fatalf("engine.Record (iteration %d): %v", i+1, err)
 		}

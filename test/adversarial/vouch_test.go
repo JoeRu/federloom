@@ -50,12 +50,12 @@ func TestSybilStrangerFloodCapped(t *testing.T) {
 	defer s.Close()
 
 	const cap = 15.0
-	eng := reputation.New(s, 7*24*time.Hour, cap)
+	eng := reputation.New(s, 7*24*time.Hour, cap, 0.15)
 	const ip = "203.0.113.100"
 
 	for i := 0; i < 100; i++ {
 		peerID := fmt.Sprintf("sybil-%d", i)
-		if _, err := eng.Record(ip, "ssh-probe", peerID, 0.3, "", false); err != nil {
+		if _, err := eng.Record(ip, "ssh-probe", peerID, 0.3, "", "", false); err != nil {
 			t.Fatalf("Record[%d]: %v", i, err)
 		}
 	}

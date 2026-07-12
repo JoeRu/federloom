@@ -21,6 +21,7 @@ type ScoreRecord struct {
 	Groups          []string  `json:"groups,omitempty"`           // distinct anchored Person names that reported this IP
 	StrangerSeen    bool      `json:"stranger_seen,omitempty"`    // at least one un-anchored reporter
 	StrangerContrib float64   `json:"stranger_contrib,omitempty"` // cumulative score points added by strangers (capped)
+	SubnetsSeen     []string  `json:"subnets_seen,omitempty"`     // distinct subnets that reported this IP (diversity, §4.2); ids local-only, never shared as names
 }
 
 // BadgerStore wraps BadgerDB for reputation persistence.

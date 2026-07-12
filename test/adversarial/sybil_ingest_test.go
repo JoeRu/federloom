@@ -23,12 +23,12 @@ func TestSybilFloodScoreCapped(t *testing.T) {
 	}
 	defer s.Close()
 
-	engine := reputation.New(s, 7*24*time.Hour, 15)
+	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
 
 	const ip = "2.3.4.5"
 	for i := 0; i < 50; i++ {
 		peerID := fmt.Sprintf("sybil-peer-%d", i)
-		if _, err := engine.Record(ip, "ssh-probe", peerID, 0.3, "", false); err != nil {
+		if _, err := engine.Record(ip, "ssh-probe", peerID, 0.3, "", "", false); err != nil {
 			t.Fatalf("Record[%d]: %v", i, err)
 		}
 	}
@@ -61,12 +61,12 @@ func TestSybilFloodHighTrustCapped(t *testing.T) {
 	}
 	defer s.Close()
 
-	engine := reputation.New(s, 7*24*time.Hour, 15)
+	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
 
 	const ip = "3.4.5.6"
 	for i := 0; i < 50; i++ {
 		peerID := fmt.Sprintf("peer-%d", i)
-		if _, err := engine.Record(ip, "ssh-auth-success", peerID, 1.0, "", false); err != nil {
+		if _, err := engine.Record(ip, "ssh-auth-success", peerID, 1.0, "", "", false); err != nil {
 			t.Fatalf("Record[%d]: %v", i, err)
 		}
 	}

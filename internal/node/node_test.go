@@ -44,7 +44,7 @@ func testNode(t *testing.T) (*Node, string) {
 	return &Node{
 		cfg:        cfg,
 		store:      s,
-		rep:        reputation.New(s, 7*24*time.Hour, cfg.Trust.StrangerScoreCap),
+		rep:        reputation.New(s, 7*24*time.Hour, cfg.Trust.StrangerScoreCap, cfg.EffectiveDiversityRepeatFactor()),
 		neverblock: enforce.NewNeverBlockList(nil),
 		whitelist:  wl,
 		trust:      ts,

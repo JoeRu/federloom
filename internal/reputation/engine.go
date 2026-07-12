@@ -44,17 +44,26 @@ type Observation struct {
 	Group      string
 	Trust      float64
 	Anchored   bool
+	Subnet     string // originator's home subnet (diversity key); "" = untracked (solo / pre-E1)
 }
 
 // Accumulate applies obs to rec (lazily decayed to now) and returns the updated
 // record. Pure: no store access. This is the single accumulation path — both
 // Record (native events) and the federated recompute (internal/repquery) fold
 // through it, so a federated score is computed under the same math as a local one.
-func Accumulate(rec store.ScoreRecord, obs Observation, now time.Time, halfLife time.Duration, strangerCap float64) store.ScoreRecord {
+func Accumulate(rec store.ScoreRecord, obs Observation, now time.Time, halfLife time.Duration, strangerCap, diversityRepeat float64) store.ScoreRecord {
 	if !rec.LastSeen.IsZero() {
 		rec.Score = DecayScore(rec.Score, rec.LastSeen, now, halfLife)
 	}
-	contrib := obs.Trust * weightFor(obs.Reason) * (1 - rec.Score/100)
+	// Subnet-diversity weighting (§4.2): a repeat report from a subnet that has
+	// already reported this IP counts for less; the first from a new subnet is
+	// full. Empty subnet (solo / pre-E1) is never damped and never tracked.
+	firstFromSubnet := obs.Subnet != "" && !containsString(rec.SubnetsSeen, obs.Subnet)
+	divFactor := 1.0
+	if obs.Subnet != "" && !firstFromSubnet {
+		divFactor = diversityRepeat
+	}
+	contrib := obs.Trust * weightFor(obs.Reason) * (1 - rec.Score/100) * divFactor
 	if !obs.Anchored {
 		remaining := strangerCap - rec.StrangerContrib
 		if remaining < 0 {
@@ -79,6 +88,9 @@ func Accumulate(rec store.ScoreRecord, obs Observation, now time.Time, halfLife 
 	if !containsString(rec.ReporterIDs, obs.ReporterID) {
 		rec.ReporterIDs = append(rec.ReporterIDs, obs.ReporterID)
 	}
+	if firstFromSubnet {
+		rec.SubnetsSeen = append(rec.SubnetsSeen, obs.Subnet)
+	}
 	rec.LastSeen = now
 	if rec.FirstSeen.IsZero() {
 		rec.FirstSeen = now
@@ -93,30 +105,32 @@ func Accumulate(rec store.ScoreRecord, obs Observation, now time.Time, halfLife 
 // Person-group corroboration, and a cumulative cap on stranger contributions
 // (spec §4.2/§8; design docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md).
 type Engine struct {
-	store       *store.BadgerStore
-	halfLife    time.Duration
-	strangerCap float64
+	store           *store.BadgerStore
+	halfLife        time.Duration
+	strangerCap     float64
+	diversityRepeat float64
 }
 
 // New creates an Engine backed by s. halfLife drives decay; strangerCap is the
 // maximum total score un-anchored reporters can add to any single IP.
-func New(s *store.BadgerStore, halfLife time.Duration, strangerCap float64) *Engine {
-	return &Engine{store: s, halfLife: halfLife, strangerCap: strangerCap}
+func New(s *store.BadgerStore, halfLife time.Duration, strangerCap, diversityRepeat float64) *Engine {
+	return &Engine{store: s, halfLife: halfLife, strangerCap: strangerCap, diversityRepeat: diversityRepeat}
 }
 
 // Record applies one observation to ip's score and returns the new score.
 // trust is the reporter's resolved weight (anchor weight, or stranger weight).
 // group is the anchored Person's name ("" for strangers); anchored reports
 // count as distinct corroboration votes per group, strangers share one capped
-// bucket that never exceeds strangerCap score points in total.
-func (e *Engine) Record(ip, reason, reporterID string, trust float64, group string, anchored bool) (float64, error) {
+// bucket that never exceeds strangerCap score points in total. subnet is the
+// originator's home subnet (diversity key, §4.2); "" leaves diversity untracked.
+func (e *Engine) Record(ip, reason, reporterID string, trust float64, group, subnet string, anchored bool) (float64, error) {
 	rec, err := e.store.GetScore(ip)
 	if err != nil {
 		return 0, fmt.Errorf("reputation: get %q: %w", ip, err)
 	}
 	rec = Accumulate(rec, Observation{
-		Reason: reason, ReporterID: reporterID, Group: group, Trust: trust, Anchored: anchored,
-	}, time.Now(), e.halfLife, e.strangerCap)
+		Reason: reason, ReporterID: reporterID, Group: group, Subnet: subnet, Trust: trust, Anchored: anchored,
+	}, time.Now(), e.halfLife, e.strangerCap, e.diversityRepeat)
 	ttl := 3 * e.halfLife
 	if err := e.store.PutScore(ip, rec, ttl); err != nil {
 		return 0, fmt.Errorf("reputation: put %q: %w", ip, err)

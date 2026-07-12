@@ -54,12 +54,12 @@ func TestNeverBlockPoisoningRFC1918(t *testing.T) {
 			}
 			defer s.Close()
 
-			engine := reputation.New(s, 7*24*time.Hour, 15)
+			engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
 			sink := &mockSink{}
 
 			for i := 0; i < 10; i++ {
 				peerID := fmt.Sprintf("malicious-peer-%d", i)
-				score, err := engine.Record(ip, "ssh-auth-success", peerID, 1.0, peerID, true)
+				score, err := engine.Record(ip, "ssh-auth-success", peerID, 1.0, peerID, "", true)
 				if err != nil {
 					t.Fatalf("Record[%d]: %v", i, err)
 				}
@@ -97,12 +97,12 @@ func TestNeverBlockPoisoningLoopback(t *testing.T) {
 			}
 			defer s.Close()
 
-			engine := reputation.New(s, 7*24*time.Hour, 15)
+			engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
 			sink := &mockSink{}
 
 			for i := 0; i < 10; i++ {
 				peerID := fmt.Sprintf("malicious-peer-%d", i)
-				score, err := engine.Record(ip, "ssh-auth-success", peerID, 1.0, peerID, true)
+				score, err := engine.Record(ip, "ssh-auth-success", peerID, 1.0, peerID, "", true)
 				if err != nil {
 					t.Fatalf("Record[%d]: %v", i, err)
 				}
@@ -133,7 +133,7 @@ func TestNeverBlockPublicIPNotProtected(t *testing.T) {
 	}
 	defer s.Close()
 
-	engine := reputation.New(s, 7*24*time.Hour, 15)
+	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
 	nbl := enforce.NewNeverBlockList(nil)
 	sink := &mockSink{}
 
@@ -143,7 +143,7 @@ func TestNeverBlockPublicIPNotProtected(t *testing.T) {
 	//   after 3: 64 + 1*40*(1-64/100) = 64 + 14.4 = 78.4  → > 75 threshold
 	for i := 0; i < 3; i++ {
 		peerID := fmt.Sprintf("peer-%d", i)
-		score, err := engine.Record(ip, "ssh-auth-success", peerID, 1.0, peerID, true)
+		score, err := engine.Record(ip, "ssh-auth-success", peerID, 1.0, peerID, "", true)
 		if err != nil {
 			t.Fatalf("Record[%d]: %v", i, err)
 		}

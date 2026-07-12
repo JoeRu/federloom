@@ -71,7 +71,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 	if p := cfg.Reputation.IPv6Prefix; p != 0 && (p < 1 || p > 128) {
 		log.Printf("node: reputation.ipv6_prefix %d out of range [1,128]; using default 64", p)
 	}
-	eng := reputation.New(s, halfLife, cfg.Trust.StrangerScoreCap)
+	eng := reputation.New(s, halfLife, cfg.Trust.StrangerScoreCap, cfg.EffectiveDiversityRepeatFactor())
 
 	var sink enforce.Sink
 	switch cfg.Enforce.Backend {
@@ -308,7 +308,7 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 		}
 	}
 	_ = n.dedup.Seen(dedupKey(e.ReporterID, e.IP, e.Reason, e.Timestamp), time.Now())
-	if _, err := n.rep.Record(e.IP, e.Reason, n.selfID, 1.0, n.selfID, true); err != nil {
+	if _, err := n.rep.Record(e.IP, e.Reason, n.selfID, 1.0, n.selfID, e.SubnetID, true); err != nil {
 		log.Printf("node: record local %s: %v", e.IP, err)
 		return
 	}
@@ -430,7 +430,7 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 			weight *= discount
 		}
 	}
-	if _, err := n.rep.Record(e.IP, e.Reason, e.ReporterID, weight, group, anchored); err != nil {
+	if _, err := n.rep.Record(e.IP, e.Reason, e.ReporterID, weight, group, e.SubnetID, anchored); err != nil {
 		log.Printf("node: record remote %s: %v", e.IP, err)
 		return
 	}
