@@ -501,3 +501,47 @@ func TestDiversityKeysOnOriginSubnet(t *testing.T) {
 		t.Errorf("same-subnet repeat not damped: first=%v secondGain=%v", rec1.Score, gain)
 	}
 }
+
+// TestLocalObservationsBypassDiversity locks in the self-defense fix: a node's
+// own repeated local observations of the same attacker must escalate normally
+// (undamped), even though processLocal's home subnet is populated on the event
+// (e.SubnetID = n.cfg.FederationSubnet). If subnet diversity damping ever leaks
+// into the local path again, a single-subnet node would be stuck at a low,
+// damped score and could never cross a realistic block threshold on its own
+// repeated evidence — this test fails loudly in that regression.
+func TestLocalObservationsBypassDiversity(t *testing.T) {
+	n, _ := testNode(t)
+	n.cfg.FederationSubnet = "home" // non-empty, so a damping leak would be visible
+	ctx := context.Background()
+	ip := "203.0.113.99"
+
+	var scores []float64
+	for i := 0; i < 5; i++ {
+		n.processLocal(ctx, proto.Event{IP: ip, Reason: "ssh-auth-success", Timestamp: time.Now().UTC()})
+		rec, err := n.rep.GetRecord(ip)
+		if err != nil {
+			t.Fatalf("GetRecord: %v", err)
+		}
+		scores = append(scores, rec.Score)
+	}
+
+	for i := 1; i < len(scores); i++ {
+		if scores[i] <= scores[i-1] {
+			t.Fatalf("score did not strictly increase on repeat %d: scores=%v", i, scores)
+		}
+	}
+	// A damped single-subnet series (diversity_repeat_factor=0.15) would sit
+	// around ~53 after 5 ssh-auth-success (weight 40) reports; undamped local
+	// escalation must clear a realistic block threshold well above that.
+	if scores[len(scores)-1] <= 75 {
+		t.Errorf("local score after 5 repeats = %v, want > 75 (self-defense must escalate undamped)", scores[len(scores)-1])
+	}
+
+	rec, err := n.rep.GetRecord(ip)
+	if err != nil {
+		t.Fatalf("GetRecord: %v", err)
+	}
+	if len(rec.SubnetsSeen) != 0 {
+		t.Errorf("local observation must bypass diversity tracking; SubnetsSeen = %v, want empty", rec.SubnetsSeen)
+	}
+}

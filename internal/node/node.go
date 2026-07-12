@@ -308,7 +308,11 @@ func (n *Node) processLocal(ctx context.Context, e proto.Event) {
 		}
 	}
 	_ = n.dedup.Seen(dedupKey(e.ReporterID, e.IP, e.Reason, e.Timestamp), time.Now())
-	if _, err := n.rep.Record(e.IP, e.Reason, n.selfID, 1.0, n.selfID, e.SubnetID, true); err != nil {
+	// Local observations are this node's own direct evidence — they must
+	// escalate on repetition (self-defense), so they bypass subnet-diversity
+	// damping (empty subnet). Diversity weighting applies only to federated
+	// (remote) reports in ProcessRemote, where source independence is the point.
+	if _, err := n.rep.Record(e.IP, e.Reason, n.selfID, 1.0, n.selfID, "", true); err != nil {
 		log.Printf("node: record local %s: %v", e.IP, err)
 		return
 	}
