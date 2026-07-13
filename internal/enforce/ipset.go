@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -40,7 +41,7 @@ func (s *IpsetSink) Name() string { return "ipset" }
 // Start creates the ipset sets and installs iptables/ip6tables rules (idempotent).
 func (s *IpsetSink) Start(ctx context.Context) error {
 	// IPv4 set
-	if err := s.run(ctx, "ipset", "create", s.setName, "hash:ip", "family", "inet", "-exist"); err != nil {
+	if err := s.run(ctx, "ipset", "create", s.setName, "hash:ip", "family", "inet", "timeout", "0", "-exist"); err != nil {
 		return fmt.Errorf("enforce/ipset: create IPv4 set %q: %w", s.setName, err)
 	}
 	// IPv6 set is hash:net so a whole /64 (or configured prefix) blocks as one
@@ -48,14 +49,14 @@ func (s *IpsetSink) Start(ctx context.Context) error {
 	// mismatch, which we use as the migration trigger. Best-effort (IPv6 may be
 	// unavailable on some hosts).
 	set6 := s.setName + "6"
-	if err := s.run(ctx, "ipset", "create", set6, "hash:net", "family", "inet6", "-exist"); err != nil {
+	if err := s.run(ctx, "ipset", "create", set6, "hash:net", "family", "inet6", "timeout", "0", "-exist"); err != nil {
 		// Likely a stale hash:ip set from a prior version. Drop referencing
 		// ip6tables rules so the set can be destroyed, then recreate as hash:net.
 		for _, chain := range s.chains {
 			_ = s.run(ctx, "ip6tables", "-D", chain, "-m", "set", "--match-set", set6, "src", "-j", "DROP")
 		}
 		_ = s.run(ctx, "ipset", "destroy", set6)
-		if err2 := s.run(ctx, "ipset", "create", set6, "hash:net", "family", "inet6", "-exist"); err2 != nil {
+		if err2 := s.run(ctx, "ipset", "create", set6, "hash:net", "family", "inet6", "timeout", "0", "-exist"); err2 != nil {
 			log.Printf("enforce/ipset: IPv6 hash:net set creation failed (ip6tables may be unavailable): %v", err2)
 		}
 	}
@@ -84,6 +85,21 @@ func (s *IpsetSink) Block(ip string) error {
 	set := s.ipSet(ip)
 	if err := s.run(ctx, "ipset", "add", set, ip, "-exist"); err != nil {
 		return fmt.Errorf("enforce/ipset: block %s: %w", ip, err)
+	}
+	return nil
+}
+
+// BlockFor adds ip with a TTL (seconds) after which ipset auto-removes it.
+func (s *IpsetSink) BlockFor(ip string, ttl time.Duration) error {
+	if ttl <= 0 {
+		return s.Block(ip)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	set := s.ipSet(ip)
+	secs := strconv.Itoa(int(ttl.Seconds()))
+	if err := s.run(ctx, "ipset", "add", set, ip, "timeout", secs, "-exist"); err != nil {
+		return fmt.Errorf("enforce/ipset: blockFor %s: %w", ip, err)
 	}
 	return nil
 }

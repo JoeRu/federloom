@@ -21,8 +21,12 @@ type mockSink struct {
 func (m *mockSink) Name() string                  { return "mock" }
 func (m *mockSink) Start(_ context.Context) error { return nil }
 func (m *mockSink) Block(ip string) error         { m.blocked = append(m.blocked, ip); return nil }
-func (m *mockSink) Unblock(ip string) error       { m.unblocked = append(m.unblocked, ip); return nil }
-func (m *mockSink) Close() error                  { return nil }
+func (m *mockSink) BlockFor(ip string, _ time.Duration) error {
+	m.blocked = append(m.blocked, ip)
+	return nil
+}
+func (m *mockSink) Unblock(ip string) error { m.unblocked = append(m.unblocked, ip); return nil }
+func (m *mockSink) Close() error            { return nil }
 
 // Compile-time assertion that mockSink satisfies the enforce.Sink interface.
 var _ enforce.Sink = (*mockSink)(nil)

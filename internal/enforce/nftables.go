@@ -54,8 +54,8 @@ func (s *NftablesSink) Start(ctx context.Context) error {
 	}
 	cmds := [][]string{
 		{"nft", "add", "table", "inet", nftTable},
-		{"nft", "add", "set", "inet", nftTable, s.setName, "{ type ipv4_addr; flags interval; }"},
-		{"nft", "add", "set", "inet", nftTable, s.set6(), "{ type ipv6_addr; flags interval; }"},
+		{"nft", "add", "set", "inet", nftTable, s.setName, "{ type ipv4_addr; flags interval, timeout; }"},
+		{"nft", "add", "set", "inet", nftTable, s.set6(), "{ type ipv6_addr; flags interval, timeout; }"},
 		{"nft", "add", "chain", "inet", nftTable, s.hook, fmt.Sprintf("{ type filter hook %s priority 0; }", s.hook)},
 		{"nft", "add", "rule", "inet", nftTable, s.hook, "ip", "saddr", "@" + s.setName, "drop"},
 		{"nft", "add", "rule", "inet", nftTable, s.hook, "ip6", "saddr", "@" + s.set6(), "drop"},
@@ -72,6 +72,20 @@ func (s *NftablesSink) Block(ip string) error {
 	defer cancel()
 	if err := s.run(ctx, "nft", "add", "element", "inet", nftTable, s.nftSet(ip), "{", ip, "}"); err != nil {
 		return fmt.Errorf("enforce/nftables: block %s: %w", ip, err)
+	}
+	return nil
+}
+
+// BlockFor adds ip with a TTL after which nftables auto-removes the element.
+func (s *NftablesSink) BlockFor(ip string, ttl time.Duration) error {
+	if ttl <= 0 {
+		return s.Block(ip)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	dur := fmt.Sprintf("%ds", int(ttl.Seconds()))
+	if err := s.run(ctx, "nft", "add", "element", "inet", nftTable, s.nftSet(ip), "{", ip, "timeout", dur, "}"); err != nil {
+		return fmt.Errorf("enforce/nftables: blockFor %s: %w", ip, err)
 	}
 	return nil
 }

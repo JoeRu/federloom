@@ -78,8 +78,24 @@ func (s *CrowdSecSink) Start(ctx context.Context) error {
 	return s.authenticate(authCtx)
 }
 
-// Block pushes a ban alert for ip to the CrowdSec LAPI (/v1/alerts).
+// Block pushes a ban alert for ip to the CrowdSec LAPI (/v1/alerts), using the
+// sink's configured ban duration.
 func (s *CrowdSecSink) Block(ip string) error {
+	return s.blockWithDuration(ip, s.banDur)
+}
+
+// BlockFor submits a CrowdSec decision with an explicit duration (ttl).
+// ttl<=0 falls back to Block (the configured permanent ban duration).
+func (s *CrowdSecSink) BlockFor(ip string, ttl time.Duration) error {
+	if ttl <= 0 {
+		return s.Block(ip)
+	}
+	return s.blockWithDuration(ip, ttl)
+}
+
+// blockWithDuration pushes a ban alert for ip to the CrowdSec LAPI
+// (/v1/alerts) with the given decision duration.
+func (s *CrowdSecSink) blockWithDuration(ip string, dur time.Duration) error {
 	ctx := context.Background()
 	now := time.Now().UTC().Format(time.RFC3339)
 
@@ -116,7 +132,7 @@ func (s *CrowdSecSink) Block(ip string) error {
 	alert := csAlert{
 		Capacity: 0,
 		Decisions: []csDecision{{
-			Duration: s.banDur.String(),
+			Duration: dur.String(),
 			IP:       ip,
 			Origin:   "federloom",
 			Scenario: "federloom/reputation",

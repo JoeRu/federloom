@@ -5,7 +5,10 @@
 // .claude/skills/enforce-backend.
 package enforce
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 // Sink applies block decisions to a firewall backend.
 // Implementations must be safe for concurrent use.
@@ -15,6 +18,10 @@ type Sink interface {
 	Start(ctx context.Context) error
 	// Block adds ip to the deny set.
 	Block(ip string) error
+	// BlockFor adds ip to the deny set with a TTL after which the backend
+	// auto-removes it. Used for provisional (federated) blocks. ttl<=0 behaves
+	// like Block (permanent).
+	BlockFor(ip string, ttl time.Duration) error
 	// Unblock removes ip from the deny set.
 	Unblock(ip string) error
 	// Close releases any resources held by the backend (does NOT flush the deny set).

@@ -3,7 +3,9 @@ package enforce
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
+	"time"
 )
 
 // captureRun records ipset/iptables invocations for assertion.
@@ -67,10 +69,10 @@ func TestIpsetStartCreatesHashNetIPv6Set(t *testing.T) {
 	if err := s.Start(context.Background()); err != nil {
 		t.Fatalf("Start: %v", err)
 	}
-	if !hasCall(calls, "ipset", "create", "federloom6", "hash:net", "family", "inet6", "-exist") {
+	if !hasCall(calls, "ipset", "create", "federloom6", "hash:net", "family", "inet6", "timeout", "0", "-exist") {
 		t.Errorf("IPv6 set must be created as hash:net; calls=%v", calls)
 	}
-	if !hasCall(calls, "ipset", "create", "federloom", "hash:ip", "family", "inet", "-exist") {
+	if !hasCall(calls, "ipset", "create", "federloom", "hash:ip", "family", "inet", "timeout", "0", "-exist") {
 		t.Errorf("IPv4 set must stay hash:ip; calls=%v", calls)
 	}
 }
@@ -107,5 +109,44 @@ func TestIpsetStartMigratesHashIpToHashNet(t *testing.T) {
 	}
 	if recreates < 2 {
 		t.Errorf("expected two hash:net create attempts (initial + post-destroy recreate); got %d; calls=%v", recreates, calls)
+	}
+}
+
+func TestIpsetBlockForIssuesTimeout(t *testing.T) {
+	var calls [][]string
+	s := NewIpset("testset", []string{"INPUT"})
+	s.run = func(ctx context.Context, name string, args ...string) error {
+		calls = append(calls, append([]string{name}, args...))
+		return nil
+	}
+	if err := s.BlockFor("203.0.113.9", 90*time.Second); err != nil {
+		t.Fatalf("BlockFor: %v", err)
+	}
+	// Expect: ipset add testset 203.0.113.9 timeout 90 -exist
+	last := calls[len(calls)-1]
+	joined := strings.Join(last, " ")
+	if !strings.Contains(joined, "add testset 203.0.113.9") || !strings.Contains(joined, "timeout 90") {
+		t.Errorf("BlockFor args = %v, want add with 'timeout 90'", last)
+	}
+}
+
+func TestIpsetStartCreatesWithTimeoutCapability(t *testing.T) {
+	var calls [][]string
+	s := NewIpset("testset", []string{"INPUT"})
+	s.run = func(ctx context.Context, name string, args ...string) error {
+		calls = append(calls, append([]string{name}, args...))
+		return nil
+	}
+	_ = s.Start(context.Background())
+	// The v4 create must include "timeout 0" so per-entry timeouts are allowed.
+	found := false
+	for _, c := range calls {
+		j := strings.Join(c, " ")
+		if strings.Contains(j, "create testset hash:ip") && strings.Contains(j, "timeout 0") {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("Start did not create the v4 set with 'timeout 0'; calls=%v", calls)
 	}
 }

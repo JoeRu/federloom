@@ -17,17 +17,28 @@ import (
 	"github.com/JoeRu/federloom/pkg/proto"
 )
 
+// blockForCall records a single BlockFor(ip, ttl) invocation.
+type blockForCall struct {
+	IP  string
+	TTL time.Duration
+}
+
 // mockSink records Block/Unblock calls without touching any real firewall.
 type mockSink struct {
-	blocked   []string
-	unblocked []string
+	blocked    []string
+	unblocked  []string
+	blockedFor []blockForCall
 }
 
 func (m *mockSink) Name() string                  { return "mock" }
 func (m *mockSink) Start(_ context.Context) error { return nil }
 func (m *mockSink) Block(ip string) error         { m.blocked = append(m.blocked, ip); return nil }
-func (m *mockSink) Unblock(ip string) error       { m.unblocked = append(m.unblocked, ip); return nil }
-func (m *mockSink) Close() error                  { return nil }
+func (m *mockSink) BlockFor(ip string, ttl time.Duration) error {
+	m.blockedFor = append(m.blockedFor, blockForCall{ip, ttl})
+	return nil
+}
+func (m *mockSink) Unblock(ip string) error { m.unblocked = append(m.unblocked, ip); return nil }
+func (m *mockSink) Close() error            { return nil }
 
 var _ enforce.Sink = (*mockSink)(nil)
 
