@@ -44,13 +44,16 @@ func TestQuerierFetchesAndCaches(t *testing.T) {
 
 	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 2*time.Second, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount, 0.15)
 
-	rec, ok := q.Query(ctx, "9.9.9.9")
+	rec, subnets, ok := q.Query(ctx, "9.9.9.9")
 	if !ok || rec.Score <= 0 || rec.LastSeen.IsZero() {
 		t.Fatalf("Query = %+v ok=%v, want a positive recomputed score with non-zero LastSeen", rec, ok)
 	}
+	if subnets < 0 {
+		t.Fatalf("subnets = %d, want >= 0", subnets)
+	}
 	// Second query within TTL must hit the cache (no new responder call).
 	before := counter.callCount()
-	if _, ok := q.Query(ctx, "9.9.9.9"); !ok {
+	if _, _, ok := q.Query(ctx, "9.9.9.9"); !ok {
 		t.Fatal("cached query lost the answer")
 	}
 	if counter.callCount() != before {
@@ -58,7 +61,7 @@ func TestQuerierFetchesAndCaches(t *testing.T) {
 	}
 
 	// Unknown IP: no aggregator has it → ok false.
-	if _, ok := q.Query(ctx, "8.8.8.8"); ok {
+	if _, _, ok := q.Query(ctx, "8.8.8.8"); ok {
 		t.Error("unknown IP should return ok=false")
 	}
 }
@@ -93,7 +96,7 @@ func TestQuerierTimeoutDoesNotHang(t *testing.T) {
 	done := make(chan struct{})
 	var gotOK bool
 	go func() {
-		_, gotOK = q.Query(ctx, "9.9.9.9")
+		_, _, gotOK = q.Query(ctx, "9.9.9.9")
 		close(done)
 	}()
 	select {
@@ -125,7 +128,7 @@ func TestQuerierPreservesScoreZeroAnswer(t *testing.T) {
 	defer client.Close()
 
 	q := NewQuerier(client, []peer.AddrInfo{{ID: agg.ID(), Addrs: agg.Addrs()}}, 2*time.Second, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount, 0.15)
-	rec, ok := q.Query(ctx, "7.7.7.7")
+	rec, _, ok := q.Query(ctx, "7.7.7.7")
 	if !ok {
 		t.Fatal("known-but-clean answer (score 0) should return ok=true")
 	}
@@ -146,7 +149,7 @@ func TestQuerierCacheBounded(t *testing.T) {
 	q := NewQuerier(nil, nil, 100*time.Millisecond, time.Minute, testHalfLife, testStrangerCap, testFederationDiscount, 0.15)
 	ips := []string{"10.0.0.1", "10.0.0.2", "10.0.0.3", "10.0.0.4", "10.0.0.5"}
 	for _, ip := range ips {
-		q.Query(context.Background(), ip)
+		_, _, _ = q.Query(context.Background(), ip)
 	}
 	q.mu.Lock()
 	size := len(q.cache)
@@ -206,7 +209,7 @@ func TestQuerierSingleflight(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if rec, ok := q.Query(ctx, "6.6.6.6"); !ok || rec.Score <= 0 {
+			if rec, _, ok := q.Query(ctx, "6.6.6.6"); !ok || rec.Score <= 0 {
 				t.Error("concurrent query lost the answer")
 			}
 		}()

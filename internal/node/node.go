@@ -163,7 +163,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		} else {
 			q := repquery.NewQuerier(t.Host(), aggs, cfg.EffectiveQueryTimeout(), cfg.EffectiveQueryCacheTTL(),
 				halfLife, cfg.Trust.StrangerScoreCap, cfg.Trust.FederationDiscount, cfg.EffectiveDiversityRepeatFactor())
-			resolver = repquery.NewResolver(s, q)
+			resolver = repquery.NewResolver(s, q, nil)
 		}
 	}
 

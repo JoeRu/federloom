@@ -10,13 +10,21 @@ import (
 // miss) the configured aggregators via the querier. It is the single read path
 // the DNSBL and the point-lookup score API consume. Read-only.
 type Resolver struct {
-	local Store
-	q     *Querier // nil = federation disabled
+	local       Store
+	q           *Querier                                            // nil = federation disabled
+	onFederated func(ip string, rec store.ScoreRecord, subnets int) // nil = no materialise
 }
 
-// NewResolver wraps a local store; q may be nil (federation off).
-func NewResolver(local Store, q *Querier) *Resolver {
-	return &Resolver{local: local, q: q}
+// NewResolver wraps a local store; q may be nil (federation off); onFederated
+// may be nil (no materialise). onFederated is invoked on a FEDERATED hit only
+// — the resolver never writes; the callback owner (the node) decides enforcement.
+func NewResolver(local Store, q *Querier, onFederated func(ip string, rec store.ScoreRecord, subnets int)) *Resolver {
+	return &Resolver{local: local, q: q, onFederated: onFederated}
+}
+
+// SetMaterialiser sets (or replaces) the federated-hit callback.
+func (r *Resolver) SetMaterialiser(fn func(ip string, rec store.ScoreRecord, subnets int)) {
+	r.onFederated = fn
 }
 
 // GetScore returns the local record if present, else a federated answer
@@ -30,7 +38,10 @@ func (r *Resolver) GetScore(ip string) (store.ScoreRecord, error) {
 	if !rec.LastSeen.IsZero() || r.q == nil {
 		return rec, nil // local hit, or federation disabled
 	}
-	if rec2, ok := r.q.Query(context.Background(), ip); ok {
+	if rec2, subnets, ok := r.q.Query(context.Background(), ip); ok {
+		if r.onFederated != nil {
+			r.onFederated(ip, rec2, subnets)
+		}
 		return rec2, nil
 	}
 	return rec, nil // federated miss → the (empty) local record

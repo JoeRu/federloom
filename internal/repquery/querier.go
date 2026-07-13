@@ -40,9 +40,10 @@ type Querier struct {
 }
 
 type cacheEntry struct {
-	entry store.ScoreRecord
-	ok    bool
-	at    time.Time
+	entry   store.ScoreRecord
+	subnets int
+	ok      bool
+	at      time.Time
 }
 
 // NewQuerier builds a Querier. aggregators is the trusted set to ask; their
@@ -66,10 +67,11 @@ func NewQuerier(h host.Host, aggregators []peer.AddrInfo, timeout, cacheTTL time
 
 // Query returns the merged (max-score) reputation for ip across aggregators,
 // each aggregator's EvidenceAggregate recomputed into a ScoreRecord under the
-// consumer's own parameters. ok is false if no aggregator returned a
-// non-empty record. Cached by IP; a negative result is cached for a fraction
-// of the TTL to avoid hammering.
-func (q *Querier) Query(ctx context.Context, ip string) (store.ScoreRecord, bool) {
+// consumer's own parameters, plus the subnets diversity count of the
+// aggregate that produced the merged answer. ok is false if no aggregator
+// returned a non-empty record. Cached by IP; a negative result is cached for
+// a fraction of the TTL to avoid hammering.
+func (q *Querier) Query(ctx context.Context, ip string) (store.ScoreRecord, int, bool) {
 	now := time.Now()
 	q.mu.Lock()
 	if c, hit := q.cache[ip]; hit {
@@ -79,33 +81,34 @@ func (q *Querier) Query(ctx context.Context, ip string) (store.ScoreRecord, bool
 		}
 		if now.Sub(c.at) < ttl {
 			q.mu.Unlock()
-			return c.entry, c.ok
+			return c.entry, c.subnets, c.ok
 		}
 	}
 	q.mu.Unlock()
 
 	type qres struct {
-		entry store.ScoreRecord
-		ok    bool
+		entry   store.ScoreRecord
+		subnets int
+		ok      bool
 	}
 	v, _, _ := q.sf.Do(ip, func() (interface{}, error) {
-		merged, ok := q.fanout(ctx, ip)
+		merged, subnets, ok := q.fanout(ctx, ip)
 		q.mu.Lock()
 		if len(q.cache) >= maxCacheEntries {
 			q.evictLocked(time.Now())
 		}
-		q.cache[ip] = cacheEntry{entry: merged, ok: ok, at: time.Now()}
+		q.cache[ip] = cacheEntry{entry: merged, subnets: subnets, ok: ok, at: time.Now()}
 		q.mu.Unlock()
-		return qres{merged, ok}, nil
+		return qres{merged, subnets, ok}, nil
 	})
 	r := v.(qres)
-	return r.entry, r.ok
+	return r.entry, r.subnets, r.ok
 }
 
 // fanout asks every aggregator concurrently within the timeout, recomputes
 // each returned EvidenceAggregate into a ScoreRecord under the consumer's own
 // parameters, and merges by max recomputed score.
-func (q *Querier) fanout(ctx context.Context, ip string) (store.ScoreRecord, bool) {
+func (q *Querier) fanout(ctx context.Context, ip string) (store.ScoreRecord, int, bool) {
 	qctx, cancel := context.WithTimeout(ctx, q.timeout)
 	defer cancel()
 
@@ -122,6 +125,7 @@ func (q *Querier) fanout(ctx context.Context, ip string) (store.ScoreRecord, boo
 	}
 
 	var best store.ScoreRecord
+	bestSubnets := 0
 	found := false
 	reasons := map[string]bool{}
 collect:
@@ -140,6 +144,7 @@ collect:
 			}
 			if !found || rec.Score > best.Score {
 				best = rec
+				bestSubnets = r.ev.DiversityBuckets["subnets"]
 			}
 			found = true
 		case <-qctx.Done():
@@ -154,7 +159,7 @@ collect:
 			best.Reasons = append(best.Reasons, rs)
 		}
 	}
-	return best, found
+	return best, bestSubnets, found
 }
 
 // ask opens a stream to one aggregator, sends the query, reads the answer.
