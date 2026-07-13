@@ -49,7 +49,7 @@ DHT/bloom + materialise-on-verdict remain). Open: P1-2 (diversity), P1-3
 | A2 | Diversity-weighted corroboration (ASN/geo buckets) ✅ resolved — subnet-diversity weighting (score-only; ASN/geo later) | §4.2 | P1-2 |
 | A3 | Dispute / anti-trust votes (the `Disputes` field is on the wire but never populated) | §4.4 | P1-3 |
 | A4 | Applicability weighting / system profile (SBOM matchmaker) | §4.5, §7.6 | P1-6 |
-| A5 | Materialise-on-verdict: a block-worthy *federated* verdict for an IP that contacted you pushes into ipset (O(1) path) — explicitly deferred from E3 until evidence is scale-free | E3 design §8 | P1-1 |
+| A5 | Materialise-on-verdict: a block-worthy *federated* verdict for an IP that contacted you pushes into ipset (O(1) path) — explicitly deferred from E3 until evidence is scale-free ✅ resolved — diversity-gated, TTL-bounded, opt-in | E3 design §8 | P1-1 |
 | A6 | Federation-scale hardening: bloom pre-filter for the federated path, DHT content routing, batch queries | §11.3/§11.4 | P1-1 |
 | A7 | Resource budget + load shedding (CPU/bandwidth budget, graceful degradation) | §11.5 | federation-roadmap Phase 4, never built |
 
@@ -111,7 +111,7 @@ Open question from the critique still to decide at brainstorm: offline ASN
 table (IPtoASN bundled at build) vs. live lookups (privacy leak) vs.
 bucket-by-/16 heuristic (no dependency).
 
-### Step 4 — Materialise-on-verdict → A5
+### Step 4 — Materialise-on-verdict → A5 ✅ done 2026-07-13
 With scale-free evidence (Step 2) + diversity weighting (Step 3), a federated
 verdict is finally trustworthy enough to *push*: block-worthy answer for an IP
 that contacted you → ipset (subject to never-block/whitelist + operator

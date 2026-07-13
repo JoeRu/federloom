@@ -40,7 +40,7 @@ serves as GDPR storage limitation.
 
 > **Current status (2026-07):** the running system push-replicates every event
 > over gossipsub; the on-demand DHT query model and materialize-on-verdict are the
-> *target* (E2 `EvidenceAggregate` import via query path is DONE; see spec traceability table §7.5/§11.4).
+> *target* (E2 `EvidenceAggregate` import via query path is DONE; federated query read path can now materialise a provisional, diversity-gated, TTL-bounded block (opt-in); see spec traceability table §7.5/§11.4).
 
 ## Reputation: push enforcement path vs query read path
 

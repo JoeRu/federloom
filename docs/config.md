@@ -308,6 +308,19 @@ list. Strangers are rejected before their request is read. Defederation
 (adding a peer to `blocked_peers`) is the per-peer off switch; a node with
 no trust anchors answers nobody.
 
+### `federation_materialize`, `federation_block_threshold`, `federation_block_min_subnets`, `federation_block_ttl`
+
+When **enabled** (`federation_materialize: true`, default **false**), a
+block-worthy federated verdict for an IP that contacts a protected service is
+pushed into the firewall as a **provisional, TTL-bounded** block (default 1h,
+`federation_block_ttl`), so subsequent packets drop O(1). It materialises only
+when the locally-recomputed score ≥ `federation_block_threshold` (default 80)
+AND the evidence spans ≥ `federation_block_min_subnets` distinct subnets
+(default 3) — diversity is the Sybil gate. never-block and whitelist always
+win. Local (anchored) blocks are unchanged and permanent; federated blocks
+self-expire and re-materialise if the evidence persists. Off by default: an
+operator must consciously enable remote-sourced kernel drops.
+
 ### `federation_subnet` and `federation_bridge_subnets`
 
 `federation_subnet` names this node's home trust domain (gossip topic). Empty or

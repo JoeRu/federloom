@@ -582,7 +582,7 @@ Honest status of each design area in the current codebase. This table — not th
 | §9 | GDPR framing (cleartext IP, decay = deletion) | `internal/store` (TTL) | DONE |
 | §10 | Never-block set | `internal/enforce` | DONE — incl. public resolvers |
 | §11.3 | O(1) enforcement (ipset/nftables) | `internal/enforce` | DONE |
-| §11.4 | On-demand query / pull transport | `internal/repquery` | PARTIAL — read path via configured aggregators (E3); DHT/bloom + materialise-on-verdict PLANNED |
+| §11.4 | On-demand query / pull transport | `internal/repquery` | DONE — read path (E3) + diversity-gated TTL materialise (Step 4) |
 | §14 | Federation discovery (DHT + relay list) | `internal/discovery` | DONE |
 
 ## 13. Next Steps

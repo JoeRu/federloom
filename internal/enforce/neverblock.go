@@ -35,16 +35,27 @@ type NeverBlockList struct {
 }
 
 // NewNeverBlockList builds a NeverBlockList from the default RFC1918 ranges plus any
-// operator-provided extra CIDRs. Invalid entries in extra are silently skipped.
+// operator-provided extra CIDRs or bare IPs. Invalid entries in extra are silently skipped.
+// Bare IPs are converted to /32 (or /128 for IPv6).
 func NewNeverBlockList(extra []string) *NeverBlockList {
 	all := append(defaultNeverBlock, extra...)
 	var prefixes []netip.Prefix
 	for _, cidr := range all {
+		// Try to parse as a CIDR prefix first
 		prefix, err := netip.ParsePrefix(cidr)
-		if err != nil {
+		if err == nil {
+			prefixes = append(prefixes, prefix.Masked())
 			continue
 		}
-		prefixes = append(prefixes, prefix.Masked())
+		// If that fails, try to parse as a bare IP and convert to /32 or /128
+		if addr, err := netip.ParseAddr(cidr); err == nil {
+			if addr.Is6() {
+				prefix, _ = netip.ParsePrefix(addr.String() + "/128")
+			} else {
+				prefix, _ = netip.ParsePrefix(addr.String() + "/32")
+			}
+			prefixes = append(prefixes, prefix)
+		}
 	}
 	return &NeverBlockList{prefixes: prefixes}
 }
