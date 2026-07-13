@@ -36,7 +36,9 @@ type NeverBlockList struct {
 
 // NewNeverBlockList builds a NeverBlockList from the default RFC1918 ranges plus any
 // operator-provided extra CIDRs or bare IPs. Invalid entries in extra are silently skipped.
-// Bare IPs are converted to /32 (or /128 for IPv6).
+// Bare IPv4 (including IPv4-mapped IPv6 literals, e.g. "::ffff:203.0.113.7") is converted
+// to /32; bare IPv6 is converted to /128. Zoned IPv6 literals (e.g. "fe80::1%eth0") cannot
+// form a valid prefix and are skipped.
 func NewNeverBlockList(extra []string) *NeverBlockList {
 	all := append(defaultNeverBlock, extra...)
 	var prefixes []netip.Prefix
@@ -49,12 +51,18 @@ func NewNeverBlockList(extra []string) *NeverBlockList {
 		}
 		// If that fails, try to parse as a bare IP and convert to /32 or /128
 		if addr, err := netip.ParseAddr(cidr); err == nil {
-			if addr.Is6() {
-				prefix, _ = netip.ParsePrefix(addr.String() + "/128")
-			} else {
-				prefix, _ = netip.ParsePrefix(addr.String() + "/32")
+			addr = addr.Unmap() // treat ::ffff:1.2.3.4 as 1.2.3.4, matching KeyAddr on the query side
+			if addr.Zone() != "" {
+				continue // zoned addresses cannot be a prefix / never-block entry
 			}
-			prefixes = append(prefixes, prefix)
+			bits := 32
+			if addr.Is6() {
+				bits = 128
+			}
+			p := netip.PrefixFrom(addr, bits) // exact host prefix; no string round-trip / zone pitfalls
+			if p.IsValid() {
+				prefixes = append(prefixes, p)
+			}
 		}
 	}
 	return &NeverBlockList{prefixes: prefixes}
