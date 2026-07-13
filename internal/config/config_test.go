@@ -419,3 +419,23 @@ func TestEffectiveDiversityRepeatFactor(t *testing.T) {
 		t.Errorf("Defaults DiversityRepeatFactor = %v, want 0.15", got)
 	}
 }
+
+func TestFederationMaterializeDefaults(t *testing.T) {
+	d := config.Defaults()
+	if d.FederationMaterialize {
+		t.Error("FederationMaterialize must default OFF")
+	}
+	if d.FederationBlockThreshold != 80 {
+		t.Errorf("FederationBlockThreshold default = %v, want 80", d.FederationBlockThreshold)
+	}
+	if d.FederationBlockMinSubnets != 3 {
+		t.Errorf("FederationBlockMinSubnets default = %v, want 3", d.FederationBlockMinSubnets)
+	}
+	if got := config.Defaults().EffectiveFederationBlockTTL(); got != time.Hour {
+		t.Errorf("EffectiveFederationBlockTTL default = %v, want 1h", got)
+	}
+	// Unset (<=0) TTL → default 1h.
+	if got := (&config.Config{}).EffectiveFederationBlockTTL(); got != time.Hour {
+		t.Errorf("unset TTL = %v, want 1h", got)
+	}
+}

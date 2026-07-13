@@ -47,22 +47,26 @@ type DNSBLConfig struct {
 
 // Config is the top-level runtime configuration.
 type Config struct {
-	FederationMode          string              `yaml:"federation_mode"`
-	FederationSubnet        string              `yaml:"federation_subnet"`          // home trust domain; "" or "default" = base topic
-	FederationBridgeSubnets []string            `yaml:"federation_bridge_subnets"`  // subnets this node bridges (empty = leaf)
-	FederationAggregators   []string            `yaml:"federation_aggregators"`     // aggregator peer multiaddrs to query on a local miss (empty = off)
-	FederationQueryTimeout  Duration            `yaml:"federation_query_timeout"`   // per-query deadline; default 150ms
-	FederationQueryCacheTTL Duration            `yaml:"federation_query_cache_ttl"` // cache TTL for federated answers; default 5m
-	Store                   StoreConfig         `yaml:"store"`
-	Reputation              ReputationConfig    `yaml:"reputation"`
-	Ingest                  IngestConfig        `yaml:"ingest"`
-	Enforce                 EnforceConfig       `yaml:"enforce"`
-	Trust                   TrustConfig         `yaml:"trust"`
-	Observability           ObservabilityConfig `yaml:"observability"`
-	API                     APIConfig           `yaml:"api"`
-	BootstrapPeers          []string            `yaml:"bootstrap_peers"`
-	DNSBL                   DNSBLConfig         `yaml:"dnsbl"`
-	Discovery               DiscoveryConfig     `yaml:"discovery"`
+	FederationMode            string              `yaml:"federation_mode"`
+	FederationSubnet          string              `yaml:"federation_subnet"`            // home trust domain; "" or "default" = base topic
+	FederationBridgeSubnets   []string            `yaml:"federation_bridge_subnets"`    // subnets this node bridges (empty = leaf)
+	FederationAggregators     []string            `yaml:"federation_aggregators"`       // aggregator peer multiaddrs to query on a local miss (empty = off)
+	FederationQueryTimeout    Duration            `yaml:"federation_query_timeout"`     // per-query deadline; default 150ms
+	FederationQueryCacheTTL   Duration            `yaml:"federation_query_cache_ttl"`   // cache TTL for federated answers; default 5m
+	FederationMaterialize     bool                `yaml:"federation_materialize"`       // push block-worthy federated verdicts into the firewall (default OFF)
+	FederationBlockThreshold  float64             `yaml:"federation_block_threshold"`   // recomputed-score floor to materialise (default 80)
+	FederationBlockMinSubnets int                 `yaml:"federation_block_min_subnets"` // evidence subnet-diversity floor to materialise (default 3)
+	FederationBlockTTL        Duration            `yaml:"federation_block_ttl"`         // TTL of a materialised federated block (default 1h)
+	Store                     StoreConfig         `yaml:"store"`
+	Reputation                ReputationConfig    `yaml:"reputation"`
+	Ingest                    IngestConfig        `yaml:"ingest"`
+	Enforce                   EnforceConfig       `yaml:"enforce"`
+	Trust                     TrustConfig         `yaml:"trust"`
+	Observability             ObservabilityConfig `yaml:"observability"`
+	API                       APIConfig           `yaml:"api"`
+	BootstrapPeers            []string            `yaml:"bootstrap_peers"`
+	DNSBL                     DNSBLConfig         `yaml:"dnsbl"`
+	Discovery                 DiscoveryConfig     `yaml:"discovery"`
 }
 
 // StoreConfig configures the BadgerDB reputation store.
@@ -216,8 +220,10 @@ type DiscoveryConfig struct {
 // Defaults returns a Config with sensible production defaults.
 func Defaults() *Config {
 	return &Config{
-		FederationMode: "solo",
-		Store:          StoreConfig{Dir: "data/reputation"},
+		FederationMode:            "solo",
+		FederationBlockThreshold:  80,
+		FederationBlockMinSubnets: 3,
+		Store:                     StoreConfig{Dir: "data/reputation"},
 		Reputation: ReputationConfig{
 			HalfLife:         Duration{7 * 24 * time.Hour},
 			BlockThreshold:   75,
@@ -381,6 +387,15 @@ func (c *Config) EffectiveQueryCacheTTL() time.Duration {
 		return 5 * time.Minute
 	}
 	return c.FederationQueryCacheTTL.Duration
+}
+
+// EffectiveFederationBlockTTL returns the TTL for a materialised federated
+// block, defaulting to 1h when unset.
+func (c *Config) EffectiveFederationBlockTTL() time.Duration {
+	if c.FederationBlockTTL.Duration <= 0 {
+		return time.Hour
+	}
+	return c.FederationBlockTTL.Duration
 }
 
 // EffectiveDiversityRepeatFactor returns the subnet-diversity repeat weight,
