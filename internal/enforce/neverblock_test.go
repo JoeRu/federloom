@@ -32,6 +32,25 @@ func TestNeverBlockExtraWhitelist(t *testing.T) {
 	}
 }
 
+// TestNeverBlockAcceptsBareIP: a bare (non-CIDR) IP in the extra list is
+// honored as an exact /32 (or /128) entry — previously such entries were
+// silently skipped, leaving an operator who wrote a bare IP unprotected.
+func TestNeverBlockAcceptsBareIP(t *testing.T) {
+	nbl := enforce.NewNeverBlockList([]string{"203.0.113.7", "2001:db8::1"})
+	if !nbl.Contains("203.0.113.7") {
+		t.Error("bare IPv4 203.0.113.7 should be never-blocked (as /32)")
+	}
+	if nbl.Contains("203.0.113.8") {
+		t.Error("bare-IP entry must be exact /32, not a wider range")
+	}
+	if !nbl.Contains("2001:db8::1") {
+		t.Error("bare IPv6 2001:db8::1 should be never-blocked (as /128)")
+	}
+	if nbl.Contains("2001:db8::2") {
+		t.Error("bare IPv6 entry must be exact /128, not wider")
+	}
+}
+
 func TestNeverBlockIPv6Loopback(t *testing.T) {
 	nbl := enforce.NewNeverBlockList(nil)
 	if !nbl.Contains("::1") {
