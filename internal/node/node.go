@@ -185,7 +185,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 
 	dedup := newDedupCache(100_000, 10*time.Minute)
 
-	return &Node{
+	n := &Node{
 		cfg:         cfg,
 		transport:   t,
 		store:       s,
@@ -205,7 +205,13 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		dnsbl:       dnsblSrv,
 		discovery:   disc,
 		dedup:       dedup,
-	}, nil
+	}
+
+	if resolver != nil && cfg.FederationMaterialize {
+		resolver.SetMaterialiser(n.materialiseFederated)
+	}
+
+	return n, nil
 }
 
 // Run starts all subsystems and blocks until ctx is cancelled.
@@ -544,6 +550,41 @@ func (n *Node) SetTrustReloadInterval(d time.Duration) {
 // observe Block/Unblock decisions through a mock sink without touching a real
 // firewall. Not called in production paths.
 func (n *Node) SetSinkForTest(s enforce.Sink) { n.sink = s }
+
+// materialiseFederated is the callback the resolver invokes on a federated hit.
+// It applies the federated block gate (design 2026-07-13 §4) and, on pass,
+// pushes a TTL-bounded block. Read of n.sink is deferred so SetSinkForTest works.
+func (n *Node) materialiseFederated(ip string, rec store.ScoreRecord, subnets int) {
+	if !n.cfg.FederationMaterialize {
+		return
+	}
+	if n.neverblock.Contains(ip) || n.whitelist.Contains(ip) {
+		return // never-block / whitelist always win
+	}
+	if rec.Score < n.cfg.FederationBlockThreshold || subnets < n.cfg.FederationBlockMinSubnets {
+		return // not block-worthy or insufficient diversity
+	}
+	ttl := n.cfg.EffectiveFederationBlockTTL()
+	if err := n.sink.BlockFor(ip, ttl); err != nil {
+		log.Printf("node: materialise block %s: %v", ip, err)
+		return
+	}
+	log.Printf("node: materialised federated block %s (score=%.1f subnets=%d ttl=%s)", ip, rec.Score, subnets, ttl)
+	n.obs.RecordBlock(ip, "federated-materialise", rec.Score, rec.FirstSeen, rec.Corroboration)
+}
+
+// ScoreViaPointReaderForTest routes an IP through the API point reader (the same
+// resolver the DNSBL/API use), so tests can drive the federated read+materialise
+// path. Test-only.
+func (n *Node) ScoreViaPointReaderForTest(ip string) (store.ScoreRecord, error) {
+	return n.api.PointLookupForTest(ip)
+}
+
+// MaterialiseForTest drives the federated materialise gate directly with a
+// crafted verdict, bypassing the resolver wiring. Test-only.
+func (n *Node) MaterialiseForTest(ip string, rec store.ScoreRecord, subnets int) {
+	n.materialiseFederated(ip, rec, subnets)
+}
 
 // CloseStores releases BadgerDB resources. Call in tests that build a Node
 // outside of Run (which closes the store via defer on return).
