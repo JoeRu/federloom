@@ -160,3 +160,51 @@ func TestMaterialiseFederatedVerdict(t *testing.T) {
 		t.Fatalf("expected MaterialiseForTest to materialise 203.0.113.94, got %+v", sink.blockedFor)
 	}
 }
+
+// matNode builds a materialise-configured node (no transport needed — cases
+// drive the gate directly via MaterialiseForTest) with a recording sink.
+func matNode(t *testing.T, enabled bool) (*node.Node, *recSink) {
+	t.Helper()
+	cfg := config.Defaults()
+	cfg.Store.Dir = t.TempDir()
+	cfg.FederationMaterialize = enabled
+	n, err := node.New(cfg, nil)
+	if err != nil {
+		t.Fatalf("node.New: %v", err)
+	}
+	t.Cleanup(func() { n.CloseStores() })
+	sink := &recSink{}
+	n.SetSinkForTest(sink)
+	return n, sink
+}
+
+// TestMaterialiseGateIsANDNotOR isolates each half of the score∧subnets gate:
+// a high-score/low-subnet verdict and a low-score/high-subnet verdict must both
+// be refused. The main test's low-diversity fixture fails BOTH halves at once,
+// so it cannot catch an accidental || → && (OR-gate) regression; these do.
+func TestMaterialiseGateIsANDNotOR(t *testing.T) {
+	// High score (90 ≥ 80), low subnets (1 < 3) → must NOT materialise.
+	n1, s1 := matNode(t, true)
+	n1.MaterialiseForTest("203.0.113.100", store.ScoreRecord{Score: 90, LastSeen: time.Now()}, 1)
+	if len(s1.blockedFor) != 0 {
+		t.Errorf("high-score/low-subnet must not materialise (subnet floor); got %+v", s1.blockedFor)
+	}
+
+	// Low score (40 < 80), high subnets (8 ≥ 3) → must NOT materialise.
+	n2, s2 := matNode(t, true)
+	n2.MaterialiseForTest("203.0.113.101", store.ScoreRecord{Score: 40, LastSeen: time.Now()}, 8)
+	if len(s2.blockedFor) != 0 {
+		t.Errorf("low-score/high-subnet must not materialise (score threshold); got %+v", s2.blockedFor)
+	}
+}
+
+// TestMaterialiseOptInOff proves the opt-in invariant: with
+// federation_materialize disabled, an otherwise block-worthy verdict produces
+// zero firewall writes (behaviour is byte-for-byte the read-only path).
+func TestMaterialiseOptInOff(t *testing.T) {
+	n, sink := matNode(t, false) // disabled
+	n.MaterialiseForTest("203.0.113.95", store.ScoreRecord{Score: 99, LastSeen: time.Now()}, 10)
+	if len(sink.blockedFor) != 0 {
+		t.Errorf("disabled materialise must be a no-op; got %+v", sink.blockedFor)
+	}
+}
