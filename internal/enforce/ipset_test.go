@@ -150,3 +150,25 @@ func TestIpsetStartCreatesWithTimeoutCapability(t *testing.T) {
 		t.Errorf("Start did not create the v4 set with 'timeout 0'; calls=%v", calls)
 	}
 }
+
+func TestBlockForErrorIsActionable(t *testing.T) {
+	s := NewIpset("federloom", []string{"INPUT"})
+	// Mock run to return a timeout-support error
+	s.run = func(ctx context.Context, name string, args ...string) error {
+		if name == "ipset" && len(args) > 0 && args[0] == "add" {
+			return fmt.Errorf("set was created without timeout support")
+		}
+		return nil
+	}
+	err := s.BlockFor("203.0.113.50", 60*time.Second)
+	if err == nil {
+		t.Fatal("BlockFor should return an error")
+	}
+	errMsg := err.Error()
+	if !strings.Contains(errMsg, "without timeout support") {
+		t.Errorf("error should contain 'without timeout support' hint, got: %s", errMsg)
+	}
+	if !strings.Contains(errMsg, "recreate it or redeploy") {
+		t.Errorf("error should contain 'recreate it or redeploy' hint, got: %s", errMsg)
+	}
+}

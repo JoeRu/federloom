@@ -99,7 +99,7 @@ func (s *IpsetSink) BlockFor(ip string, ttl time.Duration) error {
 	set := s.ipSet(ip)
 	secs := strconv.Itoa(int(ttl.Seconds()))
 	if err := s.run(ctx, "ipset", "add", set, ip, "timeout", secs, "-exist"); err != nil {
-		return fmt.Errorf("enforce/ipset: blockFor %s: %w", ip, err)
+		return fmt.Errorf("enforce/ipset: blockFor %s: %w (if this reports 'without timeout support', the ipset set %q predates the materialise feature — recreate it or redeploy the node)", ip, err, set)
 	}
 	return nil
 }

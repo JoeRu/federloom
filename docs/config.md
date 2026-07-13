@@ -321,6 +321,13 @@ win. Local (anchored) blocks are unchanged and permanent; federated blocks
 self-expire and re-materialise if the evidence persists. Off by default: an
 operator must consciously enable remote-sourced kernel drops.
 
+**Upgrade note:** materialised blocks use timeouts, which require an
+ipset/nftables set created with timeout capability. A node **upgraded in place**
+from a version before this feature keeps its old (no-timeout) set, and
+materialise `BlockFor` calls will be rejected (logged, no block applied — it
+fails safe). Recreate the deny set (or redeploy the node) before enabling
+`federation_materialize` on an upgraded node. Fresh deploys are unaffected.
+
 ### `federation_subnet` and `federation_bridge_subnets`
 
 `federation_subnet` names this node's home trust domain (gossip topic). Empty or

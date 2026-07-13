@@ -104,6 +104,7 @@ func TestMaterialiseFederatedVerdict(t *testing.T) {
 	cfg.Store.Dir = t.TempDir()
 	cfg.FederationMaterialize = true
 	cfg.FederationAggregators = []string{aggMultiaddr(t, bHost)}
+	cfg.FederationQueryTimeout = config.Duration{Duration: 5 * time.Second}
 
 	// Pre-seed A's local-only whitelist so the never-block/whitelist gate has
 	// something to catch, before the node (and its WhitelistStore) is built.
