@@ -49,3 +49,11 @@ func TestAggregateShipsSubnetsBucket(t *testing.T) {
 	// Names never leave the node — only the count.
 	// (Structural: EvidenceAggregate has no subnet-names field.)
 }
+
+func TestAggregateShipsDisputeSubnets(t *testing.T) {
+	r := store.ScoreRecord{LastSeen: time.Now(), DisputeSubnetsSeen: []string{"a", "b"}}
+	ev := AggregateFromRecord("203.0.113.7", r)
+	if ev.DiversityBuckets["dispute_subnets"] != 2 {
+		t.Errorf("dispute_subnets bucket = %d, want 2", ev.DiversityBuckets["dispute_subnets"])
+	}
+}

@@ -24,7 +24,7 @@ func TestInflatedBucketsCannotForceBlock(t *testing.T) {
 		StrangersPresent: true,
 		EvidenceWeight:   1.0,
 	}
-	rec := repquery.RecordFromEvidence(ev, now, 7*24*time.Hour, 15, 0.5, 0.15)
+	rec := repquery.RecordFromEvidence(ev, now, 7*24*time.Hour, 15, 0.5, 0.15, 10)
 
 	if len(rec.Groups) != 0 || rec.Corroboration != 0 {
 		t.Fatalf("federated evidence manufactured corroboration: Groups=%v Corr=%d", rec.Groups, rec.Corroboration)

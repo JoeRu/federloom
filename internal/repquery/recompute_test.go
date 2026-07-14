@@ -20,7 +20,7 @@ func TestRecordFromEvidenceRecomputesLocally(t *testing.T) {
 		StrangersPresent: false,
 		EvidenceWeight:   1.0,
 	}
-	rec := RecordFromEvidence(ev, now, 7*24*time.Hour, 15, 0.5, 0.15)
+	rec := RecordFromEvidence(ev, now, 7*24*time.Hour, 15, 0.5, 0.15, 10)
 
 	// Score is recomputed locally and positive; more groups => higher.
 	if rec.Score <= 0 {
@@ -38,7 +38,7 @@ func TestRecordFromEvidenceRecomputesLocally(t *testing.T) {
 	// More groups => strictly higher score (diversity is carried across the import).
 	evMore := ev
 	evMore.DiversityBuckets = map[string]int{"groups": 6, "reporters": 12}
-	recMore := RecordFromEvidence(evMore, now, 7*24*time.Hour, 15, 0.5, 0.15)
+	recMore := RecordFromEvidence(evMore, now, 7*24*time.Hour, 15, 0.5, 0.15, 10)
 	if recMore.Score <= rec.Score {
 		t.Errorf("more groups should recompute higher: %v !> %v", recMore.Score, rec.Score)
 	}
@@ -47,7 +47,7 @@ func TestRecordFromEvidenceRecomputesLocally(t *testing.T) {
 func TestRecordFromEvidenceNotFoundAndStrangerOnly(t *testing.T) {
 	now := time.Now().UTC()
 	// Zero WindowLast => empty record (not found).
-	empty := RecordFromEvidence(proto.EvidenceAggregate{IP: "1.1.1.1"}, now, time.Hour, 15, 0.5, 0.15)
+	empty := RecordFromEvidence(proto.EvidenceAggregate{IP: "1.1.1.1"}, now, time.Hour, 15, 0.5, 0.15, 10)
 	if !empty.LastSeen.IsZero() || empty.Score != 0 {
 		t.Errorf("not-found evidence should yield empty record, got %+v", empty)
 	}
@@ -56,7 +56,7 @@ func TestRecordFromEvidenceNotFoundAndStrangerOnly(t *testing.T) {
 		IP: "2.2.2.2", Scenarios: []string{"smtp-spamtrap"}, WindowLast: now,
 		DiversityBuckets: map[string]int{"groups": 0, "reporters": 5}, StrangersPresent: true, EvidenceWeight: 1.0,
 	}
-	rec := RecordFromEvidence(strangerOnly, now, 7*24*time.Hour, 15, 0.5, 0.15)
+	rec := RecordFromEvidence(strangerOnly, now, 7*24*time.Hour, 15, 0.5, 0.15, 10)
 	if rec.Score > 15.001 {
 		t.Errorf("stranger-only evidence exceeded local cap: %v", rec.Score)
 	}
@@ -87,7 +87,7 @@ func TestRecordFromEvidenceFoldCapBounds(t *testing.T) {
 
 	done := make(chan store.ScoreRecord, 1)
 	go func() {
-		done <- RecordFromEvidence(huge, now, 7*24*time.Hour, 15, 0.5, 0.15)
+		done <- RecordFromEvidence(huge, now, 7*24*time.Hour, 15, 0.5, 0.15, 10)
 	}()
 	var recHuge store.ScoreRecord
 	select {
@@ -96,7 +96,7 @@ func TestRecordFromEvidenceFoldCapBounds(t *testing.T) {
 		t.Fatal("RecordFromEvidence with groups=1_000_000 did not return promptly; fold cap not applied")
 	}
 
-	recCapped := RecordFromEvidence(capped, now, 7*24*time.Hour, 15, 0.5, 0.15)
+	recCapped := RecordFromEvidence(capped, now, 7*24*time.Hour, 15, 0.5, 0.15, 10)
 
 	if recHuge.Score != recCapped.Score {
 		t.Errorf("groups=1_000_000 should score identically to capped groups=64: %v != %v", recHuge.Score, recCapped.Score)
@@ -125,13 +125,13 @@ func TestRecordFromEvidenceClampsWeight(t *testing.T) {
 		}
 	}
 
-	recHigh := RecordFromEvidence(mk(5.0), now, 7*24*time.Hour, 15, 0.5, 0.15)
-	recOne := RecordFromEvidence(mk(1.0), now, 7*24*time.Hour, 15, 0.5, 0.15)
+	recHigh := RecordFromEvidence(mk(5.0), now, 7*24*time.Hour, 15, 0.5, 0.15, 10)
+	recOne := RecordFromEvidence(mk(1.0), now, 7*24*time.Hour, 15, 0.5, 0.15, 10)
 	if recHigh.Score != recOne.Score {
 		t.Errorf("EvidenceWeight=5.0 should clamp to 1.0: %v != %v", recHigh.Score, recOne.Score)
 	}
 
-	recNeg := RecordFromEvidence(mk(-3.0), now, 7*24*time.Hour, 15, 0.5, 0.15)
+	recNeg := RecordFromEvidence(mk(-3.0), now, 7*24*time.Hour, 15, 0.5, 0.15, 10)
 	if recNeg.Score != 0 {
 		t.Errorf("EvidenceWeight=-3.0 should clamp to 0 trust and yield score 0, got %v", recNeg.Score)
 	}
@@ -151,7 +151,7 @@ func TestRecordFromEvidenceNaNWeightYieldsFiniteScore(t *testing.T) {
 		DiversityBuckets: map[string]int{"groups": 3},
 		EvidenceWeight:   math.NaN(),
 	}
-	rec := RecordFromEvidence(ev, now, 7*24*time.Hour, 15, 0.5, 0.15)
+	rec := RecordFromEvidence(ev, now, 7*24*time.Hour, 15, 0.5, 0.15, 10)
 
 	if rec.Score != rec.Score { // NaN != NaN
 		t.Fatalf("expected finite Score, got NaN")
@@ -177,8 +177,8 @@ func TestRecordFromEvidenceSubnetCapsDiversity(t *testing.T) {
 	manySubnets := base
 	manySubnets.DiversityBuckets = map[string]int{"groups": 40, "subnets": 40}
 
-	low := RecordFromEvidence(oneSubnet, now, hl, 15, 0.5, 0.15)
-	high := RecordFromEvidence(manySubnets, now, hl, 15, 0.5, 0.15)
+	low := RecordFromEvidence(oneSubnet, now, hl, 15, 0.5, 0.15, 10)
+	high := RecordFromEvidence(manySubnets, now, hl, 15, 0.5, 0.15, 10)
 
 	// Same group count (40), different subnet diversity: the broad answer must
 	// score strictly higher (its votes are all full-weight; the one-subnet
@@ -193,5 +193,24 @@ func TestRecordFromEvidenceSubnetCapsDiversity(t *testing.T) {
 	// Invariant intact.
 	if len(low.Groups) != 0 || low.Corroboration != 0 {
 		t.Errorf("federated record leaked corroboration: %+v", low)
+	}
+}
+
+func TestRecordFromEvidenceDisputesLowerScore(t *testing.T) {
+	now := time.Now().UTC()
+	hl := 7 * 24 * time.Hour
+	base := proto.EvidenceAggregate{
+		IP: "203.0.113.7", Scenarios: []string{"ssh-auth-success"}, WindowLast: now, EvidenceWeight: 1.0,
+		DiversityBuckets: map[string]int{"groups": 10, "subnets": 10},
+	}
+	undisputed := RecordFromEvidence(base, now, hl, 15, 0.5, 0.15, 10)
+	disputedEv := base
+	disputedEv.DiversityBuckets = map[string]int{"groups": 10, "subnets": 10, "dispute_subnets": 8}
+	disputed := RecordFromEvidence(disputedEv, now, hl, 15, 0.5, 0.15, 10)
+	if !(disputed.Score < undisputed.Score) {
+		t.Errorf("dispute_subnets must lower the recomputed score: %v !< %v", disputed.Score, undisputed.Score)
+	}
+	if len(disputed.Groups) != 0 { // Groups-empty invariant (E2) preserved
+		t.Errorf("recompute must not leak Groups: %+v", disputed)
 	}
 }

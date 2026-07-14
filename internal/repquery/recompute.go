@@ -37,7 +37,7 @@ func maxWeightScenario(scenarios []string) string {
 // Corroboration is 0. The synthetic anchored votes drive the SCORE only; the
 // answer must never satisfy the anchored-corroboration block backstop
 // (len(rec.Groups) > 0). The score alone is advisory (DNSBL/API), threshold-governed.
-func RecordFromEvidence(ev proto.EvidenceAggregate, now time.Time, halfLife time.Duration, strangerCap, federationDiscount, diversityRepeat float64) store.ScoreRecord {
+func RecordFromEvidence(ev proto.EvidenceAggregate, now time.Time, halfLife time.Duration, strangerCap, federationDiscount, diversityRepeat, disputeWeight float64) store.ScoreRecord {
 	if ev.WindowLast.IsZero() {
 		return store.ScoreRecord{} // not found
 	}
@@ -86,6 +86,16 @@ func RecordFromEvidence(ev proto.EvidenceAggregate, now time.Time, halfLife time
 		folded = reputation.Accumulate(folded, reputation.Observation{
 			Reason: reason, ReporterID: "fed-stranger", Trust: trust, Anchored: false,
 		}, ev.WindowLast, halfLife, strangerCap, 1.0)
+	}
+
+	disputeSubnets := ev.DiversityBuckets["dispute_subnets"]
+	if disputeSubnets > maxEvidenceFolds {
+		disputeSubnets = maxEvidenceFolds
+	}
+	for i := 0; i < disputeSubnets; i++ {
+		folded = reputation.ApplyDispute(folded, reputation.Observation{
+			ReporterID: "fed-dispute", Subnet: "fed-d" + strconv.Itoa(i), Trust: trust, Anchored: true,
+		}, ev.WindowLast, halfLife, disputeWeight, strangerCap, diversityRepeat)
 	}
 
 	score := reputation.DecayScore(folded.Score, ev.WindowLast, now, halfLife)

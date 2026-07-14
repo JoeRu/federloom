@@ -15,9 +15,10 @@ func AggregateFromRecord(ip string, r store.ScoreRecord) proto.EvidenceAggregate
 		WindowFirst: r.FirstSeen,
 		WindowLast:  r.LastSeen, // zero => "not found" sentinel
 		DiversityBuckets: map[string]int{
-			"groups":    len(r.Groups),
-			"reporters": len(r.ReporterIDs),
-			"subnets":   len(r.SubnetsSeen),
+			"groups":          len(r.Groups),
+			"reporters":       len(r.ReporterIDs),
+			"subnets":         len(r.SubnetsSeen),
+			"dispute_subnets": len(r.DisputeSubnetsSeen),
 		},
 		StrangersPresent: r.StrangerSeen,
 		EvidenceWeight:   1.0,
