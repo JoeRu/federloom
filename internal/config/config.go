@@ -57,6 +57,8 @@ type Config struct {
 	FederationBlockThreshold  float64             `yaml:"federation_block_threshold"`   // recomputed-score floor to materialise (default 80)
 	FederationBlockMinSubnets int                 `yaml:"federation_block_min_subnets"` // evidence subnet-diversity floor to materialise (default 3)
 	FederationBlockTTL        Duration            `yaml:"federation_block_ttl"`         // TTL of a materialised federated block (default 1h)
+	DisputeWeight             float64             `yaml:"dispute_weight"`               // per-vote downward strength (default 10)
+	DisputeUnblockMinSubnets  int                 `yaml:"dispute_unblock_min_subnets"`  // distinct disputing subnets to unblock a materialised federated block (default 3)
 	Store                     StoreConfig         `yaml:"store"`
 	Reputation                ReputationConfig    `yaml:"reputation"`
 	Ingest                    IngestConfig        `yaml:"ingest"`
@@ -223,6 +225,7 @@ func Defaults() *Config {
 		FederationMode:            "solo",
 		FederationBlockThreshold:  80,
 		FederationBlockMinSubnets: 3,
+		DisputeUnblockMinSubnets:  3,
 		Store:                     StoreConfig{Dir: "data/reputation"},
 		Reputation: ReputationConfig{
 			HalfLife:         Duration{7 * 24 * time.Hour},
@@ -410,4 +413,12 @@ func (c *Config) EffectiveDiversityRepeatFactor() float64 {
 		return 1.0
 	}
 	return f
+}
+
+// EffectiveDisputeWeight returns the per-vote dispute strength, defaulting to 10.
+func (c *Config) EffectiveDisputeWeight() float64 {
+	if c.DisputeWeight <= 0 {
+		return 10
+	}
+	return c.DisputeWeight
 }

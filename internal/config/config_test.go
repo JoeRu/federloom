@@ -439,3 +439,16 @@ func TestFederationMaterializeDefaults(t *testing.T) {
 		t.Errorf("unset TTL = %v, want 1h", got)
 	}
 }
+
+func TestDisputeDefaults(t *testing.T) {
+	d := config.Defaults()
+	if d.DisputeUnblockMinSubnets != 3 {
+		t.Errorf("DisputeUnblockMinSubnets default = %d, want 3", d.DisputeUnblockMinSubnets)
+	}
+	if got := config.Defaults().EffectiveDisputeWeight(); got != 10 {
+		t.Errorf("EffectiveDisputeWeight default = %v, want 10", got)
+	}
+	if got := (&config.Config{}).EffectiveDisputeWeight(); got != 10 {
+		t.Errorf("unset dispute weight = %v, want 10", got)
+	}
+}
