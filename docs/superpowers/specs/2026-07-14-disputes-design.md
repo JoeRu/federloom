@@ -40,15 +40,17 @@ signal rides the live federated type, `EvidenceAggregate`, instead.
    disputing subnets × trust; crossing a dispute-diversity threshold actively
    unblocks a materialised federated block and suppresses re-materialisation.
 
-Two further choices adopted (recommended, not separately asked): a small
-**`proto.WhitelistVote` signed envelope** (rather than overloading
-`proto.Event.Reason`, which is an *attack* taxonomy); and **unblock targets
+Two further choices adopted (recommended, not separately asked): the vote is
+carried on the wire as an **`Event` with `Kind:"vote"`** (planning decision
+2026-07-14 — the transport gossips only `Event`; this reuses all of it without
+overloading the attack-taxonomy `Reason`; see §4); and **unblock targets
 federated materialised blocks ONLY** — never a local anchored block, which
 stays under the operator's sovereign control.
 
 ## 3. Scope
 
-**In:** the signed `WhitelistVote` wire envelope + gossip; a disputing-subnet
+**In:** the `Event.Kind:"vote"` wire discriminator + domain-separated vote
+signing + gossip; a disputing-subnet
 diversity tracker on the record + a negative branch in `Accumulate`; the
 `dispute_subnets` bucket in `EvidenceAggregate` + dispute handling in
 `RecordFromEvidence`; unblock-on-dispute-threshold for federated blocks;
@@ -64,44 +66,48 @@ subtracting the dispute contribution.
 
 ---
 
-## 4. Wire: `proto.WhitelistVote` (`pkg/proto`, additive)
+## 4. Wire: a dispute is an `Event` with `Kind:"vote"` (`pkg/proto`, additive)
 
-A dispute federates as a signed envelope around the shared-vote whitelist
-decision — everything needed to authenticate and diversity-weight it:
+**Wire-carriage decision (planning, 2026-07-14):** the transport gossips only
+`proto.Event` (`json.Marshal(proto.Event)` → topic). Rather than build a
+parallel vote gossip channel for a standalone `WhitelistVote` struct, a dispute
+travels as an `Event` with a new discriminator field `Kind`. This reuses the
+entire transport, signing, dedup, anti-spoof guard, gossip, and `ProcessRemote`
+routing — the node branches on `e.Kind`. It does NOT overload `Reason` (the
+attack taxonomy — the concern that ruled out that approach). The
+"`WhitelistVote`" of the original design is the logical view; the wire type is
+`Event`+`Kind`.
 
 ```go
-// WhitelistVote is a signed, federated "this IP is legitimate" dispute
-// (spec §4.4). It is the shared-vote form of a WhitelistEntry (§7.4): an
-// operator's whitelist decision, propagated as a negative, diversity-weighted
-// reputation vote. local-only whitelist entries are NEVER emitted as votes.
-type WhitelistVote struct {
-	IP         string    `json:"ip"`          // single IP / prefix-normalized (never a broad CIDR — see §7)
-	ReporterID string    `json:"reporter_id"` // libp2p peer ID of the disputing node
-	SubnetID   string    `json:"subnet_id"`   // originator's home subnet (diversity key, like an Event)
-	Timestamp  time.Time `json:"timestamp"`
-	Signature  []byte    `json:"signature"`   // over the domain-separated vote message (see signing note below)
-}
+// Event.Kind discriminates a report from a dispute vote. "" (default) = a
+// report/attack observation (backward-compatible); "vote" = a federated
+// shared-vote dispute (spec §4.4): a signed "this IP is legitimate" negative,
+// diversity-weighted reputation vote. A vote reuses Event's IP / ReporterID /
+// SubnetID / Timestamp / Signature; Reason is empty for a vote.
+Kind string `json:"kind,omitempty"`
 ```
 
-**Signing:** reuse the identity machinery with a domain-separated message
-(`identity.SignVote`/`VerifyVoteSig`, mirroring `SignEvent`, over
-`"federloom-vote-v1"|IP|Timestamp|ReporterID`). As with events, `SubnetID` is
-NOT covered by the signature (roadmap B7 — a relay could rewrite it to reduce
-dispute diversity; bounded by the same containment, and disputes only *reduce*
-enforcement so the failure mode is "a bad IP stays blocked", the safe
-direction). The public key is embedded in `ReporterID` (peer ID), so the vote
-authenticates the disputing node for trust resolution.
+**Signing (domain separation):** a vote is signed with a distinct domain
+string so a report and a vote for the same IP are not interchangeable and
+existing report signatures stay byte-for-byte identical. `SignEvent`/
+`VerifyEventSig` select the message by `Kind`: reports keep
+`"federloom-event-v1"|IP|Reason|Timestamp|ReporterID` unchanged; a vote signs
+`"federloom-vote-v1"|IP|Timestamp|ReporterID`. As with events, `SubnetID` is
+not covered (roadmap B7 — a relay could only *reduce* dispute diversity, the
+safe direction: a bad IP stays blocked). The public key is embedded in
+`ReporterID` for trust resolution.
 
-Gossiped on the existing events topic (leaf/bridge behavior identical to
-events); received votes are deduped by the existing dedup cache keyed on
-`(ReporterID, IP, "vote", Timestamp)`.
+Gossiped on the existing events topic via the unchanged `transport.Publish`
+(leaf/bridge behavior identical to events); received votes are deduped by the
+existing dedup cache (its key already includes `Reason` — a vote has
+`Reason:""` and `Kind:"vote"`, distinct from any report, so no collision).
 
 ## 5. Recording & propagation
 
 **Disputing node** (`internal/node`, `internal/store`): `whitelist add
 --shared-vote <ip>` records a `WhitelistEntry{Scope:"shared-vote"}` locally
 (existing store; still gates local blocks via `Contains`) AND publishes a
-signed `WhitelistVote`. `local-only` entries are unchanged and never emitted.
+signed vote `Event` (`Kind:"vote"`). `local-only` entries are unchanged and never emitted.
 A node also records its OWN vote into its store so its local record reflects
 the dispute (and it counts toward the aggregate it may serve).
 
@@ -195,8 +201,10 @@ next lookup and self-clear. The active Unblock makes it prompt.
   N from N subnets pull the score down proportionally; score floors at 0;
   stranger dispute-flood bounded by the cap; report-diversity vs
   dispute-diversity kept separate.
-- **Vote signing/verify:** `SignVote`/`VerifyVoteSig` round-trip; a forged /
-  replayed / blocked-peer vote is dropped (mirror the event tests).
+- **Vote signing/verify:** `SignEvent`/`VerifyEventSig` on a `Kind:"vote"`
+  event round-trip; report signatures stay byte-for-byte unchanged
+  (equivalence); a forged / replayed / blocked-peer vote is dropped (mirror
+  the event tests).
 - **Unblock threshold:** a materialised federated block is Unblocked once
   distinct disputing subnets reach the floor; below the floor it stays;
   re-materialisation is suppressed while disputed. A **local** anchored block
