@@ -3,6 +3,7 @@ package proto_test
 import (
 	"bytes"
 	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
@@ -101,5 +102,19 @@ func TestEvidenceAggregateJSONRoundTrip(t *testing.T) {
 		!back.StrangersPresent || !back.WindowLast.Equal(ev.WindowLast) ||
 		len(back.Scenarios) != 2 {
 		t.Errorf("round trip lost fields: %+v", back)
+	}
+}
+
+func TestEventKindRoundTrip(t *testing.T) {
+	e := proto.Event{IP: "1.2.3.4", Kind: "vote", ReporterID: "r", Timestamp: time.Unix(1, 0).UTC()}
+	b, _ := json.Marshal(e)
+	var back proto.Event
+	if err := json.Unmarshal(b, &back); err != nil || back.Kind != "vote" {
+		t.Errorf("Kind round trip: %v / %+v", err, back)
+	}
+	// Default (report) omits the field.
+	rb, _ := json.Marshal(proto.Event{IP: "1.2.3.4"})
+	if strings.Contains(string(rb), "kind") {
+		t.Errorf("empty Kind must be omitted, got %s", rb)
 	}
 }

@@ -22,6 +22,24 @@ func eventMessage(e proto.Event) []byte {
 		e.ReporterID)
 }
 
+// voteMessage is the canonical byte string signed for a dispute vote
+// (Event.Kind == "vote"), domain-separated from a report so the two are not
+// interchangeable. Reason/PortClass/OriginTrace are not part of a vote.
+func voteMessage(e proto.Event) []byte {
+	return []byte("federloom-vote-v1|" +
+		e.IP + "|" +
+		e.Timestamp.UTC().Format(time.RFC3339Nano) + "|" +
+		e.ReporterID)
+}
+
+// signedMessage returns the canonical bytes for e based on its Kind.
+func signedMessage(e proto.Event) []byte {
+	if e.Kind == "vote" {
+		return voteMessage(e)
+	}
+	return eventMessage(e)
+}
+
 // PeerIDFromPrivKey derives the libp2p peer ID string from priv.
 // The peer ID embeds the public key for Ed25519 keys and is used as ReporterID.
 func PeerIDFromPrivKey(priv libp2pcrypto.PrivKey) (string, error) {
@@ -35,7 +53,7 @@ func PeerIDFromPrivKey(priv libp2pcrypto.PrivKey) (string, error) {
 // SignEvent signs e's content fields with priv and stores the result in e.Signature.
 // Call this in processLocal before publishing, after setting e.ReporterID.
 func SignEvent(e *proto.Event, priv libp2pcrypto.PrivKey) error {
-	sig, err := priv.Sign(eventMessage(*e))
+	sig, err := priv.Sign(signedMessage(*e))
 	if err != nil {
 		return fmt.Errorf("identity: sign event: %w", err)
 	}
@@ -61,7 +79,7 @@ func VerifyEventSig(e proto.Event) error {
 	if err != nil {
 		return fmt.Errorf("identity: extract public key from %q: %w", e.ReporterID, err)
 	}
-	ok, err := pubKey.Verify(eventMessage(e), e.Signature)
+	ok, err := pubKey.Verify(signedMessage(e), e.Signature)
 	if err != nil {
 		return fmt.Errorf("identity: verify event from %s: %w", e.ReporterID, err)
 	}

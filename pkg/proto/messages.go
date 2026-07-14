@@ -20,6 +20,7 @@ type Event struct {
 	SubnetID    string    `json:"subnet"`          // origin trust domain (federation, spec §5)
 	OriginTrace []string  `json:"origin"`          // provenance chain (anti feedback-loop, spec §5.2)
 	Vouch       *PeerCert `json:"vouch,omitempty"` // present if the reporter is vouched by a Person identity (spec §5.1)
+	Kind        string    `json:"kind,omitempty"`  // "" = report/attack (default); "vote" = federated shared-vote dispute (spec §4.4)
 }
 
 // PeerCert binds a node's libp2p peer ID to a Person identity (spec §5.1).
