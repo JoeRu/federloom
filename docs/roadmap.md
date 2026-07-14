@@ -47,7 +47,7 @@ DHT/bloom + materialise-on-verdict remain). Open: P1-2 (diversity), P1-3
 |---|---|---|---|
 | A1 | `EvidenceAggregate` federated import + scale-free local recompute + attested `diversity_buckets`. ✅ resolved | §5.2, §7.5, §8 | P1-1 core |
 | A2 | Diversity-weighted corroboration (ASN/geo buckets) ✅ resolved — subnet-diversity weighting (score-only; ASN/geo later) | §4.2 | P1-2 |
-| A3 | Dispute / anti-trust votes (the `Disputes` field is on the wire but never populated) | §4.4 | P1-3 |
+| A3 | Dispute / anti-trust votes ✅ resolved — federated shared-vote, diversity-weighted, unblock-federated-only | §4.4 | P1-3 |
 | A4 | Applicability weighting / system profile (SBOM matchmaker) | §4.5, §7.6 | P1-6 |
 | A5 | Materialise-on-verdict: a block-worthy *federated* verdict for an IP that contacted you pushes into ipset (O(1) path) — explicitly deferred from E3 until evidence is scale-free ✅ resolved — diversity-gated, TTL-bounded, opt-in | E3 design §8 | P1-1 |
 | A6 | Federation-scale hardening: bloom pre-filter for the federated path, DHT content routing, batch queries | §11.3/§11.4 | P1-1 |
@@ -120,7 +120,7 @@ threshold + the stranger-block backstop analogue for federated evidence).
 Completes E3's "pull discovers, push enforces" synthesis. Security-critical —
 full adversarial scenarios required.
 
-### Step 5 — Disputes / anti-trust votes → A3
+### Step 5 — Disputes / anti-trust votes → A3 ✅ done 2026-07-14
 Populate the existing `Disputes` wire field: signed "this IP is wrongly
 listed" votes, weighted by trust, accelerating decay (§4.4). Natural after
 Step 4, because materialised federated blocks are exactly what disputes must

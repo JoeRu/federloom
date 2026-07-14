@@ -13,6 +13,7 @@ structural properties of real attacks (broad, independent, against unused target
 | "Patient Sybil" (age accounts, then activate) | Age counts only coupled with activity + consensus agreement (spec §4.3) |
 | High-trust node gets compromised, reports 8.8.8.8 | Fast trust decay on anomaly; corroboration requirement; key revocation (spec §4.3, §6.3) |
 | Mass-whitelist to shield a real attacker | Whitelist votes are diversity/trust-weighted like block votes (spec §4.4 / problem H) |
+| Sybil mass-whitelisting to protect attackers | Dispute-diversity (distinct subnets) gates unblock of materialised blocks; trust weighting + stranger cap bound single-subnet flood; disputes only ever reduce enforcement (never add blocks); local sovereign blocks never touched (spec §4.4) |
 | Re-centralise via project anchors | Anchors locally removable; project anchors are default, not mandatory (problem I) |
 | Malicious/compromised subnet | Defederation (problem L) |
 | Bridge nodes intercept/poison traffic | Anchored-corroboration block backstop, per-hop discount, defederation by not bridging |

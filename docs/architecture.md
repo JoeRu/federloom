@@ -48,6 +48,8 @@ Reputation has two paths: a **push** path where locally-sourced scoring events f
 
 Corroboration is **subnet-diversity weighted** — breadth across subnets outweighs volume from one (score only; the block gate stays anchored-Person). A report from a subnet that has already reported an IP counts for only a fraction (config `diversity_repeat_factor`, default 0.15) of a report from a new subnet, preventing single-subnet floods from buying breadth signals.
 
+**Disputes** (shared-vote whitelist entries) federate as diversity-weighted negative votes that can undo a materialized federated block when signatures from enough distinct subnets accumulate, but never touch local anchored blocks or local-only whitelist entries — preserving operator sovereignty (Invariant 1).
+
 ## Federation (Mastodon model)
 
 Each subnet is a trust domain with its own roots and governance. Subnets run

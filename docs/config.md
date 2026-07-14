@@ -344,6 +344,19 @@ cannot force a downstream block (that still requires anchored corroboration) and
 imported events are scored by the originator's trust, not the bridge's. Bridge
 only subnets you trust; stop bridging a subnet to defederate it.
 
+### `dispute_weight`, `dispute_unblock_min_subnets`
+
+Whitelisting an IP with `--scope shared-vote` federates a signed **dispute**
+("this IP is legitimate"). Receiving nodes apply it as a negative,
+**diversity-weighted** reputation vote: `dispute_weight` (default 10) is the
+per-vote strength, damped for repeats from an already-counted subnet. Once
+distinct disputing subnets reach `dispute_unblock_min_subnets` (default 3), a
+**materialised federated block** for that IP is unblocked and suppressed from
+re-materialising. A single subnet or a stranger dispute-flood cannot clear a
+block (§4.4 Sybil defense). Disputes never unblock a **local** block (your own
+anchored decision), never touch `local-only` whitelist entries, and every
+parameter is locally overridable.
+
 ### observability
 
 Controls the optional observability plane (spec §11.2). Both outputs are

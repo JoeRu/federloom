@@ -569,7 +569,7 @@ Honest status of each design area in the current codebase. This table — not th
 | §4.1 | Ground-truth anchors | `internal/trust`, honeypot/spamtrap ingest | DONE |
 | §4.2 | Diversity-weighted corroboration | `internal/reputation`, `internal/repquery` | DONE — subnet-diversity weighting (D); ASN/geo dimensions PLANNED |
 | §4.3 | Asymmetric decay | `internal/reputation` | DONE |
-| §4.4 | Dispute / anti-trust votes | — | PLANNED (E) |
+| §4.4 | Dispute / anti-trust votes | — | DONE — federated shared-vote votes, diversity-weighted negative vote + unblock threshold (Step 5) |
 | §4.5 | Applicability weighting | — | PLANNED (E) |
 | §5.1 | Trust anchors (Person keys, peer certs) | `internal/trust`, `internal/identity` | DONE |
 | §5.2 | Federation import / discount / origin-trace | `internal/node`, `internal/transport`, `internal/repquery` | PARTIAL — origin-trace + per-hop discount (E1); evidence import via query path DONE (E2); gossip-side evidence import PLANNED |
