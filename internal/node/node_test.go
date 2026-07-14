@@ -545,3 +545,41 @@ func TestLocalObservationsBypassDiversity(t *testing.T) {
 		t.Errorf("local observation must bypass diversity tracking; SubnetsSeen = %v, want empty", rec.SubnetsSeen)
 	}
 }
+
+// TestProcessRemoteRoutesVoteToDispute: a Kind:"vote" event lowers the score
+// (dispute), it does NOT go through the report path (no Groups added), and an
+// anchored disputer's vote registers a distinct dispute-subnet.
+func TestProcessRemoteRoutesVoteToDispute(t *testing.T) {
+	n, dir := testNode(t)
+	// Seed a bad score for the IP via a normal anchored report first.
+	priv, err := identity.GeneratePersonKey(filepath.Join(dir, "p.key"))
+	if err != nil {
+		t.Fatalf("person key: %v", err)
+	}
+	_ = trust.SaveAnchors(n.cfg.TrustAnchorsFile(), []trust.Anchor{{Person: "p", IdentityPubkey: identity.EncodePub(identity.PersonPub(priv)), Weight: 0.9, Source: "test"}})
+	cert := identity.IssueCert(priv, "12D3KooWrep", time.Now().Add(time.Hour))
+	for i := 0; i < 5; i++ {
+		n.ProcessRemote(transport.ReceivedEvent{
+			Event: proto.Event{IP: "203.0.113.60", Reason: "ssh-auth-success", ReporterID: "12D3KooWrep", SubnetID: "s" + string(rune('a'+i)), Vouch: &cert, Timestamp: time.Now()},
+			From:  "12D3KooWrep", Subnet: "home",
+		})
+	}
+	before, _ := n.GetScore("203.0.113.60")
+	if before.Score <= 0 {
+		t.Fatalf("precondition: IP should be scored, got %v", before.Score)
+	}
+	// A dispute vote from the anchored disputer. Unsigned + From == ReporterID:
+	// the spoof guard passes for a direct event and ProcessRemote skips the
+	// signature-verify branch (it only runs when len(Signature) > 0), so it
+	// routes purely on Kind. (The end-to-end SIGNED path is covered by Task 5's
+	// integration-style tests via the emit/receive round-trip.)
+	vote := proto.Event{IP: "203.0.113.60", Kind: "vote", ReporterID: "12D3KooWrep", SubnetID: "sa", Vouch: &cert, Timestamp: time.Now()}
+	n.ProcessRemote(transport.ReceivedEvent{Event: vote, From: "12D3KooWrep", Subnet: "home"})
+	after, _ := n.GetScore("203.0.113.60")
+	if !(after.Score < before.Score) {
+		t.Errorf("dispute vote must lower score: before=%v after=%v", before.Score, after.Score)
+	}
+	if len(after.DisputeSubnetsSeen) < 1 {
+		t.Errorf("dispute should register a disputing subnet, got %v", after.DisputeSubnetsSeen)
+	}
+}

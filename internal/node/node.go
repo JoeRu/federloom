@@ -216,6 +216,9 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 
 // Run starts all subsystems and blocks until ctx is cancelled.
 func (n *Node) Run(ctx context.Context) error {
+	if n.transport != nil {
+		n.publishSharedVotes(ctx)
+	}
 	n.obs.Start(ctx)
 	n.api.Start(ctx)
 	n.dnsbl.Start(ctx)
@@ -391,6 +394,10 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 		return
 	}
 	e.IP = key
+	if e.Kind == "vote" {
+		n.processDispute(e, re)
+		return
+	}
 	// Feedback loop guard: drop events that have already passed through this node.
 	if n.selfID != "" {
 		for _, hop := range e.OriginTrace {
@@ -473,6 +480,58 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 	n.obs.RecordEvent(e, rec.Score, ruleName, string(action))
 	n.api.Broadcast(e.IP, rec.Score, e.Reason, e.ReporterID)
 	n.reemitIfBridge(re)
+}
+
+// processDispute applies a federated dispute vote (Event.Kind == "vote") to the
+// IP's score as a diversity-weighted negative vote, and (Task 5) unblocks a
+// materialised federated block once distinct disputing subnets cross the floor.
+func (n *Node) processDispute(e proto.Event, re transport.ReceivedEvent) {
+	// Dedup (reason is "" for a vote → key distinct from any report).
+	if n.dedup.Seen(dedupKey(e.ReporterID, e.IP, e.Reason, e.Timestamp), time.Now()) {
+		return
+	}
+	if e.Vouch != nil && e.Vouch.PeerID == e.ReporterID {
+		if err := n.trust.AddCert(*e.Vouch, time.Now()); err != nil {
+			log.Printf("node: invalid vouch on dispute from %q: %v", e.ReporterID, err)
+		}
+	}
+	weight, _, anchored := n.trust.Resolve(e.ReporterID)
+	score, disputeSubnets, err := n.rep.RecordDispute(e.IP, e.ReporterID, weight, e.SubnetID, anchored)
+	if err != nil {
+		log.Printf("node: record dispute %s: %v", e.IP, err)
+		return
+	}
+	log.Printf("node: dispute %s from %s (subnet=%s anchored=%t) → score=%.1f dispute_subnets=%d", e.IP, e.ReporterID, e.SubnetID, anchored, score, disputeSubnets)
+	n.maybeUnblockDisputed(e.IP, disputeSubnets) // implemented in Task 5 (add a no-op stub here)
+}
+
+// maybeUnblockDisputed is a no-op placeholder; Task 5 implements unblocking a
+// materialised federated block once distinct disputing subnets cross the floor.
+func (n *Node) maybeUnblockDisputed(ip string, disputeSubnets int) {}
+
+// publishSharedVotes emits a signed dispute vote for each shared-vote
+// whitelist entry (re-announced disputes; late joiners hear them via the
+// responder/gossip). local-only entries are never emitted (privacy).
+func (n *Node) publishSharedVotes(ctx context.Context) {
+	if n.transport == nil || n.identityKey == nil {
+		return
+	}
+	for _, entry := range n.whitelist.List() {
+		if entry.Scope != "shared-vote" {
+			continue // local-only never federates (privacy)
+		}
+		v := proto.Event{IP: entry.IPOrRange, Kind: "vote", ReporterID: n.selfID, SubnetID: n.cfg.FederationSubnet, Timestamp: time.Now().UTC()}
+		if err := identity.SignEvent(&v, n.identityKey); err != nil {
+			log.Printf("node: sign shared-vote for %s: %v", entry.IPOrRange, err)
+			continue
+		}
+		if err := n.transport.Publish(ctx, v, n.cfg.FederationSubnet); err != nil {
+			log.Printf("node: publish shared-vote for %s: %v", entry.IPOrRange, err)
+		}
+		// Apply to our own record too (we count toward the aggregate we serve).
+		w, _, anchored := n.trust.Resolve(n.selfID)
+		_, _, _ = n.rep.RecordDispute(entry.IPOrRange, n.selfID, w, n.cfg.FederationSubnet, anchored)
+	}
 }
 
 // reemitIfBridge re-publishes an accepted remote event onto every subnet this
