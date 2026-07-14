@@ -101,6 +101,46 @@ func Accumulate(rec store.ScoreRecord, obs Observation, now time.Time, halfLife 
 	return rec
 }
 
+// ApplyDispute subtracts a diversity-weighted negative vote from rec's score
+// (spec §4.4). A dispute from a NEW disputing subnet counts full; a repeat from
+// an already-counted disputing subnet is damped by diversityRepeat (reusing the
+// D mechanic on a SEPARATE DisputeSubnetsSeen set — dispute diversity is never
+// conflated with report diversity). Strangers' disputes are cap-bounded so a
+// stranger dispute-flood cannot clear a score. The score floors at 0. Pure.
+func ApplyDispute(rec store.ScoreRecord, obs Observation, now time.Time, halfLife time.Duration, disputeWeight, strangerCap, diversityRepeat float64) store.ScoreRecord {
+	if !rec.LastSeen.IsZero() {
+		rec.Score = DecayScore(rec.Score, rec.LastSeen, now, halfLife)
+	}
+	firstFromSubnet := obs.Subnet != "" && !containsString(rec.DisputeSubnetsSeen, obs.Subnet)
+	divFactor := 1.0
+	if obs.Subnet != "" && !firstFromSubnet {
+		divFactor = diversityRepeat
+	}
+	// Proportional reduction so it cannot drive the score negative; scaled by the
+	// current score so a near-zero IP isn't over-disputed.
+	reduction := obs.Trust * disputeWeight * (rec.Score / 100) * divFactor
+	if !obs.Anchored {
+		// Strangers share one capped bucket, mirroring the report stranger cap.
+		remaining := strangerCap - rec.DisputeContrib
+		if remaining < 0 {
+			remaining = 0
+		}
+		if reduction > remaining {
+			reduction = remaining
+		}
+	}
+	rec.DisputeContrib += reduction
+	rec.Score -= reduction
+	if rec.Score < 0 {
+		rec.Score = 0
+	}
+	if firstFromSubnet {
+		rec.DisputeSubnetsSeen = append(rec.DisputeSubnetsSeen, obs.Subnet)
+	}
+	rec.LastSeen = now
+	return rec
+}
+
 // Engine computes IP reputation scores using lazy decay, logistic accumulation,
 // Person-group corroboration, and a cumulative cap on stranger contributions
 // (spec §4.2/§8; design docs/superpowers/specs/2026-06-12-social-trust-anchors-design.md).
@@ -109,12 +149,14 @@ type Engine struct {
 	halfLife        time.Duration
 	strangerCap     float64
 	diversityRepeat float64
+	disputeWeight   float64
 }
 
 // New creates an Engine backed by s. halfLife drives decay; strangerCap is the
 // maximum total score un-anchored reporters can add to any single IP.
-func New(s *store.BadgerStore, halfLife time.Duration, strangerCap, diversityRepeat float64) *Engine {
-	return &Engine{store: s, halfLife: halfLife, strangerCap: strangerCap, diversityRepeat: diversityRepeat}
+// disputeWeight is the per-vote downward strength for ApplyDispute (§4.4).
+func New(s *store.BadgerStore, halfLife time.Duration, strangerCap, diversityRepeat, disputeWeight float64) *Engine {
+	return &Engine{store: s, halfLife: halfLife, strangerCap: strangerCap, diversityRepeat: diversityRepeat, disputeWeight: disputeWeight}
 }
 
 // Record applies one observation to ip's score and returns the new score.
@@ -136,6 +178,21 @@ func (e *Engine) Record(ip, reason, reporterID string, trust float64, group, sub
 		return 0, fmt.Errorf("reputation: put %q: %w", ip, err)
 	}
 	return rec.Score, nil
+}
+
+// RecordDispute applies a federated dispute vote to ip and returns the new score
+// and the count of distinct disputing subnets seen so far.
+func (e *Engine) RecordDispute(ip, reporterID string, trust float64, subnet string, anchored bool) (float64, int, error) {
+	rec, err := e.store.GetScore(ip)
+	if err != nil {
+		return 0, 0, fmt.Errorf("reputation: get %q: %w", ip, err)
+	}
+	rec = ApplyDispute(rec, Observation{ReporterID: reporterID, Subnet: subnet, Trust: trust, Anchored: anchored}, time.Now(), e.halfLife, e.disputeWeight, e.strangerCap, e.diversityRepeat)
+	ttl := 3 * e.halfLife
+	if err := e.store.PutScore(ip, rec, ttl); err != nil {
+		return 0, 0, fmt.Errorf("reputation: put %q: %w", ip, err)
+	}
+	return rec.Score, len(rec.DisputeSubnetsSeen), nil
 }
 
 // Decay reads ip's current score, applies time decay, persists it, and returns the result.

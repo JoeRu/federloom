@@ -15,7 +15,7 @@ func openEngineCap(t *testing.T, cap float64) *reputation.Engine {
 		t.Fatalf("open store: %v", err)
 	}
 	t.Cleanup(func() { s.Close() })
-	return reputation.New(s, 7*24*time.Hour, cap, 0.15)
+	return reputation.New(s, 7*24*time.Hour, cap, 0.15, 10)
 }
 
 // TestStrangerContributionCapped: strangers can never add more than the cap,
@@ -137,7 +137,7 @@ func TestStrangerDoesNotCountAsCorroboration(t *testing.T) {
 		t.Fatalf("open store: %v", err)
 	}
 	defer s.Close()
-	eng := reputation.New(s, 7*24*time.Hour, 15, 0.15)
+	eng := reputation.New(s, 7*24*time.Hour, 15, 0.15, 10)
 
 	// One un-anchored (stranger) report: anchored=false, group="".
 	if _, err := eng.Record("203.0.113.7", "ssh-post-auth-command", "stranger-1", 0.3, "", "", false); err != nil {
@@ -164,7 +164,7 @@ func TestAnchoredGroupsCountAsCorroboration(t *testing.T) {
 		t.Fatalf("open store: %v", err)
 	}
 	defer s.Close()
-	eng := reputation.New(s, 7*24*time.Hour, 15, 0.15)
+	eng := reputation.New(s, 7*24*time.Hour, 15, 0.15, 10)
 
 	// Two distinct anchored groups + a stranger on the same IP.
 	_, _ = eng.Record("203.0.113.8", "ssh-probe", "peerA", 0.9, "alice", "", true)
@@ -264,5 +264,41 @@ func TestAccumulateSubnetDiversity(t *testing.T) {
 	empty := reputation.Accumulate(store.ScoreRecord{}, reputation.Observation{Reason: "ssh-probe", ReporterID: "r", Group: "g", Trust: 0.9, Anchored: true, Subnet: ""}, now, hl, 15, 0.15)
 	if empty.Score < 1.79 || empty.Score > 1.81 || len(empty.SubnetsSeen) != 0 {
 		t.Errorf("empty-subnet obs must score ~1.8 with no SubnetsSeen, got %v / %v", empty.Score, empty.SubnetsSeen)
+	}
+}
+
+func TestApplyDisputeDiversityWeighted(t *testing.T) {
+	now := time.Now()
+	hl := 7 * 24 * time.Hour
+	// Start from a high score (as if reported bad).
+	base := store.ScoreRecord{Score: 90, LastSeen: now, FirstSeen: now}
+
+	// Ten disputes from ONE subnet: first full, rest damped → small reduction.
+	one := base
+	for i := 0; i < 10; i++ {
+		one = reputation.ApplyDispute(one, reputation.Observation{ReporterID: "d", Subnet: "a", Trust: 0.9, Anchored: true}, now, hl, 10, 15, 0.15)
+	}
+	// Ten disputes from TEN subnets: full each → large reduction.
+	ten := base
+	for i := 0; i < 10; i++ {
+		ten = reputation.ApplyDispute(ten, reputation.Observation{ReporterID: "d", Subnet: string(rune('a' + i)), Trust: 0.9, Anchored: true}, now, hl, 10, 15, 0.15)
+	}
+	if !(ten.Score < one.Score) {
+		t.Errorf("ten disputing subnets (%v) must reduce more than one (%v)", ten.Score, one.Score)
+	}
+	if len(one.DisputeSubnetsSeen) != 1 || len(ten.DisputeSubnetsSeen) != 10 {
+		t.Errorf("dispute subnets tracked wrong: %d / %d", len(one.DisputeSubnetsSeen), len(ten.DisputeSubnetsSeen))
+	}
+	// Score floors at 0.
+	floored := store.ScoreRecord{Score: 5, LastSeen: now}
+	for i := 0; i < 5; i++ {
+		floored = reputation.ApplyDispute(floored, reputation.Observation{ReporterID: "d", Subnet: string(rune('a' + i)), Trust: 1, Anchored: true}, now, hl, 50, 15, 0.15)
+	}
+	if floored.Score < 0 {
+		t.Errorf("score must floor at 0, got %v", floored.Score)
+	}
+	// Dispute diversity is SEPARATE from report diversity (SubnetsSeen untouched).
+	if len(ten.SubnetsSeen) != 0 {
+		t.Errorf("ApplyDispute must not touch SubnetsSeen, got %v", ten.SubnetsSeen)
 	}
 }

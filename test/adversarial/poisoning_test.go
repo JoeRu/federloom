@@ -65,7 +65,7 @@ func TestNeverBlockPoisoningRFC1918(t *testing.T) {
 			}
 			defer s.Close()
 
-			engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
+			engine := reputation.New(s, 7*24*time.Hour, 15, 0.15, 10)
 			sink := &mockSink{}
 
 			for i := 0; i < 10; i++ {
@@ -108,7 +108,7 @@ func TestNeverBlockPoisoningLoopback(t *testing.T) {
 			}
 			defer s.Close()
 
-			engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
+			engine := reputation.New(s, 7*24*time.Hour, 15, 0.15, 10)
 			sink := &mockSink{}
 
 			for i := 0; i < 10; i++ {
@@ -144,7 +144,7 @@ func TestNeverBlockPublicIPNotProtected(t *testing.T) {
 	}
 	defer s.Close()
 
-	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
+	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15, 10)
 	nbl := enforce.NewNeverBlockList(nil)
 	sink := &mockSink{}
 

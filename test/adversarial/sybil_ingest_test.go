@@ -23,7 +23,7 @@ func TestSybilFloodScoreCapped(t *testing.T) {
 	}
 	defer s.Close()
 
-	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
+	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15, 10)
 
 	const ip = "2.3.4.5"
 	for i := 0; i < 50; i++ {
@@ -61,7 +61,7 @@ func TestSybilFloodHighTrustCapped(t *testing.T) {
 	}
 	defer s.Close()
 
-	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
+	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15, 10)
 
 	const ip = "3.4.5.6"
 	for i := 0; i < 50; i++ {

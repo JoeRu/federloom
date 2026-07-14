@@ -50,7 +50,7 @@ func TestSybilStrangerFloodCapped(t *testing.T) {
 	defer s.Close()
 
 	const cap = 15.0
-	eng := reputation.New(s, 7*24*time.Hour, cap, 0.15)
+	eng := reputation.New(s, 7*24*time.Hour, cap, 0.15, 10)
 	const ip = "203.0.113.100"
 
 	for i := 0; i < 100; i++ {

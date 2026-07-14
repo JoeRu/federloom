@@ -71,7 +71,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 	if p := cfg.Reputation.IPv6Prefix; p != 0 && (p < 1 || p > 128) {
 		log.Printf("node: reputation.ipv6_prefix %d out of range [1,128]; using default 64", p)
 	}
-	eng := reputation.New(s, halfLife, cfg.Trust.StrangerScoreCap, cfg.EffectiveDiversityRepeatFactor())
+	eng := reputation.New(s, halfLife, cfg.Trust.StrangerScoreCap, cfg.EffectiveDiversityRepeatFactor(), cfg.EffectiveDisputeWeight())
 
 	var sink enforce.Sink
 	switch cfg.Enforce.Backend {

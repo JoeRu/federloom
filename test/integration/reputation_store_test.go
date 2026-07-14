@@ -20,7 +20,7 @@ func TestEngineRecordAndGetScore(t *testing.T) {
 	}
 	defer s.Close()
 
-	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
+	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15, 10)
 
 	if _, err := engine.Record("1.2.3.4", "ssh-auth-bruteforce", "peer1", 1.0, "peer1", "", true); err != nil {
 		t.Fatalf("engine.Record: %v", err)
@@ -55,7 +55,7 @@ func TestEngineDecayReducesScore(t *testing.T) {
 	defer s.Close()
 
 	// 1-second half-life so we can observe decay quickly.
-	engine := reputation.New(s, time.Second, 15, 0.15)
+	engine := reputation.New(s, time.Second, 15, 0.15, 10)
 
 	// ssh-auth-success has weight 40; first record gives score ≈ 40*(1-0/100) = 40.
 	if _, err := engine.Record("1.2.3.4", "ssh-auth-success", "peer1", 1.0, "peer1", "", true); err != nil {
@@ -90,7 +90,7 @@ func TestEngineMultipleReportersCorroboration(t *testing.T) {
 	}
 	defer s.Close()
 
-	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
+	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15, 10)
 
 	for _, reporter := range []string{"peer1", "peer2", "peer3"} {
 		if _, err := engine.Record("1.2.3.4", "ssh-probe", reporter, 1.0, reporter, "", true); err != nil {

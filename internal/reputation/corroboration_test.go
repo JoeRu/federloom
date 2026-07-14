@@ -15,7 +15,7 @@ func openEngine(t *testing.T) *reputation.Engine {
 		t.Fatalf("open store: %v", err)
 	}
 	t.Cleanup(func() { s.Close() })
-	return reputation.New(s, 7*24*time.Hour, 15, 0.15)
+	return reputation.New(s, 7*24*time.Hour, 15, 0.15, 10)
 }
 
 func TestRecordIncreasesScore(t *testing.T) {

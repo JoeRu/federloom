@@ -48,7 +48,7 @@ func TestPipelineBlockAfterThreshold(t *testing.T) {
 	}
 	defer s.Close()
 
-	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
+	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15, 10)
 	sink := &mockSink{}
 
 	const (
@@ -88,7 +88,7 @@ func TestPipelineNeverBlockProtected(t *testing.T) {
 	}
 	defer s.Close()
 
-	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15)
+	engine := reputation.New(s, 7*24*time.Hour, 15, 0.15, 10)
 	sink := &mockSink{}
 	nbl := enforce.NewNeverBlockList(nil)
 
@@ -133,7 +133,7 @@ func TestPipelineUnblockAfterDecay(t *testing.T) {
 	}
 	defer s.Close()
 
-	engine := reputation.New(s, 500*time.Millisecond, 15, 0.15)
+	engine := reputation.New(s, 500*time.Millisecond, 15, 0.15, 10)
 	sink := &mockSink{}
 
 	const (
