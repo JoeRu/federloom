@@ -128,8 +128,8 @@ func ApplyDispute(rec store.ScoreRecord, obs Observation, now time.Time, halfLif
 		if reduction > remaining {
 			reduction = remaining
 		}
+		rec.DisputeContrib += reduction // stranger budget only (mirrors StrangerContrib)
 	}
-	rec.DisputeContrib += reduction
 	rec.Score -= reduction
 	if rec.Score < 0 {
 		rec.Score = 0

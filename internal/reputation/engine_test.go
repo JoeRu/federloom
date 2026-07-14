@@ -1,6 +1,7 @@
 package reputation_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -300,5 +301,65 @@ func TestApplyDisputeDiversityWeighted(t *testing.T) {
 	// Dispute diversity is SEPARATE from report diversity (SubnetsSeen untouched).
 	if len(ten.SubnetsSeen) != 0 {
 		t.Errorf("ApplyDispute must not touch SubnetsSeen, got %v", ten.SubnetsSeen)
+	}
+}
+
+// TestApplyDisputeStrangerCapBounded proves two things:
+// (a) the Sybil bound — a stranger dispute-flood fanned out across many
+// DISTINCT subnets (worst case: no subnet damping) cannot reduce a score by
+// more than strangerCap in total.
+// (b) the Fix-1 correction — an ANCHORED dispute must not consume the
+// stranger DisputeContrib budget, so a subsequent stranger dispute still has
+// room to reduce the score further.
+func TestApplyDisputeStrangerCapBounded(t *testing.T) {
+	now := time.Now()
+	hl := 7 * 24 * time.Hour
+	const disputeWeight = 10
+	const strangerCap = 15
+	const diversityRepeat = 0.15
+
+	// (a) 100 stranger disputes across 100 distinct subnets — no subnet is
+	// repeated, so divFactor is always 1 (the worst case for the cap).
+	rec := store.ScoreRecord{Score: 90, LastSeen: now, FirstSeen: now}
+	for i := 0; i < 100; i++ {
+		rec = reputation.ApplyDispute(rec, reputation.Observation{
+			ReporterID: "flooder",
+			Subnet:     fmt.Sprintf("subnet-%d", i),
+			Trust:      1.0,
+			Anchored:   false,
+		}, now, hl, disputeWeight, strangerCap, diversityRepeat)
+	}
+	const epsilon = 0.1
+	minScore := 90 - strangerCap - epsilon
+	if rec.Score < minScore {
+		t.Errorf("100-subnet stranger dispute flood reduced score to %v, want >= %v (strangerCap=%v)", rec.Score, minScore, strangerCap)
+	}
+
+	// (b) An anchored dispute must not exhaust the stranger DisputeContrib
+	// budget. Apply one big anchored dispute (large disputeWeight, full trust),
+	// then a stranger dispute on a fresh subnet — it must still reduce the
+	// score further. Against the pre-fix code (DisputeContrib += reduction
+	// outside the !Anchored block), the anchored dispute below pushes
+	// DisputeContrib to 45 (> strangerCap 15), so the stranger dispute's
+	// `remaining` clamps to 0 and it becomes a no-op — this assertion would fail.
+	base := store.ScoreRecord{Score: 90, LastSeen: now, FirstSeen: now}
+	afterAnchored := reputation.ApplyDispute(base, reputation.Observation{
+		ReporterID: "anchor",
+		Subnet:     "anchored-subnet",
+		Trust:      1.0,
+		Anchored:   true,
+	}, now, hl, 50, strangerCap, diversityRepeat)
+	if !(afterAnchored.Score < base.Score) {
+		t.Fatalf("anchored dispute did not reduce score: before %v after %v", base.Score, afterAnchored.Score)
+	}
+
+	afterStranger := reputation.ApplyDispute(afterAnchored, reputation.Observation{
+		ReporterID: "stranger",
+		Subnet:     "stranger-subnet",
+		Trust:      1.0,
+		Anchored:   false,
+	}, now, hl, disputeWeight, strangerCap, diversityRepeat)
+	if !(afterStranger.Score < afterAnchored.Score) {
+		t.Errorf("stranger dispute after a large anchored dispute must still reduce the score (DisputeContrib must not be exhausted by anchored): before %v after %v (DisputeContrib=%v)", afterAnchored.Score, afterStranger.Score, afterAnchored.DisputeContrib)
 	}
 }
