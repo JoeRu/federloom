@@ -52,6 +52,9 @@ func testNode(t *testing.T) (*Node, string) {
 		rules:      rules.Load("", cfg.Reputation.BlockThreshold, cfg.Trust.StrangerScoreCap),
 		burst:      rules.NewBurstStore(),
 		dedup:      newDedupCache(100_000, 10*time.Minute),
+
+		materialised: make(map[string]struct{}),
+		disputed:     make(map[string]struct{}),
 	}, dir
 }
 
@@ -581,5 +584,65 @@ func TestProcessRemoteRoutesVoteToDispute(t *testing.T) {
 	}
 	if len(after.DisputeSubnetsSeen) < 1 {
 		t.Errorf("dispute should register a disputing subnet, got %v", after.DisputeSubnetsSeen)
+	}
+}
+
+// recSinkNode is a tiny mock enforce.Sink recording Block/BlockFor/Unblock
+// calls, local to the node package's tests (test/adversarial's mockSink isn't
+// importable here without creating an import cycle).
+type recSinkNode struct {
+	blocked    []string
+	blockedFor []string
+	unblocked  []string
+}
+
+func (m *recSinkNode) Name() string                  { return "recSinkNode" }
+func (m *recSinkNode) Start(_ context.Context) error { return nil }
+func (m *recSinkNode) Block(ip string) error         { m.blocked = append(m.blocked, ip); return nil }
+func (m *recSinkNode) BlockFor(ip string, _ time.Duration) error {
+	m.blockedFor = append(m.blockedFor, ip)
+	return nil
+}
+func (m *recSinkNode) Unblock(ip string) error { m.unblocked = append(m.unblocked, ip); return nil }
+func (m *recSinkNode) Close() error            { return nil }
+
+var _ enforce.Sink = (*recSinkNode)(nil)
+
+// containsStr reports whether needle is present in haystack.
+func containsStr(haystack []string, needle string) bool {
+	for _, s := range haystack {
+		if s == needle {
+			return true
+		}
+	}
+	return false
+}
+
+// TestDisputeUnblocksFederatedNotLocal: a materialised federated block is
+// Unblocked once distinct disputing subnets reach the floor; a LOCAL block
+// (recorded directly on the sink, not via materialiseFederated) is NEVER
+// unblocked by a dispute.
+func TestDisputeUnblocksFederatedNotLocal(t *testing.T) {
+	n, _ := testNode(t)
+	n.cfg.FederationMaterialize = true // gate enabled so MaterialiseForTest actually blocks
+	sink := &recSinkNode{}
+	n.SetSinkForTest(sink)
+
+	// Federated block for X via the materialise path.
+	n.MaterialiseForTest("203.0.113.70", store.ScoreRecord{Score: 90, LastSeen: time.Now()}, 4)
+	// A local block for Y — NOT via materialiseFederated (simulate the report path).
+	_ = n.SinkForTest().Block("203.0.113.71")
+
+	// Disputes for X across the floor of distinct subnets → unblock X only.
+	floor := n.cfg.DisputeUnblockMinSubnets
+	for i := 0; i < floor; i++ {
+		n.DisputeForTest("203.0.113.70", "s"+string(rune('a'+i)))
+		n.DisputeForTest("203.0.113.71", "s"+string(rune('a'+i))) // dispute Y too
+	}
+	if !containsStr(sink.unblocked, "203.0.113.70") {
+		t.Errorf("federated block X should be unblocked by diverse disputes; unblocked=%v", sink.unblocked)
+	}
+	if containsStr(sink.unblocked, "203.0.113.71") {
+		t.Errorf("local block Y must NOT be unblocked by a remote dispute; unblocked=%v", sink.unblocked)
 	}
 }

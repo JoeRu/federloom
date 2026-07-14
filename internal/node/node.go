@@ -55,6 +55,10 @@ type Node struct {
 	dnsbl       *dnsbl.Server      // nil-safe: Start is no-op when addr/zone are empty
 	discovery   *discovery.Manager // nil in solo mode (no transport)
 	dedup       *dedupCache
+
+	matMu        sync.Mutex          // guards materialised/disputed
+	materialised map[string]struct{} // IPs with a live materialised federated block
+	disputed     map[string]struct{} // IPs suppressed from re-materialise by a diverse dispute
 }
 
 // New wires all subsystems from cfg. t may be nil for local-only operation.
@@ -205,6 +209,9 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		dnsbl:       dnsblSrv,
 		discovery:   disc,
 		dedup:       dedup,
+
+		materialised: make(map[string]struct{}),
+		disputed:     make(map[string]struct{}),
 	}
 
 	if resolver != nil && cfg.FederationMaterialize {
@@ -505,9 +512,29 @@ func (n *Node) processDispute(e proto.Event, re transport.ReceivedEvent) {
 	n.maybeUnblockDisputed(e.IP, disputeSubnets) // implemented in Task 5 (add a no-op stub here)
 }
 
-// maybeUnblockDisputed is a no-op placeholder; Task 5 implements unblocking a
-// materialised federated block once distinct disputing subnets cross the floor.
-func (n *Node) maybeUnblockDisputed(ip string, disputeSubnets int) {}
+// maybeUnblockDisputed unblocks a materialised FEDERATED block for ip once
+// distinct disputing subnets reach the floor, and suppresses re-materialisation.
+// It NEVER touches a block that was not materialised by this node (local
+// anchored blocks are absent from n.materialised) — local sovereignty.
+func (n *Node) maybeUnblockDisputed(ip string, disputeSubnets int) {
+	if disputeSubnets < n.cfg.DisputeUnblockMinSubnets {
+		return
+	}
+	n.matMu.Lock()
+	_, wasMaterialised := n.materialised[ip]
+	n.disputed[ip] = struct{}{} // suppress future re-materialise regardless
+	delete(n.materialised, ip)
+	n.matMu.Unlock()
+	if !wasMaterialised {
+		return // never Unblock something we didn't materialise (local block, etc.)
+	}
+	if err := n.sink.Unblock(ip); err != nil {
+		log.Printf("node: dispute-unblock %s: %v", ip, err)
+		return
+	}
+	log.Printf("node: dispute-unblocked federated block %s (dispute_subnets=%d)", ip, disputeSubnets)
+	n.obs.RecordUnblock(ip)
+}
 
 // publishSharedVotes emits a signed dispute vote for each shared-vote
 // whitelist entry (re-announced disputes; late joiners hear them via the
@@ -610,6 +637,16 @@ func (n *Node) SetTrustReloadInterval(d time.Duration) {
 // firewall. Not called in production paths.
 func (n *Node) SetSinkForTest(s enforce.Sink) { n.sink = s }
 
+// SinkForTest returns the current enforce sink. Test-only.
+func (n *Node) SinkForTest() enforce.Sink { return n.sink }
+
+// DisputeForTest applies a dispute for ip from subnet, driving the same path as
+// a received vote (anchored, full trust). Test-only.
+func (n *Node) DisputeForTest(ip, subnet string) {
+	_, ds, _ := n.rep.RecordDispute(ip, "test-disputer-"+subnet, 1.0, subnet, true)
+	n.maybeUnblockDisputed(ip, ds)
+}
+
 // materialiseFederated is the callback the resolver invokes on a federated hit.
 // It applies the federated block gate (design 2026-07-13 §4) and, on pass,
 // pushes a TTL-bounded block. Read of n.sink is deferred so SetSinkForTest works.
@@ -623,11 +660,20 @@ func (n *Node) materialiseFederated(ip string, rec store.ScoreRecord, subnets in
 	if rec.Score < n.cfg.FederationBlockThreshold || subnets < n.cfg.FederationBlockMinSubnets {
 		return // not block-worthy or insufficient diversity
 	}
+	n.matMu.Lock()
+	_, suppressed := n.disputed[ip]
+	n.matMu.Unlock()
+	if suppressed {
+		return // an active diverse dispute suppresses (re-)materialisation
+	}
 	ttl := n.cfg.EffectiveFederationBlockTTL()
 	if err := n.sink.BlockFor(ip, ttl); err != nil {
 		log.Printf("node: materialise block %s: %v", ip, err)
 		return
 	}
+	n.matMu.Lock()
+	n.materialised[ip] = struct{}{}
+	n.matMu.Unlock()
 	log.Printf("node: materialised federated block %s (score=%.1f subnets=%d ttl=%s)", ip, rec.Score, subnets, ttl)
 	n.obs.RecordBlock(ip, "federated-materialise", rec.Score, rec.FirstSeen, rec.Corroboration)
 }
