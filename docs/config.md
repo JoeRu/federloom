@@ -349,13 +349,18 @@ only subnets you trust; stop bridging a subnet to defederate it.
 Whitelisting an IP with `--scope shared-vote` federates a signed **dispute**
 ("this IP is legitimate"). Receiving nodes apply it as a negative,
 **diversity-weighted** reputation vote: `dispute_weight` (default 10) is the
-per-vote strength, damped for repeats from an already-counted subnet. Once
-distinct disputing subnets reach `dispute_unblock_min_subnets` (default 3), a
-**materialised federated block** for that IP is unblocked and suppressed from
-re-materialising. A single subnet or a stranger dispute-flood cannot clear a
-block (§4.4 Sybil defense). Disputes never unblock a **local** block (your own
-anchored decision), never touch `local-only` whitelist entries, and every
-parameter is locally overridable.
+per-vote strength, damped for repeats from an already-counted **anchored**
+subnet. Once distinct **anchored** disputing subnets reach
+`dispute_unblock_min_subnets` (default 3), a **materialised federated block**
+for that IP is unblocked and suppressed from re-materialising. Only anchored
+(vouched) disputers count toward that diversity floor — a stranger dispute
+still reduces the score (capped by the stranger budget), but the subnet it
+claims (`SubnetID` is attacker-controlled and unsigned) is never added to the
+count, so a single unanchored node cannot fabricate distinct subnets and
+unblock a block on its own. A single subnet or a stranger dispute-flood cannot
+clear a block (§4.4 Sybil defense). Disputes never unblock a **local** block
+(your own anchored decision), never touch `local-only` whitelist entries, and
+every parameter is locally overridable.
 
 ### observability
 

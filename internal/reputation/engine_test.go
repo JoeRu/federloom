@@ -334,6 +334,9 @@ func TestApplyDisputeStrangerCapBounded(t *testing.T) {
 	if rec.Score < minScore {
 		t.Errorf("100-subnet stranger dispute flood reduced score to %v, want >= %v (strangerCap=%v)", rec.Score, minScore, strangerCap)
 	}
+	if len(rec.DisputeSubnetsSeen) != 0 {
+		t.Error("stranger disputes must not count toward dispute diversity")
+	}
 
 	// (b) An anchored dispute must not exhaust the stranger DisputeContrib
 	// budget. Apply one big anchored dispute (large disputeWeight, full trust),
@@ -361,5 +364,37 @@ func TestApplyDisputeStrangerCapBounded(t *testing.T) {
 	}, now, hl, disputeWeight, strangerCap, diversityRepeat)
 	if !(afterStranger.Score < afterAnchored.Score) {
 		t.Errorf("stranger dispute after a large anchored dispute must still reduce the score (DisputeContrib must not be exhausted by anchored): before %v after %v (DisputeContrib=%v)", afterAnchored.Score, afterStranger.Score, afterAnchored.DisputeContrib)
+	}
+}
+
+// TestApplyDisputeStrangersDontCountSubnets proves the Sybil-fabricated-subnet
+// fix: obs.Subnet is attacker-controlled and unsigned, so a single unanchored
+// node claiming 5 DISTINCT fabricated SubnetIDs must never grow
+// DisputeSubnetsSeen (the count that gates the materialised-block unblock in
+// internal/node.maybeUnblockDisputed). The score may still be reduced, but
+// only up to the stranger cap.
+func TestApplyDisputeStrangersDontCountSubnets(t *testing.T) {
+	now := time.Now()
+	hl := 7 * 24 * time.Hour
+	const disputeWeight = 10
+	const strangerCap = 15
+	const diversityRepeat = 0.15
+
+	rec := store.ScoreRecord{Score: 90, LastSeen: now, FirstSeen: now}
+	for i := 0; i < 5; i++ {
+		rec = reputation.ApplyDispute(rec, reputation.Observation{
+			ReporterID: "stranger",
+			Subnet:     fmt.Sprintf("fake-subnet-%d", i), // fabricated, distinct
+			Trust:      1.0,
+			Anchored:   false,
+		}, now, hl, disputeWeight, strangerCap, diversityRepeat)
+	}
+	if len(rec.DisputeSubnetsSeen) != 0 {
+		t.Errorf("stranger disputes across %d fabricated distinct subnets must not fabricate diversity: DisputeSubnetsSeen=%v", 5, rec.DisputeSubnetsSeen)
+	}
+	const epsilon = 0.1
+	minScore := 90 - strangerCap - epsilon
+	if rec.Score < minScore {
+		t.Errorf("stranger flood reduced score to %v, want >= %v (strangerCap=%v)", rec.Score, minScore, strangerCap)
 	}
 }

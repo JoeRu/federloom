@@ -56,3 +56,27 @@ func TestSybilDisputeFloodCannotClearBlock(t *testing.T) {
 		t.Errorf("diverse anchored disputes should unblock; unblocked=%v", sink2.unblocked)
 	}
 }
+
+// TestStrangerFakedSubnetsCannotUnblock proves the Sybil-fabricated-subnet fix:
+// a SINGLE unanchored node can claim as many distinct (fabricated, unsigned)
+// SubnetIDs as it likes — Event.SubnetID is attacker-controlled — but must
+// never be able to drive DisputeSubnetsSeen past DisputeUnblockMinSubnets and
+// clear a materialised federated block. Pre-fix, ApplyDispute appended
+// obs.Subnet to DisputeSubnetsSeen for ANY first-from-subnet dispute
+// (anchored or not), so this flood alone would unblock the IP; this test
+// would fail against that code.
+func TestStrangerFakedSubnetsCannotUnblock(t *testing.T) {
+	n, sink := matDisputeNode(t)
+	n.MaterialiseForTest("203.0.113.82", store.ScoreRecord{Score: 90, LastSeen: time.Now()}, 4)
+
+	floor := config.Defaults().DisputeUnblockMinSubnets // 3
+	for i := 0; i < floor+2; i++ {
+		// A single stranger, fabricating a distinct SubnetID every vote.
+		n.DisputeAsStrangerForTest("203.0.113.82", "faked-subnet-"+string(rune('a'+i)))
+	}
+	for _, ip := range sink.unblocked {
+		if ip == "203.0.113.82" {
+			t.Fatalf("a stranger flood with fabricated distinct SubnetIDs must NOT unblock a materialised block")
+		}
+	}
+}

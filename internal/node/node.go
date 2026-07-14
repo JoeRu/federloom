@@ -647,6 +647,17 @@ func (n *Node) DisputeForTest(ip, subnet string) {
 	n.maybeUnblockDisputed(ip, ds)
 }
 
+// DisputeAsStrangerForTest applies a dispute for ip from subnet as an
+// UNANCHORED (stranger) vote, at the stranger trust weight, driving the same
+// path as a received vote from a non-vouched peer. Lets adversarial tests
+// exercise the Sybil-fabricated-subnet path: a stranger can claim any
+// SubnetID it likes (unsigned, attacker-controlled) but must never be able to
+// grow dispute-subnet diversity — see reputation.ApplyDispute. Test-only.
+func (n *Node) DisputeAsStrangerForTest(ip, subnet string) {
+	_, ds, _ := n.rep.RecordDispute(ip, "stranger-"+subnet, n.cfg.Trust.StrangerWeight, subnet, false)
+	n.maybeUnblockDisputed(ip, ds)
+}
+
 // materialiseFederated is the callback the resolver invokes on a federated hit.
 // It applies the federated block gate (design 2026-07-13 §4) and, on pass,
 // pushes a TTL-bounded block. Read of n.sink is deferred so SetSinkForTest works.

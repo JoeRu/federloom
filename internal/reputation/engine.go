@@ -102,19 +102,29 @@ func Accumulate(rec store.ScoreRecord, obs Observation, now time.Time, halfLife 
 }
 
 // ApplyDispute subtracts a diversity-weighted negative vote from rec's score
-// (spec §4.4). A dispute from a NEW disputing subnet counts full; a repeat from
-// an already-counted disputing subnet is damped by diversityRepeat (reusing the
-// D mechanic on a SEPARATE DisputeSubnetsSeen set — dispute diversity is never
-// conflated with report diversity). Strangers' disputes are cap-bounded so a
-// stranger dispute-flood cannot clear a score. The score floors at 0. Pure.
+// (spec §4.4). A dispute from a NEW ANCHORED disputing subnet counts full; a
+// repeat from an already-counted ANCHORED disputing subnet is damped by
+// diversityRepeat (reusing the D mechanic on a SEPARATE DisputeSubnetsSeen set
+// — dispute diversity is never conflated with report diversity). Strangers'
+// disputes are cap-bounded so a stranger dispute-flood cannot clear a score,
+// AND — critically — strangers never earn diversity credit: obs.Subnet is
+// attacker-controlled and unsigned, so a single unanchored node fabricating
+// many distinct SubnetIDs must never be able to grow DisputeSubnetsSeen (which
+// gates the materialised-block unblock in internal/node). Only an ANCHORED
+// dispute (backed by a vouch/anchor) counts toward diversity. The score floors
+// at 0. Pure.
 func ApplyDispute(rec store.ScoreRecord, obs Observation, now time.Time, halfLife time.Duration, disputeWeight, strangerCap, diversityRepeat float64) store.ScoreRecord {
 	if !rec.LastSeen.IsZero() {
 		rec.Score = DecayScore(rec.Score, rec.LastSeen, now, halfLife)
 	}
-	firstFromSubnet := obs.Subnet != "" && !containsString(rec.DisputeSubnetsSeen, obs.Subnet)
+	// Only ANCHORED disputers earn diversity credit (and count toward the unblock
+	// gate): DisputeSubnetsSeen now means "distinct ANCHORED disputing subnets".
+	// A stranger (or a node faking SubnetIDs without an anchor vouch) can reduce
+	// the score (capped) but can never fabricate unblock diversity (§4.4).
+	firstAnchoredSubnet := obs.Anchored && obs.Subnet != "" && !containsString(rec.DisputeSubnetsSeen, obs.Subnet)
 	divFactor := 1.0
-	if obs.Subnet != "" && !firstFromSubnet {
-		divFactor = diversityRepeat
+	if obs.Anchored && obs.Subnet != "" && !firstAnchoredSubnet {
+		divFactor = diversityRepeat // anchored repeat from an already-counted subnet
 	}
 	// Proportional reduction so it cannot drive the score negative; scaled by the
 	// current score so a near-zero IP isn't over-disputed.
@@ -134,7 +144,7 @@ func ApplyDispute(rec store.ScoreRecord, obs Observation, now time.Time, halfLif
 	if rec.Score < 0 {
 		rec.Score = 0
 	}
-	if firstFromSubnet {
+	if firstAnchoredSubnet {
 		rec.DisputeSubnetsSeen = append(rec.DisputeSubnetsSeen, obs.Subnet)
 	}
 	rec.LastSeen = now
@@ -181,7 +191,8 @@ func (e *Engine) Record(ip, reason, reporterID string, trust float64, group, sub
 }
 
 // RecordDispute applies a federated dispute vote to ip and returns the new score
-// and the count of distinct disputing subnets seen so far.
+// and the count of distinct ANCHORED disputing subnets seen so far (strangers
+// reduce the score but never grow this count — see ApplyDispute).
 func (e *Engine) RecordDispute(ip, reporterID string, trust float64, subnet string, anchored bool) (float64, int, error) {
 	rec, err := e.store.GetScore(ip)
 	if err != nil {
