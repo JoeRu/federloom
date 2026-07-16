@@ -237,13 +237,18 @@ func TestIPv6AddressesAggregatePer64(t *testing.T) {
 	}
 }
 
-// TestFederationDiscountPerBridgeHop verifies the discount is applied per bridge
-// hop = len(OriginTrace)-1: a direct (len 1) stranger event is NOT discounted,
-// and a two-hop (len 3) relayed event is discounted by discount^2. The two-hop
-// event must be a REAL signed relay (publisher = last OriginTrace hop) to pass
-// the C1 spoof guard, so this also exercises the relayed-event path end to end.
-func TestFederationDiscountPerBridgeHop(t *testing.T) {
-	// Two IPs, same reason/weight; one arrives direct (len 1), one via 2 hops (len 3).
+// TestFederationDiscountCrossSubnetBinary verifies the discount (v2, spec §5.2)
+// is a BINARY rule keyed on the signed origin SubnetID, not on OriginTrace hop
+// count (closes B2): a same-subnet event is NOT discounted regardless of how
+// many bridge hops it crossed, and a cross-subnet event is discounted exactly
+// ONCE — never squared, no matter how many hops it relayed through. The
+// cross-subnet event must be a REAL signed relay (publisher = last OriginTrace
+// hop) to pass the C1 spoof guard, so this also exercises the relayed-event
+// path end to end.
+func TestFederationDiscountCrossSubnetBinary(t *testing.T) {
+	// Two IPs, same reason/weight; one arrives direct in the node's home subnet
+	// (SubnetID == "", len-1 trace), one via a real signed 2-bridge-hop relay
+	// whose SIGNED origin subnet differs from the node's home subnet.
 	n, _, _ := newNodeWithRules(t, injectionRules)
 
 	direct := transport.ReceivedEvent{
@@ -259,36 +264,38 @@ func TestFederationDiscountPerBridgeHop(t *testing.T) {
 	if err != nil {
 		t.Fatalf("peerid: %v", err)
 	}
-	twoHopEvent := proto.Event{
+	crossSubnetEvent := proto.Event{
 		IP:          "203.0.113.41",
 		Reason:      "ssh-probe",
 		ReporterID:  origID,
 		Timestamp:   time.Now().UTC(),
+		SubnetID:    "othersubnet", // crosses the federation boundary
 		OriginTrace: []string{origID, "bridge1", "bridge2"},
 	}
-	if err := identity.SignEvent(&twoHopEvent, priv); err != nil {
+	if err := identity.SignEvent(&crossSubnetEvent, priv); err != nil {
 		t.Fatalf("sign: %v", err)
 	}
 	// Relayed: publisher is the last OriginTrace hop ("bridge2"), not the originator.
-	twoHop := transport.ReceivedEvent{Event: twoHopEvent, From: "bridge2"}
+	crossSubnet := transport.ReceivedEvent{Event: crossSubnetEvent, From: "bridge2"}
 
 	n.ProcessRemote(direct)
-	n.ProcessRemote(twoHop)
+	n.ProcessRemote(crossSubnet)
 
 	rd, _ := n.GetScore("203.0.113.40")
 	rh, _ := n.GetScore("203.0.113.41")
-	// Direct event: no discount. Two-bridge event: discount^2 (0.25 with default 0.5).
+	// Same-subnet (home) event: no discount. Cross-subnet event: discounted ONCE
+	// (0.5 with the default), regardless of its 2-bridge-hop OriginTrace.
 	if !(rd.Score > rh.Score) {
-		t.Errorf("direct (len 1) score %.4f must exceed two-hop (len 3) score %.4f", rd.Score, rh.Score)
+		t.Errorf("same-subnet score %.4f must exceed cross-subnet (discounted) score %.4f", rd.Score, rh.Score)
 	}
 	if rh.Score <= 0 {
-		t.Errorf("two-hop event should still record a positive score, got %.4f", rh.Score)
+		t.Errorf("cross-subnet event should still record a positive score, got %.4f", rh.Score)
 	}
 	const discount = 0.5
-	want := rd.Score * discount * discount
+	want := rd.Score * discount
 	const epsilon = 0.01
 	if diff := rh.Score - want; diff > epsilon || diff < -epsilon {
-		t.Errorf("two-hop score %.4f not within %.2f of direct*discount^2 = %.4f", rh.Score, epsilon, want)
+		t.Errorf("cross-subnet score %.4f not within %.2f of same-subnet*discount = %.4f (hop count must not matter)", rh.Score, epsilon, want)
 	}
 }
 

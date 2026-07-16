@@ -34,6 +34,16 @@ import (
 // Events with longer traces are dropped to prevent unbounded trace growth.
 const maxOriginTraceLen = 8
 
+// canonicalSubnet collapses the "" / "default" aliases (which both mean the
+// base/home topic) so subnet comparisons treat them as identical. Mirrors the
+// semantics of internal/transport's package-private canonicalSubnet.
+func canonicalSubnet(s string) string {
+	if s == "" || s == "default" {
+		return ""
+	}
+	return s
+}
+
 // Node is the composition root that connects ingest, reputation, enforce, and transport.
 type Node struct {
 	cfg         *config.Config
@@ -441,18 +451,17 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 	}
 
 	weight, group, anchored := n.trust.Resolve(e.ReporterID)
-	// Federation discount: a non-anchored reporter loses weight per BRIDGE hop —
-	// bridgeHops = len(OriginTrace)-1 (the originator itself is not a hop), so a
-	// same-subnet direct event (len 1) is NOT discounted, and each subnet crossing
-	// multiplies by FederationDiscount (spec §5.2). Anchored reporters are exempt.
-	if bridgeHops := len(e.OriginTrace) - 1; !anchored && bridgeHops > 0 {
+	// Federation discount (v2, spec §5.2): a non-anchored event that crosses a
+	// federation boundary (its SIGNED origin subnet differs from ours) loses
+	// weight once. Keyed on the signed SubnetID — NOT the mutable OriginTrace
+	// hop count — so a relay cannot dodge or under-report it (closes B2).
+	// Anchored reporters remain exempt (their trust is explicit).
+	if !anchored && canonicalSubnet(e.SubnetID) != canonicalSubnet(n.cfg.FederationSubnet) {
 		discount := n.cfg.Trust.FederationDiscount
 		if discount <= 0 || discount > 1 {
 			discount = 0.5 // safe fallback for misconfigured values
 		}
-		for i := 0; i < bridgeHops; i++ {
-			weight *= discount
-		}
+		weight *= discount
 	}
 	if _, err := n.rep.Record(e.IP, e.Reason, e.ReporterID, weight, group, e.SubnetID, anchored); err != nil {
 		log.Printf("node: record remote %s: %v", e.IP, err)

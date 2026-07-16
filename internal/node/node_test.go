@@ -646,3 +646,29 @@ func TestDisputeUnblocksFederatedNotLocal(t *testing.T) {
 		t.Errorf("local block Y must NOT be unblocked by a remote dispute; unblocked=%v", sink.unblocked)
 	}
 }
+
+// TestFederationDiscountKeyedOnSubnet: a non-anchored event from a DIFFERENT
+// subnet is discounted once; a same-subnet event is not; hop count no longer
+// matters (an event with a long OriginTrace but same subnet is undiscounted).
+func TestFederationDiscountKeyedOnSubnet(t *testing.T) {
+	n, _ := testNode(t) // node's FederationSubnet is "" (default) via config.Defaults
+	// Cross-subnet stranger event → discounted (weight lower than same-subnet).
+	crossIP, sameIP := "198.51.100.30", "198.51.100.31"
+	n.ProcessRemote(transport.ReceivedEvent{
+		Event: proto.Event{IP: crossIP, Reason: "ssh-probe", ReporterID: "strangerA", SubnetID: "othersubnet", Timestamp: time.Now(), OriginTrace: []string{"strangerA"}},
+		From:  "strangerA", Subnet: "home",
+	})
+	// Same-subnet stranger event (SubnetID == node's "" ) with a LONG OriginTrace.
+	n.ProcessRemote(transport.ReceivedEvent{
+		Event: proto.Event{IP: sameIP, Reason: "ssh-probe", ReporterID: "strangerB", SubnetID: "", Timestamp: time.Now(), OriginTrace: []string{"strangerB", "h1", "h2", "h3"}},
+		From:  "strangerB", Subnet: "home",
+	})
+	cross, _ := n.GetScore(crossIP)
+	same, _ := n.GetScore(sameIP)
+	// Same-subnet (undiscounted, full stranger weight) scores higher than the
+	// cross-subnet (discounted) event, DESPITE the long OriginTrace on the
+	// same-subnet one — hop count no longer drives the discount.
+	if !(same.Score > cross.Score) {
+		t.Errorf("same-subnet (%v) should outscore discounted cross-subnet (%v); hop count must not matter", same.Score, cross.Score)
+	}
+}
