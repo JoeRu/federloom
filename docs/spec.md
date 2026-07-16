@@ -186,8 +186,11 @@ domains** — consistent with Leitprinzip 4 (local view is truth) and the
   gets "defederated" like a bad Mastodon instance → the Sybil response at
   the **subnet level**.
 - **Caution, feedback loop:** mutual import (A↔B) can let the same
-  information be counted multiple times → **origin tracking** per report or
-  a strictly decaying discount over federation hops is needed (Problem K).
+  information be counted multiple times → **federation discount** is now keyed on
+  the signed origin subnet (v2: a non-anchored, cross-federation-boundary event
+  is discounted once when signed `SubnetID` ≠ receiver's subnet, rather than per
+  self-reported hop count). `OriginTrace` remains for feedback-loop guard, 
+  trace-cap, and dedup (Problem K).
 
 ### 5.3 Resulting Model
 - Instead of *one* global truth, a **mesh of trust domains** that mirrors
@@ -261,10 +264,9 @@ must make this explicit so that nobody mistakes the federation defaults for bind
 | `ip` | Cleartext IPv4 (single address) / IPv6 **prefix-normalized** (default `/64`, configurable — a single `/128` never corroborates). Hashing rejected (§9). |
 | `scenario` | Abstract attack **scenario** from the reason-code catalog (e.g. `ssh-brute-force`, `smtp-auth-bruteforce`). **Join key**: scoring ↔ SBOM/profile ↔ rules ↔ STIX `attack-pattern`. **No concrete ports.** |
 | `timestamp` | Time of observation |
-| `port_class` *(optional, deprecated)* | Coarse port class; superseded by `scenario`, to avoid leaking service details |
 | `reporter_id` | Pseudonymous node ID (cryptographic key) |
 | `signature` | Reporter's signature |
-| `subnet_id` | Origin subnet/trust domain (for federation, §5) |
+| `subnet_id` | Origin subnet/trust domain (for federation, §5); signed as of v2 |
 | `origin_trace` | Origin chain (against federation feedback loops, §5.2) |
 
 ### 7.2 Aggregated Reputation Entry per IP
@@ -572,10 +574,10 @@ Honest status of each design area in the current codebase. This table — not th
 | §4.4 | Dispute / anti-trust votes | — | DONE — federated shared-vote votes, diversity-weighted negative vote + unblock threshold (Step 5) |
 | §4.5 | Applicability weighting | — | PLANNED (E) |
 | §5.1 | Trust anchors (Person keys, peer certs) | `internal/trust`, `internal/identity` | DONE |
-| §5.2 | Federation import / discount / origin-trace | `internal/node`, `internal/transport`, `internal/repquery` | PARTIAL — origin-trace + per-hop discount (E1); evidence import via query path DONE (E2); gossip-side evidence import PLANNED |
-| §7.1 | Event model | `pkg/proto` | DONE — `port_class` deprecated-retained |
+| §5.2 | Federation import / discount / origin-trace | `internal/node`, `internal/transport`, `internal/repquery` | DONE — signed-subnet discount (v2); origin-trace for feedback-loop guard/dedup; evidence import via query path (E2); gossip-side evidence import PLANNED |
+| §7.1 | Event model | `pkg/proto` | DONE — `port_class` removed (v2) |
 | §7.1 | IPv6 `/64` prefix normalization | `internal/netutil`, `internal/node`, `internal/enforce` | DONE |
-| §7.2 | ScoreEntry aggregate | `pkg/proto` | RESERVED — replaced by EvidenceAggregate (E2); slated for C1 removal |
+| §7.2 | ScoreEntry aggregate | `pkg/proto` | REMOVED (v2) — replaced by EvidenceAggregate (E2) |
 | §7.5 | EvidenceAggregate (federated import type) | `pkg/proto`, `internal/repquery` | DONE — the on-demand query answer, recomputed locally (E2) |
 | §7.6 | System profile / SBOM | — | PLANNED (E) |
 | §8 | Score dynamics (logistic accumulation, decay) | `internal/reputation`, `internal/rules` | DONE |

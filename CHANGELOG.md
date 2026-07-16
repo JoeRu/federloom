@@ -2,6 +2,22 @@
 
 All notable changes are documented here. Format: Keep a Changelog; versioning: SemVer.
 
+## Wire v2 (SchemaVersion 2) — breaking
+
+- **Signed `SubnetID`.** The event and vote signed messages now include
+  `SubnetID` (domain strings `federloom-event-v2` / `federloom-vote-v2`).
+  A relay can no longer rewrite the origin subnet — the diversity/home-subnet
+  key is cryptographically bound to the originator (closes B7).
+- **Federation discount keyed on signed origin subnet.** A non-anchored,
+  cross-federation-boundary event is discounted once (signed `SubnetID` ≠ the
+  receiver's subnet), instead of once per self-reported `OriginTrace` hop. Hop
+  count no longer affects scoring (closes B2); `OriginTrace` remains for the
+  feedback-loop guard, trace-cap, and dedup.
+- **Removed** the deprecated `port_class` `Event` field and the reserved,
+  unused `ScoreEntry` type (C1).
+- **Gossip topic** bumped `federloom/events/v0` → `federloom/events/v2`.
+- **Hard cutover:** no v1↔v2 compatibility. All nodes must upgrade together.
+
 ## [Unreleased]
 
 ### Added

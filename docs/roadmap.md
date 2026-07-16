@@ -58,12 +58,12 @@ DHT/bloom + materialise-on-verdict remain). Open: P1-2 (diversity), P1-3
 | # | Item | Severity | Origin |
 |---|---|---|---|
 | B1 | **Responder answers *any* peer**: `/federloom/repquery/v1` is registered on the shared transport host with no aggregator/subnet authorization. Enabling `federation_aggregators` (client role) silently makes the node an unauthenticated reputation oracle for the swarm. Stream deadline (shipped) bounds slowloris, but authorization is required **before the protocol is exposed beyond explicitly trusted peers**. ✅ resolved — trust-store authz, fail closed | Important | E3 whole-branch review |
-| B2 | `OriginTrace` is unsigned — a malicious relay can under-report hop count to reduce the federation discount. Bounded by the stranger-block backstop + dedup + decay. | Minor (advisory) | E1 final re-review |
+| B2 | `OriginTrace` is unsigned — a malicious relay can under-report hop count to reduce the federation discount. Bounded by the stranger-block backstop + dedup + decay. ✅ resolved — wire v2 2026-07-16 | Minor (advisory) | E1 final re-review |
 | B3 | Querier cache is unbounded (grows per distinct IP, incl. negatives); no in-flight de-dup (concurrent misses for the same IP each fan out). ✅ resolved — bounded cache + singleflight | Minor | E3 Task-4 review |
 | B4 | E3 MVP-approved simplifications to *replace*, not patch: raw cross-domain `ScoreEntry` merge (foreign score scale, §5.2 warning) and max-score combiner. ✅ resolved — replaced by EvidenceAggregate + local recompute | Accepted-MVP | E3 design §4/§6 |
 | B5 | Small polish: responder `Close()` vs `Reset()` on decode error; `SetDeadline` error swallowed; redundant explicit `Connect`; E1 strict lowest-hop re-scoring; E1 echo-suppression only single-bridge tested. ✅ resolved — Reset/deadline-log/peerstore-seeding; multi-bridge echo test added; lowest-hop re-scoring stays parked | Trivial | various reviews |
 | B6 | `RecordFromEvidence` (E2) does not cap the `Scenarios` slice / `DiversityBuckets` map size, unlike the `groups` fold-cap (`maxEvidenceFolds=64`) — a lying aggregator can force O(n) alloc + per-IP cache-memory amplification. Bounded by the stream deadline + defederation (matches the trusted-aggregator model). Cap after max-weight scenario selection when hardening the gossip-side import. | Low | E2 whole-branch review |
-| B7 | `e.SubnetID` (and `OriginTrace`, cf. B2) are NOT covered by the event signature (`identity.eventMessage` signs IP\|Reason\|Timestamp\|ReporterID) — so D's "bridge-launder resistant" diversity keying is not cryptographically enforced: a relay can rewrite `SubnetID` and `VerifyEventSig` still passes. Exploitability bounded — a bridge can only DEFEAT damping (return to pre-feature full-weight scoring), never inflate past the baseline, and dedup drops same-content replays. Sign `SubnetID` alongside `OriginTrace` at the events-v1 wire bump (C1). | Medium | D whole-branch review |
+| B7 | `e.SubnetID` (and `OriginTrace`, cf. B2) are NOT covered by the event signature (`identity.eventMessage` signs IP\|Reason\|Timestamp\|ReporterID) — so D's "bridge-launder resistant" diversity keying is not cryptographically enforced: a relay can rewrite `SubnetID` and `VerifyEventSig` still passes. Exploitability bounded — a bridge can only DEFEAT damping (return to pre-feature full-weight scoring), never inflate past the baseline, and dedup drops same-content replays. ✅ resolved — wire v2 2026-07-16 | Medium | D whole-branch review |
 | B8 | `RecordFromEvidence` subnet-cap off-by-one: the shared `fed-repeat` synthetic subnet's first fold counts as a new subnet, so `fullVotes+1` votes are full-weight when `groups>subnets`. Negligible under logistic saturation; slightly loosens the E2 subnet-cap. Tighten if the federated fold is revisited. | Low | D whole-branch review |
 | B9 | ipset/nftables `Start` does not migrate a pre-existing no-timeout set to a timeout-capable one on in-place upgrade (create ... timeout 0 -exist no-ops on an existing set), so materialise `BlockFor` is rejected until the set is recreated. Fails safe (logged, no block). Add an entry-preserving migration (save/restore/swap) — deploy-time-testable, not fake-run-testable. | Medium | Step 4 whole-branch review |
 | B10 | Dispute→unblock TOCTOU: `materialiseFederated` releases `matMu` between the `disputed[ip]` check and the `BlockFor`+`materialised[ip]` set, so a concurrent dispute crossing the floor can let one federated block land that a later dispute vote clears (else it self-expires at TTL). Over-block only (safe direction), opt-in path. Make the check-block-record sequence atomic if exact suppression timing matters. | Low | Step 5 whole-branch review |
@@ -73,7 +73,7 @@ DHT/bloom + materialise-on-verdict remain). Open: P1-2 (diversity), P1-3
 
 | # | Item |
 |---|---|
-| C1 | `port_class` and `ScoreEntry` are deprecated-retained in `pkg/proto` (P2-1). Removal is a breaking wire change — bundle into the next protocol version bump (`federloom/events/v1`), ideally together with signing `OriginTrace` (B2), so the network pays for one migration, not two. |
+| C1 | `port_class` and `ScoreEntry` are deprecated-retained in `pkg/proto` (P2-1). ✅ resolved — wire v2 2026-07-16 (removed `port_class` and `ScoreEntry`, bundle with signed `SubnetID` B7 + hop-count discount B2 in single migration) |
 | C2 | Spec §13 "Next Steps" is stale again (items 5, 8, 10, 11, 15, 17 are done or superseded). Point it at this roadmap. ✅ done 2026-07-10 (superseded-note added; spec translated to English) |
 
 ---
@@ -129,10 +129,12 @@ Step 4, because materialised federated blocks are exactly what disputes must
 be able to undo. Keeps invariant 1 (lists are aids): disputes are the
 network-level override to complement the local one.
 
-### Step 6 — Wire v1 bump → C1, B2
-One breaking migration bundling: `port_class` removal, signed `OriginTrace`
-(hop-count integrity), and any E2 field learnings. Dual-listen `v0`/`v1`
-transition window per `.claude/skills/wire-protocol`.
+### Step 6 — Wire v2 bump → C1, B2, B7 ✅ done 2026-07-16
+One breaking migration bundling: `port_class` and `ScoreEntry` removal, signed
+`SubnetID` (federated diversity integrity, B7), and signed-subnet federation
+discount keying (B2) instead of per-hop. Hop count no longer affects scoring;
+`OriginTrace` retained for feedback-loop guard, trace-cap, dedup. Hard cutover:
+no v1↔v2 compatibility (per `.claude/skills/wire-protocol`).
 
 ### Step 7 — Scale & resilience → A6, A7
 Bloom pre-filter for the federated read path, batch/multi-IP queries, DHT
