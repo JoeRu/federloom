@@ -116,3 +116,38 @@ func TestVoteSignatureDomainSeparated(t *testing.T) {
 		t.Error("clearing Kind must invalidate the signature")
 	}
 }
+
+func TestSubnetIDIsSigned(t *testing.T) {
+	priv, _, err := libp2pcrypto.GenerateEd25519Key(rand.Reader)
+	if err != nil {
+		t.Fatalf("keygen: %v", err)
+	}
+	id, err := identity.PeerIDFromPrivKey(priv)
+	if err != nil {
+		t.Fatalf("peerid: %v", err)
+	}
+	ts := time.Now().UTC()
+	e := proto.Event{IP: "1.2.3.4", Reason: "ssh-probe", ReporterID: id, SubnetID: "home", Timestamp: ts}
+	if err := identity.SignEvent(&e, priv); err != nil {
+		t.Fatalf("sign: %v", err)
+	}
+	if err := identity.VerifyEventSig(e); err != nil {
+		t.Fatalf("valid event should verify: %v", err)
+	}
+	// A relay rewriting SubnetID must invalidate the signature (B7 closed).
+	tampered := e
+	tampered.SubnetID = "attacker-subnet"
+	if err := identity.VerifyEventSig(tampered); err == nil {
+		t.Error("rewriting SubnetID must invalidate the signature")
+	}
+	// Same for a vote (Kind:"vote").
+	v := proto.Event{IP: "1.2.3.4", Kind: "vote", ReporterID: id, SubnetID: "home", Timestamp: ts}
+	if err := identity.SignEvent(&v, priv); err != nil {
+		t.Fatalf("sign vote: %v", err)
+	}
+	vt := v
+	vt.SubnetID = "attacker"
+	if err := identity.VerifyEventSig(vt); err == nil {
+		t.Error("rewriting a vote's SubnetID must invalidate the signature")
+	}
+}

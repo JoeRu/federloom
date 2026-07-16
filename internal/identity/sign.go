@@ -11,25 +11,29 @@ import (
 )
 
 // eventMessage is the canonical byte string signed to authenticate an event.
-// Domain-separated with "federloom-event-v1" so signatures cannot be replayed
+// Domain-separated with "federloom-event-v2" so signatures cannot be replayed
 // across protocols. Fields joined by "|"; none of them can contain "|".
+// SubnetID is included so a relay can no longer rewrite the origin subnet (B7).
 // NOTE: Vouch is intentionally excluded; PeerCert integrity is enforced independently by identity.VerifyCert.
 func eventMessage(e proto.Event) []byte {
-	return []byte("federloom-event-v1|" +
+	return []byte("federloom-event-v2|" +
 		e.IP + "|" +
 		e.Reason + "|" +
 		e.Timestamp.UTC().Format(time.RFC3339Nano) + "|" +
-		e.ReporterID)
+		e.ReporterID + "|" +
+		e.SubnetID)
 }
 
 // voteMessage is the canonical byte string signed for a dispute vote
 // (Event.Kind == "vote"), domain-separated from a report so the two are not
-// interchangeable. Reason/OriginTrace are not part of a vote.
+// interchangeable. Reason/OriginTrace are not part of a vote. SubnetID is
+// included so a relay can no longer rewrite the origin subnet (B7).
 func voteMessage(e proto.Event) []byte {
-	return []byte("federloom-vote-v1|" +
+	return []byte("federloom-vote-v2|" +
 		e.IP + "|" +
 		e.Timestamp.UTC().Format(time.RFC3339Nano) + "|" +
-		e.ReporterID)
+		e.ReporterID + "|" +
+		e.SubnetID)
 }
 
 // signedMessage returns the canonical bytes for e based on its Kind.
