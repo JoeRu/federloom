@@ -17,7 +17,7 @@ const (
 )
 
 // DefaultTopic is the gossipsub topic for FederLoom events.
-const DefaultTopic = "federloom/events/v0"
+const DefaultTopic = "federloom/events/v2"
 
 // Options configures a transport Node.
 type Options struct {

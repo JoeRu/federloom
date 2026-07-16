@@ -53,9 +53,9 @@ func TestSybilStrangerQueriersGainNothing(t *testing.T) {
 		}
 		attempted++
 		_ = json.NewEncoder(s).Encode(proto.RepQuery{IP: "1.2.3.4"})
-		var e proto.ScoreEntry
-		if err := json.NewDecoder(s).Decode(&e); err == nil {
-			t.Errorf("sybil %d received an answer: %+v (authorization bypassed)", i, e)
+		var ev proto.EvidenceAggregate
+		if err := json.NewDecoder(s).Decode(&ev); err == nil {
+			t.Errorf("sybil %d received an answer: %+v (authorization bypassed)", i, ev)
 		}
 		_ = s.Close()
 		sybil.Close()

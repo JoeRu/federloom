@@ -24,7 +24,7 @@ func eventMessage(e proto.Event) []byte {
 
 // voteMessage is the canonical byte string signed for a dispute vote
 // (Event.Kind == "vote"), domain-separated from a report so the two are not
-// interchangeable. Reason/PortClass/OriginTrace are not part of a vote.
+// interchangeable. Reason/OriginTrace are not part of a vote.
 func voteMessage(e proto.Event) []byte {
 	return []byte("federloom-vote-v1|" +
 		e.IP + "|" +

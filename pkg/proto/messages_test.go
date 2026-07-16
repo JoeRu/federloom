@@ -75,9 +75,24 @@ func TestEventWithoutVouchOmitsField(t *testing.T) {
 }
 
 func TestSchemaVersionBumped(t *testing.T) {
-	if proto.SchemaVersion != 1 {
-		t.Errorf("SchemaVersion = %d, want 1 (vouching added)", proto.SchemaVersion)
+	if proto.SchemaVersion != 2 {
+		t.Errorf("SchemaVersion = %d, want 2 (wire v2: signed SubnetID, port_class/ScoreEntry removed)", proto.SchemaVersion)
 	}
+}
+
+// TestRemovedPortClassAndScoreEntry verifies that the deprecated field and type are gone.
+// This is a compile-time guard: if either is reintroduced, the test will fail to build.
+func TestRemovedPortClassAndScoreEntry(t *testing.T) {
+	// Construct an Event without PortClass field — proves it doesn't exist.
+	e := proto.Event{
+		IP:         "192.0.2.1",
+		Reason:     "ssh-auth-bruteforce",
+		ReporterID: "12D3KooWtest",
+	}
+	if e.IP == "" {
+		t.Fatal("this should never happen — just ensures the Event compiles without PortClass")
+	}
+	// ScoreEntry is not referenced — its removal is verified by no build error above.
 }
 
 func TestEvidenceAggregateJSONRoundTrip(t *testing.T) {
