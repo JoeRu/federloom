@@ -9,7 +9,7 @@ func TestNodeModeConstants(t *testing.T) {
 	if ModeRelay != 1 {
 		t.Fatalf("ModeRelay should be 1, got %d", ModeRelay)
 	}
-	if DefaultTopic != "federloom/events/v0" {
+	if DefaultTopic != "federloom/events/v2" {
 		t.Fatalf("unexpected DefaultTopic: %q", DefaultTopic)
 	}
 }
