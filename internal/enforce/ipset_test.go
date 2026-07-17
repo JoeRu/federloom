@@ -112,6 +112,44 @@ func TestIpsetStartMigratesHashIpToHashNet(t *testing.T) {
 	}
 }
 
+// TestIpsetStartMigratesTimeoutlessIPv4Set simulates a pre-existing IPv4 set
+// created before `timeout` support (commit 052406a): the `-exist` create fails
+// on the header mismatch. Start must migrate it — drop the referencing iptables
+// rule, destroy the stale set, recreate with timeout — instead of hard-failing.
+func TestIpsetStartMigratesTimeoutlessIPv4Set(t *testing.T) {
+	var calls [][]string
+	firstCreateFailed := false
+	s := NewIpset("federloom", []string{"INPUT"})
+	s.run = func(ctx context.Context, name string, args ...string) error {
+		calls = append(calls, append([]string{name}, args...))
+		// Fail the FIRST create of the hash:ip IPv4 set to simulate a stale
+		// timeout-less set; the migration recreate (second attempt) succeeds.
+		if !firstCreateFailed && name == "ipset" && len(args) >= 2 && args[0] == "create" && args[1] == "federloom" {
+			firstCreateFailed = true
+			return fmt.Errorf("set with the same name already exists")
+		}
+		return nil
+	}
+	if err := s.Start(context.Background()); err != nil {
+		t.Fatalf("Start must migrate a timeout-less IPv4 set, not fail: %v", err)
+	}
+	if !hasCall(calls, "iptables", "-D", "INPUT", "-m", "set", "--match-set", "federloom", "src", "-j", "DROP") {
+		t.Errorf("migration must delete the iptables rule before destroy; calls=%v", calls)
+	}
+	if !hasCall(calls, "ipset", "destroy", "federloom") {
+		t.Errorf("migration must destroy the stale IPv4 set; calls=%v", calls)
+	}
+	recreates := 0
+	for _, c := range calls {
+		if len(c) >= 4 && c[0] == "ipset" && c[1] == "create" && c[2] == "federloom" && c[3] == "hash:ip" {
+			recreates++
+		}
+	}
+	if recreates < 2 {
+		t.Errorf("expected two hash:ip create attempts (initial + post-destroy recreate); got %d; calls=%v", recreates, calls)
+	}
+}
+
 func TestIpsetBlockForIssuesTimeout(t *testing.T) {
 	var calls [][]string
 	s := NewIpset("testset", []string{"INPUT"})
