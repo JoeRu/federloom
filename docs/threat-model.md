@@ -22,6 +22,7 @@ structural properties of real attacks (broad, independent, against unused target
 | Learn who-sees-whom via on-demand lookups | **Open** — DNSBL-style lookups leak query patterns; consider prefix-block caching / oblivious lookup (related to problem E) |
 | Reputation-oracle abuse (repquery) | the on-demand query responder authorizes per peer — anchored ∧ not blocked, fail closed — so strangers and defederated peers cannot read reputation data (closes the E3 review finding). Streams carry a deadline (slowloris-bounded); a Sybil stranger wave gains nothing (adversarial: `repquery_sybil_test.go`). |
 | Reporter deanonymisation / topology leak | Local-only whitelist never shared; Tor-style submission vs. Sybil-accountability is an **open** tension (problem E) |
+| Induced shedding: a peer floods gossip to push a victim into shed mode | Bounded to availability only — the processing-rate `Governor` (spec §11.5, off by default) only sheds network-contribution work (remote scoring, bridge re-emission, federated queries); local ingest → score → enforce is never shed, so the flood cannot cause a wrong block or starve local enforcement (adversarial: `test/adversarial/load_shedding_test.go`) |
 
 ## Known open items
 

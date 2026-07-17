@@ -51,7 +51,7 @@ DHT/bloom + materialise-on-verdict remain). Open: P1-2 (diversity), P1-3
 | A4 | Applicability weighting / system profile (SBOM matchmaker) | §4.5, §7.6 | P1-6 |
 | A5 | Materialise-on-verdict: a block-worthy *federated* verdict for an IP that contacted you pushes into ipset (O(1) path) — explicitly deferred from E3 until evidence is scale-free ✅ resolved — diversity-gated, TTL-bounded, opt-in | E3 design §8 | P1-1 |
 | A6 | Federation-scale hardening: bloom pre-filter for the federated path, DHT content routing, batch queries | §11.3/§11.4 | P1-1 |
-| A7 | Resource budget + load shedding (CPU/bandwidth budget, graceful degradation) | §11.5 | federation-roadmap Phase 4, never built |
+| A7 | Resource budget + load shedding (CPU/bandwidth budget, graceful degradation) ✅ resolved — processing-rate governor + load shedding 2026-07-17 (local protection never shed; off by default) | §11.5 | federation-roadmap Phase 4 |
 
 ### B. Review-discovered technical debt (from E1/E3 final reviews — previously scratch-only, now durable here)
 
@@ -136,11 +136,21 @@ discount keying (B2) instead of per-hop. Hop count no longer affects scoring;
 `OriginTrace` retained for feedback-loop guard, trace-cap, dedup. Hard cutover:
 no v1↔v2 compatibility (per `.claude/skills/wire-protocol`).
 
-### Step 7 — Scale & resilience → A6, A7
-Bloom pre-filter for the federated read path, batch/multi-IP queries, DHT
-content routing if aggregator lists prove too static; resource budget + load
-shedding (§11.5). Driven by real deployment telemetry from the SwarmGuard
-environment, not speculation — do this when measurements say so.
+### Step 7 — Scale & resilience → A6, A7 — partially done
+A7 (resource budget + load shedding, §11.5) ✅ resolved 2026-07-17: a
+processing-rate `Governor` (`internal/resources`) sheds network-contribution
+work — remote gossip scoring, bridge re-emission, on-demand federated
+queries — above `resources.max_events_per_sec`, while local protection (own
+ingest → score → enforce) is never shed. Off by default (`0`). Adversarial
+coverage: `test/adversarial/load_shedding_test.go` proves a gossip flood trips
+shed mode without ever fabricating a block. TODO (follow-up, deliberately
+deferred from this branch): document `resources.max_events_per_sec` in
+`deploy/examples/*.yaml`.
+
+A6 (bloom pre-filter for the federated read path, batch/multi-IP queries, DHT
+content routing if aggregator lists prove too static) remains PLANNED — driven
+by real deployment telemetry from the SwarmGuard environment, not
+speculation — do this when measurements say so.
 
 ### Parked (no sequence position, revisit on demand)
 - A4 applicability weighting / system profile (§4.5/§7.6): valuable, but the
@@ -162,7 +172,7 @@ Step 3  D  diversity corroboration (A2)    [needs Step 2]
 Step 4  materialise-on-verdict (A5)        [needs Steps 2+3; security-critical]
 Step 5  disputes (A3)                      [complements Step 4]
 Step 6  wire v1 bump (C1,B2)               [one migration for all breaks]
-Step 7  scale hardening (A6,A7)            [telemetry-driven]
+Step 7  scale hardening (A6,A7)            [A7 done 2026-07-17; A6 telemetry-driven]
 parked  A4 applicability, subnet discovery, lowest-hop re-scoring
 ```
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strconv"
 	"testing"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/JoeRu/federloom/internal/enforce"
 	"github.com/JoeRu/federloom/internal/identity"
 	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/resources"
 	"github.com/JoeRu/federloom/internal/rules"
 	"github.com/JoeRu/federloom/internal/store"
 	"github.com/JoeRu/federloom/internal/transport"
@@ -52,6 +54,7 @@ func testNode(t *testing.T) (*Node, string) {
 		rules:      rules.Load("", cfg.Reputation.BlockThreshold, cfg.Trust.StrangerScoreCap),
 		burst:      rules.NewBurstStore(),
 		dedup:      newDedupCache(100_000, 10*time.Minute),
+		gov:        resources.NewGovernor(cfg.Resources.MaxEventsPerSec), // default 0 = never sheds
 
 		materialised: make(map[string]struct{}),
 		disputed:     make(map[string]struct{}),
@@ -670,5 +673,34 @@ func TestFederationDiscountKeyedOnSubnet(t *testing.T) {
 	// same-subnet one — hop count no longer drives the discount.
 	if !(same.Score > cross.Score) {
 		t.Errorf("same-subnet (%v) should outscore discounted cross-subnet (%v); hop count must not matter", same.Score, cross.Score)
+	}
+}
+
+// TestLoadSheddingPreservesLocalProtection: a remote flood drives the governor
+// into shed mode; a LOCAL observation still scores — the §11.5 priority
+// invariant that local protection is never shed.
+func TestLoadSheddingPreservesLocalProtection(t *testing.T) {
+	n, _ := testNode(t)
+	n.gov = resources.NewGovernor(5) // 5 events/sec budget (package-internal field)
+
+	// Flood remote events to push the governor over budget.
+	for i := 0; i < 30; i++ {
+		n.ProcessRemote(transport.ReceivedEvent{
+			Event: proto.Event{IP: "198.51.100." + strconv.Itoa(i+1), Reason: "ssh-probe", ReporterID: "r", SubnetID: "s", Timestamp: time.Now()},
+			From:  "r",
+		})
+	}
+	if !n.gov.Shed() {
+		t.Fatalf("30 remote events over a 5/s budget must put the governor in shed mode; rate=%v", n.gov.Rate())
+	}
+
+	// A LOCAL observation must STILL be recorded while shedding (never shed).
+	n.processLocal(context.Background(), proto.Event{IP: "203.0.113.151", Reason: "ssh-probe"})
+	rec, err := n.rep.GetRecord("203.0.113.151")
+	if err != nil {
+		t.Fatalf("GetRecord: %v", err)
+	}
+	if rec.LastSeen.IsZero() {
+		t.Error("local protection was starved during shedding — local ingest must never be shed")
 	}
 }

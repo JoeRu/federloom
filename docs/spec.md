@@ -585,6 +585,7 @@ Honest status of each design area in the current codebase. This table — not th
 | §10 | Never-block set | `internal/enforce` | DONE — incl. public resolvers |
 | §11.3 | O(1) enforcement (ipset/nftables) | `internal/enforce` | DONE |
 | §11.4 | On-demand query / pull transport | `internal/repquery` | DONE — read path (E3) + diversity-gated TTL materialise (Step 4) |
+| §11.5 | Resource budget & load shedding | `internal/resources`, `internal/node` | DONE — processing-rate budget + shed hysteresis (A7); local protection never shed. Bloom pre-filter/DHT/batch-query hardening (A6) remains PLANNED |
 | §14 | Federation discovery (DHT + relay list) | `internal/discovery` | DONE |
 
 ## 13. Next Steps

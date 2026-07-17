@@ -67,3 +67,8 @@ The daemon runs under a CPU/bandwidth budget and **sheds load** under attack:
 local protection takes priority over network contribution; it verifies foreign
 signatures lazily/in batches and syncs later. The protection must never become the
 performance problem.
+
+> **Implemented (2026-07-17, A7):** a processing-rate `Governor`
+> (`resources.max_events_per_sec`, off by default) sheds network-contribution
+> work — remote gossip scoring, bridge re-emission, federated queries — under
+> load; local protection (own ingest → score → enforce) is never shed.

@@ -14,7 +14,7 @@ func (f fixedStore) GetScore(string) (store.ScoreRecord, error) { return f.rec, 
 
 func TestResolverLocalHitSkipsFederation(t *testing.T) {
 	local := fixedStore{rec: store.ScoreRecord{Score: 50, LastSeen: time.Now()}}
-	r := NewResolver(local, nil, nil) // nil querier: if it tried to federate it'd panic
+	r := NewResolver(local, nil, nil, nil) // nil querier: if it tried to federate it'd panic
 	got, err := r.GetScore("1.1.1.1")
 	if err != nil || got.Score != 50 {
 		t.Fatalf("local hit not returned: %+v err=%v", got, err)
@@ -22,7 +22,7 @@ func TestResolverLocalHitSkipsFederation(t *testing.T) {
 }
 
 func TestResolverMissNoQuerierReturnsEmpty(t *testing.T) {
-	r := NewResolver(fixedStore{}, nil, nil) // local miss (zero record), no federation
+	r := NewResolver(fixedStore{}, nil, nil, nil) // local miss (zero record), no federation
 	got, _ := r.GetScore("2.2.2.2")
 	if !got.LastSeen.IsZero() {
 		t.Errorf("expected empty record on miss with no querier, got %+v", got)
@@ -41,7 +41,7 @@ func TestResolverInvokesMaterialiseCallbackOnFederatedHit(t *testing.T) {
 		called++
 		gotIP = ip
 		gotSubnets = subnets
-	})
+	}, nil)
 	// With q == nil the federated path is skipped, so the callback must NOT fire.
 	if _, err := r.GetScore("1.2.3.4"); err != nil {
 		t.Fatalf("GetScore: %v", err)
@@ -56,11 +56,26 @@ func TestResolverInvokesMaterialiseCallbackOnFederatedHit(t *testing.T) {
 func TestResolverLocalHitDoesNotMaterialise(t *testing.T) {
 	local := fixedStore{rec: store.ScoreRecord{Score: 90, LastSeen: time.Now()}}
 	called := 0
-	r := NewResolver(local, nil, func(string, store.ScoreRecord, int) { called++ })
+	r := NewResolver(local, nil, func(string, store.ScoreRecord, int) { called++ }, nil)
 	if _, err := r.GetScore("1.2.3.4"); err != nil {
 		t.Fatalf("GetScore: %v", err)
 	}
 	if called != 0 {
 		t.Errorf("local hit must not materialise; called=%d", called)
+	}
+}
+
+// TestResolverShedsFederatedQuery: when shed() is true the resolver returns the
+// local-only (empty) record and does NOT fan out a federated query. A non-nil
+// zero-value *Querier is passed so the federated branch is entered; the shed
+// guard must short-circuit before r.q.Query is ever reached.
+func TestResolverShedsFederatedQuery(t *testing.T) {
+	r := NewResolver(fixedStore{}, &Querier{}, nil, func() bool { return true }) // local miss, federation "on", always shed
+	rec, err := r.GetScore("203.0.113.9")
+	if err != nil {
+		t.Fatalf("GetScore: %v", err)
+	}
+	if !rec.LastSeen.IsZero() {
+		t.Errorf("shedding must return the local-only (empty) record, got %+v", rec)
 	}
 }

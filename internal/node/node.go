@@ -23,6 +23,7 @@ import (
 	"github.com/JoeRu/federloom/internal/observability"
 	"github.com/JoeRu/federloom/internal/repquery"
 	"github.com/JoeRu/federloom/internal/reputation"
+	"github.com/JoeRu/federloom/internal/resources"
 	"github.com/JoeRu/federloom/internal/rules"
 	"github.com/JoeRu/federloom/internal/store"
 	"github.com/JoeRu/federloom/internal/transport"
@@ -65,6 +66,7 @@ type Node struct {
 	dnsbl       *dnsbl.Server      // nil-safe: Start is no-op when addr/zone are empty
 	discovery   *discovery.Manager // nil in solo mode (no transport)
 	dedup       *dedupCache
+	gov         *resources.Governor // good-neighbour processing-rate budget (spec §11.5)
 
 	matMu        sync.Mutex          // guards materialised/disputed
 	materialised map[string]struct{} // IPs with a live materialised federated block
@@ -177,7 +179,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		} else {
 			q := repquery.NewQuerier(t.Host(), aggs, cfg.EffectiveQueryTimeout(), cfg.EffectiveQueryCacheTTL(),
 				halfLife, cfg.Trust.StrangerScoreCap, cfg.Trust.FederationDiscount, cfg.EffectiveDiversityRepeatFactor(), cfg.EffectiveDisputeWeight())
-			resolver = repquery.NewResolver(s, q, nil)
+			resolver = repquery.NewResolver(s, q, nil, nil)
 		}
 	}
 
@@ -199,6 +201,8 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 
 	dedup := newDedupCache(100_000, 10*time.Minute)
 
+	gov := resources.NewGovernor(cfg.Resources.MaxEventsPerSec)
+
 	n := &Node{
 		cfg:         cfg,
 		transport:   t,
@@ -219,6 +223,7 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 		dnsbl:       dnsblSrv,
 		discovery:   disc,
 		dedup:       dedup,
+		gov:         gov,
 
 		materialised: make(map[string]struct{}),
 		disputed:     make(map[string]struct{}),
@@ -226,6 +231,16 @@ func New(cfg *config.Config, t *transport.Node) (*Node, error) {
 
 	if resolver != nil && cfg.FederationMaterialize {
 		resolver.SetMaterialiser(n.materialiseFederated)
+	}
+
+	if resolver != nil {
+		resolver.SetShed(func() bool {
+			if n.gov.Shed() {
+				n.obs.RecordShed("federated_query")
+				return true
+			}
+			return false
+		})
 	}
 
 	return n, nil
@@ -278,6 +293,8 @@ func (n *Node) Run(ctx context.Context) error {
 				select {
 				case <-t.C:
 					n.obs.UpdatePeers(len(n.transport.Host().Network().Peers()))
+					n.obs.SetProcessingRate(n.gov.Rate())
+					n.obs.SetShedMode(n.gov.Shed())
 				case <-ctx.Done():
 					return
 				}
@@ -309,6 +326,7 @@ func (n *Node) Run(ctx context.Context) error {
 }
 
 func (n *Node) processLocal(ctx context.Context, e proto.Event) {
+	n.gov.Charge() // metered but never gated: local protection is never shed (spec §11.5)
 	key, err := netutil.NormalizeIP(e.IP, n.cfg.Reputation.EffectiveIPv6Prefix())
 	if err != nil {
 		log.Printf("node: drop event with invalid IP %q: %v", e.IP, err)
@@ -378,6 +396,11 @@ func (n *Node) ProcessRemote(re transport.ReceivedEvent) {
 	if re.From == "" {
 		log.Printf("node: drop event with empty verified publisher")
 		return
+	}
+	n.gov.Charge()
+	if n.gov.Shed() {
+		n.obs.RecordShed("remote_event")
+		return // shed: drop this remote event (report or vote) — protect locally instead
 	}
 	if e.ReporterID != re.From {
 		// A relayed (bridged) event is re-published under the relaying node's peer
@@ -576,6 +599,10 @@ func (n *Node) publishSharedVotes(ctx context.Context) {
 // conditions are no-ops. The originator's signature is preserved (OriginTrace
 // is not signed).
 func (n *Node) reemitIfBridge(re transport.ReceivedEvent) {
+	if n.gov.Shed() {
+		n.obs.RecordShed("bridge_reemit")
+		return
+	}
 	if n.transport == nil || n.selfID == "" {
 		return
 	}
@@ -648,6 +675,9 @@ func (n *Node) SetSinkForTest(s enforce.Sink) { n.sink = s }
 
 // SinkForTest returns the current enforce sink. Test-only.
 func (n *Node) SinkForTest() enforce.Sink { return n.sink }
+
+// SheddingForTest reports the governor's current shed state. Test-only.
+func (n *Node) SheddingForTest() bool { return n.gov.Shed() }
 
 // DisputeForTest applies a dispute for ip from subnet, driving the same path as
 // a received vote (anchored, full trust). Test-only.
