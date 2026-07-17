@@ -1,10 +1,10 @@
 # Own isolated subnet: own trust roots, no import from other domains (spec §5.2).
 federation_mode: isolated
-federation:
-  subnet_id: "my-org-internal"
-  import_discount: 0.0    # import nothing
-anchors:
-  - source: self-added
+federation_subnet: "my-org-internal"   # home trust domain
+trust:
+  federation_discount: 0.0             # import nothing — foreign consensus weight 0 (spec §5.2)
+  # Trust anchors live in trust.anchors_file (JSON) or are added via
+  # `federloomctl trust add` — not configured inline here.
 # Isolated deployment: no outbound peer discovery, no advertisement.
 discovery:
   advertise: false

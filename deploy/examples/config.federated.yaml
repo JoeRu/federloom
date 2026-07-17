@@ -1,18 +1,16 @@
 # Federated node: contributes to and imports from a trust domain (with discount).
 federation_mode: federated
-transport:
-  mode: hybrid            # push | pull-on-demand | hybrid (spec §11.5)
-federation:
-  subnet_id: "example-federation"
-  import_discount: 0.5    # foreign consensus counts less than own (spec §5.2)
-  mode: allowlist         # allowlist (default-deny) | blocklist (default-allow)
-anchors:
-  - source: project-default
-score:
-  block_threshold: 75
+federation_subnet: "example-federation"  # home trust domain (spec §5.2)
+reputation:
+  block_threshold: 75                     # score at which an IP is blocked (spec §4.2)
+trust:
+  federation_discount: 0.5                # foreign consensus weight discount (spec §5.2)
 resources:
-  max_cpu_percent: 25     # good-neighbour budget (spec §11.5)
-  max_bandwidth_kbps: 512
+  # Good-neighbour processing-rate budget (spec §11.5). 0 = off (default).
+  # Above the budget the node sheds NETWORK-CONTRIBUTION work only — remote
+  # gossip scoring, bridge re-emission, on-demand federated queries — while
+  # local protection (own ingest → score → enforce) always runs.
+  max_events_per_sec: 0
 # Federation discovery (spec §14) — opt-out flags, both default true.
 discovery:
   advertise: true

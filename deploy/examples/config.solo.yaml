@@ -2,9 +2,8 @@
 federation_mode: solo
 enforce:
   backend: ipset          # ipset | nftables | crowdsec
-score:
+reputation:
   block_threshold: 80     # local threshold; lists are aids only (spec Leitprinzip 7)
-decay:
   half_life: 168h         # TODO: tune (spec problem D)
 ingest:
   crowdsec:
@@ -19,6 +18,11 @@ ingest:
 # discovery:
 #   advertise: true
 #   discover: true
+
+# Optional good-neighbour budget (spec §11.5, disabled by default).
+# Sheds network-contribution work only; local protection is never shed.
+# resources:
+#   max_events_per_sec: 0
 
 # Optional observability plane (disabled by default, spec §11.2).
 # Uncomment to enable:
