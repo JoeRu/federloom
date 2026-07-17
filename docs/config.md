@@ -364,6 +364,8 @@ every parameter is locally overridable.
 
 ### resources
 
+Good-neighbour resource controls (spec §11.5) — off by default.
+
 ### `resources.max_events_per_sec`
 
 Good-neighbour load shedding (spec §11.5). When set to a positive value, the

@@ -51,7 +51,7 @@ DHT/bloom + materialise-on-verdict remain). Open: P1-2 (diversity), P1-3
 | A4 | Applicability weighting / system profile (SBOM matchmaker) | §4.5, §7.6 | P1-6 |
 | A5 | Materialise-on-verdict: a block-worthy *federated* verdict for an IP that contacted you pushes into ipset (O(1) path) — explicitly deferred from E3 until evidence is scale-free ✅ resolved — diversity-gated, TTL-bounded, opt-in | E3 design §8 | P1-1 |
 | A6 | Federation-scale hardening: bloom pre-filter for the federated path, DHT content routing, batch queries | §11.3/§11.4 | P1-1 |
-| A7 | Resource budget + load shedding (CPU/bandwidth budget, graceful degradation) ✅ resolved — load shedding 2026-07-17 | §11.5 | federation-roadmap Phase 4, never built |
+| A7 | Resource budget + load shedding (CPU/bandwidth budget, graceful degradation) ✅ resolved — processing-rate governor + load shedding 2026-07-17 (local protection never shed; off by default) | §11.5 | federation-roadmap Phase 4 |
 
 ### B. Review-discovered technical debt (from E1/E3 final reviews — previously scratch-only, now durable here)
 
