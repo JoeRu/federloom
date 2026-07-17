@@ -32,6 +32,11 @@ func NewGovernor(maxPerSec float64) *Governor {
 	return &Governor{maxPerSec: maxPerSec, now: time.Now, lastTick: -1}
 }
 
+// tick maps the current time to a 100ms bucket index. This uses wall-clock
+// time, not a monotonic clock: an NTP step only perturbs the rate estimate
+// transiently (a backward step can over-count → a spurious shed; a large
+// forward step wipes the window → a brief under-shed). Both land in the safe
+// direction — shedding only affects network participation, never enforcement.
 func (g *Governor) tick() int64 { return g.now().UnixNano() / int64(bucketDur) }
 
 // advanceLocked zeros the buckets for ticks elapsed since lastTick. Holds mu.
