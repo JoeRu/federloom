@@ -362,6 +362,21 @@ clear a block (§4.4 Sybil defense). Disputes never unblock a **local** block
 (your own anchored decision), never touch `local-only` whitelist entries, and
 every parameter is locally overridable.
 
+### resources
+
+### `resources.max_events_per_sec`
+
+Good-neighbour load shedding (spec §11.5). When set to a positive value, the
+node caps its total processing rate at this many events/sec; above the budget it
+**sheds network-contribution work** — remote gossip scoring, bridge
+re-emission, and on-demand federated queries — while **local protection (your
+own ingest → score → enforce) always runs**. Shedding only ever *reduces*
+network participation; it never blocks, never bypasses a whitelist/never-block,
+and never mutates enforcement. Default `0` = **off** (no shedding). This
+complements OS-level limits (`nice`/cgroups/systemd), which stay a deployment
+concern. Metrics: `federloom_shed_total{kind}`, `federloom_shed_mode`,
+`federloom_processing_rate`.
+
 ### observability
 
 Controls the optional observability plane (spec §11.2). Both outputs are
