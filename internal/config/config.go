@@ -69,6 +69,7 @@ type Config struct {
 	BootstrapPeers            []string            `yaml:"bootstrap_peers"`
 	DNSBL                     DNSBLConfig         `yaml:"dnsbl"`
 	Discovery                 DiscoveryConfig     `yaml:"discovery"`
+	Resources                 ResourcesConfig     `yaml:"resources"`
 }
 
 // StoreConfig configures the BadgerDB reputation store.
@@ -208,6 +209,12 @@ type ObservabilityConfig struct {
 	SQLitePath          string   `yaml:"sqlite_path"`           // path to metrics.db; "" = disabled
 	SQLiteRetention     Duration `yaml:"sqlite_retention"`      // rows older than this are pruned
 	ScoreGaugeThreshold float64  `yaml:"score_gauge_threshold"` // 0 = half of block_threshold
+}
+
+// ResourcesConfig controls the good-neighbour budget (spec §11.5). Off by
+// default: max_events_per_sec 0 means unlimited (the node never sheds).
+type ResourcesConfig struct {
+	MaxEventsPerSec float64 `yaml:"max_events_per_sec"` // processing-rate budget; 0 = off. Only network-contribution work is shed; local protection is never shed.
 }
 
 // DiscoveryConfig controls automated peer discovery (spec §14).

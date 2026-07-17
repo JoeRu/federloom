@@ -440,6 +440,20 @@ func TestFederationMaterializeDefaults(t *testing.T) {
 	}
 }
 
+func TestResourcesConfigDefaultsOff(t *testing.T) {
+	if config.Defaults().Resources.MaxEventsPerSec != 0 {
+		t.Errorf("max_events_per_sec must default to 0 (off), got %v", config.Defaults().Resources.MaxEventsPerSec)
+	}
+	// YAML override is honored.
+	c, err := config.LoadYAML([]byte("resources:\n  max_events_per_sec: 250\n"))
+	if err != nil {
+		t.Fatalf("LoadYAML: %v", err)
+	}
+	if c.Resources.MaxEventsPerSec != 250 {
+		t.Errorf("override = %v, want 250", c.Resources.MaxEventsPerSec)
+	}
+}
+
 func TestDisputeDefaults(t *testing.T) {
 	d := config.Defaults()
 	if d.DisputeUnblockMinSubnets != 3 {
