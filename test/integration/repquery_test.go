@@ -40,7 +40,7 @@ func TestFederatedLookupFetchesFromAggregator(t *testing.T) {
 	}
 	defer aHost.Close()
 	q := repquery.NewQuerier(aHost, []peer.AddrInfo{{ID: bHost.ID(), Addrs: bHost.Addrs()}}, 2*time.Second, time.Minute, 7*24*time.Hour, 15, 0.5, 0.15, 10)
-	resolver := repquery.NewResolver(storeStub{m: map[string]store.ScoreRecord{}}, q, nil)
+	resolver := repquery.NewResolver(storeStub{m: map[string]store.ScoreRecord{}}, q, nil, nil)
 
 	// A resolves an IP it does not hold → fetched from B, recomputed under A's own parameters.
 	rec, err := resolver.GetScore("203.0.113.9")
