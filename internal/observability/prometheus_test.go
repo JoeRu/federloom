@@ -117,3 +117,25 @@ func TestPrometheusOutput_RecordRecurrence_EmitsCounter(t *testing.T) {
 		t.Errorf("missing block_recurrence_total in:\n%s", body)
 	}
 }
+
+func TestShedMetrics(t *testing.T) {
+	p, err := newPrometheusOutput("", 37.5)
+	if err != nil {
+		t.Fatalf("newPrometheusOutput: %v", err)
+	}
+	p.recordShed("remote_event")
+	p.recordShed("remote_event")
+	p.setShedMode(true)
+	p.setProcessingRate(42)
+
+	body := scrape(t, p)
+	if !strings.Contains(body, `federloom_shed_total{kind="remote_event"} 2`) {
+		t.Errorf("missing shed_total counter in:\n%s", body)
+	}
+	if !strings.Contains(body, "federloom_shed_mode 1") {
+		t.Errorf("missing shed_mode gauge in:\n%s", body)
+	}
+	if !strings.Contains(body, "federloom_processing_rate 42") {
+		t.Errorf("missing processing_rate gauge in:\n%s", body)
+	}
+}

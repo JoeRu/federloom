@@ -23,6 +23,9 @@ type prometheusOutput struct {
 	corroboration *prometheus.HistogramVec
 	unblocks      *prometheus.CounterVec
 	recurrences   *prometheus.CounterVec
+	shed          *prometheus.CounterVec
+	shedMode      prometheus.Gauge
+	procRate      prometheus.Gauge
 	registry      *prometheus.Registry
 	threshold     float64
 	addr          string
@@ -80,10 +83,23 @@ func newPrometheusOutput(addr string, scoreThreshold float64) (*prometheusOutput
 			Name: "federloom_block_recurrence_total",
 			Help: "Previously-unblocked IPs re-blocked within 7 days, by original rule.",
 		}, []string{"rule"}),
+		shed: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Name: "federloom_shed_total",
+			Help: "Network-contribution work skipped due to the processing-rate budget (spec §11.5).",
+		}, []string{"kind"}),
+		shedMode: prometheus.NewGauge(prometheus.GaugeOpts{
+			Name: "federloom_shed_mode",
+			Help: "1 while the node is currently shedding load (spec §11.5), else 0.",
+		}),
+		procRate: prometheus.NewGauge(prometheus.GaugeOpts{
+			Name: "federloom_processing_rate",
+			Help: "Current processed events/sec over the last second (spec §11.5).",
+		}),
 	}
 	for _, c := range []prometheus.Collector{
 		p.events, p.rules, p.blockedIPs, p.score, p.peers, p.federated,
 		p.blocks, p.timeToBlock, p.corroboration, p.unblocks, p.recurrences,
+		p.shed, p.shedMode, p.procRate,
 	} {
 		if err := reg.Register(c); err != nil {
 			return nil, err
@@ -134,4 +150,20 @@ func (p *prometheusOutput) recordUnblock(rule string) {
 
 func (p *prometheusOutput) recordRecurrence(rule string) {
 	p.recurrences.WithLabelValues(rule).Inc()
+}
+
+func (p *prometheusOutput) recordShed(kind string) {
+	p.shed.WithLabelValues(kind).Inc()
+}
+
+func (p *prometheusOutput) setShedMode(on bool) {
+	if on {
+		p.shedMode.Set(1)
+	} else {
+		p.shedMode.Set(0)
+	}
+}
+
+func (p *prometheusOutput) setProcessingRate(r float64) {
+	p.procRate.Set(r)
 }

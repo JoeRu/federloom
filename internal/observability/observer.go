@@ -182,3 +182,28 @@ func (o *Observer) RecordFederated(direction string) {
 	}
 	o.prom.federated.WithLabelValues(direction).Inc()
 }
+
+// RecordShed counts one shed network-contribution item (kind ∈ remote_event,
+// bridge_reemit, federated_query). No-op when observability is disabled.
+func (o *Observer) RecordShed(kind string) {
+	if o == nil || o.prom == nil {
+		return
+	}
+	o.prom.recordShed(kind)
+}
+
+// SetShedMode reflects whether the node is currently shedding load (spec §11.5).
+func (o *Observer) SetShedMode(on bool) {
+	if o == nil || o.prom == nil {
+		return
+	}
+	o.prom.setShedMode(on)
+}
+
+// SetProcessingRate reports the governor's current events/sec.
+func (o *Observer) SetProcessingRate(r float64) {
+	if o == nil || o.prom == nil {
+		return
+	}
+	o.prom.setProcessingRate(r)
+}
