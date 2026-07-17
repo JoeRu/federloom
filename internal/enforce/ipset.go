@@ -40,9 +40,21 @@ func (s *IpsetSink) Name() string { return "ipset" }
 
 // Start creates the ipset sets and installs iptables/ip6tables rules (idempotent).
 func (s *IpsetSink) Start(ctx context.Context) error {
-	// IPv4 set
+	// IPv4 set. hash:ip with per-entry timeout support (added for materialise
+	// TTLs, commit 052406a). A set created before timeout support won't match
+	// `-exist` (header mismatch → error), so migrate it the same way the IPv6
+	// path below does: drop the referencing iptables rules so the set can be
+	// destroyed, then recreate with timeout. Unlike the best-effort IPv6 set,
+	// the IPv4 set is the primary enforcement set, so a failure of the recreate
+	// (post-migration) is still fatal.
 	if err := s.run(ctx, "ipset", "create", s.setName, "hash:ip", "family", "inet", "timeout", "0", "-exist"); err != nil {
-		return fmt.Errorf("enforce/ipset: create IPv4 set %q: %w", s.setName, err)
+		for _, chain := range s.chains {
+			_ = s.run(ctx, "iptables", "-D", chain, "-m", "set", "--match-set", s.setName, "src", "-j", "DROP")
+		}
+		_ = s.run(ctx, "ipset", "destroy", s.setName)
+		if err2 := s.run(ctx, "ipset", "create", s.setName, "hash:ip", "family", "inet", "timeout", "0", "-exist"); err2 != nil {
+			return fmt.Errorf("enforce/ipset: create IPv4 set %q (after timeout-migration attempt): %w", s.setName, err2)
+		}
 	}
 	// IPv6 set is hash:net so a whole /64 (or configured prefix) blocks as one
 	// entry. Migrate a pre-existing hash:ip set: -exist errors on a type
