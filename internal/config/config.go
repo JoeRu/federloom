@@ -152,11 +152,14 @@ type SpamtrapConfig struct {
 	PollInterval Duration `yaml:"poll_interval"`
 }
 
-// Fail2BanConfig configures the fail2ban Docker ingest adapter.
-// The adapter polls `docker exec <container> fail2ban-client banned` on each tick.
+// Fail2BanConfig configures the fail2ban ingest adapter.
+// mode "docker" (default) polls `docker exec <container> fail2ban-client banned`;
+// mode "local" polls `fail2ban-client banned` directly on the host (bare-metal
+// fail2ban; federloomd needs access to the fail2ban socket, i.e. root).
 type Fail2BanConfig struct {
 	Enabled      bool              `yaml:"enabled"`
-	Container    string            `yaml:"container"`     // default: "fail2ban"
+	Mode         string            `yaml:"mode"`          // "docker" (default) | "local"
+	Container    string            `yaml:"container"`     // docker mode only; default: "fail2ban"
 	PollInterval Duration          `yaml:"poll_interval"` // default: 30s
 	JailReasons  map[string]string `yaml:"jail_reasons"`  // operator overrides (exact match only)
 }

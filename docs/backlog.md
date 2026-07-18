@@ -9,21 +9,9 @@ FederLoom today ingests **created bans/decisions** (fail2ban bans, CrowdSec
 decisions/alerts) and a few tool-specific logs (mailcow, Cowrie, OpenCanary,
 spamtrap). Two gaps block wider integration examples:
 
-### B1 — fail2ban ingest: bare-metal (non-Docker) mode — TODO
+### B1 — fail2ban ingest: bare-metal (non-Docker) mode — DONE
 
-`internal/ingest/fail2ban.go` only reaches fail2ban via
-`docker exec <container> fail2ban-client banned`. A host-installed
-(OS-package) fail2ban — the classic setup on a plain VPS with sshd, nginx or
-apache jails — cannot be ingested.
-
-Proposed fix: add `mode: local | docker` to `Fail2BanConfig`; `local` runs
-`fail2ban-client banned` directly on the host (federloomd needs access to the
-fail2ban socket or root). Small change; jail→reason mapping is reused as-is.
-
-Blocks: bare-metal integration examples that use fail2ban as the detector
-(nginx, apache, wordpress, sshd on an OS install). Workaround until then:
-route bare-metal detection through CrowdSec (LAPI is HTTP and works for both
-bare-metal and Docker).
+Done: implemented as `ingest.fail2ban.mode: local | docker` (default docker).
 
 ### B2 — direct access-log ingest (nginx / apache / traefik / haproxy) — TODO
 
