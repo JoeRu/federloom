@@ -1,0 +1,14 @@
+[Unit]
+Description=FederLoom federated blocklist daemon
+Documentation=https://github.com/JoeRu/federloom
+After=network-online.target fail2ban.service
+Wants=network-online.target
+
+[Service]
+# Root is required: ipset enforcement + fail2ban-client socket access.
+ExecStart=/usr/local/bin/federloomd --config /etc/federloom/config.yaml
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
