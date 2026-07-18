@@ -2,25 +2,49 @@
 
 All notable changes are documented here. Format: Keep a Changelog; versioning: SemVer.
 
-## Wire v2 (SchemaVersion 2) — breaking
+## [0.1.0] - 2026-07-17
 
-- **Signed `SubnetID`.** The event and vote signed messages now include
-  `SubnetID` (domain strings `federloom-event-v2` / `federloom-vote-v2`).
-  A relay can no longer rewrite the origin subnet — the diversity/home-subnet
-  key is cryptographically bound to the originator (closes B7).
-- **Federation discount keyed on signed origin subnet.** A non-anchored,
-  cross-federation-boundary event is discounted once (signed `SubnetID` ≠ the
-  receiver's subnet), instead of once per self-reported `OriginTrace` hop. Hop
-  count no longer affects scoring (closes B2); `OriginTrace` remains for the
-  feedback-loop guard, trace-cap, and dedup.
-- **Removed** the deprecated `port_class` `Event` field and the reserved,
-  unused `ScoreEntry` type (C1).
-- **Gossip topic** bumped `federloom/events/v0` → `federloom/events/v2`.
-- **Hard cutover:** no v1↔v2 compatibility. All nodes must upgrade together.
-
-## [Unreleased]
+First tagged release. Covers the full scaffold through Step 7 (load shedding).
+Pre-1.0: the Wire v2 change below is breaking, acceptable under 0.x semantics.
 
 ### Added
+- **Resource budget + graceful load shedding (§11.5).** `resources.max_events_per_sec`
+  drives a processing-rate governor with shed hysteresis. Above the budget the node
+  sheds network-contribution work only — remote gossip scoring, bridge re-emission,
+  on-demand federated queries — while local protection (own ingest → score → enforce)
+  is never shed. Off by default (budget 0). Metrics `federloom_shed_total{kind}`,
+  `federloom_shed_mode`, `federloom_processing_rate`.
+- **Disputes / anti-trust votes (§4.4).** Federated diversity-weighted shared-vote that
+  can retract a *federated* block; unblocks federated blocks only, never a local decision;
+  the diversity credit is anchored-gated so a single stranger cannot fabricate subnets.
+- **Materialise-on-verdict (E3 §8).** A block-worthy federated verdict for an IP that has
+  contacted you is pushed into ipset (O(1) path); diversity-gated, TTL-bounded, opt-in.
+- **`EvidenceAggregate` federated import + scale-free local recompute** (§5.2/§7.5/§8) and
+  **diversity-weighted corroboration** via subnet buckets (§4.2).
+
+### Changed
+- **Repquery responder authorization (B1).** `/federloom/repquery/v1` is trust-store gated
+  and fails closed; bounded querier cache + singleflight de-dup (B3).
+
+### Fixed
+- **enforce/ipset: auto-migrate a pre-timeout IPv4 set on upgrade.** A `federloom` IPv4 set
+  created before timeout support failed the `-exist` create on a header mismatch and the
+  node crash-looped; the IPv4 path now migrates (drop referencing rules → destroy → recreate
+  with timeout) like the IPv6 path. A failure of the recreate itself stays fatal (fail closed).
+
+### Breaking — Wire v2 (SchemaVersion 2)
+- **Signed `SubnetID`** (domain strings `federloom-event-v2` / `federloom-vote-v2`): a relay
+  can no longer rewrite the origin subnet — the diversity/home-subnet key is cryptographically
+  bound to the originator (closes B7).
+- **Federation discount keyed on signed origin subnet** — a non-anchored, cross-boundary event
+  is discounted once (signed `SubnetID` ≠ receiver's subnet), not once per self-reported
+  `OriginTrace` hop; hop count no longer affects scoring (closes B2). `OriginTrace` remains for
+  the feedback-loop guard, trace-cap, and dedup.
+- **Removed** the deprecated `port_class` `Event` field and the unused `ScoreEntry` type (C1).
+- **Gossip topic** `federloom/events/v0` → `federloom/events/v2`.
+- **Hard cutover:** no v1↔v2 compatibility — all nodes upgrade together.
+
+### Added (observability)
 - `internal/observability`: dual-output Observer — Prometheus `/metrics` (port 9101) + SQLite
   event history with configurable retention (default 15 days). Both disabled by default.
 - Six Prometheus metrics: `federloom_events_received_total`, `federloom_rules_fired_total`,

@@ -143,9 +143,11 @@ work — remote gossip scoring, bridge re-emission, on-demand federated
 queries — above `resources.max_events_per_sec`, while local protection (own
 ingest → score → enforce) is never shed. Off by default (`0`). Adversarial
 coverage: `test/adversarial/load_shedding_test.go` proves a gossip flood trips
-shed mode without ever fabricating a block. TODO (follow-up, deliberately
-deferred from this branch): document `resources.max_events_per_sec` in
-`deploy/examples/*.yaml`.
+shed mode without ever fabricating a block. Done (v0.1.0, 2026-07-17):
+`resources.max_events_per_sec` is documented in
+`deploy/examples/config.federated.yaml` (active) and `config.solo.yaml`
+(commented); all example configs were truth-upped to the flat Config schema
+in the same pass.
 
 A6 (bloom pre-filter for the federated read path, batch/multi-IP queries, DHT
 content routing if aggregator lists prove too static) remains PLANNED — driven

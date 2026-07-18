@@ -68,6 +68,16 @@ docker compose exec federloom federloomctl trust set --weight 0.8 PERSON \
 - **Scales by querying, not replicating** (spec §11): DNSBL-style on-demand
   lookup + compact local bloom filter; `ipset`/`nftables` (O(1)), never one rule
   per IP.
+- **Good-neighbour load shedding** (spec §11.5): an optional processing-rate budget
+  (`resources.max_events_per_sec`, off by default) sheds network-contribution work
+  under load — remote scoring, bridge re-emit, federated queries — while local
+  protection always runs.
+- **Disputes** (spec §4.4): federated anti-trust votes can retract a *federated*
+  block; a single stranger can't (diversity is anchored-gated).
+- **Materialise-on-verdict** (E3 §8): a strong federated verdict about an IP that
+  contacted you enforces locally via ipset (O(1)); opt-in, TTL-bounded.
+- **Observability** (spec §11.2, default OFF): optional Prometheus `/metrics` and a
+  local SQLite event history.
 - **GDPR by design** (spec §9): IPs are personal data; lawful basis is legitimate
   interest (Art. 6(1)(f), Recital 49); decay is automatic deletion.
 
