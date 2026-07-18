@@ -1,0 +1,21 @@
+# FederLoom on a bare-metal nginx host: federate what fail2ban detects in your nginx logs.
+# Every value here is a local default — lists are aids, not law; override freely.
+federation_mode: solo          # switch to "federated" to share/receive (see README)
+store:
+  dir: /var/lib/federloom
+ingest:
+  fail2ban:
+    enabled: true
+    mode: local                # host-installed fail2ban (no Docker)
+    poll_interval: 30s
+enforce:
+  backend: ipset
+  set_name: federloom
+  chains: [INPUT]              # host services (sshd) arrive via INPUT
+reputation:
+  rules_file: /etc/federloom/rules.yaml
+api:
+  addr: "127.0.0.1:9102"       # local status API — keep it off public interfaces
+# Join a federation: set federation_mode: federated and add peers, e.g.
+# bootstrap_peers:
+#   - /dns4/peer.example.org/tcp/7700/p2p/12D3KooW...
