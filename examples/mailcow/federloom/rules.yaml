@@ -1,0 +1,12 @@
+# Blocking rules — yours to change: lists are aids, not law.
+- name: local-smtp-bruteforce
+  reason: smtp-auth-bruteforce
+  min_corroboration: 1
+  action: block
+- name: local-imap-bruteforce
+  reason: imap-auth-bruteforce
+  min_corroboration: 1
+  action: block
+- name: multi-reporter
+  min_corroboration: 3
+  action: block
