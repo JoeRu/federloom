@@ -1,0 +1,16 @@
+# Blocking rules — yours to change: lists are aids, not law.
+# A decision your own CrowdSec already made is high-confidence: this node's
+# own observations are always self-anchored, so a single one already
+# satisfies min_corroboration: 1 and blocks immediately. No "reason" filter
+# here — CrowdSec's decision reason is the underlying attack scenario (e.g.
+# ssh-auth-bruteforce, or whatever -R value a manual `cscli decisions add`
+# passes), not a fixed literal, so matching a hardcoded string would never fire.
+- name: local-crowdsec-decision
+  min_corroboration: 1
+  action: block
+# Federation dividend (fires once federated — see README): three
+# independently anchored reporters agreeing is stronger evidence than any
+# one of them alone.
+- name: multi-reporter
+  min_corroboration: 3
+  action: block

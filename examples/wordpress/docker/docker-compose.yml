@@ -1,0 +1,68 @@
+# WordPress + MariaDB + CrowdSec (wordpress collection) + FederLoom.
+# wp-login/xmlrpc brute force → CrowdSec decision → FederLoom reputation →
+# host-firewall block (DOCKER-USER) → attacker never reaches WordPress again.
+services:
+  db:
+    image: mariadb:11
+    container_name: federloom-wp-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wordpress
+      MARIADB_PASSWORD: "change-me-db-pass"   # change me if this host is shared
+      MARIADB_RANDOM_ROOT_PASSWORD: "1"
+    volumes:
+      - db-data:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:latest
+    container_name: federloom-wordpress
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: "change-me-db-pass"   # must match MARIADB_PASSWORD above
+    depends_on: [db]
+
+  crowdsec:
+    image: crowdsecurity/crowdsec:latest
+    container_name: federloom-wp-crowdsec
+    restart: unless-stopped
+    environment:
+      COLLECTIONS: "crowdsecurity/wordpress"
+      # Auto-registers a bouncer named "federloom" with this key.
+      # CHANGE THE KEY if this host is shared; it must match api_key in config.yaml.
+      BOUNCER_KEY_federloom: "federloom-example-key"
+    ports:
+      # LAPI, localhost only — never expose publicly. Published on host port
+      # 18080 to avoid colliding with a host-installed CrowdSec that owns 8080.
+      - "127.0.0.1:18080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro   # read wordpress stdout logs
+      - ./acquis.yaml:/etc/crowdsec/acquis.d/wordpress.yaml:ro
+      - crowdsec-config:/etc/crowdsec
+      - crowdsec-data:/var/lib/crowdsec/data
+    depends_on: [wordpress]
+
+  federloom:
+    image: ghcr.io/joeru/federloom:latest
+    container_name: federloom
+    restart: unless-stopped
+    cap_add: [NET_ADMIN, NET_RAW]
+    network_mode: host          # enforce on the host firewall; reach LAPI via 127.0.0.1
+    volumes:
+      - ./config.yaml:/etc/federloom/config.yaml:ro
+      - ./rules.yaml:/etc/federloom/rules.yaml:ro
+      - federloom-data:/var/lib/federloom
+    command: >
+      --config /etc/federloom/config.yaml
+    depends_on: [crowdsec]
+
+volumes:
+  db-data:
+  crowdsec-config:
+  crowdsec-data:
+  federloom-data:

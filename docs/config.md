@@ -201,12 +201,14 @@ ingest:
 
 #### ingest.fail2ban
 
-Polls `docker exec <container> fail2ban-client banned` on each tick and
-converts active bans into reputation events.
+Polls `fail2ban-client banned` on each tick — via `docker exec <container>`
+(`mode: docker`) or directly on the host (`mode: local`) — and converts active
+bans into reputation events.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `ingest.fail2ban.enabled` | bool | `false` | Enable the fail2ban Docker adapter. |
+| `ingest.fail2ban.enabled` | bool | `false` | Enable the fail2ban adapter. |
+| `ingest.fail2ban.mode` | string | `docker` | `docker` polls `docker exec <container> fail2ban-client banned`; `local` runs `fail2ban-client banned` directly on the host (bare-metal fail2ban — federloomd must run as root or have access to the fail2ban socket). |
 | `ingest.fail2ban.container` | string | `fail2ban` | Docker container name running fail2ban. |
 | `ingest.fail2ban.poll_interval` | duration | `30s` | How often to poll `fail2ban-client banned`. |
 | `ingest.fail2ban.jail_reasons` | map[string]string | `{}` | Override the reason code assigned per jail name (exact match). Example: `sshd: ssh-auth-bruteforce`. |
@@ -215,6 +217,7 @@ converts active bans into reputation events.
 ingest:
   fail2ban:
     enabled: true
+    mode: docker
     container: fail2ban
     poll_interval: 30s
     jail_reasons:

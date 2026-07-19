@@ -1,0 +1,63 @@
+# HAProxy + CrowdSec (detect) + FederLoom (federate + enforce), plus the
+# reverse direction: HAProxy denies IPs from FederLoom's blocklist feed at the
+# proxy layer (defence in depth on top of the host-firewall block).
+services:
+  haproxy:
+    image: haproxy:2.9-alpine
+    container_name: federloom-haproxy
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      # Directory mount, not a single-file bind mount: fetch-blocklist.sh
+      # atomically renames a new file into place, and a single-file bind
+      # mount stays pinned to the original inode across a rename, so the
+      # container would never see the refreshed list. A directory mount
+      # follows the directory entry, so renames inside it propagate.
+      - ./acl:/usr/local/etc/haproxy/acl:ro
+    depends_on: [whoami]
+
+  whoami:
+    image: traefik/whoami
+    container_name: federloom-haproxy-whoami
+    restart: unless-stopped
+
+  crowdsec:
+    image: crowdsecurity/crowdsec:latest
+    container_name: federloom-haproxy-crowdsec
+    restart: unless-stopped
+    environment:
+      COLLECTIONS: "crowdsecurity/haproxy"
+      # Auto-registers a bouncer named "federloom" with this key.
+      # CHANGE THE KEY if this host is shared; it must match api_key in config.yaml.
+      BOUNCER_KEY_federloom: "federloom-example-key"
+    ports:
+      # LAPI, localhost only — never expose publicly. Published on host port
+      # 18080 to avoid colliding with a host-installed CrowdSec that owns 8080.
+      - "127.0.0.1:18080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./acquis.yaml:/etc/crowdsec/acquis.d/haproxy.yaml:ro
+      - crowdsec-config:/etc/crowdsec
+      - crowdsec-data:/var/lib/crowdsec/data
+    depends_on: [haproxy]
+
+  federloom:
+    image: ghcr.io/joeru/federloom:latest
+    container_name: federloom
+    restart: unless-stopped
+    cap_add: [NET_ADMIN, NET_RAW]
+    network_mode: host          # enforce on the host firewall; reach LAPI via 127.0.0.1
+    volumes:
+      - ./config.yaml:/etc/federloom/config.yaml:ro
+      - ./rules.yaml:/etc/federloom/rules.yaml:ro
+      - federloom-data:/var/lib/federloom
+    command: >
+      --config /etc/federloom/config.yaml
+    depends_on: [crowdsec]
+
+volumes:
+  crowdsec-config:
+  crowdsec-data:
+  federloom-data:

@@ -1,0 +1,7 @@
+# Drop into /etc/fail2ban/jail.d/ — enables the stock nginx jails.
+# FederLoom picks the bans up via `fail2ban-client banned` (mode: local).
+[nginx-http-auth]
+enabled = true
+
+[nginx-botsearch]
+enabled = true

@@ -1,0 +1,12 @@
+# Blocking rules — yours to change: lists are aids, not law.
+- name: local-http-bruteforce
+  reason: http-auth-bruteforce
+  min_corroboration: 1
+  action: block
+- name: local-ssh-bruteforce
+  reason: ssh-auth-bruteforce
+  min_corroboration: 1
+  action: block
+- name: multi-reporter
+  min_corroboration: 3
+  action: block

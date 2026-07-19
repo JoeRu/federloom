@@ -143,3 +143,37 @@ func TestFail2Ban_UnknownJail(t *testing.T) {
 		t.Fatal("timed out waiting for event")
 	}
 }
+
+// TestFail2Ban_InvalidMode: unknown mode → Start returns an error.
+func TestFail2Ban_InvalidMode(t *testing.T) {
+	cfg := makeFail2BanCfg(50 * time.Millisecond)
+	cfg.Mode = "bogus"
+	f := ingest.NewFail2Ban(cfg, "selfpeer")
+	if _, err := f.Start(context.Background()); err == nil {
+		t.Fatal("Start: want error for mode \"bogus\", got nil")
+	}
+}
+
+// TestFail2Ban_LocalModeStarts: mode "local" is accepted (fetcher wired).
+func TestFail2Ban_LocalModeStarts(t *testing.T) {
+	cfg := makeFail2BanCfg(time.Hour) // long poll: fetcher never actually runs
+	cfg.Mode = "local"
+	f := ingest.NewFail2Ban(cfg, "selfpeer")
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	if _, err := f.Start(ctx); err != nil {
+		t.Fatalf("Start: unexpected error for mode \"local\": %v", err)
+	}
+}
+
+// TestFail2Ban_DockerModeDefault: empty mode behaves as docker mode (no error).
+func TestFail2Ban_DockerModeDefault(t *testing.T) {
+	cfg := makeFail2BanCfg(time.Hour)
+	cfg.Mode = ""
+	f := ingest.NewFail2Ban(cfg, "selfpeer")
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	if _, err := f.Start(ctx); err != nil {
+		t.Fatalf("Start: unexpected error for empty mode: %v", err)
+	}
+}

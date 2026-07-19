@@ -1,0 +1,15 @@
+# Blocking rules — yours to change: lists are aids, not law.
+# Local fail2ban detections are high-confidence: one report is enough to block.
+- name: local-ssh-bruteforce
+  reason: ssh-auth-bruteforce
+  min_corroboration: 1
+  action: block
+- name: local-recidive
+  reason: recidive
+  min_corroboration: 1
+  action: block
+# Federation dividend: block what 3+ independent reporters agree on
+# (only fires once you are federated).
+- name: multi-reporter
+  min_corroboration: 3
+  action: block

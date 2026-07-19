@@ -1,0 +1,15 @@
+name: examples-smoke
+on:
+  pull_request:
+    paths:
+      - 'examples/**'
+      - 'test/examples/**'
+      - 'deploy/docker/**'
+  schedule:
+    - cron: '17 3 * * *'   # nightly — catches rot from upstream image changes
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./test/examples/run-smoke.sh

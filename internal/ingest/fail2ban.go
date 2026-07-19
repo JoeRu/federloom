@@ -3,6 +3,7 @@ package ingest
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os/exec"
 	"strings"
@@ -19,6 +20,12 @@ type fail2banFetcher func(ctx context.Context, container string) ([]byte, error)
 // dockerBanned is the production fetcher: runs `docker exec <container> fail2ban-client banned`.
 func dockerBanned(ctx context.Context, container string) ([]byte, error) {
 	return exec.CommandContext(ctx, "docker", "exec", container, "fail2ban-client", "banned").Output()
+}
+
+// localBanned is the bare-metal fetcher: runs `fail2ban-client banned` directly
+// on the host (fail2ban installed as an OS package, no Docker).
+func localBanned(ctx context.Context, _ string) ([]byte, error) {
+	return exec.CommandContext(ctx, "fail2ban-client", "banned").Output()
 }
 
 // builtinJailReasons maps common fail2ban jail names (exact) to FederLoom reason strings.
@@ -46,7 +53,8 @@ var builtinJailPrefixes = []struct{ prefix, reason string }{
 	{"wp-", "http-wp-bruteforce"},
 }
 
-// Fail2Ban polls a fail2ban Docker container for banned IPs and emits proto.Events.
+// Fail2Ban polls fail2ban for banned IPs — via `docker exec` (mode "docker")
+// or `fail2ban-client` on the host (mode "local") — and emits proto.Events.
 type Fail2Ban struct {
 	cfg     config.Fail2BanConfig
 	selfID  string
@@ -56,9 +64,19 @@ type Fail2Ban struct {
 // Compile-time check: Fail2Ban must implement Source.
 var _ Source = (*Fail2Ban)(nil)
 
-// NewFail2Ban creates a Fail2Ban adapter using the real Docker fetcher.
+// NewFail2Ban creates a Fail2Ban adapter, selecting the fetcher by cfg.Mode:
+// "docker" (or empty) polls via `docker exec`, "local" polls the host's
+// fail2ban-client directly. An unknown mode leaves the fetcher nil; Start
+// reports the error.
 func NewFail2Ban(cfg config.Fail2BanConfig, selfID string) *Fail2Ban {
-	return NewFail2BanWithFetcher(cfg, selfID, dockerBanned)
+	var f fail2banFetcher
+	switch cfg.Mode {
+	case "", "docker":
+		f = dockerBanned
+	case "local":
+		f = localBanned
+	}
+	return NewFail2BanWithFetcher(cfg, selfID, f)
 }
 
 // NewFail2BanWithFetcher creates a Fail2Ban adapter with a custom fetcher.
@@ -74,6 +92,9 @@ func (f *Fail2Ban) Name() string { return "fail2ban" }
 
 // Start launches the polling goroutine and returns the event channel.
 func (f *Fail2Ban) Start(ctx context.Context) (<-chan proto.Event, error) {
+	if f.fetcher == nil {
+		return nil, fmt.Errorf("fail2ban: unknown mode %q (valid: \"docker\", \"local\")", f.cfg.Mode)
+	}
 	ch := make(chan proto.Event, 64)
 	go f.run(ctx, ch)
 	return ch, nil

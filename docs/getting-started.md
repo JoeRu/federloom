@@ -8,6 +8,10 @@ trust: peer-to-peer, no central authority. This guide covers the Docker
 path; no build tools required. At the end you will have a running container
 blocking IPs and exposing Prometheus metrics at `:9101/metrics`.
 
+> **Fastest path:** if you already run fail2ban, CrowdSec, Mailcow, or a
+> dockerized web stack, use a ready-made integration from
+> [`examples/`](../examples/README.md) instead of a manual setup.
+
 ---
 
 ## Prerequisites
