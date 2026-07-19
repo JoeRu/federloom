@@ -1,0 +1,20 @@
+# Export-only FederLoom node. On its own it serves an EMPTY list — join a
+# federation (or enable an ingest source) so there is something to export.
+# Every threshold is locally overridable — lists are aids, not law.
+federation_mode: solo          # set to "federated" + bootstrap_peers for real use
+store:
+  dir: /var/lib/federloom
+enforce:
+  backend: ipset
+  set_name: federloom
+  # This container runs on the default bridge network (no network_mode:
+  # host — it only needs to serve the feed, not write the host firewall), so
+  # its network namespace has no DOCKER-USER chain (that chain only exists in
+  # netns where dockerd itself manages container networking, i.e. the host's).
+  # INPUT always exists in every netns; the ipset/iptables rule installed here
+  # is confined to this container's own loopback and is not host enforcement.
+  chain: INPUT
+api:
+  addr: ":9102"                # container-internal; host binding set in docker-compose.yml
+# bootstrap_peers:
+#   - /dns4/peer.example.org/tcp/7700/p2p/12D3KooW...

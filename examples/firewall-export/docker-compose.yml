@@ -1,0 +1,22 @@
+# FederLoom as a blocklist SOURCE for firewalls (OPNsense, pfSense, MikroTik,
+# FortiGate): no agent on the firewall — it just fetches a plain-text URL.
+# SECURITY: bind the published port to a management/VPN interface, never to a
+# WAN address. The API has no auth; network reachability IS the trust boundary.
+services:
+  federloom:
+    image: ghcr.io/joeru/federloom:latest
+    container_name: federloom-export
+    restart: unless-stopped
+    cap_add: [NET_ADMIN, NET_RAW]
+    ports:
+      # Change 127.0.0.1 to your management/VPN interface IP so your firewall
+      # can reach it, e.g. "10.0.0.5:9102:9102".
+      - "127.0.0.1:9102:9102"
+    volumes:
+      - ./config.yaml:/etc/federloom/config.yaml:ro
+      - federloom-data:/var/lib/federloom
+    command: >
+      --config /etc/federloom/config.yaml
+
+volumes:
+  federloom-data:
