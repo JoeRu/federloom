@@ -1,0 +1,31 @@
+# FederLoom at the HAProxy edge: detect via CrowdSec, deny at proxy + firewall.
+# Every value is locally overridable — lists are aids, not law.
+federation_mode: solo          # switch to "federated" to share/receive (see README)
+store:
+  dir: /var/lib/federloom
+ingest:
+  crowdsec:
+    enabled: true
+    lapi_url: "http://127.0.0.1:18080"
+    api_key: "federloom-example-key"   # must match BOUNCER_KEY_federloom in docker-compose.yml
+    poll_interval: 10s
+    enable_decisions: true
+    enable_alerts: false       # alerts need machine auth; decisions are enough here
+enforce:
+  backend: ipset
+  set_name: federloom
+  chains: [INPUT, DOCKER-USER]   # protect host services and containers
+reputation:
+  rules_file: /etc/federloom/rules.yaml
+  # A single own-CrowdSec decision is already high-confidence (see the
+  # min_corroboration: 1 rule in rules.yaml) and blocks immediately. These
+  # two thresholds keep the score-based API and the /crowdsec/v1/decisions
+  # feed in agreement with that rules-engine decision, rather than the
+  # production default (block_threshold: 75), which assumes many small
+  # stranger reports accumulating over time — not a single trusted local
+  # detector. unblock_threshold stays below block_threshold (hysteresis);
+  # decay still releases a stale IP once its score fades toward zero.
+  block_threshold: 1
+  unblock_threshold: 0.5
+api:
+  addr: "127.0.0.1:9102"       # score API + /crowdsec/v1/decisions plain-text feed
