@@ -115,6 +115,15 @@ Two small interfaces cover the full integration surface
 - **`enforce.Sink`** — enforcement backends: `ipset`, `nftables`, or emit a
   CrowdSec-compatible blocklist so an existing bouncer does the blocking.
 
+## Integrations
+
+Ready-made, CI-validated examples under [`examples/`](examples/): plain VPS
+with fail2ban, nginx, Apache, WordPress, Traefik, HAProxy, a bidirectional
+CrowdSec bridge, a non-invasive Mailcow override, and agentless blocklist
+feeds for OPNsense/pfSense/MikroTik/FortiGate. Start with
+[`examples/vps-fail2ban/`](examples/vps-fail2ban/) — fail2ban to federated
+blocklist in five minutes.
+
 ## Repository layout
 
 See [`docs/project-structure.md`](docs/project-structure.md) for the full tree.

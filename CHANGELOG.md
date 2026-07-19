@@ -2,6 +2,19 @@
 
 All notable changes are documented here. Format: Keep a Changelog; versioning: SemVer.
 
+## [Unreleased]
+
+### Added
+- `examples/` — self-contained, CI-validated integration examples: vps-fail2ban,
+  nginx (os+docker), apache (os+docker), wordpress, traefik, haproxy,
+  crowdsec bridge, mailcow override, firewall-export
+  (OPNsense/pfSense/MikroTik/FortiGate).
+- fail2ban ingest `mode: local | docker` — bare-metal (non-Docker) fail2ban
+  support (backlog B1).
+- `make validate-examples` CI gate (strict schema decode of all example
+  configs + compose validation) and a docker-example smoke harness
+  (`test/examples/run-smoke.sh`).
+
 ## [0.1.0] - 2026-07-17
 
 First tagged release. Covers the full scaffold through Step 7 (load shedding).
