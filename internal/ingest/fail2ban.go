@@ -53,7 +53,8 @@ var builtinJailPrefixes = []struct{ prefix, reason string }{
 	{"wp-", "http-wp-bruteforce"},
 }
 
-// Fail2Ban polls a fail2ban Docker container for banned IPs and emits proto.Events.
+// Fail2Ban polls fail2ban for banned IPs — via `docker exec` (mode "docker")
+// or `fail2ban-client` on the host (mode "local") — and emits proto.Events.
 type Fail2Ban struct {
 	cfg     config.Fail2BanConfig
 	selfID  string
