@@ -10,12 +10,17 @@ services:
     restart: unless-stopped
     # Read Docker logs for ingest (read-only), like the CrowdSec override does.
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount the directory, not the socket file: dockerd recreates docker.sock on
+      # restart (e.g. a NixOS upgrade), and with live-restore this container keeps
+      # running on the deleted inode - ingest then fails with "exit status 1".
+      - /run:/host-run:ro
       - ./federloom/config.yaml:/etc/federloom/config.yaml:ro
       - federloom-data:/var/lib/federloom
     # Enforcement happens on the host; the daemon needs net admin for ipset/nft.
     cap_add: [ NET_ADMIN, NET_RAW ]
     network_mode: host
+    environment:
+      DOCKER_HOST: unix:///host-run/docker.sock
 
 volumes:
   federloom-data:
