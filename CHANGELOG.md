@@ -15,6 +15,14 @@ All notable changes are documented here. Format: Keep a Changelog; versioning: S
   configs + compose validation) and a docker-example smoke harness
   (`test/examples/run-smoke.sh`).
 
+### Fixed
+- mailcow and fail2ban ingest: a failed `docker` / `fail2ban-client` call now
+  logs the command's own message (e.g. `Cannot connect to the Docker daemon`)
+  instead of a bare `exit status 1`.
+- `deploy/mailcow`: mount `/run` and set `DOCKER_HOST` instead of
+  bind-mounting the `docker.sock` file, which went stale whenever dockerd
+  restarted under `live-restore` and silently stopped mailcow ingest.
+
 ## [0.1.0] - 2026-07-17
 
 First tagged release. Covers the full scaffold through Step 7 (load shedding).
