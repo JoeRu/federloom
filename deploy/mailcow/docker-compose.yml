@@ -17,11 +17,16 @@ services:
     restart: unless-stopped
     cap_add: [NET_ADMIN, NET_RAW]
     network_mode: host
+    environment:
+      DOCKER_HOST: unix:///host-run/docker.sock
     volumes:
       - ./config.local.yaml:/etc/federloom/config.yaml:ro
       - ./rules.yaml:/etc/federloom/rules.yaml:ro
       - federloom-data:/var/lib/federloom
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount the directory, not the socket file: dockerd recreates docker.sock on
+      # restart (e.g. a NixOS upgrade), and with live-restore this container keeps
+      # running on the deleted inode - ingest then fails with "exit status 1".
+      - /run:/host-run:ro
     command: >
       --config /etc/federloom/config.yaml
       --listen /ip4/0.0.0.0/tcp/7700

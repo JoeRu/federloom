@@ -19,7 +19,8 @@ type logFetcher func(ctx context.Context, container, since string) ([]byte, erro
 
 // dockerFetch is the production logFetcher.
 func dockerFetch(ctx context.Context, container, since string) ([]byte, error) {
-	return exec.CommandContext(ctx, "docker", "logs", "--since", since, container).CombinedOutput()
+	out, err := exec.CommandContext(ctx, "docker", "logs", "--since", since, container).CombinedOutput()
+	return out, commandError(err, out)
 }
 
 var (

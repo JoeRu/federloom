@@ -19,13 +19,15 @@ type fail2banFetcher func(ctx context.Context, container string) ([]byte, error)
 
 // dockerBanned is the production fetcher: runs `docker exec <container> fail2ban-client banned`.
 func dockerBanned(ctx context.Context, container string) ([]byte, error) {
-	return exec.CommandContext(ctx, "docker", "exec", container, "fail2ban-client", "banned").Output()
+	out, err := exec.CommandContext(ctx, "docker", "exec", container, "fail2ban-client", "banned").Output()
+	return out, commandError(err, out)
 }
 
 // localBanned is the bare-metal fetcher: runs `fail2ban-client banned` directly
 // on the host (fail2ban installed as an OS package, no Docker).
 func localBanned(ctx context.Context, _ string) ([]byte, error) {
-	return exec.CommandContext(ctx, "fail2ban-client", "banned").Output()
+	out, err := exec.CommandContext(ctx, "fail2ban-client", "banned").Output()
+	return out, commandError(err, out)
 }
 
 // builtinJailReasons maps common fail2ban jail names (exact) to FederLoom reason strings.
