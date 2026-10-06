@@ -47,9 +47,15 @@ func (n *Node) KeepBootstrapPeers(ctx context.Context, peers []peer.AddrInfo, in
 				continue
 			}
 			if n.host.Network().Connectedness(p.ID) == network.Connected {
+				// Connected through some other path (e.g. it dialled us, or
+				// discovery found it): still a bootstrap peer, so protect it, and
+				// count a recovery from an outage as a reconnect for the DHT
+				// refresh below.
+				n.host.ConnManager().Protect(p.ID, bootstrapProtectTag)
 				if down[p.ID] {
 					log.Printf("transport: bootstrap peer %s connected again", p.ID)
 					delete(down, p.ID)
+					reconnected = true
 				}
 				continue
 			}
