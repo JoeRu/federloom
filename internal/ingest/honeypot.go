@@ -120,14 +120,15 @@ func (h *Honeypot) tail(ctx context.Context, ch chan<- proto.Event) {
 					ReporterID: h.selfID,
 				}
 
+				// Block rather than drop when the channel is full: the source is a file,
+				// so waiting only delays ingest. Dropping lost the duplicate events of a
+				// burst and logged one line per drop; local protection is never shed
+				// (spec §11.5).
 				select {
 				case ch <- e:
 				case <-ctx.Done():
 					f.Close()
 					return
-				default:
-					// Channel full — drop (high-volume honeypot noise).
-					log.Printf("ingest/cowrie: channel full, dropping event for %s", ce.SrcIP)
 				}
 			}
 			if err := scanner.Err(); err != nil {

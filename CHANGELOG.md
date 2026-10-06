@@ -22,6 +22,11 @@ All notable changes are documented here. Format: Keep a Changelog; versioning: S
 - `deploy/mailcow`: mount `/run` and set `DOCKER_HOST` instead of
   bind-mounting the `docker.sock` file, which went stale whenever dockerd
   restarted under `live-restore` and silently stopped mailcow ingest.
+- cowrie, OpenCanary, spamtrap and mailcow ingest: a full event channel now
+  applies backpressure instead of dropping the event and logging
+  `channel full, dropping …`. Bursts from a single attacker session no longer
+  produce hundreds of drop lines a day, and local events are no longer shed
+  (spec §11.5).
 
 ## [0.1.0] - 2026-07-17
 
