@@ -84,6 +84,31 @@ func TestKeepBootstrapPeersReconnectsAfterHubRestart(t *testing.T) {
 	restarted := fixedNode(t, ctx, hubKey, port)
 	defer restarted.Close()
 	waitConnected(t, leaf, hubInfo.ID, true, 5*time.Second)
+
+	// Reconnecting is not the goal in itself: discovery through the hub must
+	// work again. A peer that only joins after the restart can be known to the
+	// leaf solely through a DHT lookup via the restarted hub.
+	other, err := transport.New(ctx, testOpts(t, transport.ModeLeaf))
+	if err != nil {
+		t.Fatalf("create other: %v", err)
+	}
+	defer other.Close()
+	if err := other.Bootstrap(ctx, []peer.AddrInfo{hubInfo}); err != nil {
+		t.Fatalf("other bootstrap: %v", err)
+	}
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		fctx, fcancel := context.WithTimeout(ctx, time.Second)
+		ai, err := leaf.FindPeer(fctx, other.Host().ID())
+		fcancel()
+		if err == nil && len(ai.Addrs) > 0 {
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("leaf could not find a new peer via the restarted hub's DHT: %v", err)
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
 }
 
 // TestBootstrapTriesEveryPeer: one unreachable bootstrap peer must not stop
