@@ -16,6 +16,13 @@ All notable changes are documented here. Format: Keep a Changelog; versioning: S
   (`test/examples/run-smoke.sh`).
 
 ### Fixed
+- Federation: bootstrap peers are now re-dialled every
+  `bootstrap_reconnect_interval` (new, default `1m`) when not connected.
+  Bootstrap used to run once at start-up, so a node whose only peer was its
+  bootstrap hub stayed isolated after the hub restarted, until it was itself
+  restarted. Startup bootstrap also tries every listed peer instead of
+  stopping at the first unreachable one, and bootstrap connections are
+  protected from connection trimming.
 - mailcow and fail2ban ingest: a failed `docker` / `fail2ban-client` call now
   logs the command's own message (e.g. `Cannot connect to the Docker daemon`)
   instead of a bare `exit status 1`.

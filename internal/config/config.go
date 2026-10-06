@@ -67,9 +67,12 @@ type Config struct {
 	Observability             ObservabilityConfig `yaml:"observability"`
 	API                       APIConfig           `yaml:"api"`
 	BootstrapPeers            []string            `yaml:"bootstrap_peers"`
-	DNSBL                     DNSBLConfig         `yaml:"dnsbl"`
-	Discovery                 DiscoveryConfig     `yaml:"discovery"`
-	Resources                 ResourcesConfig     `yaml:"resources"`
+	// BootstrapReconnectInterval is how often unconnected bootstrap peers are
+	// re-dialled after start-up (default 1m; <=0 also means 1m).
+	BootstrapReconnectInterval Duration        `yaml:"bootstrap_reconnect_interval"`
+	DNSBL                      DNSBLConfig     `yaml:"dnsbl"`
+	Discovery                  DiscoveryConfig `yaml:"discovery"`
+	Resources                  ResourcesConfig `yaml:"resources"`
 }
 
 // StoreConfig configures the BadgerDB reputation store.
@@ -282,6 +285,7 @@ func Defaults() *Config {
 			FederationDiscount:    0.5,
 			DiversityRepeatFactor: 0.15,
 		},
+		BootstrapReconnectInterval: Duration{time.Minute},
 		Discovery: DiscoveryConfig{
 			Advertise: true,
 			Discover:  true,
