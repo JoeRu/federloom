@@ -21,7 +21,7 @@ federated too. That is desired: one FederLoom instance covers the whole host.
 
 - Linux host with `nginx` and `fail2ban` installed and running.
 - `ipset` + `iptables` installed.
-- Go 1.22+ to build the binary (prebuilt binaries: see project releases).
+- Go 1.26+ to build the binary (prebuilt binaries: see project releases).
 
 ## Setup
 

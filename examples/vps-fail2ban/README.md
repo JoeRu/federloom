@@ -15,7 +15,7 @@ theirs).
 
 - Linux host with `fail2ban` installed and running (e.g. the stock `sshd` jail).
 - `ipset` + `iptables` installed.
-- Go 1.22+ to build the binary (prebuilt binaries: see project releases).
+- Go 1.26+ to build the binary (prebuilt binaries: see project releases).
 
 ## Setup
 
