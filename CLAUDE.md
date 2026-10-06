@@ -24,7 +24,7 @@ accurate if you change behaviour.
 
 ## Tech stack
 
-- **Go 1.22**, single static binary per command (`cmd/federloomd`, `cmd/federloomctl`).
+- **Go 1.26**, single static binary per command (`cmd/federloomd`, `cmd/federloomctl`).
 - **libp2p** for transport (gossipsub + kademlia DHT), **BadgerDB** for the
   reputation store (TTL = decay GC), **bloom filter** as the negative pre-filter.
 - Config: YAML + ENV override (`internal/config`, examples in `deploy/examples/`).

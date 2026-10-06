@@ -4,6 +4,12 @@ All notable changes are documented here. Format: Keep a Changelog; versioning: S
 
 ## [Unreleased]
 
+### Changed
+- Go 1.26 toolchain (`go.mod`, Docker build image `golang:1.26`; CI reads
+  the version from `go.mod`). go-libp2p v0.50.0, which brings quic-go 0.62.0
+  and webtransport-go 0.13.0 (the part of the Dependabot group update in #8
+  that needed the newer go-libp2p), plus the indirect updates it pulls in.
+
 ### Added
 - `examples/` — self-contained, CI-validated integration examples: vps-fail2ban,
   nginx (os+docker), apache (os+docker), wordpress, traefik, haproxy,
