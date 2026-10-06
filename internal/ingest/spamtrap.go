@@ -96,13 +96,15 @@ func (s *Spamtrap) tail(ctx context.Context, ch chan<- proto.Event) {
 					continue
 				}
 
+				// Block rather than drop when the channel is full: the source is a file,
+				// so waiting only delays ingest. Dropping lost the duplicate events of a
+				// burst and logged one line per drop; local protection is never shed
+				// (spec §11.5).
 				select {
 				case ch <- proto.Event{IP: line, Reason: "smtp-spamtrap", Timestamp: time.Now(), ReporterID: s.selfID}:
 				case <-ctx.Done():
 					f.Close()
 					return
-				default:
-					log.Printf("ingest/spamtrap: channel full, dropping %s", line)
 				}
 			}
 			if err := scanner.Err(); err != nil {

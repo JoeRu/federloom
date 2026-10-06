@@ -110,12 +110,13 @@ func (m *MailcowLogs) pollPostfix(ctx context.Context, since string, ch chan<- p
 			continue
 		}
 		ip := string(sub[1])
+		// Block rather than drop when the channel is full: the batch is already
+		// fetched, so waiting only delays ingest (spec §11.5: local protection is
+		// never shed). Applies to the dovecot loop below as well.
 		select {
 		case ch <- proto.Event{IP: ip, Reason: "smtp-auth-bruteforce", Timestamp: time.Now(), ReporterID: m.selfID}:
 		case <-ctx.Done():
 			return
-		default:
-			log.Printf("ingest/mailcow: channel full, dropping %s", ip)
 		}
 	}
 }
@@ -139,8 +140,6 @@ func (m *MailcowLogs) pollDovecot(ctx context.Context, since string, ch chan<- p
 		case ch <- proto.Event{IP: ip, Reason: reason, Timestamp: time.Now(), ReporterID: m.selfID}:
 		case <-ctx.Done():
 			return
-		default:
-			log.Printf("ingest/mailcow: channel full, dropping %s", ip)
 		}
 	}
 }
