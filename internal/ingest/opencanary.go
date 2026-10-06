@@ -74,8 +74,7 @@ func (o *OpenCanary) tail(ctx context.Context, ch chan<- proto.Event) {
 		pollInterval = time.Second
 	}
 
-	var offset int64
-	var lastSize int64
+	var pos tailPos
 
 	ticker := time.NewTicker(pollInterval)
 	defer ticker.Stop()
@@ -96,13 +95,10 @@ func (o *OpenCanary) tail(ctx context.Context, ch chan<- proto.Event) {
 				continue
 			}
 
-			// Log rotation: file shrank — reopen from start.
-			if fi.Size() < lastSize {
-				offset = 0
-			}
-			lastSize = fi.Size()
+			// Log rotation (truncated or replaced file) — read from start.
+			pos.sync(fi)
 
-			if _, err := f.Seek(offset, io.SeekStart); err != nil {
+			if _, err := f.Seek(pos.offset, io.SeekStart); err != nil {
 				f.Close()
 				continue
 			}
@@ -111,7 +107,7 @@ func (o *OpenCanary) tail(ctx context.Context, ch chan<- proto.Event) {
 			scanner.Buffer(make([]byte, 1<<20), 1<<20) // 1 MiB cap — avoids silent truncation
 			for scanner.Scan() {
 				line := scanner.Bytes()
-				offset += int64(len(line)) + 1 // +1 for newline
+				pos.offset += int64(len(line)) + 1 // +1 for newline
 
 				var oe openCanaryEvent
 				if err := json.Unmarshal(line, &oe); err != nil {
