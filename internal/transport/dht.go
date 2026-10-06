@@ -2,6 +2,7 @@ package transport
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	dht "github.com/libp2p/go-libp2p-kad-dht"
@@ -10,13 +11,28 @@ import (
 )
 
 // Bootstrap connects to the given peers and refreshes the DHT routing table.
+// It tries every peer: one unreachable peer must not stop the node from
+// joining through the others. Connected bootstrap peers are protected from
+// connection trimming. The returned error joins every failed connect (and a
+// failed DHT refresh); it is non-nil even when other peers connected, so the
+// caller can log it, but it is not fatal.
 func (n *Node) Bootstrap(ctx context.Context, peers []peer.AddrInfo) error {
+	var errs []error
+	self := n.host.ID()
 	for _, p := range peers {
-		if err := n.host.Connect(ctx, p); err != nil {
-			return fmt.Errorf("transport: connect bootstrap peer %s: %w", p.ID, err)
+		if p.ID == self {
+			continue
 		}
+		if err := n.host.Connect(ctx, p); err != nil {
+			errs = append(errs, fmt.Errorf("transport: connect bootstrap peer %s: %w", p.ID, err))
+			continue
+		}
+		n.host.ConnManager().Protect(p.ID, bootstrapProtectTag)
 	}
-	return n.dht.Bootstrap(ctx)
+	if err := n.dht.Bootstrap(ctx); err != nil {
+		errs = append(errs, err)
+	}
+	return errors.Join(errs...)
 }
 
 // FindPeer resolves a peer's addresses via the DHT routing table.

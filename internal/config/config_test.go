@@ -466,3 +466,16 @@ func TestDisputeDefaults(t *testing.T) {
 		t.Errorf("unset dispute weight = %v, want 10", got)
 	}
 }
+
+func TestBootstrapReconnectInterval(t *testing.T) {
+	if got := config.Defaults().BootstrapReconnectInterval.Duration; got != time.Minute {
+		t.Errorf("default bootstrap_reconnect_interval = %v, want 1m", got)
+	}
+	cfg, err := config.LoadYAML([]byte("bootstrap_reconnect_interval: 30s\n"))
+	if err != nil {
+		t.Fatalf("LoadYAML: %v", err)
+	}
+	if got := cfg.BootstrapReconnectInterval.Duration; got != 30*time.Second {
+		t.Errorf("bootstrap_reconnect_interval = %v, want 30s", got)
+	}
+}

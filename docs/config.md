@@ -486,15 +486,23 @@ discovery:
 
 ### bootstrap_peers
 
-A list of well-known libp2p multiaddrs to connect to at startup. Peers are
-tried once on boot; the DHT routing table takes over after that. Update this
-list when a peer's node key rotates, since key rotation produces a new peer ID.
+A list of well-known libp2p multiaddrs to connect to at startup. Every peer is
+tried on boot (an unreachable one does not stop the others), and afterwards
+any bootstrap peer that is not connected is re-dialled every
+`bootstrap_reconnect_interval` (default `1m`), so a node whose only peer
+restarted rejoins on its own. Bootstrap connections are protected from
+connection trimming. Update this list when a peer's node key rotates, since
+key rotation produces a new peer ID.
+
+List more than one peer where you can: with a single hub, every node's way
+back into the swarm runs through that hub.
 
 Defaults to `[]` (empty — no hardcoded peers; discovery via DHT).
 
 ```yaml
 bootstrap_peers:
   - /ip4/1.2.3.4/tcp/7700/p2p/12D3KooW...
+bootstrap_reconnect_interval: 1m
 ```
 
 ## For developers: adding a new config field

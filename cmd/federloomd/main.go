@@ -115,6 +115,9 @@ func main() {
 		if err := t.Bootstrap(ctx, bootstrapPeers); err != nil {
 			log.Printf("bootstrap warning: %v", err)
 		}
+		// Bootstrap runs once; keep re-dialling lost bootstrap peers so a
+		// restarted hub does not leave this node isolated.
+		go t.KeepBootstrapPeers(ctx, bootstrapPeers, cfg.BootstrapReconnectInterval.Duration)
 	}
 
 	if *relay {
