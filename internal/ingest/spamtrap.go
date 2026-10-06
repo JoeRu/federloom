@@ -47,8 +47,7 @@ func (s *Spamtrap) tail(ctx context.Context, ch chan<- proto.Event) {
 		pollInterval = time.Second
 	}
 
-	var offset int64
-	var lastSize int64
+	var pos tailPos
 
 	ticker := time.NewTicker(pollInterval)
 	defer ticker.Stop()
@@ -69,13 +68,10 @@ func (s *Spamtrap) tail(ctx context.Context, ch chan<- proto.Event) {
 				continue
 			}
 
-			// Log rotation: file shrank — reopen from start.
-			if fi.Size() < lastSize {
-				offset = 0
-			}
-			lastSize = fi.Size()
+			// Log rotation (truncated or replaced file) — read from start.
+			pos.sync(fi)
 
-			if _, err := f.Seek(offset, io.SeekStart); err != nil {
+			if _, err := f.Seek(pos.offset, io.SeekStart); err != nil {
 				f.Close()
 				continue
 			}
@@ -84,7 +80,7 @@ func (s *Spamtrap) tail(ctx context.Context, ch chan<- proto.Event) {
 			scanner.Buffer(make([]byte, 1<<20), 1<<20)
 			for scanner.Scan() {
 				raw := scanner.Bytes()
-				offset += int64(len(raw)) + 1 // +1 for newline
+				pos.offset += int64(len(raw)) + 1 // +1 for newline
 
 				line := strings.TrimSpace(string(raw))
 				if line == "" || strings.HasPrefix(line, "#") {

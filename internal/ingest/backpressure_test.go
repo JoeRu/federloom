@@ -119,3 +119,26 @@ func TestMailcowBurstIsNotDropped(t *testing.T) {
 	}
 	drainAfter(t, ctx, ch, burst)
 }
+
+func TestMailcowDovecotBurstIsNotDropped(t *testing.T) {
+	var dovecotCalls atomic.Int32
+	m := makeMailcow(t, func(container string) []byte {
+		// Only the first dovecot poll returns the burst; postfix stays empty,
+		// so the count is exact.
+		if container != "test-dovecot" || dovecotCalls.Add(1) > 1 {
+			return nil
+		}
+		var b []byte
+		for i := 0; i < burst; i++ {
+			b = append(b, fmt.Sprintf("Jun 17 10:12:34 mx dovecot: imap-login: Disconnected (auth failed, 3 attempts in 10 secs): user=<test@mail.com>, method=PLAIN, rip=198.51.100.%d, lip=172.22.1.3\n", i%250+1)...)
+		}
+		return b
+	})
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	ch, err := m.Start(ctx)
+	if err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+	drainAfter(t, ctx, ch, burst)
+}

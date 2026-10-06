@@ -27,6 +27,10 @@ All notable changes are documented here. Format: Keep a Changelog; versioning: S
   `channel full, dropping …`. Bursts from a single attacker session no longer
   produce hundreds of drop lines a day, and local events are no longer shed
   (spec §11.5).
+- cowrie, OpenCanary and spamtrap ingest: rename-style log rotation is now
+  detected by file identity as well as size. A replacement file that was
+  already larger than the old one by the next poll used to be read from the old
+  offset, silently skipping its beginning.
 
 ## [0.1.0] - 2026-07-17
 
