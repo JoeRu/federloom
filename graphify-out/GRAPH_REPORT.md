@@ -1,138 +1,166 @@
-# Graph Report - .  (2026-07-07)
+# Graph Report - .  (2026-07-19)
 
 ## Corpus Check
-- 254 files · ~221,897 words
+- 206 files · ~360,482 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1616 nodes · 3075 edges · 125 communities (107 shown, 18 thin omitted)
-- Extraction: 78% EXTRACTED · 22% INFERRED · 0% AMBIGUOUS · INFERRED: 673 edges (avg confidence: 0.81)
+- 2064 nodes · 3961 edges · 151 communities (114 shown, 37 thin omitted)
+- Extraction: 79% EXTRACTED · 21% INFERRED · 0% AMBIGUOUS · INFERRED: 828 edges (avg confidence: 0.81)
 - Token cost: 113,000 input · 14,700 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_nftables Enforcement Sink|nftables Enforcement Sink]]
-- [[_COMMUNITY_Rules Engine & Burst Control|Rules Engine & Burst Control]]
-- [[_COMMUNITY_Federation Trust Bundle|Federation Trust Bundle]]
-- [[_COMMUNITY_Identity Signing & Peer Keys|Identity Signing & Peer Keys]]
-- [[_COMMUNITY_Core Configuration|Core Configuration]]
-- [[_COMMUNITY_Observability Observer|Observability Observer]]
-- [[_COMMUNITY_CrowdSec Ingest Source|CrowdSec Ingest Source]]
-- [[_COMMUNITY_Config Loading & Tests|Config Loading & Tests]]
-- [[_COMMUNITY_swarmctl CLI Commands|swarmctl CLI Commands]]
-- [[_COMMUNITY_Prometheus Metrics Registry|Prometheus Metrics Registry]]
-- [[_COMMUNITY_libp2p DHT Transport|libp2p DHT Transport]]
-- [[_COMMUNITY_Agent Configs & Client Deploy|Agent Configs & Client Deploy]]
-- [[_COMMUNITY_Whitelist CLI|Whitelist CLI]]
-- [[_COMMUNITY_REST API Server|REST API Server]]
-- [[_COMMUNITY_DNSBL Server Core|DNSBL Server Core]]
-- [[_COMMUNITY_Fail2ban Ingest|Fail2ban Ingest]]
-- [[_COMMUNITY_federloomctl Core|federloomctl Core]]
-- [[_COMMUNITY_Design Spec (spec.md)|Design Spec (spec.md)]]
-- [[_COMMUNITY_Mailcow Log Ingest|Mailcow Log Ingest]]
-- [[_COMMUNITY_Adversarial Vouch Tests|Adversarial Vouch Tests]]
-- [[_COMMUNITY_Blocklist API Handler|Blocklist API Handler]]
-- [[_COMMUNITY_Honeypot & Sensor Concepts|Honeypot & Sensor Concepts]]
-- [[_COMMUNITY_Federation & Status CLI|Federation & Status CLI]]
-- [[_COMMUNITY_Peer Discovery & Relay|Peer Discovery & Relay]]
-- [[_COMMUNITY_Reputation Decay Engine|Reputation Decay Engine]]
-- [[_COMMUNITY_Event Stream API|Event Stream API]]
-- [[_COMMUNITY_Rule Evaluator|Rule Evaluator]]
-- [[_COMMUNITY_Vouch Pipeline Integration|Vouch Pipeline Integration]]
-- [[_COMMUNITY_Social Trust Architecture|Social Trust Architecture]]
-- [[_COMMUNITY_Federation Guide Docs|Federation Guide Docs]]
-- [[_COMMUNITY_CrowdSec Enforce Sink|CrowdSec Enforce Sink]]
-- [[_COMMUNITY_Blocklist API Tests|Blocklist API Tests]]
-- [[_COMMUNITY_Bootstrap & Relay Concepts|Bootstrap & Relay Concepts]]
-- [[_COMMUNITY_Trust Store Tests|Trust Store Tests]]
-- [[_COMMUNITY_Identity CLI Commands|Identity CLI Commands]]
-- [[_COMMUNITY_Three-Plane Architecture Docs|Three-Plane Architecture Docs]]
-- [[_COMMUNITY_Identity Cert Issuance|Identity Cert Issuance]]
-- [[_COMMUNITY_Getting Started Docs|Getting Started Docs]]
-- [[_COMMUNITY_Plugins Interface Docs|Plugins Interface Docs]]
-- [[_COMMUNITY_Trust Store (File-backed)|Trust Store (File-backed)]]
-- [[_COMMUNITY_Mailcow Deploy Config|Mailcow Deploy Config]]
-- [[_COMMUNITY_Adversarial Mock Sink|Adversarial Mock Sink]]
-- [[_COMMUNITY_GDPR & Whitelist Design|GDPR & Whitelist Design]]
-- [[_COMMUNITY_Grafana Observability Plans|Grafana Observability Plans]]
-- [[_COMMUNITY_Never-Block Safety List|Never-Block Safety List]]
-- [[_COMMUNITY_Integration Mock Sink|Integration Mock Sink]]
-- [[_COMMUNITY_BadgerDB Reputation Store|BadgerDB Reputation Store]]
-- [[_COMMUNITY_Store Tests|Store Tests]]
-- [[_COMMUNITY_Transport Tests|Transport Tests]]
-- [[_COMMUNITY_Fail2ban & Honeypot Plans|Fail2ban & Honeypot Plans]]
-- [[_COMMUNITY_Grafana Dashboard Plans|Grafana Dashboard Plans]]
-- [[_COMMUNITY_Score API Tests|Score API Tests]]
-- [[_COMMUNITY_Architecture Concepts|Architecture Concepts]]
-- [[_COMMUNITY_HTTP Client Library|HTTP Client Library]]
-- [[_COMMUNITY_DNSBL Server Impl|DNSBL Server Impl]]
-- [[_COMMUNITY_ipset Enforcement Sink|ipset Enforcement Sink]]
-- [[_COMMUNITY_Cluster Integration Tests|Cluster Integration Tests]]
-- [[_COMMUNITY_Reputation Engine Tests|Reputation Engine Tests]]
-- [[_COMMUNITY_Whitelist & Bloom Filter Plans|Whitelist & Bloom Filter Plans]]
-- [[_COMMUNITY_Sybil & Reputation Store Tests|Sybil & Reputation Store Tests]]
-- [[_COMMUNITY_CrowdSec Enforce Tests|CrowdSec Enforce Tests]]
-- [[_COMMUNITY_Project Structure Docs|Project Structure Docs]]
-- [[_COMMUNITY_Blocklist Effectiveness Plans|Blocklist Effectiveness Plans]]
-- [[_COMMUNITY_Redeploy & Docker Plans|Redeploy & Docker Plans]]
-- [[_COMMUNITY_HTTP Client Tests|HTTP Client Tests]]
-- [[_COMMUNITY_Rules Engine Design|Rules Engine Design]]
-- [[_COMMUNITY_ipset Concept & README|ipset Concept & README]]
-- [[_COMMUNITY_Grafana Dashboards & Changelog|Grafana Dashboards & Changelog]]
-- [[_COMMUNITY_Redeploy Scripts|Redeploy Scripts]]
-- [[_COMMUNITY_Rules Engine Docs|Rules Engine Docs]]
-- [[_COMMUNITY_DNSBL Design Plans|DNSBL Design Plans]]
-- [[_COMMUNITY_Docker Publish & Bootstrap Plans|Docker Publish & Bootstrap Plans]]
-- [[_COMMUNITY_Corroboration Tests|Corroboration Tests]]
-- [[_COMMUNITY_Wire Protocol Messages|Wire Protocol Messages]]
-- [[_COMMUNITY_Bloom Filter|Bloom Filter]]
-- [[_COMMUNITY_Bootstrap Peers Plans|Bootstrap Peers Plans]]
-- [[_COMMUNITY_Federation Roadmap Specs|Federation Roadmap Specs]]
-- [[_COMMUNITY_Security Fixes & Bloom Specs|Security Fixes & Bloom Specs]]
-- [[_COMMUNITY_Proto Message Tests|Proto Message Tests]]
-- [[_COMMUNITY_WordPress Effectiveness Report|WordPress Effectiveness Report]]
-- [[_COMMUNITY_Ground Truth & Honeypot Onboarding|Ground Truth & Honeypot Onboarding]]
-- [[_COMMUNITY_libp2p Transport Options|libp2p Transport Options]]
-- [[_COMMUNITY_Mailcow Bootstrap Scripts|Mailcow Bootstrap Scripts]]
-- [[_COMMUNITY_Mailcow & Spamtrap Plans|Mailcow & Spamtrap Plans]]
-- [[_COMMUNITY_Events API Handler|Events API Handler]]
-- [[_COMMUNITY_Score API Handler|Score API Handler]]
-- [[_COMMUNITY_Ingest Plugin Interface|Ingest Plugin Interface]]
-- [[_COMMUNITY_Security Fixes Plans|Security Fixes Plans]]
-- [[_COMMUNITY_WordPress Bootstrap Scripts|WordPress Bootstrap Scripts]]
-- [[_COMMUNITY_WordPress FederLoom Exporter|WordPress FederLoom Exporter]]
-- [[_COMMUNITY_WordPress SwarmGuard Exporter|WordPress SwarmGuard Exporter]]
-- [[_COMMUNITY_Federation CLI Tests|Federation CLI Tests]]
-- [[_COMMUNITY_Setup CLI Tests|Setup CLI Tests]]
-- [[_COMMUNITY_Status CLI Tests|Status CLI Tests]]
-- [[_COMMUNITY_swarmctl Federation Tests|swarmctl Federation Tests]]
-- [[_COMMUNITY_swarmctl Setup Tests|swarmctl Setup Tests]]
-- [[_COMMUNITY_swarmctl Status Tests|swarmctl Status Tests]]
-- [[_COMMUNITY_Mailcow Sidecar Concept|Mailcow Sidecar Concept]]
-- [[_COMMUNITY_Dev Smoke Test Script|Dev Smoke Test Script]]
-- [[_COMMUNITY_Local Override Docs|Local Override Docs]]
-- [[_COMMUNITY_Honeypot Bootstrap Script|Honeypot Bootstrap Script]]
-- [[_COMMUNITY_Transport Options Tests|Transport Options Tests]]
-- [[_COMMUNITY_WordPress CTI Import Script|WordPress CTI Import Script]]
-- [[_COMMUNITY_SDD Progress Docs|SDD Progress Docs]]
-- [[_COMMUNITY_Enforce Sink Interface|Enforce Sink Interface]]
-- [[_COMMUNITY_Install Script|Install Script]]
-- [[_COMMUNITY_Trust Bundle|Trust Bundle]]
-- [[_COMMUNITY_Detect Local Truth Script|Detect Local Truth Script]]
-- [[_COMMUNITY_FederLoom Logo|FederLoom Logo]]
+- [[_COMMUNITY_Reputation Scoring & Decay|Reputation Scoring & Decay]]
+- [[_COMMUNITY_Config & DisputeLoad-Shedding Tests|Config & Dispute/Load-Shedding Tests]]
+- [[_COMMUNITY_Integration Pipeline & Sybil Tests|Integration Pipeline & Sybil Tests]]
+- [[_COMMUNITY_Rules & Burst Engine|Rules & Burst Engine]]
+- [[_COMMUNITY_libp2p Transport (DHTGossip)|libp2p Transport (DHT/Gossip)]]
+- [[_COMMUNITY_Node & Resource Governor|Node & Resource Governor]]
+- [[_COMMUNITY_Honeypot & OpenCanary Ingest|Honeypot & OpenCanary Ingest]]
+- [[_COMMUNITY_Federation Invitation & Bootstrap|Federation Invitation & Bootstrap]]
+- [[_COMMUNITY_Observability (SQLiteObserver)|Observability (SQLite/Observer)]]
+- [[_COMMUNITY_Injection Adversarial Tests|Injection Adversarial Tests]]
+- [[_COMMUNITY_Concepts, Docs & Skills|Concepts, Docs & Skills]]
+- [[_COMMUNITY_ipset Enforcement|ipset Enforcement]]
+- [[_COMMUNITY_Prometheus Metrics|Prometheus Metrics]]
+- [[_COMMUNITY_CrowdSec Ingest|CrowdSec Ingest]]
+- [[_COMMUNITY_Historical Roadmap Plans|Historical Roadmap Plans]]
+- [[_COMMUNITY_DNSBL Server|DNSBL Server]]
+- [[_COMMUNITY_API Server & Bearer Auth|API Server & Bearer Auth]]
+- [[_COMMUNITY_federloomctl CLI|federloomctl CLI]]
+- [[_COMMUNITY_Never-Block & Poisoning Tests|Never-Block & Poisoning Tests]]
+- [[_COMMUNITY_Node Core Wiring|Node Core Wiring]]
+- [[_COMMUNITY_Community 20|Community 20]]
+- [[_COMMUNITY_Community 21|Community 21]]
+- [[_COMMUNITY_Community 22|Community 22]]
+- [[_COMMUNITY_Community 23|Community 23]]
+- [[_COMMUNITY_Community 24|Community 24]]
+- [[_COMMUNITY_Community 25|Community 25]]
+- [[_COMMUNITY_Community 26|Community 26]]
+- [[_COMMUNITY_Community 27|Community 27]]
+- [[_COMMUNITY_Community 28|Community 28]]
+- [[_COMMUNITY_Community 29|Community 29]]
+- [[_COMMUNITY_Community 30|Community 30]]
+- [[_COMMUNITY_Community 31|Community 31]]
+- [[_COMMUNITY_Community 32|Community 32]]
+- [[_COMMUNITY_Community 33|Community 33]]
+- [[_COMMUNITY_Community 34|Community 34]]
+- [[_COMMUNITY_Community 35|Community 35]]
+- [[_COMMUNITY_Community 36|Community 36]]
+- [[_COMMUNITY_Community 37|Community 37]]
+- [[_COMMUNITY_Community 38|Community 38]]
+- [[_COMMUNITY_Community 39|Community 39]]
+- [[_COMMUNITY_Community 40|Community 40]]
+- [[_COMMUNITY_Community 41|Community 41]]
+- [[_COMMUNITY_Community 42|Community 42]]
+- [[_COMMUNITY_Community 43|Community 43]]
+- [[_COMMUNITY_Community 44|Community 44]]
+- [[_COMMUNITY_Community 45|Community 45]]
+- [[_COMMUNITY_Community 46|Community 46]]
+- [[_COMMUNITY_Community 47|Community 47]]
+- [[_COMMUNITY_Community 48|Community 48]]
+- [[_COMMUNITY_Community 49|Community 49]]
+- [[_COMMUNITY_Community 50|Community 50]]
+- [[_COMMUNITY_Community 51|Community 51]]
+- [[_COMMUNITY_Community 52|Community 52]]
+- [[_COMMUNITY_Community 53|Community 53]]
+- [[_COMMUNITY_Community 54|Community 54]]
+- [[_COMMUNITY_Community 55|Community 55]]
+- [[_COMMUNITY_Community 56|Community 56]]
+- [[_COMMUNITY_Community 57|Community 57]]
+- [[_COMMUNITY_Community 58|Community 58]]
+- [[_COMMUNITY_Community 59|Community 59]]
+- [[_COMMUNITY_Community 60|Community 60]]
+- [[_COMMUNITY_Community 61|Community 61]]
+- [[_COMMUNITY_Community 62|Community 62]]
+- [[_COMMUNITY_Community 63|Community 63]]
+- [[_COMMUNITY_Community 64|Community 64]]
+- [[_COMMUNITY_Community 65|Community 65]]
+- [[_COMMUNITY_Community 66|Community 66]]
+- [[_COMMUNITY_Community 67|Community 67]]
+- [[_COMMUNITY_Community 68|Community 68]]
+- [[_COMMUNITY_Community 69|Community 69]]
+- [[_COMMUNITY_Community 70|Community 70]]
+- [[_COMMUNITY_Community 71|Community 71]]
+- [[_COMMUNITY_Community 72|Community 72]]
+- [[_COMMUNITY_Community 73|Community 73]]
+- [[_COMMUNITY_Community 74|Community 74]]
+- [[_COMMUNITY_Community 75|Community 75]]
+- [[_COMMUNITY_Community 76|Community 76]]
+- [[_COMMUNITY_Community 77|Community 77]]
+- [[_COMMUNITY_Community 78|Community 78]]
+- [[_COMMUNITY_Community 79|Community 79]]
+- [[_COMMUNITY_Community 80|Community 80]]
+- [[_COMMUNITY_Community 81|Community 81]]
+- [[_COMMUNITY_Community 82|Community 82]]
+- [[_COMMUNITY_Community 83|Community 83]]
+- [[_COMMUNITY_Community 84|Community 84]]
+- [[_COMMUNITY_Community 85|Community 85]]
+- [[_COMMUNITY_Community 86|Community 86]]
+- [[_COMMUNITY_Community 87|Community 87]]
+- [[_COMMUNITY_Community 88|Community 88]]
+- [[_COMMUNITY_Community 89|Community 89]]
+- [[_COMMUNITY_Community 90|Community 90]]
+- [[_COMMUNITY_Community 91|Community 91]]
+- [[_COMMUNITY_Community 92|Community 92]]
+- [[_COMMUNITY_Community 93|Community 93]]
+- [[_COMMUNITY_Community 94|Community 94]]
+- [[_COMMUNITY_Community 95|Community 95]]
+- [[_COMMUNITY_Community 96|Community 96]]
+- [[_COMMUNITY_Community 97|Community 97]]
+- [[_COMMUNITY_Community 98|Community 98]]
+- [[_COMMUNITY_Community 99|Community 99]]
+- [[_COMMUNITY_Community 100|Community 100]]
+- [[_COMMUNITY_Community 101|Community 101]]
+- [[_COMMUNITY_Community 102|Community 102]]
+- [[_COMMUNITY_Community 103|Community 103]]
+- [[_COMMUNITY_Community 104|Community 104]]
+- [[_COMMUNITY_Community 105|Community 105]]
+- [[_COMMUNITY_Community 106|Community 106]]
+- [[_COMMUNITY_Community 107|Community 107]]
+- [[_COMMUNITY_Community 108|Community 108]]
+- [[_COMMUNITY_Community 109|Community 109]]
+- [[_COMMUNITY_Community 110|Community 110]]
+- [[_COMMUNITY_Community 111|Community 111]]
+- [[_COMMUNITY_Community 112|Community 112]]
+- [[_COMMUNITY_Community 113|Community 113]]
+- [[_COMMUNITY_Community 114|Community 114]]
+- [[_COMMUNITY_Community 115|Community 115]]
+- [[_COMMUNITY_Community 116|Community 116]]
+- [[_COMMUNITY_Community 117|Community 117]]
+- [[_COMMUNITY_Community 118|Community 118]]
+- [[_COMMUNITY_Community 119|Community 119]]
+- [[_COMMUNITY_Community 120|Community 120]]
+- [[_COMMUNITY_Community 121|Community 121]]
+- [[_COMMUNITY_Community 122|Community 122]]
+- [[_COMMUNITY_Community 123|Community 123]]
+- [[_COMMUNITY_Community 124|Community 124]]
+- [[_COMMUNITY_Community 125|Community 125]]
+- [[_COMMUNITY_Community 126|Community 126]]
+- [[_COMMUNITY_Community 127|Community 127]]
+- [[_COMMUNITY_Community 128|Community 128]]
+- [[_COMMUNITY_Community 129|Community 129]]
+- [[_COMMUNITY_Community 130|Community 130]]
+- [[_COMMUNITY_Community 134|Community 134]]
+- [[_COMMUNITY_Community 135|Community 135]]
+- [[_COMMUNITY_Community 136|Community 136]]
+- [[_COMMUNITY_Community 137|Community 137]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `GeneratePersonKey()` - 43 edges
-2. `PersonPub()` - 43 edges
-3. `EncodePub()` - 38 edges
-4. `Config` - 37 edges
-5. `IssueCert()` - 36 edges
-6. `Defaults()` - 30 edges
-7. `Node` - 28 edges
-8. `Open()` - 27 edges
-9. `SaveAnchors()` - 25 edges
-10. `addConfigFlag()` - 23 edges
+1. `Defaults()` - 48 edges
+2. `Node` - 47 edges
+3. `Config` - 46 edges
+4. `GeneratePersonKey()` - 43 edges
+5. `PersonPub()` - 43 edges
+6. `EncodePub()` - 38 edges
+7. `IssueCert()` - 36 edges
+8. `T` - 30 edges
+9. `Open()` - 29 edges
+10. `testNode()` - 27 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `Never-Block Set (neverblock.go)` --semantically_similar_to--> `Local-Only Whitelist Never Federated (Invariant 3)`  [INFERRED] [semantically similar]
+  /root/federloom/.claude/skills/enforce-backend/SKILL.md → CLAUDE.md
 - `BurstStore — in-memory sliding-window burst counter` --conceptually_related_to--> `SSH Brute Burst Rule (15 events / 10 min)`  [INFERRED]
   docs/superpowers/plans/2026-06-14-rules-engine.md → deploy/mailcow/rules.yaml
 - `PeerCert — wire vouching certificate (Ed25519)` --conceptually_related_to--> `Wire SchemaVersion 0→1 Bump (additive PeerCert)`  [INFERRED]
@@ -141,8 +169,6 @@
   deploy/examples/config.solo.yaml → docs/architecture.md
 - `addConfigFlag()` --calls--> `Defaults()`  [INFERRED]
   cmd/swarmctl/common.go → internal/config/config.go
-- `cmdIdentity()` --calls--> `LoadOrCreateNodeKey()`  [INFERRED]
-  cmd/swarmctl/identity.go → internal/identity/nodekey.go
 
 ## Import Cycles
 - None detected.
@@ -182,391 +208,419 @@
 - **Operator Documentation Suite — Config Ref, Rules Ref, Getting Started, DNSBL Integration** — specs_2026_06_25_config_docs_design, specs_2026_06_25_rules_docs_design, specs_2026_06_26_getting_started_docker_design, specs_2026_06_19_dnsbl_integration_design [INFERRED 0.85]
 - **Ingest Plugin Expansion Sprint — Fail2Ban, HTTP Honeypot** — specs_2026_06_19_fail2ban_ingest_design, specs_2026_06_19_http_honeypot_design [INFERRED 0.75]
 
-## Communities (125 total, 18 thin omitted)
+## Communities (151 total, 37 thin omitted)
 
-### Community 0 - "nftables Enforcement Sink"
+### Community 0 - "Reputation Scoring & Decay"
 Cohesion: 0.06
-Nodes (36): NewNftables(), NftablesSink, cowrieEvent, NewHoneypot(), TestHoneypotParsesLoginFailed(), TestHoneypotSkipsEmptyIP(), TestHoneypotUnknownEventID(), writeLines() (+28 more)
+Nodes (57): TestSingleSubnetFloodScoresBelowBroad(), TestInflatedBucketsCannotForceBlock(), Duration, EvidenceAggregate, ScoreRecord, Time, T, Duration (+49 more)
 
-### Community 1 - "Rules Engine & Burst Control"
-Cohesion: 0.13
-Nodes (44): Action, burstKey, Duration, Mutex, Time, T, BurstStore, Event (+36 more)
+### Community 1 - "Config & Dispute/Load-Shedding Tests"
+Cohesion: 0.07
+Nodes (56): matDisputeNode(), TestStrangerFakedSubnetsCannotUnblock(), TestSybilDisputeFloodCannotClearBlock(), TestGossipFloodShedsButNeverMisenforces(), blockWorthy(), matNode(), TestMaterialiseGateIsLoadBearing(), Defaults() (+48 more)
 
-### Community 2 - "Federation Trust Bundle"
+### Community 2 - "Integration Pipeline & Sybil Tests"
+Cohesion: 0.06
+Nodes (43): TestSybilFloodHighTrustCapped(), TestSybilFloodScoreCapped(), BloomFilter, mockSink, TestPipelineBlockAfterThreshold(), TestPipelineNeverBlockProtected(), TestPipelineUnblockAfterDecay(), TestEngineDecayReducesScore() (+35 more)
+
+### Community 3 - "Rules & Burst Engine"
+Cohesion: 0.11
+Nodes (49): Action, burstKey, Duration, Mutex, Time, T, BurstStore, Event (+41 more)
+
+### Community 4 - "libp2p Transport (DHT/Gossip)"
+Cohesion: 0.06
+Nodes (38): AddrInfo, CancelFunc, ID, AddrInfo, Context, Host, IpfsDHT, NodeMode (+30 more)
+
+### Community 5 - "Node & Resource Governor"
+Cohesion: 0.08
+Nodes (36): Context, Duration, Node, T, Mutex, Time, T, containsStr() (+28 more)
+
+### Community 6 - "Honeypot & OpenCanary Ingest"
+Cohesion: 0.08
+Nodes (35): cowrieEvent, NewHoneypot(), TestHoneypotParsesLoginFailed(), TestHoneypotSkipsEmptyIP(), TestHoneypotUnknownEventID(), writeLines(), NewOpenCanary(), TestOpenCanaryParsesFTPLoginAttempt() (+27 more)
+
+### Community 7 - "Federation Invitation & Bootstrap"
 Cohesion: 0.08
 Nodes (38): Bundle, FedInfo, NewInvitation(), ReadInvitation(), makeTestConfig(), setupKeys(), TestInvitationBootstrapPeerContainsPeerID(), TestInvitationRoundTrip() (+30 more)
 
-### Community 3 - "Identity Signing & Peer Keys"
-Cohesion: 0.07
-Nodes (39): eventMessage(), PeerIDFromPrivKey(), SignEvent(), makeTestEvent(), makeTestKey(), TestSignAndVerify(), TestVerifyEventSig_EmptyReporterID(), TestVerifyEventSig_MissingSig() (+31 more)
+### Community 8 - "Observability (SQLite/Observer)"
+Cohesion: 0.06
+Nodes (30): DB, Context, Event, Mutex, ObservabilityConfig, prometheusOutput, ReputationConfig, sqliteOutput (+22 more)
 
-### Community 4 - "Core Configuration"
-Cohesion: 0.05
-Nodes (37): APIConfig, Config, Load(), CrowdSecConfig, DiscoveryConfig, DNSBLConfig, Duration, EnforceConfig (+29 more)
+### Community 9 - "Injection Adversarial Tests"
+Cohesion: 0.12
+Nodes (44): anchoredEvent(), newInjectionNode(), newNodeWithRules(), TestAnchoredBurstStillBlocks(), TestAnchoredReporterCanBlock(), TestBareReasonBlockRuleAnchoredStillBlocks(), TestBareReasonBlockRuleStrangerDowngraded(), TestDuplicateRemoteEventScoredOnce() (+36 more)
 
-### Community 5 - "Observability Observer"
-Cohesion: 0.07
-Nodes (29): DB, Context, Event, Mutex, ObservabilityConfig, prometheusOutput, ReputationConfig, sqliteOutput (+21 more)
-
-### Community 6 - "CrowdSec Ingest Source"
-Cohesion: 0.10
-Nodes (32): Client, CrowdSec, CrowdSec, mapScenario(), NewCrowdSec(), crowdSecForTest(), crowdSecMachineForTest(), TestCrowdSec_FetchAlerts_ScenarioMapping() (+24 more)
-
-### Community 7 - "Config Loading & Tests"
-Cohesion: 0.13
-Nodes (39): Defaults(), LoadYAML(), TestBlockedPeersFileOverride(), TestBootstrapPeersDefaultEmpty(), TestBootstrapPeersFromYAML(), TestDefaultsAreValid(), TestDefaultsMailcowPollInterval(), TestDefaultsOpenCanaryPollInterval() (+31 more)
-
-### Community 8 - "swarmctl CLI Commands"
-Cohesion: 0.11
-Nodes (34): Config, PeerCert, PublicKey, Anchor, PeerCert, Time, T, FlagSet (+26 more)
-
-### Community 9 - "Prometheus Metrics Registry"
-Cohesion: 0.10
-Nodes (30): CounterVec, Gauge, GaugeVec, HistogramVec, Observer, T, Context, Event (+22 more)
-
-### Community 10 - "libp2p DHT Transport"
+### Community 10 - "Concepts, Docs & Skills"
 Cohesion: 0.08
-Nodes (24): AddrInfo, CancelFunc, ID, AddrInfo, Context, Host, IpfsDHT, NodeMode (+16 more)
+Nodes (47): Add Ingest Plugin Skill, Adversarial Test Skill, Invariant Guardian Agent, CLAUDE.md Project Guidance, Client Config (smoke-test federated peer), Client Docker Compose, Client Rules (smoke-test), Adversarial Test Suite (CI Gate) (+39 more)
 
-### Community 11 - "Agent Configs & Client Deploy"
+### Community 11 - "ipset Enforcement"
 Cohesion: 0.10
-Nodes (35): Invariant Guardian Agent, CLAUDE.md Project Guidance, Client Config (smoke-test federated peer), Client Docker Compose, Client Rules (smoke-test), Trust Anchors Locally Removable — Not Mandatory (Invariant 6), Three Architecture Planes: Data, Control, Observability, CrowdSec Bouncer Integration for Ingest and Enforcement (+27 more)
+Nodes (23): NewIpset(), captureRun(), hasCall(), TestBlockForErrorIsActionable(), TestIpsetBlockForIssuesTimeout(), TestIpsetIPv4BlocksBareAddress(), TestIpsetIPv6BlocksAsHashNet(), TestIpsetStartCreatesHashNetIPv6Set() (+15 more)
 
-### Community 12 - "Whitelist CLI"
+### Community 12 - "Prometheus Metrics"
+Cohesion: 0.09
+Nodes (31): CounterVec, Gauge, GaugeVec, HistogramVec, Observer, T, Context, Event (+23 more)
+
+### Community 13 - "CrowdSec Ingest"
+Cohesion: 0.11
+Nodes (31): CrowdSec, CrowdSec, mapScenario(), NewCrowdSec(), crowdSecForTest(), crowdSecMachineForTest(), TestCrowdSec_FetchAlerts_ScenarioMapping(), TestCrowdSec_FetchAlerts_Since() (+23 more)
+
+### Community 14 - "Historical Roadmap Plans"
+Cohesion: 0.06
+Nodes (39): Fail2Ban Ingest Plugin Plan, Fail2Ban Docker Exec Ingest Adapter (injectable fetcher pattern, NewFail2BanWithFetcher), Fail2Ban Jail-to-Reason Mapping (builtin exact/prefix + operator override), HTTP Honeypot (OpenCanary HTTP/HTTPS) Plan, OpenCanary HTTP/HTTPS Honeypot Modules (ports 80/443, http-probe/https-probe reason codes), Grafana Dashboard v2 Plan, block_threshold Grafana Template Variable (constant, used in score-based panels), Grafana Per-Node Effectiveness Dashboard Plan (+31 more)
+
+### Community 15 - "DNSBL Server"
+Cohesion: 0.11
+Nodes (22): Addr, responseRecorder, newTestServer(), query(), TestListedIPReturnsA127(), TestListedIPTypeAIncludesTXT(), TestListedIPTypeTXT(), TestMinScoreFallsBackToBlockThreshold() (+14 more)
+
+### Community 16 - "API Server & Bearer Auth"
+Cohesion: 0.09
+Nodes (25): EventMsg, scoreReader, bearerTokenMiddleware(), New(), TestBearerTokenMiddleware_CorrectToken(), TestBearerTokenMiddleware_EmptyAuthHeader(), TestBearerTokenMiddleware_MissingHeader(), TestBearerTokenMiddleware_WrongToken() (+17 more)
+
+### Community 17 - "federloomctl CLI"
 Cohesion: 0.13
+Nodes (27): Config, Anchor, Config, PeerCert, Time, addConfigFlag(), cmdFederation(), federationInvite() (+19 more)
+
+### Community 18 - "Never-Block & Poisoning Tests"
+Cohesion: 0.12
+Nodes (23): blockForCall, mockSink, TestCIDRInjectionNeverRecorded(), TestNeverBlockPoisoningLoopback(), TestNeverBlockPoisoningRFC1918(), TestNeverBlockPublicIPNotProtected(), NewNeverBlockList(), TestNeverBlockAcceptsBareIP() (+15 more)
+
+### Community 19 - "Node Core Wiring"
+Cohesion: 0.07
+Nodes (23): dedupCache, Governor, BadgerStore, BurstStore, Engine, Mutex, Observer, PeerCert (+15 more)
+
+### Community 20 - "Community 20"
+Cohesion: 0.14
+Nodes (23): dockerBanned(), TestParseBanned(), TestResolveReason(), localBanned(), NewFail2Ban(), NewFail2BanWithFetcher(), parseBanned(), makeFail2BanCfg() (+15 more)
+
+### Community 21 - "Community 21"
+Cohesion: 0.14
 Nodes (23): T, cmdWhitelist(), TestWhitelistAdd_InvalidIP(), TestWhitelistAdd_InvalidScope(), TestWhitelistAddRemoveList(), whitelistAdd(), whitelistList(), whitelistRemove() (+15 more)
 
-### Community 13 - "REST API Server"
-Cohesion: 0.11
-Nodes (22): EventMsg, bearerTokenMiddleware(), New(), TestBearerTokenMiddleware_CorrectToken(), TestBearerTokenMiddleware_EmptyAuthHeader(), TestBearerTokenMiddleware_MissingHeader(), TestBearerTokenMiddleware_WrongToken(), TestBroadcastDisabled() (+14 more)
+### Community 22 - "Community 22"
+Cohesion: 0.07
+Nodes (18): Config, Load(), DiscoveryConfig, DNSBLConfig, ResourcesConfig, StoreConfig, TrustConfig, DiscoveryConfig (+10 more)
 
-### Community 14 - "DNSBL Server Core"
+### Community 23 - "Community 23"
 Cohesion: 0.15
-Nodes (17): Addr, responseRecorder, newTestServer(), query(), TestListedIPReturnsA127(), TestListedIPTypeAIncludesTXT(), TestListedIPTypeTXT(), TestMinScoreFallsBackToBlockThreshold() (+9 more)
+Nodes (25): Config, PeerCert, Anchor, Config, PeerCert, Time, FlagSet, addConfigFlag() (+17 more)
 
-### Community 15 - "Fail2ban Ingest"
+### Community 24 - "Community 24"
+Cohesion: 0.11
+Nodes (27): spec.md, Anti-Trust and Dispute Feedback (§4.4), Asymmetric Decay Stake (§4.3), Control Plane (reputation, transport, store, trust), Diversity-Weighted Corroboration (§4.2), Data Plane (internal/enforce), Ground Truth Anchors (§4.1), Leitprinzip 1: Local Sovereignty (+19 more)
+
+### Community 25 - "Community 25"
 Cohesion: 0.14
-Nodes (19): dockerBanned(), TestParseBanned(), TestResolveReason(), NewFail2Ban(), NewFail2BanWithFetcher(), parseBanned(), makeFail2BanCfg(), TestFail2Ban_NewBan() (+11 more)
+Nodes (15): Client, csScopeFor(), TestCrowdSecScopeForValue(), NewCrowdSec(), CrowdSecSink, csEnforcedAuthReq, csEnforcedAuthResp, Client (+7 more)
 
-### Community 16 - "federloomctl Core"
+### Community 26 - "Community 26"
 Cohesion: 0.15
-Nodes (22): Config, Anchor, PeerCert, Time, addConfigFlag(), anchorStatus(), cmdTrust(), trustBlock() (+14 more)
+Nodes (16): blockEntry, blocklistFilter, validReputationKey(), MatchesPatterns(), PurposePatterns(), ResolveTaxonomy(), TestMatchesPatterns(), TestPurposePatterns() (+8 more)
 
-### Community 17 - "Design Spec (spec.md)"
-Cohesion: 0.11
-Nodes (23): spec.md, Anti-Trust and Dispute Feedback (§4.4), Asymmetric Decay Stake (§4.3), Diversity-Weighted Corroboration (§4.2), Federation Subnets (§5.2), Leitprinzip 1: Local Sovereignty, Leitprinzip 2: Earned Trust, Leitprinzip 3: Structural Attack Resistance (+15 more)
-
-### Community 18 - "Mailcow Log Ingest"
+### Community 27 - "Community 27"
 Cohesion: 0.19
 Nodes (16): logFetcher, dockerFetch(), NewMailcow(), NewMailcowWithFetcher(), makeMailcow(), TestMailcowDovecotIMAPAuthFailed(), TestMailcowDovecotPOP3AuthFailed(), TestMailcowPostfixSASLLoginFailure() (+8 more)
 
-### Community 19 - "Adversarial Vouch Tests"
+### Community 28 - "Community 28"
+Cohesion: 0.22
+Nodes (20): Time, Store, T, Anchor, atomicWrite(), SaveAnchors(), NewStore(), fixture() (+12 more)
+
+### Community 29 - "Community 29"
 Cohesion: 0.26
 Nodes (20): newTestNode(), TestAnchoredPersonCountsOnce(), TestExpiredVouchIsStranger(), TestPersonRemovalAppliesImmediately(), TestSybilStrangerFloodCapped(), TestVouchForgedSignatureIsStranger(), TestVouchReplayIsStranger(), PublicKey (+12 more)
 
-### Community 20 - "Blocklist API Handler"
-Cohesion: 0.16
-Nodes (15): blockEntry, blocklistFilter, MatchesPatterns(), PurposePatterns(), ResolveTaxonomy(), TestMatchesPatterns(), TestPurposePatterns(), TestResolveTaxonomy() (+7 more)
-
-### Community 21 - "Honeypot & Sensor Concepts"
-Cohesion: 0.14
-Nodes (22): Corroboration-Based Block Rules (min_corroboration, min_burst), Cowrie SSH Honeypot Service, CrowdSec LAPI Ingest Adapter, Honeypot Sensor Strategy — watch to maximise attacker data collection, OpenCanary SMTP/IMAP/HTTP Honeypot Service, Sensor Node Strategy: High Block Threshold, Watch-Not-Block to Maximize Data, Grafana Datasource: Prometheus Honeypot, Example Rules (deploy/examples/rules.yaml) (+14 more)
-
-### Community 22 - "Federation & Status CLI"
-Cohesion: 0.20
-Nodes (17): cmdFederation(), federationInvite(), federationJoin(), cmdStatus(), DecodePub(), Fingerprint(), GeneratePersonKey(), LoadPersonKey() (+9 more)
-
-### Community 23 - "Peer Discovery & Relay"
+### Community 30 - "Community 30"
 Cohesion: 0.17
 Nodes (15): New(), TestLoadRelayList_CustomFile(), TestLoadRelayList_Embedded(), TestLoadRelayList_InvalidJSON(), TestLoadRelayList_MissingCustomFile(), Manager, RelayEntry, LoadRelayList() (+7 more)
 
-### Community 24 - "Reputation Decay Engine"
-Cohesion: 0.14
-Nodes (15): Duration, Time, T, BadgerStore, Duration, ScoreRecord, containsString(), DecayScore() (+7 more)
+### Community 31 - "Community 31"
+Cohesion: 0.13
+Nodes (21): Observability Plane (opt-in, default OFF), Expected Unblock Due-Time Computation, Grafana Dashboard JSON (swarmguard-dashboard.json), Grafana Observability Implementation Plan, Observer Fan-Out Struct (nil-safe methods, opt-in default OFF), prometheusOutput (6 core Prometheus metrics), sqliteOutput (events/rule_firings/blocks tables with retention sweep), ObservabilityConfig (+13 more)
 
-### Community 25 - "Event Stream API"
+### Community 32 - "Community 32"
 Cohesion: 0.16
 Nodes (14): flushRecorder, newFlushRecorder(), newNoFlushWriter(), newTestServer(), TestHandleEvents_Connect(), TestHandleEvents_Disconnect(), TestHandleEvents_NoFlusher(), noFlushWriter (+6 more)
 
-### Community 26 - "Rule Evaluator"
+### Community 33 - "Community 33"
+Cohesion: 0.12
+Nodes (20): Getting Started Guide, Deployment Profile: CrowdSec Standalone, Deployment Profile: fail2ban, Join Existing Federation (Option C), Key Management Reference, Deployment Profile: Mailcow, Solo Node Setup (Option A), Start New Federation (Option B) (+12 more)
+
+### Community 34 - "Community 34"
+Cohesion: 0.18
+Nodes (13): aggMultiaddr(), matNode(), newMatTransport(), TestMaterialiseFederatedVerdict(), TestMaterialiseGateIsANDNotOR(), TestMaterialiseOptInOff(), recSink, Context (+5 more)
+
+### Community 35 - "Community 35"
 Cohesion: 0.15
 Nodes (16): BurstStore, Event, Mutex, Node, RWMutex, ScoreRecord, Time, Action (+8 more)
 
-### Community 27 - "Vouch Pipeline Integration"
-Cohesion: 0.17
-Nodes (16): Config, Config, upsertAnchor(), newReceiverNode(), TestVouchPipeline_AnchoredVsStranger(), TestVouchPipeline_CachedCertPersists(), Time, TestVouchedReporterScoresAsAnchored() (+8 more)
-
-### Community 28 - "Social Trust Architecture"
-Cohesion: 0.17
-Nodes (19): Corroboration Group — Person-level diversity vote counting, Key Management Policy — issuance, rotation, revocation, PeerCert — wire vouching certificate (Ed25519), Person-to-Person Trust Pairing via Identity Bundles, Social Trust Anchors — Ed25519 Person Identity + Vouching, Stranger Score Cap — Sybil flood mitigation, Onboarding 3/4 — Key Management, Node Key (identity.key, libp2p, auto-generated) (+11 more)
-
-### Community 29 - "Federation Guide Docs"
-Cohesion: 0.15
-Nodes (19): Federation Modes — solo / federated / isolated, Federation Guide, Defederation (Sybil defence at subnet level), Federation Mode: Federated, Federation Mode: Isolated, Origin Tracing (anti-double-counting), Federation Mode: Solo, Stranger Score Cap (trust.stranger_score_cap, default 15) (+11 more)
-
-### Community 30 - "CrowdSec Enforce Sink"
-Cohesion: 0.18
-Nodes (11): NewCrowdSec(), CrowdSecSink, csEnforcedAuthReq, csEnforcedAuthResp, Client, Context, Duration, EnforceConfig (+3 more)
-
-### Community 31 - "Blocklist API Tests"
+### Community 36 - "Community 36"
 Cohesion: 0.20
 Nodes (13): containsReason(), countNonEmptyLines(), newListServer(), TestHandleBlocklist_All(), TestHandleBlocklist_Purpose(), TestHandleBlocklist_ReasonFilter(), TestHandleCrowdSecCTI_PlainText(), TestHandleCrowdSecCTI_SkipsMalformedKeys() (+5 more)
 
-### Community 32 - "Bootstrap & Relay Concepts"
-Cohesion: 0.17
-Nodes (18): Bootstrap Relay Peer (12D3KooWBvpzbEB...), Reputation Decay Half-Life (168h default), Embedded DNSBL Server (Reversed-IP DNS Queries over Local Reputation), Honeypot as Bootstrap Relay Peer for Federation, Solo Federation Mode (Local-Only, No Network), Grafana Dashboard Provisioner, Grafana Datasource: FederLoom SQLite, Grafana Datasource: Prometheus Mailcow (+10 more)
+### Community 37 - "Community 37"
+Cohesion: 0.26
+Nodes (16): T, TestTrustAddOwnIdentityIsNoOp(), TestTrustAddRejectsOutOfRangeWeight(), TestTrustAddSurfacesUnreadableOwnKey(), TestTrustImportSkipsForeignCerts(), writeCfg(), GeneratePersonKey(), LoadPersonKey() (+8 more)
 
-### Community 33 - "Trust Store Tests"
-Cohesion: 0.29
-Nodes (16): Store, T, NewStore(), fixture(), TestAddCertRejectsForgedSig(), TestAnchorNonPositiveWeightDropped(), TestAnchorWeightClampedToOne(), TestCorruptFileKeepsLastGood() (+8 more)
+### Community 38 - "Community 38"
+Cohesion: 0.24
+Nodes (12): ScoreRecord, Store, ScoreRecord, T, Querier, fixedStore, NewResolver(), TestResolverInvokesMaterialiseCallbackOnFederatedHit() (+4 more)
 
-### Community 34 - "Identity CLI Commands"
-Cohesion: 0.29
-Nodes (12): PeerCert, appendIssuedCert(), cmdIdentity(), cmdPeerCert(), identityInit(), identityShow(), issuedCertsPath(), labelPath() (+4 more)
+### Community 39 - "Community 39"
+Cohesion: 0.24
+Nodes (14): PeerCert, PublicKey, appendIssuedCert(), cmdIdentity(), cmdPeerCert(), identityInit(), identityShow(), issuedCertsPath() (+6 more)
 
-### Community 35 - "Three-Plane Architecture Docs"
-Cohesion: 0.16
-Nodes (15): Control Plane (reputation, transport, store, trust), Data Plane (internal/enforce), Observability Plane (opt-in, default OFF), Grafana Dashboard JSON (swarmguard-dashboard.json), Grafana Observability Implementation Plan, Observer Fan-Out Struct (nil-safe methods, opt-in default OFF), prometheusOutput (6 core Prometheus metrics), sqliteOutput (events/rule_firings/blocks tables with retention sweep) (+7 more)
+### Community 40 - "Community 40"
+Cohesion: 0.18
+Nodes (17): Bootstrap Relay Peer (12D3KooWBvpzbEB...), Cowrie SSH Honeypot Service, OpenCanary SMTP/IMAP/HTTP Honeypot Service, Grafana Dashboard Provisioner, Grafana Datasource: FederLoom SQLite, Grafana Datasource: Prometheus Honeypot, Honeypot Config, Cowrie SSH Honeypot Ingest (+9 more)
 
-### Community 36 - "Identity Cert Issuance"
+### Community 41 - "Community 41"
+Cohesion: 0.20
+Nodes (11): cacheEntry, Group, AddrInfo, Context, Duration, EvidenceAggregate, Host, Mutex (+3 more)
+
+### Community 42 - "Community 42"
+Cohesion: 0.21
+Nodes (16): Deployment Profile: Standalone/Honeypot (Cowrie+OpenCanary), plugins.md, Cowrie SSH Honeypot Ingest Adapter (mailcow_logs.go), CrowdSec Ingest Adapter (crowdsec.go), enforce.Sink Interface (Name, Apply([]proto.ScoreEntry)), fail2ban Ingest Adapter, ingest.Source Interface (Name() string, Start(ctx) chan proto.Event), ipset Enforce Backend (ipset.go) (+8 more)
+
+### Community 43 - "Community 43"
+Cohesion: 0.19
+Nodes (15): Corroboration-Based Block Rules (min_corroboration, min_burst), Honeypot Sensor Strategy — watch to maximise attacker data collection, Sensor Node Strategy: High Block Threshold, Watch-Not-Block to Maximize Data, Example Rules (deploy/examples/rules.yaml), Honeypot Rules (sensor node), Mailcow Rules (production node), CrowdSec SMTP Ban Rule, Score-Based Fallback Rule (+7 more)
+
+### Community 44 - "Community 44"
+Cohesion: 0.20
+Nodes (15): Reputation Decay Half-Life (168h default), Embedded DNSBL Server (Reversed-IP DNS Queries over Local Reputation), Honeypot as Bootstrap Relay Peer for Federation, Solo Federation Mode (Local-Only, No Network), Grafana Datasource: Prometheus Mailcow, Grafana Datasource: Prometheus WordPress, DNSBL Integration Guide, Solo Config Example (+7 more)
+
+### Community 45 - "Community 45"
 Cohesion: 0.33
 Nodes (13): certMessage(), IssueCert(), TestCertExpiredFails(), TestCertIssueVerifyRoundTrip(), TestCertRejectsDelimiterInPeerID(), TestCertRejectsEmptyPeerID(), TestCertTamperedPeerIDFails(), TestCertWrongKeyFails() (+5 more)
 
-### Community 37 - "Getting Started Docs"
-Cohesion: 0.19
-Nodes (14): Getting Started Guide, Deployment Profile: CrowdSec Standalone, Deployment Profile: fail2ban, Join Existing Federation (Option C), Key Management Reference, Deployment Profile: Mailcow, Solo Node Setup (Option A), Deployment Profile: Standalone/Honeypot (Cowrie+OpenCanary) (+6 more)
+### Community 46 - "Community 46"
+Cohesion: 0.22
+Nodes (12): Context, EvidenceAggregate, Host, ID, Multiaddr, T, fakeAuth, queryOnce() (+4 more)
 
-### Community 38 - "Plugins Interface Docs"
-Cohesion: 0.25
-Nodes (14): plugins.md, Cowrie SSH Honeypot Ingest Adapter (mailcow_logs.go), CrowdSec Ingest Adapter (crowdsec.go), enforce.Sink Interface (Name, Apply([]proto.ScoreEntry)), fail2ban Ingest Adapter, ingest.Source Interface (Name() string, Start(ctx) chan proto.Event), ipset Enforce Backend (ipset.go), nftables Enforce Backend (nftables.go) (+6 more)
+### Community 47 - "Community 47"
+Cohesion: 0.23
+Nodes (14): Corroboration Group — Person-level diversity vote counting, PeerCert — wire vouching certificate (Ed25519), Person-to-Person Trust Pairing via Identity Bundles, Social Trust Anchors — Ed25519 Person Identity + Vouching, Stranger Score Cap — Sybil flood mitigation, Phase 1 Federation Semantics and Discovery Plan, Defederation — Blocked-Peers JSON Hot-Reload + federloomctl trust block/unblock, Event Signing via identity.SignEvent and identity.VerifyEventSig (Ed25519) (+6 more)
 
-### Community 39 - "Trust Store (File-backed)"
+### Community 48 - "Community 48"
+Cohesion: 0.16
+Nodes (14): Federation Modes — solo / federated / isolated, Federation Guide, Defederation (Sybil defence at subnet level), Federation Mode: Federated, Federation Mode: Isolated, Origin Tracing (anti-double-counting), Federation Mode: Solo, Stranger Score Cap (trust.stranger_score_cap, default 15) (+6 more)
+
+### Community 49 - "Community 49"
+Cohesion: 0.18
+Nodes (10): New(), StoreReader, DNSBLConfig, Context, Msg, ReputationConfig, ResponseWriter, ScoreRecord (+2 more)
+
+### Community 50 - "Community 50"
 Cohesion: 0.24
 Nodes (9): fileStat, Anchor, Duration, PeerCert, RWMutex, Time, fileStat, Store (+1 more)
 
-### Community 40 - "Mailcow Deploy Config"
-Cohesion: 0.19
-Nodes (14): Mailcow Docker Compose (sidecar), Host Network Mode for Mailcow Sidecar, Mailcow Rules (production node), CrowdSec SMTP Ban Rule, Score-Based Fallback Rule, Spamtrap Hit Rule, SSH Brute Burst Rule (15 events / 10 min), Pure YAML Rules Engine (+6 more)
+### Community 51 - "Community 51"
+Cohesion: 0.16
+Nodes (14): Invitation Bundle Type, Fresh Redeploy and Smoke Test Plan, Bootstrap Peer Config Design Spec, Peer ID Rotation Procedure, Federation UX Design Spec, Federation Invitation Bundle — JSON Trust Exchange Object for Peer Onboarding, Invitation Bundle Protocol, No Automatic Config.yaml Writes (+6 more)
 
-### Community 41 - "Adversarial Mock Sink"
-Cohesion: 0.27
-Nodes (7): mockSink, TestCIDRInjectionNeverRecorded(), TestNeverBlockPoisoningLoopback(), TestNeverBlockPoisoningRFC1918(), TestNeverBlockPublicIPNotProtected(), Context, T
+### Community 52 - "Community 52"
+Cohesion: 0.15
+Nodes (9): CrowdSecConfig, Duration, Fail2BanConfig, HoneypotConfig, MailcowConfig, ObservabilityConfig, OpenCanaryConfig, SpamtrapConfig (+1 more)
 
-### Community 42 - "GDPR & Whitelist Design"
+### Community 53 - "Community 53"
 Cohesion: 0.21
 Nodes (13): BadgerDB Embedded KV Store with TTL-based GC, IPs as Personal Data — No Hashing (§9), Never-Block Set (§10), Score Decay and TTL (§8), 02-whitelist.md, detect_local_truth.sh Auto-Detection Script, Local-Only Whitelist Scope (never federated), RFC 1918 and Infrastructure Mass Whitelist (+5 more)
 
-### Community 43 - "Grafana Observability Plans"
-Cohesion: 0.18
-Nodes (13): Expected Unblock Due-Time Computation, Observer Fan-out Struct, Prometheus Output (prometheusOutput), SQLite Output (sqliteOutput), Per-Rule Effectiveness Prometheus Metrics, Block Recurrence Detection, Grafana Observability Design Spec, Observer Struct — Synchronous Fan-out to Prometheus Counters and SQLite (+5 more)
+### Community 54 - "Community 54"
+Cohesion: 0.28
+Nodes (10): Mutex, ScoreRecord, T, countStore, NewQuerier(), TestQuerierCacheBounded(), TestQuerierFetchesAndCaches(), TestQuerierPreservesScoreZeroAnswer() (+2 more)
 
-### Community 44 - "Never-Block Safety List"
-Cohesion: 0.30
-Nodes (9): NewNeverBlockList(), TestNeverBlockExtraWhitelist(), TestNeverBlockIPv4MappedRFC1918(), TestNeverBlockIPv6Loopback(), TestNeverBlockPublicIP(), TestNeverBlockRFC1918(), NeverBlockList, T (+1 more)
-
-### Community 45 - "Integration Mock Sink"
-Cohesion: 0.30
-Nodes (6): mockSink, TestPipelineBlockAfterThreshold(), TestPipelineNeverBlockProtected(), TestPipelineUnblockAfterDecay(), Context, T
-
-### Community 46 - "BadgerDB Reputation Store"
-Cohesion: 0.23
-Nodes (6): DB, Duration, Time, repBloom, BadgerStore, ScoreRecord
-
-### Community 47 - "Store Tests"
-Cohesion: 0.39
-Nodes (11): BadgerStore, T, openTestStore(), TestBloom_NoFalseNegative(), TestBloom_RebuildOnReopen(), TestBloom_UnknownIPReturnsZero(), TestDeleteScore(), TestGetScoreMissing() (+3 more)
-
-### Community 48 - "Transport Tests"
+### Community 55 - "Community 55"
 Cohesion: 0.27
-Nodes (10): T, Node, NodeMode, Options, T, TestDHTFindPeerViaRelay(), connect(), testOpts() (+2 more)
+Nodes (11): T, Node, NodeMode, Options, T, TestDHTFindPeerViaRelay(), connect(), TestNewDedupesDefaultSubnetAlias() (+3 more)
 
-### Community 49 - "Fail2ban & Honeypot Plans"
-Cohesion: 0.18
-Nodes (12): Fail2Ban Ingest Plugin Plan, Fail2Ban Docker Exec Ingest Adapter (injectable fetcher pattern, NewFail2BanWithFetcher), Fail2Ban Jail-to-Reason Mapping (builtin exact/prefix + operator override), HTTP Honeypot (OpenCanary HTTP/HTTPS) Plan, OpenCanary HTTP/HTTPS Honeypot Modules (ports 80/443, http-probe/https-probe reason codes), Rules Documentation Plan (docs/rules.md), Reason Code Catalogue (all ingest adapter codes: cowrie, opencanary, mailcow, fail2ban, crowdsec, spamtrap), Cowrie Event ID to FederLoom Reason Code Mapping (ssh-auth-success, ssh-auth-bruteforce, ssh-probe, etc.) (+4 more)
+### Community 56 - "Community 56"
+Cohesion: 0.38
+Nodes (11): T, isCandidate(), main(), strictDecode(), TestValidateFile_GoodConfig(), TestValidateFile_GoodRules(), TestValidateFile_OtherFilesSkipped(), TestValidateFile_UnknownKeyConfig() (+3 more)
 
-### Community 50 - "Grafana Dashboard Plans"
+### Community 57 - "Community 57"
+Cohesion: 0.27
+Nodes (12): BurstStore — in-memory sliding-window burst counter, File Hot-Reload Pattern (mtime+size fileStat), YAML Rules Engine — hot-reloadable first-match rules, Leitprinzip 7: Lists are Aids, Not Law, 04-override.md, Operator Override Capability (any param locally overridable), Rules Engine Implementation Plan, Rules Engine Design Spec (+4 more)
+
+### Community 58 - "Community 58"
+Cohesion: 0.24
+Nodes (12): Key Management Policy — issuance, rotation, revocation, Person-to-Person Trust Pairing, Trust Anchor Lists (§5.1), Onboarding 3/4 — Key Management, Node Key (identity.key, libp2p, auto-generated), Peer Certificate (peer.cert, node-to-operator binding), Person Key (person.key, Ed25519, operator identity), Trust Weight Guidelines (0.9 honeypot / 0.7 trusted mail / 0.5 general / 0.3 new) (+4 more)
+
+### Community 59 - "Community 59"
 Cohesion: 0.17
-Nodes (12): Grafana Dashboard v2 Plan, block_threshold Grafana Template Variable (constant, used in score-based panels), Grafana Per-Node Effectiveness Dashboard Plan, Per-Node Prometheus Datasources for Effectiveness Dashboard (prom-honeypot, prom-mailcow, prom-wordpress), DHT Rendezvous Discovery (internal/discovery, /federloom/v1/peers + relay list bootstrap), federloom/events/v0 GossipSub Topic (versioned wire topic for proto.Event), Relay/Aggregator vs Leaf Node Mode Topology (ModeRelay, ModeLeaf config), P2P Transport Walking Skeleton Design Spec (+4 more)
+Nodes (12): IngestConfig, CrowdSecConfig, HoneypotConfig, CrowdSecConfig, Fail2BanConfig, HoneypotConfig, MailcowConfig, OpenCanaryConfig (+4 more)
 
-### Community 51 - "Score API Tests"
+### Community 60 - "Community 60"
+Cohesion: 0.23
+Nodes (12): Blocklist Effectiveness Monitoring Plan, Per-Rule Effectiveness Metrics (blocks_total, time_to_block_seconds, corroboration_at_block, unblocks_total, block_recurrence_total), Textfile Exporter Script (SQLite + CrowdSec → node_exporter prom file), CLI Effectiveness Report Script (effectiveness-report.sh), Node Exporter Textfile Exporter (swarmguard-exporter.sh), CrowdSec Overlap Ratio Metric, Rule Tuning Observation Table, Nginx Slip-Through Metric (+4 more)
+
+### Community 61 - "Community 61"
 Cohesion: 0.29
 Nodes (8): newScoreServer(), TestHandleScore_Found(), TestHandleScore_MissingIP(), TestHandleScore_NotFound(), scoreStoreStub, ScoreRecord, Server, T
 
-### Community 52 - "Architecture Concepts"
-Cohesion: 0.24
-Nodes (11): Bloom Filter as Negative Pre-Filter, Mastodon-Model Federation with Subnet Trust Domains, Good-Neighbour Behaviour: CPU/Bandwidth Budget and Load Shedding, Query-Not-Replicate Scaling Design, Three-Plane Architecture (Ingest Control Data Observability), Decay as GDPR Storage Limitation (Time-Bound Deletion), Federated Mode (Active Peer-to-Peer Participation), Isolated Federation Mode (No Import from Other Domains) (+3 more)
-
-### Community 53 - "HTTP Client Library"
+### Community 62 - "Community 62"
 Cohesion: 0.31
 Nodes (6): BlockEntry, BlocklistOpts, EventMsg, ScoreResponse, Context, Time
 
-### Community 54 - "DNSBL Server Impl"
-Cohesion: 0.24
-Nodes (8): New(), StoreReader, DNSBLConfig, Context, Msg, ReputationConfig, ResponseWriter, ServeMux
-
-### Community 55 - "ipset Enforcement Sink"
-Cohesion: 0.31
-Nodes (3): NewIpset(), IpsetSink, Context
-
-### Community 56 - "Cluster Integration Tests"
+### Community 63 - "Community 63"
 Cohesion: 0.33
 Nodes (10): localOpts(), startCluster(), TestDHTDiscoveryViaRelay(), TestStarTopologyGossipForward(), TestStarTopologyGossipSymmetric(), Context, Node, NodeMode (+2 more)
 
-### Community 57 - "Reputation Engine Tests"
-Cohesion: 0.44
-Nodes (10): Engine, T, openEngineCap(), TestAnchoredAddsScoreOnTopOfSaturatedStrangers(), TestAnchoredNotCapped(), TestCorroborationCountsGroupsNotPeers(), TestCorroborationStrangersCountOnce(), TestSMTPWeightsHigherThanDefault() (+2 more)
-
-### Community 58 - "Whitelist & Bloom Filter Plans"
-Cohesion: 0.22
-Nodes (11): Phase 2 Install Script and Local Whitelist Plan, federloomctl whitelist add/remove/list CLI Commands, WhitelistStore — JSON-Backed Local IP/CIDR Allowlist (scope local-only, never federated), Phase 3a Bloom Filter Negative Pre-Filter Plan, repBloom Negative Pre-Filter (bits-and-blooms/bloom/v3, 1M capacity, 1% FPR, wired into BadgerStore.GetScore), IP Normalization Plan (net/netip migration), net/netip Migration — Canonical IP Form with Unmap() for IPv4-Mapped IPv6 Collapse, BadgerStore — IP Reputation Persistence (TTL=3*halfLife as GDPR deletion, JSON ScoreEntry) (+3 more)
-
-### Community 59 - "Sybil & Reputation Store Tests"
-Cohesion: 0.33
-Nodes (8): TestSybilFloodHighTrustCapped(), TestSybilFloodScoreCapped(), TestEngineDecayReducesScore(), TestEngineMultipleReportersCorroboration(), TestEngineRecordAndGetScore(), Open(), T, T
-
-### Community 60 - "CrowdSec Enforce Tests"
+### Community 64 - "Community 64"
 Cohesion: 0.31
 Nodes (9): CrowdSecSink, mockLAPI(), TestCrowdSecSink_Block(), TestCrowdSecSink_StartFail(), TestCrowdSecSink_Unblock(), Request, ResponseWriter, Server (+1 more)
 
-### Community 61 - "Project Structure Docs"
-Cohesion: 0.24
-Nodes (10): project-structure.md, Bloom Filter as Negative Pre-Filter, libp2p Transport Library (gossipsub + Kademlia DHT), 5-Phase Implementation Plan, DHT Rendezvous for Peer Discovery (§14), 2026-06-09-p2p-transport-skeleton.md, Gossipsub for Federated Event Propagation, Kademlia DHT for Peer Discovery and Routing (+2 more)
+### Community 65 - "Community 65"
+Cohesion: 0.38
+Nodes (8): T, LoadBlockedPeers(), SaveBlockedPeers(), TestLoadAndSaveBlockedPeers(), TestLoadBlockedPeers_MissingFile(), TestStoreIsBlocked(), TestStoreIsBlocked_EmptyFile(), TestStoreIsBlocked_HotReload()
 
-### Community 62 - "Blocklist Effectiveness Plans"
+### Community 66 - "Community 66"
 Cohesion: 0.29
-Nodes (10): Blocklist Effectiveness Monitoring Plan, CLI Effectiveness Report Script (effectiveness-report.sh), Node Exporter Textfile Exporter (swarmguard-exporter.sh), CrowdSec Overlap Ratio Metric, Rule Tuning Observation Table, Nginx Slip-Through Metric, Grafana Dashboard v2 — Peer Topology, Blocklist, Candidates, FederLoom Effectiveness Dashboard Design — All Three Nodes Side-by-Side (+2 more)
+Nodes (9): PeerCert, Time, AnchorEntry, Event, EvidenceAggregate, PeerCert, RepQuery, ScoreEntry (+1 more)
 
-### Community 63 - "Redeploy & Docker Plans"
-Cohesion: 0.22
-Nodes (10): Fresh Redeploy and Smoke Test Plan, Federation UX Design Spec, Federation Invitation Bundle — JSON Trust Exchange Object for Peer Onboarding, No Automatic Config.yaml Writes, Docker Image Publishing Design — GHCR GitHub Actions Workflow, Fail2Ban Ingest Plugin Design, Fail2Ban Docker Ingest Plugin — docker exec Poll with Jail-to-Reason Mapping, HTTP Honeypot — OpenCanary HTTP/HTTPS Module Design (+2 more)
+### Community 67 - "Community 67"
+Cohesion: 0.25
+Nodes (5): denyAllAuth, TestSybilStrangerQueriersGainNothing(), sybilStore, ScoreRecord, T
 
-### Community 64 - "HTTP Client Tests"
+### Community 68 - "Community 68"
+Cohesion: 0.31
+Nodes (9): Bloom Filter as Negative Pre-Filter, Good-Neighbour Behaviour: CPU/Bandwidth Budget and Load Shedding, Query-Not-Replicate Scaling Design, Three-Plane Architecture (Ingest Control Data Observability), Decay as GDPR Storage Limitation (Time-Bound Deletion), Non-Invasive Docker Sidecar Pattern (JoeRu Mailcow-Crowdsec-Override), Architecture Overview, Mailcow Docker Compose Override (Non-Invasive) (+1 more)
+
+### Community 69 - "Community 69"
 Cohesion: 0.50
 Nodes (7): TestBlocklist(), TestBlocklist_WithOpts(), TestBlocklist_WithOpts_NoFilters(), TestEvents(), TestScoreIP_Found(), TestScoreIP_NotFound(), T
 
-### Community 65 - "Rules Engine Design"
-Cohesion: 0.39
-Nodes (9): BurstStore — in-memory sliding-window burst counter, File Hot-Reload Pattern (mtime+size fileStat), YAML Rules Engine — hot-reloadable first-match rules, Rules Engine Implementation Plan, Rules Engine Design Spec, RuleSet — Hot-reloadable YAML Block-Decision Evaluator (first-match wins, AND conditions), Config Documentation Design — docs/config.md, Rules Documentation Design — docs/rules.md (+1 more)
-
-### Community 66 - "ipset Concept & README"
+### Community 70 - "Community 70"
 Cohesion: 0.25
 Nodes (9): ipset Enforcement Backend (O(1)), SwarmGuard README, Anti-Poisoning by Structure, Decentralised Federated IP Blocklist (Core Concept), enforce.Sink Plugin Interface, Federated Trust Model, GDPR by Design, Local Sovereignty Principle (+1 more)
 
-### Community 67 - "Grafana Dashboards & Changelog"
+### Community 71 - "Community 71"
 Cohesion: 0.31
 Nodes (9): Wire SchemaVersion 0→1 Bump (additive PeerCert), Grafana Dashboard Provisioning Config, Grafana SQLite Datasource (frser-sqlite-datasource), CHANGELOG, Observability Plane (dual-output Observer), Six Prometheus Metrics, Social Trust Anchors (spec §5.1), SQLite Event History Tables (+1 more)
 
-### Community 68 - "Redeploy Scripts"
+### Community 72 - "Community 72"
 Cohesion: 0.42
 Nodes (8): check_fail(), check_ok(), hp(), load_env(), mc(), wait_metrics(), wp(), redeploy.sh script
 
-### Community 69 - "Rules Engine Docs"
+### Community 73 - "Community 73"
+Cohesion: 0.28
+Nodes (9): project-structure.md, Bloom Filter as Negative Pre-Filter, libp2p Transport Library (gossipsub + Kademlia DHT), 5-Phase Implementation Plan, DHT Rendezvous for Peer Discovery (§14), 2026-06-09-p2p-transport-skeleton.md, Gossipsub for Federated Event Propagation, Kademlia DHT for Peer Discovery and Routing (+1 more)
+
+### Community 74 - "Community 74"
 Cohesion: 0.31
 Nodes (9): rules.md, BurstStore (in-memory sliding-window burst counter), Rules Hot-Reload (mtime+size watch, no restart required), Legacy Score-Threshold Fallback (when no rules file), Reason Code Catalogue (Cowrie, OpenCanary, Mailcow, Spamtrap, CrowdSec, fail2ban), RuleSet (YAML rules file, first-match-wins AND conditions), CrowdSec Ingest Adapter Implementation Plan, CrowdSec scenarioMap (crowdsec scenarios → federloom reason codes) (+1 more)
 
-### Community 70 - "DNSBL Design Plans"
+### Community 75 - "Community 75"
+Cohesion: 0.28
+Nodes (5): allowAllAuth, TestFederatedLookupFetchesFromAggregator(), storeStub, ScoreRecord, T
+
+### Community 76 - "Community 76"
+Cohesion: 0.50
+Nodes (7): T, dedupKey(), newDedupCache(), TestDedupBoundEviction(), TestDedupDistinctKeys(), TestDedupSeenFirstThenRepeat(), TestDedupTTLEviction()
+
+### Community 77 - "Community 77"
+Cohesion: 0.33
+Nodes (7): EvidenceAggregate, ScoreRecord, T, AggregateFromRecord(), TestAggregateFromRecord(), TestAggregateShipsDisputeSubnets(), TestAggregateShipsSubnetsBucket()
+
+### Community 78 - "Community 78"
+Cohesion: 0.39
+Nodes (8): T, TestEventKindRoundTrip(), TestEventLegacyDecode(), TestEventVouchRoundTrip(), TestEventWithoutVouchOmitsField(), TestEvidenceAggregateJSONRoundTrip(), TestRemovedPortClassAndScoreEntry(), TestSchemaVersionBumped()
+
+### Community 79 - "Community 79"
 Cohesion: 0.31
 Nodes (9): DNSBL Server Implementation Plan, DNSBLConfig, Embedded DNSBL DNS Server, DNSBL StoreReader Interface, DNSBL Server Design Spec, Embedded DNSBL DNS Server — Opt-in Local Reputation A/TXT Query Service, DNSBL Reversed-IP Query Format, DNSBL Response Logic (A/TXT/NXDOMAIN) (+1 more)
 
-### Community 71 - "Docker Publish & Bootstrap Plans"
+### Community 80 - "Community 80"
 Cohesion: 0.22
 Nodes (9): Docker Image Publishing Plan (GHCR via GitHub Actions), GHCR Docker Publish Workflow (.github/workflows/docker.yml), deploy/redeploy.sh — 8-Phase Fresh Redeploy and Smoke Test Script, Bootstrap Scripts Infrastructure Extraction Plan, Per-Node .env File Pattern (load_env function + .env.example per deployment stack), Config Documentation Plan (docs/config.md), Two-File Config Pattern (config.yaml public + config.local.yaml secret, gitignored), Getting Started (Docker-First Guide) Plan (+1 more)
 
-### Community 72 - "Corroboration Tests"
-Cohesion: 0.54
-Nodes (7): Engine, T, openEngine(), TestRecordIncreasesScore(), TestSameReporterDoesNotIncreaseCorroboration(), TestScoreNeverExceeds100(), TestTwoReportersIncreasesCorroboration()
+### Community 81 - "Community 81"
+Cohesion: 0.43
+Nodes (4): Duration, Mutex, Time, dedupCache
 
-### Community 73 - "Wire Protocol Messages"
-Cohesion: 0.36
-Nodes (7): PeerCert, Time, AnchorEntry, Event, PeerCert, ScoreEntry, WhitelistEntry
+### Community 82 - "Community 82"
+Cohesion: 0.48
+Nodes (3): Context, Event, fanIn()
 
-### Community 74 - "Bloom Filter"
-Cohesion: 0.33
-Nodes (4): BloomFilter, RWMutex, newBloom(), repBloom
-
-### Community 75 - "Bootstrap Peers Plans"
-Cohesion: 0.29
-Nodes (7): Bootstrap Peer Config Implementation Plan, BootstrapPeers Config Field, swarmctl status Command, Invitation Bundle Type, Bootstrap Peer Config Design Spec, Peer ID Rotation Procedure, Invitation Bundle Protocol
-
-### Community 76 - "Federation Roadmap Specs"
+### Community 83 - "Community 83"
 Cohesion: 0.43
 Nodes (7): Federation Roadmap — Five-Phase Implementation Plan, Defederation — Peer Blocking via blocked-peers.json Hot-reload (Phase 1e), Federation Trust Discount — Hop-based Score Dilution (Phase 1b), Federation Discovery via DHT Rendezvous — internal/discovery Manager (Phase 1c), OriginTrace Wiring — Federation Feedback Loop Guard (Phase 1a), Event Signing with Ed25519 Identity Key (Phase 1d), Local Whitelist Store — scope:local-only Never Federated (Phase 2a)
 
-### Community 77 - "Security Fixes & Bloom Specs"
+### Community 84 - "Community 84"
 Cohesion: 0.38
 Nodes (7): Security Fixes Design — CIDR Injection, Unauthenticated API, Newline Injection, API Bearer Token Authentication — FEDERLOOM_API_TOKEN Middleware + Tailscale Binding, IP Validation Gate — net.ParseIP Guard at processLocal and ProcessRemote Entry Points, Phase 3a — Bloom Filter Pre-filter Design, repBloom — Bloom Filter Negative Pre-filter for BadgerStore GetScore, IP Normalization Design — net/netip Canonical Forms Everywhere, net/netip Canonical IP Normalization — Unmap() IPv4-mapped IPv6 at Node Entry Points
 
-### Community 78 - "Proto Message Tests"
-Cohesion: 0.53
-Nodes (5): T, TestEventLegacyDecode(), TestEventVouchRoundTrip(), TestEventWithoutVouchOmitsField(), TestSchemaVersionBumped()
+### Community 85 - "Community 85"
+Cohesion: 0.60
+Nodes (5): newReceiverNode(), TestVouchPipeline_AnchoredVsStranger(), TestVouchPipeline_CachedCertPersists(), Node, T
 
-### Community 79 - "WordPress Effectiveness Report"
+### Community 86 - "Community 86"
+Cohesion: 0.47
+Nodes (3): ReceivedEvent, canonicalSubnet(), ReceivedEvent
+
+### Community 87 - "Community 87"
 Cohesion: 0.33
 Nodes (3): effectiveness-report.sh script, effectiveness-report.sh script, PATH
 
-### Community 80 - "Ground Truth & Honeypot Onboarding"
+### Community 88 - "Community 88"
+Cohesion: 0.50
+Nodes (5): Mastodon-Model Federation with Subnet Trust Domains, Federated Mode (Active Peer-to-Peer Participation), Isolated Federation Mode (No Import from Other Domains), Trust Discount (import_discount) for Cross-Federation Scores, Isolated Federation Mode Example Config
+
+### Community 90 - "Community 90"
 Cohesion: 0.60
-Nodes (5): Ground Truth Anchors (§4.1), 01-ground-truth.md, Honeypot Semantics for Ground Truth (zero-FP signals), Spamtrap as Zero-False-Positive Signal, 2026-06-12-honeypot-node.md
+Nodes (4): Host, Authorizer, RegisterResponder(), Store
 
-### Community 81 - "libp2p Transport Options"
-Cohesion: 0.40
-Nodes (4): AddrInfo, PrivKey, Multiaddr, NodeMode
-
-### Community 82 - "Mailcow Bootstrap Scripts"
+### Community 91 - "Community 91"
 Cohesion: 0.60
 Nodes (3): sudo_run(), bootstrap-mailcow.sh script, bootstrap-mailcow.sh script
 
-### Community 83 - "Mailcow & Spamtrap Plans"
+### Community 92 - "Community 92"
 Cohesion: 0.50
 Nodes (5): Injectable logFetcher Interface, MailcowLogs Ingest Adapter, Mailcow Self-Sufficient Sensor Implementation Plan, SMTP/IMAP Reputation Weights, Spamtrap File-Tail Ingest Adapter
 
-### Community 84 - "Events API Handler"
+### Community 93 - "Community 93"
 Cohesion: 0.50
 Nodes (3): Server, Request, ResponseWriter
 
-### Community 85 - "Score API Handler"
+### Community 94 - "Community 94"
 Cohesion: 0.50
 Nodes (3): Server, Request, ResponseWriter
 
-### Community 87 - "Security Fixes Plans"
+### Community 97 - "Community 97"
 Cohesion: 0.67
-Nodes (4): Security Fixes Plan (CIDR injection, bearer token, port binding), Bearer Token Middleware for API Server (FEDERLOOM_API_TOKEN env var), CIDR Injection Vulnerability (0.0.0.0/0 passed as IP to nftables -> block-all attack vector), IP Validation Gate (net.ParseIP check in processLocal and ProcessRemote, CTI handler)
+Nodes (4): Mailcow Docker Compose (sidecar), Host Network Mode for Mailcow Sidecar, WordPress Docker Compose (sidecar), Host Network Mode for WordPress Sidecar
 
-### Community 88 - "WordPress Bootstrap Scripts"
+### Community 98 - "Community 98"
 Cohesion: 0.83
 Nodes (3): bootstrap-wordpress.sh script, bootstrap-wordpress.sh script, ssh_run()
 
-### Community 97 - "Mailcow Sidecar Concept"
-Cohesion: 1.00
-Nodes (3): Non-Invasive Docker Sidecar Pattern (JoeRu Mailcow-Crowdsec-Override), Mailcow Docker Compose Override (Non-Invasive), Mailcow Add-on README
+### Community 107 - "Community 107"
+Cohesion: 0.67
+Nodes (3): CrowdSec LAPI Ingest Adapter, CrowdSec Ingest Adapter Design Spec, CrowdSec LAPI Polling (GET /v1/decisions/stream + /v1/alerts, X-Api-Key header auth)
 
-### Community 99 - "Local Override Docs"
-Cohesion: 1.00
-Nodes (3): Leitprinzip 7: Lists are Aids, Not Law, 04-override.md, Operator Override Capability (any param locally overridable)
-
-### Community 103 - "SDD Progress Docs"
+### Community 113 - "Community 113"
 Cohesion: 0.67
 Nodes (3): SDD Progress Ledger: Getting Started Docker, SDD Task 1 Brief: Rewrite docs/getting-started.md, SDD Task 1 Report: getting-started.md Rewrite Complete
 
 ## Knowledge Gaps
-- **264 isolated node(s):** `Config`, `PublicKey`, `PeerCert`, `Time`, `Config` (+259 more)
+- **328 isolated node(s):** `Config`, `PublicKey`, `PeerCert`, `Time`, `Config` (+323 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **18 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **37 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `New()` connect `nftables Enforcement Sink` to `Rules Engine & Burst Control`, `Federation Trust Bundle`, `Identity Signing & Peer Keys`, `Identity Cert Issuance`, `Trust Store Tests`, `CrowdSec Ingest Source`, `Never-Block Safety List`, `Whitelist CLI`, `Fail2ban Ingest`, `Mailcow Log Ingest`, `ipset Enforcement Sink`, `Sybil & Reputation Store Tests`?**
-  _High betweenness centrality (0.127) - this node is a cross-community bridge._
-- **Why does `Open()` connect `Sybil & Reputation Store Tests` to `nftables Enforcement Sink`, `Observability Observer`, `Config Loading & Tests`, `Corroboration Tests`, `Adversarial Mock Sink`, `Bloom Filter`, `Integration Mock Sink`, `BadgerDB Reputation Store`, `Store Tests`, `Adversarial Vouch Tests`, `Federation & Status CLI`, `Reputation Engine Tests`?**
-  _High betweenness centrality (0.101) - this node is a cross-community bridge._
-- **Why does `testNode()` connect `Config Loading & Tests` to `Rules Engine & Burst Control`, `Trust Store Tests`, `Sybil & Reputation Store Tests`, `Never-Block Safety List`, `Whitelist CLI`, `Vouch Pipeline Integration`?**
-  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+- **Why does `New()` connect `Honeypot & OpenCanary Ingest` to `Integration Pipeline & Sybil Tests`, `Rules & Burst Engine`, `Node & Resource Governor`, `Community 38`, `Federation Invitation & Bootstrap`, `ipset Enforcement`, `Community 76`, `CrowdSec Ingest`, `Community 45`, `Never-Block & Poisoning Tests`, `Node Core Wiring`, `Community 20`, `Community 21`, `Community 54`, `Community 25`, `Community 90`, `Community 27`, `Community 28`?**
+  _High betweenness centrality (0.171) - this node is a cross-community bridge._
+- **Why does `Open()` connect `Integration Pipeline & Sybil Tests` to `Reputation Scoring & Decay`, `Node & Resource Governor`, `Honeypot & OpenCanary Ingest`, `Observability (SQLite/Observer)`, `federloomctl CLI`, `Never-Block & Poisoning Tests`, `Community 29`?**
+  _High betweenness centrality (0.106) - this node is a cross-community bridge._
+- **Why does `testNode()` connect `Node & Resource Governor` to `Config & Dispute/Load-Shedding Tests`, `Integration Pipeline & Sybil Tests`, `Rules & Burst Engine`, `Community 76`, `Never-Block & Poisoning Tests`, `Community 21`, `Community 28`?**
+  _High betweenness centrality (0.071) - this node is a cross-community bridge._
+- **Are the 46 inferred relationships involving `Defaults()` (e.g. with `matDisputeNode()` and `TestStrangerFakedSubnetsCannotUnblock()`) actually correct?**
+  _`Defaults()` has 46 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 40 inferred relationships involving `GeneratePersonKey()` (e.g. with `TestAnchoredPersonCountsOnce()` and `TestExpiredVouchIsStranger()`) actually correct?**
   _`GeneratePersonKey()` has 40 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 39 inferred relationships involving `PersonPub()` (e.g. with `TestAnchoredPersonCountsOnce()` and `TestExpiredVouchIsStranger()`) actually correct?**
   _`PersonPub()` has 39 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 35 inferred relationships involving `EncodePub()` (e.g. with `TestAnchoredPersonCountsOnce()` and `TestExpiredVouchIsStranger()`) actually correct?**
-  _`EncodePub()` has 35 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 31 inferred relationships involving `IssueCert()` (e.g. with `TestAnchoredPersonCountsOnce()` and `TestExpiredVouchIsStranger()`) actually correct?**
-  _`IssueCert()` has 31 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `Config`, `PublicKey`, `PeerCert` to the rest of the system?**
+  _343 weakly-connected nodes found - possible documentation gaps or missing edges._

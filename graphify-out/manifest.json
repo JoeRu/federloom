@@ -20,7 +20,7 @@
     "semantic_hash": "b384ae2a0d397e63ebfcdd1d3a3cd6fa"
   },
   "/root/federloom/.claude/settings.local.json": {
-    "mtime": 1782466100.9629455,
+    "mtime": 1784377042.7307239,
     "ast_hash": "40dd32ca39b7f3741361e6b417e7a6cc",
     "semantic_hash": "40dd32ca39b7f3741361e6b417e7a6cc"
   },
@@ -50,9 +50,9 @@
     "semantic_hash": "3b876d415acb99b85141bc492def457f"
   },
   "/root/federloom/cmd/federloomctl/setup.go": {
-    "mtime": 1782312784.5786605,
-    "ast_hash": "df241d5547db5b1fcc2a80c50f49bdd2",
-    "semantic_hash": "df241d5547db5b1fcc2a80c50f49bdd2"
+    "mtime": 1783453979.0952153,
+    "ast_hash": "b321cb810d88b8fd6170fc16acef2d82",
+    "semantic_hash": "b321cb810d88b8fd6170fc16acef2d82"
   },
   "/root/federloom/cmd/federloomctl/setup_test.go": {
     "mtime": 1782312784.5766606,
@@ -90,9 +90,9 @@
     "semantic_hash": "67b9e5ef8107e972b661ade7d053ad43"
   },
   "/root/federloom/cmd/federloomd/main.go": {
-    "mtime": 1782312784.5746605,
-    "ast_hash": "9057c5ebf9182a1d25ce07492062287f",
-    "semantic_hash": "9057c5ebf9182a1d25ce07492062287f"
+    "mtime": 1783531936.823015,
+    "ast_hash": "a737bb4b296f313d6387061e58775922",
+    "semantic_hash": "a737bb4b296f313d6387061e58775922"
   },
   "/root/federloom/deploy/grafana/provisioning/dashboards/federloom-dashboard.json": {
     "mtime": 1782361284.7820823,
@@ -150,9 +150,9 @@
     "semantic_hash": "fc362218b1934f5ce203399161e7267b"
   },
   "/root/federloom/internal/api/handler_blocklist.go": {
-    "mtime": 1782312784.6526597,
-    "ast_hash": "e9b0f28536310b0dde70d47623ac4664",
-    "semantic_hash": "e9b0f28536310b0dde70d47623ac4664"
+    "mtime": 1783499591.9475794,
+    "ast_hash": "2acd794031bfeb8be1636ca4f2af0098",
+    "semantic_hash": "2acd794031bfeb8be1636ca4f2af0098"
   },
   "/root/federloom/internal/api/handler_blocklist_test.go": {
     "mtime": 1782312784.6516595,
@@ -170,9 +170,9 @@
     "semantic_hash": "cb49096f5738d565974da569ee5b9764"
   },
   "/root/federloom/internal/api/handler_score.go": {
-    "mtime": 1782312784.6506596,
-    "ast_hash": "83dcfe1c9e925906c001ddac8b333d4e",
-    "semantic_hash": "83dcfe1c9e925906c001ddac8b333d4e"
+    "mtime": 1783626610.2377803,
+    "ast_hash": "b4ba980601b172ad1776a80caf67169e",
+    "semantic_hash": "b4ba980601b172ad1776a80caf67169e"
   },
   "/root/federloom/internal/api/handler_score_test.go": {
     "mtime": 1782312784.6536596,
@@ -180,9 +180,9 @@
     "semantic_hash": "e73e3ed03f370de346af4a31d35f7805"
   },
   "/root/federloom/internal/api/server.go": {
-    "mtime": 1782312784.6536596,
-    "ast_hash": "2f32a1773ef9d2ef1630e8079175c3f6",
-    "semantic_hash": "2f32a1773ef9d2ef1630e8079175c3f6"
+    "mtime": 1783626610.2377803,
+    "ast_hash": "b7e0220d821ab072179941a6dddf7b5d",
+    "semantic_hash": "b7e0220d821ab072179941a6dddf7b5d"
   },
   "/root/federloom/internal/api/server_test.go": {
     "mtime": 1782312784.6516595,
@@ -200,14 +200,14 @@
     "semantic_hash": "5d6fa65dc1833ef6ecbc3e92620d4c58"
   },
   "/root/federloom/internal/config/config.go": {
-    "mtime": 1782312784.6346598,
-    "ast_hash": "d9fc59531262b202935b90f6cc43bb1a",
-    "semantic_hash": "d9fc59531262b202935b90f6cc43bb1a"
+    "mtime": 1784461029.8114982,
+    "ast_hash": "a064ae55f23c83146077f1ed72a0d957",
+    "semantic_hash": "a064ae55f23c83146077f1ed72a0d957"
   },
   "/root/federloom/internal/config/config_test.go": {
-    "mtime": 1782312784.6356597,
-    "ast_hash": "681640eed6bfbbafa0d547d73b6508e9",
-    "semantic_hash": "681640eed6bfbbafa0d547d73b6508e9"
+    "mtime": 1784291813.2624311,
+    "ast_hash": "379b5f0a235cac777739750b82c2694b",
+    "semantic_hash": "379b5f0a235cac777739750b82c2694b"
   },
   "/root/federloom/internal/discovery/discovery.go": {
     "mtime": 1782312784.5716605,
@@ -225,9 +225,9 @@
     "semantic_hash": "6c918951254f4ad3d477da98a1508f6a"
   },
   "/root/federloom/internal/dnsbl/server.go": {
-    "mtime": 1782312784.5886605,
-    "ast_hash": "43c761cb27a70993344afbcb4c4ed278",
-    "semantic_hash": "43c761cb27a70993344afbcb4c4ed278"
+    "mtime": 1783626610.2397802,
+    "ast_hash": "6c075ca6323c9f660d87a340867799ff",
+    "semantic_hash": "6c075ca6323c9f660d87a340867799ff"
   },
   "/root/federloom/internal/dnsbl/server_test.go": {
     "mtime": 1782312784.5886605,
@@ -235,9 +235,9 @@
     "semantic_hash": "34d631c1e9e2fa47ef9b3bcf3bb24798"
   },
   "/root/federloom/internal/enforce/crowdsec.go": {
-    "mtime": 1782312784.5906603,
-    "ast_hash": "1ecb544821618b5c78c8c9268c8c89c7",
-    "semantic_hash": "1ecb544821618b5c78c8c9268c8c89c7"
+    "mtime": 1783956409.2815123,
+    "ast_hash": "349f78d3b8e984493a009038a9a5d7fc",
+    "semantic_hash": "349f78d3b8e984493a009038a9a5d7fc"
   },
   "/root/federloom/internal/enforce/crowdsec_test.go": {
     "mtime": 1782312784.5896604,
@@ -245,34 +245,34 @@
     "semantic_hash": "190848da5b4fb6c4811e8eed223de2d7"
   },
   "/root/federloom/internal/enforce/ipset.go": {
-    "mtime": 1782312784.5906603,
-    "ast_hash": "fbef830d810ef18cf8f0b35c0c0e2bbc",
-    "semantic_hash": "fbef830d810ef18cf8f0b35c0c0e2bbc"
+    "mtime": 1784293883.15893,
+    "ast_hash": "824453bf946c77e2ed0faa7662a2800f",
+    "semantic_hash": "824453bf946c77e2ed0faa7662a2800f"
   },
   "/root/federloom/internal/enforce/neverblock.go": {
-    "mtime": 1782312784.5896604,
-    "ast_hash": "482ceb9e6a526114f0169d116a0f4a52",
-    "semantic_hash": "482ceb9e6a526114f0169d116a0f4a52"
+    "mtime": 1783956409.2835124,
+    "ast_hash": "690d4d2b575148ef1a3be6d02ae81011",
+    "semantic_hash": "690d4d2b575148ef1a3be6d02ae81011"
   },
   "/root/federloom/internal/enforce/neverblock_test.go": {
-    "mtime": 1782312784.5886605,
-    "ast_hash": "feb0d3c15c9a76751e70ad477149faff",
-    "semantic_hash": "feb0d3c15c9a76751e70ad477149faff"
+    "mtime": 1783956409.2855122,
+    "ast_hash": "ed5b30527b1463f5003324fe3bbe392d",
+    "semantic_hash": "ed5b30527b1463f5003324fe3bbe392d"
   },
   "/root/federloom/internal/enforce/nftables.go": {
-    "mtime": 1782312784.5896604,
-    "ast_hash": "8ca66d1efd18b5d18c417a557e6bd06c",
-    "semantic_hash": "8ca66d1efd18b5d18c417a557e6bd06c"
+    "mtime": 1783956409.2865124,
+    "ast_hash": "132ed182c4b8491aa37ddc8fd6578cdc",
+    "semantic_hash": "132ed182c4b8491aa37ddc8fd6578cdc"
   },
   "/root/federloom/internal/enforce/plugin.go": {
-    "mtime": 1782312784.5896604,
-    "ast_hash": "3fde45879a0b9c9209713c43b2fd4c1a",
-    "semantic_hash": "3fde45879a0b9c9209713c43b2fd4c1a"
+    "mtime": 1783956409.2875123,
+    "ast_hash": "a02e6cefbb60bd96c9d17551ac0e0edc",
+    "semantic_hash": "a02e6cefbb60bd96c9d17551ac0e0edc"
   },
   "/root/federloom/internal/federation/invitation.go": {
-    "mtime": 1782312784.5726607,
-    "ast_hash": "bdfa5a8554eaef80519680cc589c6039",
-    "semantic_hash": "bdfa5a8554eaef80519680cc589c6039"
+    "mtime": 1783453979.0962155,
+    "ast_hash": "63a8dffebbd19170e18f64150299f8f3",
+    "semantic_hash": "63a8dffebbd19170e18f64150299f8f3"
   },
   "/root/federloom/internal/federation/invitation_test.go": {
     "mtime": 1782312784.5726607,
@@ -315,14 +315,14 @@
     "semantic_hash": "eb20bab1dc4dbace5363440291755962"
   },
   "/root/federloom/internal/identity/sign.go": {
-    "mtime": 1782312784.6416597,
-    "ast_hash": "41f1512868259b370536bd71e172142d",
-    "semantic_hash": "41f1512868259b370536bd71e172142d"
+    "mtime": 1784231330.5535333,
+    "ast_hash": "0f8bf49f673e111cb98ed9e0b7c2300c",
+    "semantic_hash": "0f8bf49f673e111cb98ed9e0b7c2300c"
   },
   "/root/federloom/internal/identity/sign_test.go": {
-    "mtime": 1782312784.6426597,
-    "ast_hash": "66cf49ad30df86d60afd29ee4b606f1f",
-    "semantic_hash": "66cf49ad30df86d60afd29ee4b606f1f"
+    "mtime": 1784231330.5535333,
+    "ast_hash": "29a52bb797073f4b2cd1953727135600",
+    "semantic_hash": "29a52bb797073f4b2cd1953727135600"
   },
   "/root/federloom/internal/ingest/crowdsec.go": {
     "mtime": 1782312784.6496596,
@@ -335,9 +335,9 @@
     "semantic_hash": "2cd6a2b832b8fbfb40cc46b3d4fecd08"
   },
   "/root/federloom/internal/ingest/fail2ban.go": {
-    "mtime": 1782312784.6476595,
-    "ast_hash": "445d41a6c4951bfcd6f7328cecdcce05",
-    "semantic_hash": "445d41a6c4951bfcd6f7328cecdcce05"
+    "mtime": 1784461029.8114982,
+    "ast_hash": "339aa8ebf20e398c8476455c191d12e2",
+    "semantic_hash": "339aa8ebf20e398c8476455c191d12e2"
   },
   "/root/federloom/internal/ingest/fail2ban_internal_test.go": {
     "mtime": 1782312784.6466596,
@@ -345,9 +345,9 @@
     "semantic_hash": "d25ec23ccdf3c0c45df5b98a25fa252c"
   },
   "/root/federloom/internal/ingest/fail2ban_test.go": {
-    "mtime": 1782312784.6486597,
-    "ast_hash": "ae9103016ad0962a3739d361a1ddc68c",
-    "semantic_hash": "ae9103016ad0962a3739d361a1ddc68c"
+    "mtime": 1784461029.8184981,
+    "ast_hash": "e0934040ce15a03e899842f325d19054",
+    "semantic_hash": "e0934040ce15a03e899842f325d19054"
   },
   "/root/federloom/internal/ingest/honeypot.go": {
     "mtime": 1782312784.6466596,
@@ -370,9 +370,9 @@
     "semantic_hash": "344bc8b4a485f6544cb65531b6f90d1c"
   },
   "/root/federloom/internal/ingest/opencanary.go": {
-    "mtime": 1782312784.6466596,
-    "ast_hash": "d67c1fd30e8a66f88f3ab0a2013f27cb",
-    "semantic_hash": "d67c1fd30e8a66f88f3ab0a2013f27cb"
+    "mtime": 1783453979.0962155,
+    "ast_hash": "95a24fbe2e76e78148eb039b67224868",
+    "semantic_hash": "95a24fbe2e76e78148eb039b67224868"
   },
   "/root/federloom/internal/ingest/opencanary_test.go": {
     "mtime": 1782312784.6446598,
@@ -400,14 +400,14 @@
     "semantic_hash": "1f40eadee6c21a6e9eaa63b41267ffc6"
   },
   "/root/federloom/internal/node/node.go": {
-    "mtime": 1782312784.6406598,
-    "ast_hash": "e08df9c40426f74fdadf4d038152049e",
-    "semantic_hash": "e08df9c40426f74fdadf4d038152049e"
+    "mtime": 1784291813.2624311,
+    "ast_hash": "b3cff68c2e30b9796b2b8b5365e64125",
+    "semantic_hash": "b3cff68c2e30b9796b2b8b5365e64125"
   },
   "/root/federloom/internal/node/node_test.go": {
-    "mtime": 1782312784.6406598,
-    "ast_hash": "76bbd6e5174dade092cc4eacbabec2ba",
-    "semantic_hash": "76bbd6e5174dade092cc4eacbabec2ba"
+    "mtime": 1784291813.2624311,
+    "ast_hash": "4574d94bae931a70a455b114891ca6a9",
+    "semantic_hash": "4574d94bae931a70a455b114891ca6a9"
   },
   "/root/federloom/internal/observability/doc.go": {
     "mtime": 1782312784.6386597,
@@ -415,9 +415,9 @@
     "semantic_hash": "ef5c3f0d01d234216abd20cf0a5d4a0d"
   },
   "/root/federloom/internal/observability/observer.go": {
-    "mtime": 1782312784.6396596,
-    "ast_hash": "14c93e7996ea4adf9487f4931fa232e6",
-    "semantic_hash": "14c93e7996ea4adf9487f4931fa232e6"
+    "mtime": 1784291813.2624311,
+    "ast_hash": "a041132774d3db673a54a3365372e80b",
+    "semantic_hash": "a041132774d3db673a54a3365372e80b"
   },
   "/root/federloom/internal/observability/observer_test.go": {
     "mtime": 1782312784.6376598,
@@ -425,14 +425,14 @@
     "semantic_hash": "f6f791a9f65c0f5920b634638212181c"
   },
   "/root/federloom/internal/observability/prometheus.go": {
-    "mtime": 1782312784.6396596,
-    "ast_hash": "e8286d437c3a4e371d83f01f4a002de0",
-    "semantic_hash": "e8286d437c3a4e371d83f01f4a002de0"
+    "mtime": 1784291813.2624311,
+    "ast_hash": "d3b3726f4c286d10b5b97d12590b3733",
+    "semantic_hash": "d3b3726f4c286d10b5b97d12590b3733"
   },
   "/root/federloom/internal/observability/prometheus_test.go": {
-    "mtime": 1782312784.6386597,
-    "ast_hash": "ff800e6109ef8ba2d7566dd5b21a3039",
-    "semantic_hash": "ff800e6109ef8ba2d7566dd5b21a3039"
+    "mtime": 1784291813.263431,
+    "ast_hash": "b8997bc5ca01b66dde7e44f4954fdd82",
+    "semantic_hash": "b8997bc5ca01b66dde7e44f4954fdd82"
   },
   "/root/federloom/internal/observability/sqlite.go": {
     "mtime": 1782312784.6386597,
@@ -450,19 +450,19 @@
     "semantic_hash": "fb7561c7125128f22c964d80f7b6191c"
   },
   "/root/federloom/internal/reputation/corroboration_test.go": {
-    "mtime": 1782312784.6366599,
-    "ast_hash": "618a3159e9a1ae0362b552fd63cfb226",
-    "semantic_hash": "618a3159e9a1ae0362b552fd63cfb226"
+    "mtime": 1784169470.9432044,
+    "ast_hash": "c94c75cd6f3ecd84cc7e9328efde1f51",
+    "semantic_hash": "c94c75cd6f3ecd84cc7e9328efde1f51"
   },
   "/root/federloom/internal/reputation/decay.go": {
-    "mtime": 1782312784.6376598,
-    "ast_hash": "2a328a5e9167d72a8620ed51f67d6bf6",
-    "semantic_hash": "2a328a5e9167d72a8620ed51f67d6bf6"
+    "mtime": 1783859605.650384,
+    "ast_hash": "eb3ab44aba36cebf6c67e2c21a734e7e",
+    "semantic_hash": "eb3ab44aba36cebf6c67e2c21a734e7e"
   },
   "/root/federloom/internal/reputation/decay_test.go": {
-    "mtime": 1782312784.6366599,
-    "ast_hash": "ef49887de2fa811fa0cf5b6687d6f4f2",
-    "semantic_hash": "ef49887de2fa811fa0cf5b6687d6f4f2"
+    "mtime": 1783859605.650384,
+    "ast_hash": "d5e62289f315b8f8d0ca367250c50f43",
+    "semantic_hash": "d5e62289f315b8f8d0ca367250c50f43"
   },
   "/root/federloom/internal/reputation/doc.go": {
     "mtime": 1782312784.6366599,
@@ -470,19 +470,14 @@
     "semantic_hash": "029e716477af35257802288d5b8bda95"
   },
   "/root/federloom/internal/reputation/engine.go": {
-    "mtime": 1782312784.6376598,
-    "ast_hash": "7de511cb61c1e4c52259cf2182e66939",
-    "semantic_hash": "7de511cb61c1e4c52259cf2182e66939"
+    "mtime": 1784169470.9432044,
+    "ast_hash": "3ea869aa9547be3668cc89d2032b99ef",
+    "semantic_hash": "3ea869aa9547be3668cc89d2032b99ef"
   },
   "/root/federloom/internal/reputation/engine_test.go": {
-    "mtime": 1782312784.6356597,
-    "ast_hash": "f0c6ad09d52e2a46b657518a6296342b",
-    "semantic_hash": "f0c6ad09d52e2a46b657518a6296342b"
-  },
-  "/root/federloom/internal/resources/doc.go": {
-    "mtime": 1782312784.6336598,
-    "ast_hash": "51dd43698e41a43a8d1478e2c8e3cd42",
-    "semantic_hash": "51dd43698e41a43a8d1478e2c8e3cd42"
+    "mtime": 1784169470.9432044,
+    "ast_hash": "04432fba045d8af0eb47e89642576d70",
+    "semantic_hash": "04432fba045d8af0eb47e89642576d70"
   },
   "/root/federloom/internal/resources/relay-list.json": {
     "mtime": 1782129268.1300328,
@@ -505,14 +500,14 @@
     "semantic_hash": "3168cdea743ba1bd063161ef0aaf5f19"
   },
   "/root/federloom/internal/rules/rule.go": {
-    "mtime": 1782312784.5746605,
-    "ast_hash": "b2558a013b34ce4808adc1ee1768360c",
-    "semantic_hash": "b2558a013b34ce4808adc1ee1768360c"
+    "mtime": 1783453979.0972154,
+    "ast_hash": "22ae81758a4eac6a4960a4cc3403a6a0",
+    "semantic_hash": "22ae81758a4eac6a4960a4cc3403a6a0"
   },
   "/root/federloom/internal/rules/rule_test.go": {
-    "mtime": 1782312784.5736606,
-    "ast_hash": "88f3aa57e3d2dbb6bae29c16859bd6b3",
-    "semantic_hash": "88f3aa57e3d2dbb6bae29c16859bd6b3"
+    "mtime": 1783453979.0972154,
+    "ast_hash": "2e9949c804fbe4a2fc0481991a3c5455",
+    "semantic_hash": "2e9949c804fbe4a2fc0481991a3c5455"
   },
   "/root/federloom/internal/store/bloom.go": {
     "mtime": 1782312784.5856605,
@@ -525,9 +520,9 @@
     "semantic_hash": "c8a34816f82ab7b6018704337812fe49"
   },
   "/root/federloom/internal/store/store.go": {
-    "mtime": 1782312784.5866604,
-    "ast_hash": "58bdd3b4fe1977a320a90824dafd377c",
-    "semantic_hash": "58bdd3b4fe1977a320a90824dafd377c"
+    "mtime": 1784169470.9442043,
+    "ast_hash": "aefaf09c149440ff26207ca2ba0fce37",
+    "semantic_hash": "aefaf09c149440ff26207ca2ba0fce37"
   },
   "/root/federloom/internal/store/store_test.go": {
     "mtime": 1782312784.5876603,
@@ -535,9 +530,9 @@
     "semantic_hash": "bdb0cff8ea69d3baf05ab7d72f2b6b74"
   },
   "/root/federloom/internal/store/whitelist.go": {
-    "mtime": 1782312784.5876603,
-    "ast_hash": "87d320de03958bb775be92d3fdb34eb8",
-    "semantic_hash": "87d320de03958bb775be92d3fdb34eb8"
+    "mtime": 1783499591.9595792,
+    "ast_hash": "0102ac80b1723ffeb95bba52655182eb",
+    "semantic_hash": "0102ac80b1723ffeb95bba52655182eb"
   },
   "/root/federloom/internal/store/whitelist_test.go": {
     "mtime": 1782312784.5866604,
@@ -560,24 +555,24 @@
     "semantic_hash": "512f90f788428b7f9b6f096128e2a281"
   },
   "/root/federloom/internal/transport/gossip.go": {
-    "mtime": 1782312784.5706606,
-    "ast_hash": "32594bc131fbab476fa50a58369929f8",
-    "semantic_hash": "32594bc131fbab476fa50a58369929f8"
+    "mtime": 1783531936.8260148,
+    "ast_hash": "5cad0e254626f5be732c9909f50062f6",
+    "semantic_hash": "5cad0e254626f5be732c9909f50062f6"
   },
   "/root/federloom/internal/transport/gossip_test.go": {
-    "mtime": 1782312784.5706606,
-    "ast_hash": "18017e7c3040f2a63fda1bbb6ac311b5",
-    "semantic_hash": "18017e7c3040f2a63fda1bbb6ac311b5"
+    "mtime": 1783531936.8260148,
+    "ast_hash": "177ddff3ab298f8b764fd2040ab5018e",
+    "semantic_hash": "177ddff3ab298f8b764fd2040ab5018e"
   },
   "/root/federloom/internal/transport/options.go": {
-    "mtime": 1782312784.5696607,
-    "ast_hash": "28990d65fea01f7a67e1aa08a56051ad",
-    "semantic_hash": "28990d65fea01f7a67e1aa08a56051ad"
+    "mtime": 1784231330.5545332,
+    "ast_hash": "8bae36e71391c9f697893c4932020375",
+    "semantic_hash": "8bae36e71391c9f697893c4932020375"
   },
   "/root/federloom/internal/transport/options_test.go": {
-    "mtime": 1782312784.5696607,
-    "ast_hash": "7dd982ad5c6f1326d3cd68294104a2ff",
-    "semantic_hash": "7dd982ad5c6f1326d3cd68294104a2ff"
+    "mtime": 1784231330.5555334,
+    "ast_hash": "12e318ec0e198d296b0c9a9f88f4805e",
+    "semantic_hash": "12e318ec0e198d296b0c9a9f88f4805e"
   },
   "/root/federloom/internal/transport/relay.go": {
     "mtime": 1782312784.5686607,
@@ -640,14 +635,14 @@
     "semantic_hash": "9f995302e52ea3a2bd12714f3725af98"
   },
   "/root/federloom/pkg/proto/messages.go": {
-    "mtime": 1782312784.5956602,
-    "ast_hash": "e509e7401a856d91a72da82f33133183",
-    "semantic_hash": "e509e7401a856d91a72da82f33133183"
+    "mtime": 1784231330.5555334,
+    "ast_hash": "b81b34228c8665be9ec053c6ad49c98c",
+    "semantic_hash": "b81b34228c8665be9ec053c6ad49c98c"
   },
   "/root/federloom/pkg/proto/messages_test.go": {
-    "mtime": 1782312784.5946603,
-    "ast_hash": "dd1f66e524dd01e3bec7a605e7654bc6",
-    "semantic_hash": "dd1f66e524dd01e3bec7a605e7654bc6"
+    "mtime": 1784231330.5555334,
+    "ast_hash": "3db17a29c5f94a17b4dbda5c8fee42d5",
+    "semantic_hash": "3db17a29c5f94a17b4dbda5c8fee42d5"
   },
   "/root/federloom/scripts/dev/smoke-test.sh": {
     "mtime": 1781254608.3624086,
@@ -665,34 +660,34 @@
     "semantic_hash": "7f9c7eb88f8e556a5a15bdc3bb17e415"
   },
   "/root/federloom/test/adversarial/poisoning_test.go": {
-    "mtime": 1782312784.5636606,
-    "ast_hash": "57954a8e7a83bd87a2861582006dfd05",
-    "semantic_hash": "57954a8e7a83bd87a2861582006dfd05"
+    "mtime": 1784169470.9442043,
+    "ast_hash": "7473ab2ae2e7e84c68c21690793a8085",
+    "semantic_hash": "7473ab2ae2e7e84c68c21690793a8085"
   },
   "/root/federloom/test/adversarial/sybil_ingest_test.go": {
-    "mtime": 1782312784.5646608,
-    "ast_hash": "9f6851d8829a7c24b513f3f59451e608",
-    "semantic_hash": "9f6851d8829a7c24b513f3f59451e608"
+    "mtime": 1784169470.9452045,
+    "ast_hash": "951012778f3094ec3b5f6b670a3b0a6e",
+    "semantic_hash": "951012778f3094ec3b5f6b670a3b0a6e"
   },
   "/root/federloom/test/adversarial/vouch_test.go": {
-    "mtime": 1782312784.5646608,
-    "ast_hash": "48e38ec68c6fb0dfe1a19c49762e1fa8",
-    "semantic_hash": "48e38ec68c6fb0dfe1a19c49762e1fa8"
+    "mtime": 1784169470.9452045,
+    "ast_hash": "053aacb9b9ed36298cb13e6c169448ca",
+    "semantic_hash": "053aacb9b9ed36298cb13e6c169448ca"
   },
   "/root/federloom/test/integration/cluster_test.go": {
-    "mtime": 1782312784.5656607,
-    "ast_hash": "37a3276bd01815b7a0938411325acbd6",
-    "semantic_hash": "37a3276bd01815b7a0938411325acbd6"
+    "mtime": 1783531936.827015,
+    "ast_hash": "a83b9fc90ca2c39eb62b3151a5a5047f",
+    "semantic_hash": "a83b9fc90ca2c39eb62b3151a5a5047f"
   },
   "/root/federloom/test/integration/pipeline_test.go": {
-    "mtime": 1782312784.5656607,
-    "ast_hash": "f980739e8f3a4d387d7eebf386d1e132",
-    "semantic_hash": "f980739e8f3a4d387d7eebf386d1e132"
+    "mtime": 1784169470.9452045,
+    "ast_hash": "b73be5760d8be73b114e2aed56426dd1",
+    "semantic_hash": "b73be5760d8be73b114e2aed56426dd1"
   },
   "/root/federloom/test/integration/reputation_store_test.go": {
-    "mtime": 1782312784.5656607,
-    "ast_hash": "9864207bdaed74320a7604fb5873e717",
-    "semantic_hash": "9864207bdaed74320a7604fb5873e717"
+    "mtime": 1784169470.9452045,
+    "ast_hash": "9f93cff3e16ae4a656c9db3cbb5f3487",
+    "semantic_hash": "9f93cff3e16ae4a656c9db3cbb5f3487"
   },
   "/root/federloom/test/integration/vouch_pipeline_test.go": {
     "mtime": 1782312784.5666606,
@@ -735,9 +730,9 @@
     "semantic_hash": "b7802e86fc9b3878246c9ed7b4a09da6"
   },
   "/root/federloom/.github/workflows/ci.yml": {
-    "mtime": 1782312784.5846605,
-    "ast_hash": "334759477b2b4a17cb27b0ac39bd9bda",
-    "semantic_hash": "334759477b2b4a17cb27b0ac39bd9bda"
+    "mtime": 1784461029.6934998,
+    "ast_hash": "cb781f4f8569776b1cc80b220e3014b3",
+    "semantic_hash": "cb781f4f8569776b1cc80b220e3014b3"
   },
   "/root/federloom/.github/workflows/docker.yml": {
     "mtime": 1782312784.5846605,
@@ -745,64 +740,64 @@
     "semantic_hash": "308892f44ec43d464a3e5d9e47cb80aa"
   },
   "/root/federloom/.superpowers/sdd/progress.md": {
-    "mtime": 1782466809.5186114,
-    "ast_hash": "bda98e028da3fc4902c14d0c5e6a364a",
-    "semantic_hash": "bda98e028da3fc4902c14d0c5e6a364a"
+    "mtime": 1784441061.683239,
+    "ast_hash": "6a741914de452dc2583745f2ff591059",
+    "semantic_hash": "6a741914de452dc2583745f2ff591059"
   },
   "/root/federloom/.superpowers/sdd/task-1-brief.md": {
-    "mtime": 1782465905.7395647,
-    "ast_hash": "0a6db0a575bfc36436a6c4ff965be486",
-    "semantic_hash": "0a6db0a575bfc36436a6c4ff965be486"
+    "mtime": 1784376140.272509,
+    "ast_hash": "0e0977854797f196c49d5637643745ca",
+    "semantic_hash": "0e0977854797f196c49d5637643745ca"
   },
   "/root/federloom/.superpowers/sdd/task-1-report.md": {
-    "mtime": 1782466672.559403,
-    "ast_hash": "7e2e261f1846b695a98399e99b8605bd",
-    "semantic_hash": "7e2e261f1846b695a98399e99b8605bd"
+    "mtime": 1784376452.0824363,
+    "ast_hash": "3a1a1082ce03eca913d2d37617f581ab",
+    "semantic_hash": "3a1a1082ce03eca913d2d37617f581ab"
   },
   "/root/federloom/.superpowers/sdd/task-2-brief.md": {
-    "mtime": 1782391202.8157625,
-    "ast_hash": "6e68a003489e7821ee6849907bec0948",
-    "semantic_hash": "6e68a003489e7821ee6849907bec0948"
+    "mtime": 1784376603.4534569,
+    "ast_hash": "127decd69495353e887e3b7883326309",
+    "semantic_hash": "127decd69495353e887e3b7883326309"
   },
   "/root/federloom/.superpowers/sdd/task-2-report.md": {
-    "mtime": 1782391259.0051646,
-    "ast_hash": "c9037fdd654b6550e643acc8ed69852b",
-    "semantic_hash": "c9037fdd654b6550e643acc8ed69852b"
+    "mtime": 1784376771.8652573,
+    "ast_hash": "081d1928b1791074ec87533a7126c05c",
+    "semantic_hash": "081d1928b1791074ec87533a7126c05c"
   },
   "/root/federloom/.superpowers/sdd/task-3-brief.md": {
-    "mtime": 1782415430.9833167,
-    "ast_hash": "60a19c5b8e374e49f3da88759e45d1de",
-    "semantic_hash": "60a19c5b8e374e49f3da88759e45d1de"
+    "mtime": 1784377003.8772304,
+    "ast_hash": "0369554f85d6ffef3821887a38a0058f",
+    "semantic_hash": "0369554f85d6ffef3821887a38a0058f"
   },
   "/root/federloom/.superpowers/sdd/task-3-report.md": {
-    "mtime": 1782415551.8247132,
-    "ast_hash": "2fae433e9ba9b439cd95b83a95aa3a70",
-    "semantic_hash": "2fae433e9ba9b439cd95b83a95aa3a70"
+    "mtime": 1784377321.0280967,
+    "ast_hash": "34257e623d8ad819e59b9daa1b7adefa",
+    "semantic_hash": "34257e623d8ad819e59b9daa1b7adefa"
   },
   "/root/federloom/.superpowers/sdd/task-4-brief.md": {
-    "mtime": 1782415645.1264775,
-    "ast_hash": "25cc15692bf98be3c618e54d672708a6",
-    "semantic_hash": "25cc15692bf98be3c618e54d672708a6"
+    "mtime": 1784377596.066514,
+    "ast_hash": "8721ef8815f5f56a19ff92bca7d7bec7",
+    "semantic_hash": "8721ef8815f5f56a19ff92bca7d7bec7"
   },
   "/root/federloom/.superpowers/sdd/task-4-report.md": {
-    "mtime": 1782415724.5874386,
-    "ast_hash": "e373f25e89fa4921943c40c5fec57b22",
-    "semantic_hash": "e373f25e89fa4921943c40c5fec57b22"
+    "mtime": 1784377711.389012,
+    "ast_hash": "fae45428d982aee9c5341b4235c148e3",
+    "semantic_hash": "fae45428d982aee9c5341b4235c148e3"
   },
   "/root/federloom/.superpowers/sdd/task-5-brief.md": {
-    "mtime": 1782415823.332221,
-    "ast_hash": "e24b4e5914454295a9225a4204f403e2",
-    "semantic_hash": "e24b4e5914454295a9225a4204f403e2"
+    "mtime": 1784377945.9659579,
+    "ast_hash": "6a232cb96ebb25455bb899242e6b4e41",
+    "semantic_hash": "6a232cb96ebb25455bb899242e6b4e41"
   },
   "/root/federloom/.superpowers/sdd/task-5-report.md": {
-    "mtime": 1782416354.868501,
-    "ast_hash": "dbd913d5b3b42e4b6e3cb4a667048a81",
-    "semantic_hash": "dbd913d5b3b42e4b6e3cb4a667048a81"
+    "mtime": 1784402265.7054422,
+    "ast_hash": "5885b791db9c7ca07276aebe6581871b",
+    "semantic_hash": "5885b791db9c7ca07276aebe6581871b"
   },
   "/root/federloom/CHANGELOG.md": {
-    "mtime": 1782312784.5576608,
-    "ast_hash": "bd6e6651db26689aebdcd15a7961bd9a",
-    "semantic_hash": "bd6e6651db26689aebdcd15a7961bd9a"
+    "mtime": 1784461029.6974998,
+    "ast_hash": "56dc97be4963250894d527b33d3590d3",
+    "semantic_hash": "56dc97be4963250894d527b33d3590d3"
   },
   "/root/federloom/CLAUDE.md": {
     "mtime": 1782312784.5586607,
@@ -810,9 +805,9 @@
     "semantic_hash": "41952b4ce9fad9f189c6f4082544a0f8"
   },
   "/root/federloom/README.md": {
-    "mtime": 1782486014.8435097,
-    "ast_hash": "ac8ef27c4848f7361a10ed324dd77698",
-    "semantic_hash": "ac8ef27c4848f7361a10ed324dd77698"
+    "mtime": 1784461029.6994996,
+    "ast_hash": "7fbec6b5814edf192f846174637ebc1a",
+    "semantic_hash": "7fbec6b5814edf192f846174637ebc1a"
   },
   "/root/federloom/deploy/client/config.yaml": {
     "mtime": 1782485574.423018,
@@ -835,19 +830,19 @@
     "semantic_hash": "7c786789a783162afd831dab5258b39f"
   },
   "/root/federloom/deploy/examples/config.federated.yaml": {
-    "mtime": 1782312784.5806606,
-    "ast_hash": "0ae037cc6bdcf8601ee1b3f18e5eeb83",
-    "semantic_hash": "0ae037cc6bdcf8601ee1b3f18e5eeb83"
+    "mtime": 1784350072.1879814,
+    "ast_hash": "a3565a8ecbc9e7a700c638174ca8f541",
+    "semantic_hash": "a3565a8ecbc9e7a700c638174ca8f541"
   },
   "/root/federloom/deploy/examples/config.isolated.yaml": {
-    "mtime": 1782312784.5806606,
-    "ast_hash": "1d0239e2f0a838304ebd1539dc9f9413",
-    "semantic_hash": "1d0239e2f0a838304ebd1539dc9f9413"
+    "mtime": 1784350072.1879814,
+    "ast_hash": "547db19bcf835bf28b19aa6e42634047",
+    "semantic_hash": "547db19bcf835bf28b19aa6e42634047"
   },
   "/root/federloom/deploy/examples/config.solo.yaml": {
-    "mtime": 1782312784.5796604,
-    "ast_hash": "d76428d3fbc116e6e4a3600573956a98",
-    "semantic_hash": "d76428d3fbc116e6e4a3600573956a98"
+    "mtime": 1784350072.1889813,
+    "ast_hash": "c2c0e56f68009d78c2f662de9426b18f",
+    "semantic_hash": "c2c0e56f68009d78c2f662de9426b18f"
   },
   "/root/federloom/deploy/examples/rules.yaml": {
     "mtime": 1782312784.5796604,
@@ -885,9 +880,9 @@
     "semantic_hash": "d78e10a36a62fbc8296b5c800ac2d5b5"
   },
   "/root/federloom/deploy/honeypot/docker-compose.yml": {
-    "mtime": 1782312784.5826604,
-    "ast_hash": "0d648ff6daa5e07efbb4c5119381b2f5",
-    "semantic_hash": "0d648ff6daa5e07efbb4c5119381b2f5"
+    "mtime": 1783445474.7916598,
+    "ast_hash": "d136f6dc0313a4fe291b000fa70a36f3",
+    "semantic_hash": "d136f6dc0313a4fe291b000fa70a36f3"
   },
   "/root/federloom/deploy/honeypot/rules.yaml": {
     "mtime": 1782312784.5826604,
@@ -935,14 +930,14 @@
     "semantic_hash": "92399e635b85da8925f9079d4883696e"
   },
   "/root/federloom/docs/architecture.md": {
-    "mtime": 1782312784.5626607,
-    "ast_hash": "f14a21a37c48694356cd6b3f7680ea08",
-    "semantic_hash": "f14a21a37c48694356cd6b3f7680ea08"
+    "mtime": 1784291813.2584312,
+    "ast_hash": "591cccb684924cdb026a937a712c125b",
+    "semantic_hash": "591cccb684924cdb026a937a712c125b"
   },
   "/root/federloom/docs/config.md": {
-    "mtime": 1782386440.63994,
-    "ast_hash": "1661f72fe16401fdc55b72ca4d84e15c",
-    "semantic_hash": "1661f72fe16401fdc55b72ca4d84e15c"
+    "mtime": 1784461029.7004995,
+    "ast_hash": "e7a5c01db3ee9f73bb97180b19a10e3c",
+    "semantic_hash": "e7a5c01db3ee9f73bb97180b19a10e3c"
   },
   "/root/federloom/docs/dnsbl-integration.md": {
     "mtime": 1782312784.5606608,
@@ -955,9 +950,9 @@
     "semantic_hash": "eea43b16f154a61dd946db8742699fd7"
   },
   "/root/federloom/docs/getting-started.md": {
-    "mtime": 1782466768.089153,
-    "ast_hash": "98dd7d7eb5df2994269484c9688fd972",
-    "semantic_hash": "98dd7d7eb5df2994269484c9688fd972"
+    "mtime": 1784461029.7014997,
+    "ast_hash": "ba5dd3a7b39d796e1de94de2a99ca92f",
+    "semantic_hash": "ba5dd3a7b39d796e1de94de2a99ca92f"
   },
   "/root/federloom/docs/onboarding/01-ground-truth.md": {
     "mtime": 1782312784.5946603,
@@ -980,9 +975,9 @@
     "semantic_hash": "36a7e8680302ef560a980cfc93c8e8ab"
   },
   "/root/federloom/docs/plugins.md": {
-    "mtime": 1782312784.5616608,
-    "ast_hash": "fa7abe3d2fb3fd81c568dcdaa7bd59be",
-    "semantic_hash": "fa7abe3d2fb3fd81c568dcdaa7bd59be"
+    "mtime": 1784461071.608964,
+    "ast_hash": "3fbbc917b94b1930f809d0a4df7dda81",
+    "semantic_hash": "3fbbc917b94b1930f809d0a4df7dda81"
   },
   "/root/federloom/docs/project-structure.md": {
     "mtime": 1782312784.5626607,
@@ -995,9 +990,9 @@
     "semantic_hash": "337ea9c2c088a30544ae59a740c559c2"
   },
   "/root/federloom/docs/spec.md": {
-    "mtime": 1782762048.2641816,
-    "ast_hash": "cf4d1c74a38e71d94afe3faa087c7c62",
-    "semantic_hash": "cf4d1c74a38e71d94afe3faa087c7c62"
+    "mtime": 1784291813.2604313,
+    "ast_hash": "12004f045ae1d634624d03b552a9c800",
+    "semantic_hash": "12004f045ae1d634624d03b552a9c800"
   },
   "/root/federloom/docs/superpowers/plans/2026-06-09-p2p-transport-skeleton.md": {
     "mtime": 1782312784.62266,
@@ -1270,9 +1265,9 @@
     "semantic_hash": "60bc32f51b70d41275d4d8090340e854"
   },
   "/root/federloom/docs/threat-model.md": {
-    "mtime": 1782312784.5606608,
-    "ast_hash": "c6423e7db747bfd8b7f975d1ab02607b",
-    "semantic_hash": "c6423e7db747bfd8b7f975d1ab02607b"
+    "mtime": 1784291813.2604313,
+    "ast_hash": "e7c614d0e1f5cdeaa6cef93c1f60e30e",
+    "semantic_hash": "e7c614d0e1f5cdeaa6cef93c1f60e30e"
   },
   "/root/federloom/scripts/dev/docker-compose.dev.yml": {
     "mtime": 1782312784.5686607,
@@ -1283,5 +1278,685 @@
     "mtime": 1782485271.9167864,
     "ast_hash": "4bf01f46e84b8dcf717fed4c556e67d2",
     "semantic_hash": "4bf01f46e84b8dcf717fed4c556e67d2"
+  },
+  "/root/federloom/examples/apache/docker/smoke.sh": {
+    "mtime": 1784461029.7114995,
+    "ast_hash": "430bdde65577f914ee746622d12b68e2",
+    "semantic_hash": "430bdde65577f914ee746622d12b68e2"
+  },
+  "/root/federloom/examples/crowdsec/smoke.sh": {
+    "mtime": 1784461029.751499,
+    "ast_hash": "4cda81e45d92d721ecf36cf5ab4515e0",
+    "semantic_hash": "4cda81e45d92d721ecf36cf5ab4515e0"
+  },
+  "/root/federloom/examples/firewall-export/smoke.sh": {
+    "mtime": 1784461029.751499,
+    "ast_hash": "a24089def8efcef9031b5110253884fc",
+    "semantic_hash": "a24089def8efcef9031b5110253884fc"
+  },
+  "/root/federloom/examples/haproxy/docker/fetch-blocklist.sh": {
+    "mtime": 1784461029.761499,
+    "ast_hash": "0f2b7293c00cd0a7b4ef30371109fc87",
+    "semantic_hash": "0f2b7293c00cd0a7b4ef30371109fc87"
+  },
+  "/root/federloom/examples/haproxy/docker/smoke.sh": {
+    "mtime": 1784461029.761499,
+    "ast_hash": "a98e005691183b0180232cd3c8b7777f",
+    "semantic_hash": "a98e005691183b0180232cd3c8b7777f"
+  },
+  "/root/federloom/examples/nginx/docker/smoke.sh": {
+    "mtime": 1784461029.7694988,
+    "ast_hash": "430bdde65577f914ee746622d12b68e2",
+    "semantic_hash": "430bdde65577f914ee746622d12b68e2"
+  },
+  "/root/federloom/examples/traefik/docker/smoke.sh": {
+    "mtime": 1784461029.7804985,
+    "ast_hash": "430bdde65577f914ee746622d12b68e2",
+    "semantic_hash": "430bdde65577f914ee746622d12b68e2"
+  },
+  "/root/federloom/examples/wordpress/docker/smoke.sh": {
+    "mtime": 1784461029.8074982,
+    "ast_hash": "430bdde65577f914ee746622d12b68e2",
+    "semantic_hash": "430bdde65577f914ee746622d12b68e2"
+  },
+  "/root/federloom/internal/enforce/crowdsec_internal_test.go": {
+    "mtime": 1783499591.9515793,
+    "ast_hash": "4d50e563d13f1645f1b6b08fe8d106d3",
+    "semantic_hash": "4d50e563d13f1645f1b6b08fe8d106d3"
+  },
+  "/root/federloom/internal/enforce/ipset_test.go": {
+    "mtime": 1784293883.16193,
+    "ast_hash": "20fe31d89fb38ed1b4c5373ea247ee1f",
+    "semantic_hash": "20fe31d89fb38ed1b4c5373ea247ee1f"
+  },
+  "/root/federloom/internal/enforce/nftables_test.go": {
+    "mtime": 1783499591.9555793,
+    "ast_hash": "8ae657a29b5b564166bb9c2464882f8d",
+    "semantic_hash": "8ae657a29b5b564166bb9c2464882f8d"
+  },
+  "/root/federloom/internal/netutil/netutil.go": {
+    "mtime": 1783499591.9565792,
+    "ast_hash": "60ad66d1335ac92198ffeba1ced763eb",
+    "semantic_hash": "60ad66d1335ac92198ffeba1ced763eb"
+  },
+  "/root/federloom/internal/netutil/netutil_test.go": {
+    "mtime": 1783499591.9575791,
+    "ast_hash": "76629aef4eb8de0e36db8ea838bc095e",
+    "semantic_hash": "76629aef4eb8de0e36db8ea838bc095e"
+  },
+  "/root/federloom/internal/node/dedup.go": {
+    "mtime": 1783758462.0889347,
+    "ast_hash": "a632c370872c70ca2bd789b6653bc162",
+    "semantic_hash": "a632c370872c70ca2bd789b6653bc162"
+  },
+  "/root/federloom/internal/node/dedup_test.go": {
+    "mtime": 1783531936.8250148,
+    "ast_hash": "c10300eb12063657764c6ce8b8c6dd2f",
+    "semantic_hash": "c10300eb12063657764c6ce8b8c6dd2f"
+  },
+  "/root/federloom/internal/node/wiring_repquery_test.go": {
+    "mtime": 1783859605.648384,
+    "ast_hash": "d446dec75a0b0b4dc526e70fc5c73d68",
+    "semantic_hash": "d446dec75a0b0b4dc526e70fc5c73d68"
+  },
+  "/root/federloom/internal/repquery/aggregate.go": {
+    "mtime": 1784169470.9422045,
+    "ast_hash": "e80550f07ec74426bed815ed51e46db6",
+    "semantic_hash": "e80550f07ec74426bed815ed51e46db6"
+  },
+  "/root/federloom/internal/repquery/aggregate_test.go": {
+    "mtime": 1784169470.9422045,
+    "ast_hash": "b88bfc55a3af06a2ae2ac05181cc0a4b",
+    "semantic_hash": "b88bfc55a3af06a2ae2ac05181cc0a4b"
+  },
+  "/root/federloom/internal/repquery/querier.go": {
+    "mtime": 1784169470.9422045,
+    "ast_hash": "017ce413ab67e968745cf591268e3691",
+    "semantic_hash": "017ce413ab67e968745cf591268e3691"
+  },
+  "/root/federloom/internal/repquery/querier_test.go": {
+    "mtime": 1784169470.9422045,
+    "ast_hash": "56583186b261ec1627c4de6eea1a41be",
+    "semantic_hash": "56583186b261ec1627c4de6eea1a41be"
+  },
+  "/root/federloom/internal/repquery/recompute.go": {
+    "mtime": 1784169470.9432044,
+    "ast_hash": "8b0c0d8df12c03e1e95c91abf7012a8e",
+    "semantic_hash": "8b0c0d8df12c03e1e95c91abf7012a8e"
+  },
+  "/root/federloom/internal/repquery/recompute_test.go": {
+    "mtime": 1784169470.9432044,
+    "ast_hash": "e7db10206790006d09b3f2b0af1765a5",
+    "semantic_hash": "e7db10206790006d09b3f2b0af1765a5"
+  },
+  "/root/federloom/internal/repquery/resolver.go": {
+    "mtime": 1784291813.263431,
+    "ast_hash": "2a98a1113c4f0e22caf125f9b01fc32a",
+    "semantic_hash": "2a98a1113c4f0e22caf125f9b01fc32a"
+  },
+  "/root/federloom/internal/repquery/resolver_test.go": {
+    "mtime": 1784291813.2644312,
+    "ast_hash": "ad687fda524b03f261880f6cb07ca16c",
+    "semantic_hash": "ad687fda524b03f261880f6cb07ca16c"
+  },
+  "/root/federloom/internal/repquery/responder.go": {
+    "mtime": 1783859605.649384,
+    "ast_hash": "c56b099742520e2c4aa8a4ba4773c21b",
+    "semantic_hash": "c56b099742520e2c4aa8a4ba4773c21b"
+  },
+  "/root/federloom/internal/repquery/responder_test.go": {
+    "mtime": 1783859605.650384,
+    "ast_hash": "3f9ca7212f562387a9b92821776b17fc",
+    "semantic_hash": "3f9ca7212f562387a9b92821776b17fc"
+  },
+  "/root/federloom/internal/resources/governor.go": {
+    "mtime": 1784291813.2644312,
+    "ast_hash": "ff2692dc63fa48c61c4a78f103d96170",
+    "semantic_hash": "ff2692dc63fa48c61c4a78f103d96170"
+  },
+  "/root/federloom/internal/resources/governor_test.go": {
+    "mtime": 1784291813.2644312,
+    "ast_hash": "8ff82cef1b0be8c6a6cd50c304960174",
+    "semantic_hash": "8ff82cef1b0be8c6a6cd50c304960174"
+  },
+  "/root/federloom/test/adversarial/disputes_test.go": {
+    "mtime": 1784169470.9442043,
+    "ast_hash": "b2b25a072314933fe86161ae2f95c5b1",
+    "semantic_hash": "b2b25a072314933fe86161ae2f95c5b1"
+  },
+  "/root/federloom/test/adversarial/diversity_flood_test.go": {
+    "mtime": 1783886626.9170218,
+    "ast_hash": "705fcd85ba8af76cc35773dedc7d86c5",
+    "semantic_hash": "705fcd85ba8af76cc35773dedc7d86c5"
+  },
+  "/root/federloom/test/adversarial/injection_test.go": {
+    "mtime": 1784231330.5555334,
+    "ast_hash": "d16051f7664b351a98ef0d853fe99332",
+    "semantic_hash": "d16051f7664b351a98ef0d853fe99332"
+  },
+  "/root/federloom/test/adversarial/load_shedding_test.go": {
+    "mtime": 1784291813.2644312,
+    "ast_hash": "a4541826f527d844a5dbc5218ef32da0",
+    "semantic_hash": "a4541826f527d844a5dbc5218ef32da0"
+  },
+  "/root/federloom/test/adversarial/materialise_test.go": {
+    "mtime": 1783956409.3495116,
+    "ast_hash": "45eeb551f9614d8c86f580407b9030e5",
+    "semantic_hash": "45eeb551f9614d8c86f580407b9030e5"
+  },
+  "/root/federloom/test/adversarial/repquery_evidence_test.go": {
+    "mtime": 1784169470.9452045,
+    "ast_hash": "ac19b37e639eb62e6f6063a4ad2b943c",
+    "semantic_hash": "ac19b37e639eb62e6f6063a4ad2b943c"
+  },
+  "/root/federloom/test/adversarial/repquery_sybil_test.go": {
+    "mtime": 1784231330.5565333,
+    "ast_hash": "0a3d021dd695f7a340af9c869a2314d4",
+    "semantic_hash": "0a3d021dd695f7a340af9c869a2314d4"
+  },
+  "/root/federloom/test/examples/lib.sh": {
+    "mtime": 1784461029.823498,
+    "ast_hash": "09b9e75af72213754b65dcc4479d8b03",
+    "semantic_hash": "09b9e75af72213754b65dcc4479d8b03"
+  },
+  "/root/federloom/test/examples/run-smoke.sh": {
+    "mtime": 1784461029.824498,
+    "ast_hash": "5fa2dad3fda65c27e1a37bdc13c71b71",
+    "semantic_hash": "5fa2dad3fda65c27e1a37bdc13c71b71"
+  },
+  "/root/federloom/test/integration/bridge_test.go": {
+    "mtime": 1783759543.195785,
+    "ast_hash": "6e53c676f10bf66fef0a254019c8c4f0",
+    "semantic_hash": "6e53c676f10bf66fef0a254019c8c4f0"
+  },
+  "/root/federloom/test/integration/materialise_test.go": {
+    "mtime": 1783956409.3565114,
+    "ast_hash": "09bba1bedc4398fc3fccb8b8be741e0e",
+    "semantic_hash": "09bba1bedc4398fc3fccb8b8be741e0e"
+  },
+  "/root/federloom/test/integration/repquery_test.go": {
+    "mtime": 1784291813.2654312,
+    "ast_hash": "e101a23dff72e2368de1d651a1ead447",
+    "semantic_hash": "e101a23dff72e2368de1d651a1ead447"
+  },
+  "/root/federloom/tools/validate-examples/main.go": {
+    "mtime": 1784461029.828498,
+    "ast_hash": "562e5e63bf3978671d255cf19c5c4fbf",
+    "semantic_hash": "562e5e63bf3978671d255cf19c5c4fbf"
+  },
+  "/root/federloom/tools/validate-examples/main_test.go": {
+    "mtime": 1784461029.831498,
+    "ast_hash": "5a94d8c3562c1155fc71ec38ddc7e92e",
+    "semantic_hash": "5a94d8c3562c1155fc71ec38ddc7e92e"
+  },
+  "/root/federloom/.github/workflows/examples-smoke.yml": {
+    "mtime": 1784461029.6964996,
+    "ast_hash": "0ac41eb3479eb773897aa6bc9949e083",
+    "semantic_hash": "0ac41eb3479eb773897aa6bc9949e083"
+  },
+  "/root/federloom/.superpowers/sdd/task-10-brief.md": {
+    "mtime": 1784438090.4789705,
+    "ast_hash": "c55efe6ccbf98b5a976f3568440f7464",
+    "semantic_hash": "c55efe6ccbf98b5a976f3568440f7464"
+  },
+  "/root/federloom/.superpowers/sdd/task-10-report.md": {
+    "mtime": 1784439469.9680421,
+    "ast_hash": "e804b8cc5ae116c5f6de5c35b55a7d79",
+    "semantic_hash": "e804b8cc5ae116c5f6de5c35b55a7d79"
+  },
+  "/root/federloom/.superpowers/sdd/task-11-brief.md": {
+    "mtime": 1784438626.9542217,
+    "ast_hash": "c7f2b009761d8223f37ab2db383529b8",
+    "semantic_hash": "c7f2b009761d8223f37ab2db383529b8"
+  },
+  "/root/federloom/.superpowers/sdd/task-11-report.md": {
+    "mtime": 1784439982.5327778,
+    "ast_hash": "5a8e362b59084fca79a952a32a7deafe",
+    "semantic_hash": "5a8e362b59084fca79a952a32a7deafe"
+  },
+  "/root/federloom/.superpowers/sdd/task-12-brief.md": {
+    "mtime": 1784438627.0092208,
+    "ast_hash": "b0b41fdd44fc5330e856adafac8913ba",
+    "semantic_hash": "b0b41fdd44fc5330e856adafac8913ba"
+  },
+  "/root/federloom/.superpowers/sdd/task-12-report.md": {
+    "mtime": 1784440412.9854186,
+    "ast_hash": "6f5adafa3f9b736b202a280ff54b7b73",
+    "semantic_hash": "6f5adafa3f9b736b202a280ff54b7b73"
+  },
+  "/root/federloom/.superpowers/sdd/task-13-brief.md": {
+    "mtime": 1784438627.0612202,
+    "ast_hash": "0692c2a8cadb1cd4a2f6eb5c56d1230c",
+    "semantic_hash": "0692c2a8cadb1cd4a2f6eb5c56d1230c"
+  },
+  "/root/federloom/.superpowers/sdd/task-13-report.md": {
+    "mtime": 1784440976.4703515,
+    "ast_hash": "0fb9458f2946e13b744b9bf6ff3be79e",
+    "semantic_hash": "0fb9458f2946e13b744b9bf6ff3be79e"
+  },
+  "/root/federloom/.superpowers/sdd/task-6-brief.md": {
+    "mtime": 1784401879.1896186,
+    "ast_hash": "e95b24d70d20f8fa200a409f6e55b022",
+    "semantic_hash": "e95b24d70d20f8fa200a409f6e55b022"
+  },
+  "/root/federloom/.superpowers/sdd/task-6-report.md": {
+    "mtime": 1784403240.2854006,
+    "ast_hash": "b85cb08921510000e460acd02661befd",
+    "semantic_hash": "b85cb08921510000e460acd02661befd"
+  },
+  "/root/federloom/.superpowers/sdd/task-7-brief.md": {
+    "mtime": 1784403210.7540066,
+    "ast_hash": "4601c27085ea847702b78b6203719353",
+    "semantic_hash": "4601c27085ea847702b78b6203719353"
+  },
+  "/root/federloom/.superpowers/sdd/task-7-report.md": {
+    "mtime": 1784403686.4436727,
+    "ast_hash": "fa540a0b50e764824ffe9a9c4cf67acf",
+    "semantic_hash": "fa540a0b50e764824ffe9a9c4cf67acf"
+  },
+  "/root/federloom/.superpowers/sdd/task-8-brief.md": {
+    "mtime": 1784403333.4995167,
+    "ast_hash": "efe02514980a1447cc878032d6f30b05",
+    "semantic_hash": "efe02514980a1447cc878032d6f30b05"
+  },
+  "/root/federloom/.superpowers/sdd/task-8-report.md": {
+    "mtime": 1784404351.3593478,
+    "ast_hash": "28e2cf8dd07337de0c6a5193b73284a0",
+    "semantic_hash": "28e2cf8dd07337de0c6a5193b73284a0"
+  },
+  "/root/federloom/.superpowers/sdd/task-9-brief.md": {
+    "mtime": 1784403892.367819,
+    "ast_hash": "a67e76a978672c793a07d67655dbc588",
+    "semantic_hash": "a67e76a978672c793a07d67655dbc588"
+  },
+  "/root/federloom/.superpowers/sdd/task-9-report.md": {
+    "mtime": 1784438471.2981908,
+    "ast_hash": "906386e977764393859ae2a9b2b4bdbd",
+    "semantic_hash": "906386e977764393859ae2a9b2b4bdbd"
+  },
+  "/root/federloom/docs/backlog.md": {
+    "mtime": 1784461095.3716598,
+    "ast_hash": "bcd25b2ceab35b994102524782255c68",
+    "semantic_hash": "bcd25b2ceab35b994102524782255c68"
+  },
+  "/root/federloom/docs/critics-and-suggestions.md": {
+    "mtime": 1783677767.3482597,
+    "ast_hash": "240c509f4844db785451ca8cd0a09b98",
+    "semantic_hash": "240c509f4844db785451ca8cd0a09b98"
+  },
+  "/root/federloom/docs/prior-art.md": {
+    "mtime": 1782762039.4622974,
+    "ast_hash": "c084c0614720173f202baeaaf5e082cd",
+    "semantic_hash": "c084c0614720173f202baeaaf5e082cd"
+  },
+  "/root/federloom/docs/roadmap.md": {
+    "mtime": 1784350072.1889813,
+    "ast_hash": "e37f9920b429ef21f7e3320a2bbcfa11",
+    "semantic_hash": "e37f9920b429ef21f7e3320a2bbcfa11"
+  },
+  "/root/federloom/docs/superpowers/plans/2026-07-07-ipv6-prefix-normalization.md": {
+    "mtime": 1783491983.2374828,
+    "ast_hash": "6b4a92f8a16ec8864ef3cda3862e6cc8",
+    "semantic_hash": "6b4a92f8a16ec8864ef3cda3862e6cc8"
+  },
+  "/root/federloom/docs/superpowers/plans/2026-07-07-remediation-batch-a-b.md": {
+    "mtime": 1783435160.3016446,
+    "ast_hash": "daafdef37923ce88a49f982cbf477b10",
+    "semantic_hash": "daafdef37923ce88a49f982cbf477b10"
+  },
+  "/root/federloom/docs/superpowers/plans/2026-07-07-stranger-block-guarantee.md": {
+    "mtime": 1783451784.934969,
+    "ast_hash": "1a80cfefa0bbc5015eada2a5db5b45db",
+    "semantic_hash": "1a80cfefa0bbc5015eada2a5db5b45db"
+  },
+  "/root/federloom/docs/superpowers/plans/2026-07-08-subnet-bridge-forwarding.md": {
+    "mtime": 1783525442.5466957,
+    "ast_hash": "fa21937dbac7570729698c6894ea0bc7",
+    "semantic_hash": "fa21937dbac7570729698c6894ea0bc7"
+  },
+  "/root/federloom/docs/superpowers/plans/2026-07-09-federated-reputation-query.md": {
+    "mtime": 1783584020.9061706,
+    "ast_hash": "ef1e90a6d2d2a69c1d00f97290e1afb7",
+    "semantic_hash": "ef1e90a6d2d2a69c1d00f97290e1afb7"
+  },
+  "/root/federloom/docs/superpowers/plans/2026-07-10-repquery-hardening.md": {
+    "mtime": 1783691472.4213488,
+    "ast_hash": "e281099303bf05a3054ffc1d508f7ac6",
+    "semantic_hash": "e281099303bf05a3054ffc1d508f7ac6"
+  },
+  "/root/federloom/docs/superpowers/plans/2026-07-11-evidence-aggregate.md": {
+    "mtime": 1783846197.4415941,
+    "ast_hash": "1c3a3cf4735b11dd4f783d9ed6191a22",
+    "semantic_hash": "1c3a3cf4735b11dd4f783d9ed6191a22"
+  },
+  "/root/federloom/docs/superpowers/plans/2026-07-12-diversity-weighted-corroboration.md": {
+    "mtime": 1783881149.1559744,
+    "ast_hash": "b68159dbbd52e20bb82c93867fb31df9",
+    "semantic_hash": "b68159dbbd52e20bb82c93867fb31df9"
+  },
+  "/root/federloom/docs/superpowers/plans/2026-07-13-materialise-on-verdict.md": {
+    "mtime": 1783930435.259659,
+    "ast_hash": "5ae74bf6efa7ca207ee493aea08ecf34",
+    "semantic_hash": "5ae74bf6efa7ca207ee493aea08ecf34"
+  },
+  "/root/federloom/docs/superpowers/plans/2026-07-14-disputes.md": {
+    "mtime": 1784005035.1211078,
+    "ast_hash": "c979d582c93a45335294b68e3906b443",
+    "semantic_hash": "c979d582c93a45335294b68e3906b443"
+  },
+  "/root/federloom/docs/superpowers/plans/2026-07-16-wire-v2.md": {
+    "mtime": 1784228636.7366393,
+    "ast_hash": "e841159e42752fd788f156b3e6793a82",
+    "semantic_hash": "e841159e42752fd788f156b3e6793a82"
+  },
+  "/root/federloom/docs/superpowers/plans/2026-07-17-docs-truth-up-release-0.1.0.md": {
+    "mtime": 1784318287.491567,
+    "ast_hash": "7f814e01b32b035a151084c90328275a",
+    "semantic_hash": "7f814e01b32b035a151084c90328275a"
+  },
+  "/root/federloom/docs/superpowers/plans/2026-07-17-load-shedding.md": {
+    "mtime": 1784270491.4357483,
+    "ast_hash": "78347c8428ccfa66cd7b6efb6b7bb027",
+    "semantic_hash": "78347c8428ccfa66cd7b6efb6b7bb027"
+  },
+  "/root/federloom/docs/superpowers/plans/2026-07-18-integration-examples.md": {
+    "mtime": 1784375503.417743,
+    "ast_hash": "906835ad4a7f391df709646119508841",
+    "semantic_hash": "906835ad4a7f391df709646119508841"
+  },
+  "/root/federloom/docs/superpowers/specs/2026-07-07-ipv6-prefix-normalization-design.md": {
+    "mtime": 1783491685.2683837,
+    "ast_hash": "6930b3a058c0e7004f59ecc9e7856a08",
+    "semantic_hash": "6930b3a058c0e7004f59ecc9e7856a08"
+  },
+  "/root/federloom/docs/superpowers/specs/2026-07-07-remediation-batch-a-b-design.md": {
+    "mtime": 1783434759.4990156,
+    "ast_hash": "0fb34911dcf8b1df8a1222f8e9ef5d70",
+    "semantic_hash": "0fb34911dcf8b1df8a1222f8e9ef5d70"
+  },
+  "/root/federloom/docs/superpowers/specs/2026-07-07-stranger-block-guarantee-design.md": {
+    "mtime": 1783453979.0952153,
+    "ast_hash": "9d2be050885bb62535f612e10f2fd928",
+    "semantic_hash": "9d2be050885bb62535f612e10f2fd928"
+  },
+  "/root/federloom/docs/superpowers/specs/2026-07-08-subnet-bridge-forwarding-design.md": {
+    "mtime": 1783524097.0058718,
+    "ast_hash": "80ae92723656c23db5604a9ae1da0c3f",
+    "semantic_hash": "80ae92723656c23db5604a9ae1da0c3f"
+  },
+  "/root/federloom/docs/superpowers/specs/2026-07-09-federated-reputation-query-design.md": {
+    "mtime": 1783583694.0921798,
+    "ast_hash": "86f2bcf5a476a9530efd0430e5ed0f20",
+    "semantic_hash": "86f2bcf5a476a9530efd0430e5ed0f20"
+  },
+  "/root/federloom/docs/superpowers/specs/2026-07-10-repquery-hardening-design.md": {
+    "mtime": 1783690887.156313,
+    "ast_hash": "d7874596050c1fd05d5b31314627e8dd",
+    "semantic_hash": "d7874596050c1fd05d5b31314627e8dd"
+  },
+  "/root/federloom/docs/superpowers/specs/2026-07-11-evidence-aggregate-design.md": {
+    "mtime": 1783798116.1205678,
+    "ast_hash": "64baa4ec5f2974ca307a5ef9542ebd27",
+    "semantic_hash": "64baa4ec5f2974ca307a5ef9542ebd27"
+  },
+  "/root/federloom/docs/superpowers/specs/2026-07-12-diversity-weighted-corroboration-design.md": {
+    "mtime": 1783877515.9658768,
+    "ast_hash": "f7cf6b58aa5790dc99cf7d0f439f0d8f",
+    "semantic_hash": "f7cf6b58aa5790dc99cf7d0f439f0d8f"
+  },
+  "/root/federloom/docs/superpowers/specs/2026-07-13-materialise-on-verdict-design.md": {
+    "mtime": 1783929315.3032691,
+    "ast_hash": "13e81f241a70b80d3dd715bcf1aa090d",
+    "semantic_hash": "13e81f241a70b80d3dd715bcf1aa090d"
+  },
+  "/root/federloom/docs/superpowers/specs/2026-07-14-disputes-design.md": {
+    "mtime": 1784004738.5880928,
+    "ast_hash": "7c6a03aace742e617c0131c296447899",
+    "semantic_hash": "7c6a03aace742e617c0131c296447899"
+  },
+  "/root/federloom/docs/superpowers/specs/2026-07-17-docs-truth-up-release-0.1.0-design.md": {
+    "mtime": 1784318094.5120347,
+    "ast_hash": "eb5ea45dc8024bc93e8e29a6c9259db5",
+    "semantic_hash": "eb5ea45dc8024bc93e8e29a6c9259db5"
+  },
+  "/root/federloom/docs/superpowers/specs/2026-07-17-load-shedding-design.md": {
+    "mtime": 1784268706.7797256,
+    "ast_hash": "d6017f01a650c38a02dea8c134cec0b0",
+    "semantic_hash": "d6017f01a650c38a02dea8c134cec0b0"
+  },
+  "/root/federloom/docs/superpowers/specs/2026-07-18-integration-examples-design.md": {
+    "mtime": 1784360948.426569,
+    "ast_hash": "3b7fcfeb3fbef8b011f969e8052931ef",
+    "semantic_hash": "3b7fcfeb3fbef8b011f969e8052931ef"
+  },
+  "/root/federloom/examples/README.md": {
+    "mtime": 1784461029.7024996,
+    "ast_hash": "cb8c16c68fc7d22c24f6081f51ad9b8d",
+    "semantic_hash": "cb8c16c68fc7d22c24f6081f51ad9b8d"
+  },
+  "/root/federloom/examples/apache/docker/README.md": {
+    "mtime": 1784461029.7044995,
+    "ast_hash": "a01617f7512af4baf0a1cdbf73738ac2",
+    "semantic_hash": "a01617f7512af4baf0a1cdbf73738ac2"
+  },
+  "/root/federloom/examples/apache/docker/acquis.yaml": {
+    "mtime": 1784461029.7054996,
+    "ast_hash": "7a400e4746af0926dd3b82b36476b7cb",
+    "semantic_hash": "7a400e4746af0926dd3b82b36476b7cb"
+  },
+  "/root/federloom/examples/apache/docker/config.yaml": {
+    "mtime": 1784461029.7064996,
+    "ast_hash": "bdcb6ca3fcee37df7f8661b0acc6a4ee",
+    "semantic_hash": "bdcb6ca3fcee37df7f8661b0acc6a4ee"
+  },
+  "/root/federloom/examples/apache/docker/docker-compose.yml": {
+    "mtime": 1784461029.7064996,
+    "ast_hash": "7add6abdf9df8c02a7f04c82d390f212",
+    "semantic_hash": "7add6abdf9df8c02a7f04c82d390f212"
+  },
+  "/root/federloom/examples/apache/docker/rules.yaml": {
+    "mtime": 1784461029.7094996,
+    "ast_hash": "1975c72a715d21db44f59838759549e0",
+    "semantic_hash": "1975c72a715d21db44f59838759549e0"
+  },
+  "/root/federloom/examples/apache/os/README.md": {
+    "mtime": 1784461029.7124994,
+    "ast_hash": "3c3286995fd2476acce9dab4acadf772",
+    "semantic_hash": "3c3286995fd2476acce9dab4acadf772"
+  },
+  "/root/federloom/examples/apache/os/config.yaml": {
+    "mtime": 1784461029.7134995,
+    "ast_hash": "8a35a272b245d711f5b674761881572c",
+    "semantic_hash": "8a35a272b245d711f5b674761881572c"
+  },
+  "/root/federloom/examples/apache/os/rules.yaml": {
+    "mtime": 1784461029.7184994,
+    "ast_hash": "4834c5ecfcb2a944b93879142c5d2a05",
+    "semantic_hash": "4834c5ecfcb2a944b93879142c5d2a05"
+  },
+  "/root/federloom/examples/crowdsec/README.md": {
+    "mtime": 1784461029.7414992,
+    "ast_hash": "3a81131e3e718dfa0ed2c302c0e9b70e",
+    "semantic_hash": "3a81131e3e718dfa0ed2c302c0e9b70e"
+  },
+  "/root/federloom/examples/crowdsec/config.yaml": {
+    "mtime": 1784461029.746499,
+    "ast_hash": "cc779b0641cdbff961fdad20b886ddd7",
+    "semantic_hash": "cc779b0641cdbff961fdad20b886ddd7"
+  },
+  "/root/federloom/examples/crowdsec/docker-compose.yml": {
+    "mtime": 1784461029.746499,
+    "ast_hash": "3cb5cf344268d1296bb402b04dc5ae7b",
+    "semantic_hash": "3cb5cf344268d1296bb402b04dc5ae7b"
+  },
+  "/root/federloom/examples/crowdsec/rules.yaml": {
+    "mtime": 1784461029.746499,
+    "ast_hash": "1975c72a715d21db44f59838759549e0",
+    "semantic_hash": "1975c72a715d21db44f59838759549e0"
+  },
+  "/root/federloom/examples/firewall-export/README.md": {
+    "mtime": 1784461029.751499,
+    "ast_hash": "1c061b1ce811f1a55fa6a50f578da12c",
+    "semantic_hash": "1c061b1ce811f1a55fa6a50f578da12c"
+  },
+  "/root/federloom/examples/firewall-export/config.yaml": {
+    "mtime": 1784461029.751499,
+    "ast_hash": "cab9677fb01c25d0e15c4abd532c6aad",
+    "semantic_hash": "cab9677fb01c25d0e15c4abd532c6aad"
+  },
+  "/root/federloom/examples/firewall-export/docker-compose.yml": {
+    "mtime": 1784461029.751499,
+    "ast_hash": "4d1284d06adc23b6664673bb4e28c7d9",
+    "semantic_hash": "4d1284d06adc23b6664673bb4e28c7d9"
+  },
+  "/root/federloom/examples/haproxy/docker/README.md": {
+    "mtime": 1784461029.751499,
+    "ast_hash": "fe3369195573cb84d29a980766eb9440",
+    "semantic_hash": "fe3369195573cb84d29a980766eb9440"
+  },
+  "/root/federloom/examples/haproxy/docker/acquis.yaml": {
+    "mtime": 1784461029.7564988,
+    "ast_hash": "1335fd945ac34c294ca1c79491267834",
+    "semantic_hash": "1335fd945ac34c294ca1c79491267834"
+  },
+  "/root/federloom/examples/haproxy/docker/config.yaml": {
+    "mtime": 1784461029.7564988,
+    "ast_hash": "b190e0689cbb6862e49426bf801e706a",
+    "semantic_hash": "b190e0689cbb6862e49426bf801e706a"
+  },
+  "/root/federloom/examples/haproxy/docker/docker-compose.yml": {
+    "mtime": 1784461029.7594988,
+    "ast_hash": "cce247606e5bdd0ad4a5c2cebaf0deca",
+    "semantic_hash": "cce247606e5bdd0ad4a5c2cebaf0deca"
+  },
+  "/root/federloom/examples/haproxy/docker/rules.yaml": {
+    "mtime": 1784461029.761499,
+    "ast_hash": "1975c72a715d21db44f59838759549e0",
+    "semantic_hash": "1975c72a715d21db44f59838759549e0"
+  },
+  "/root/federloom/examples/mailcow/README.md": {
+    "mtime": 1784461029.7654989,
+    "ast_hash": "a4f5563681fbd01fce8012b31ed11d41",
+    "semantic_hash": "a4f5563681fbd01fce8012b31ed11d41"
+  },
+  "/root/federloom/examples/mailcow/docker-compose.override.yml": {
+    "mtime": 1784461029.7654989,
+    "ast_hash": "08bf327c299a4b3939785bbd25a6f4d8",
+    "semantic_hash": "08bf327c299a4b3939785bbd25a6f4d8"
+  },
+  "/root/federloom/examples/mailcow/federloom/config.yaml": {
+    "mtime": 1784461029.7654989,
+    "ast_hash": "524f6006870ed82addb2ab0c985676c8",
+    "semantic_hash": "524f6006870ed82addb2ab0c985676c8"
+  },
+  "/root/federloom/examples/mailcow/federloom/rules.yaml": {
+    "mtime": 1784461029.7654989,
+    "ast_hash": "c1d6e817c5c4fac57e209bbcb9073488",
+    "semantic_hash": "c1d6e817c5c4fac57e209bbcb9073488"
+  },
+  "/root/federloom/examples/nginx/docker/README.md": {
+    "mtime": 1784461029.7654989,
+    "ast_hash": "38a67ecc5af055b48a9a3bc378422143",
+    "semantic_hash": "38a67ecc5af055b48a9a3bc378422143"
+  },
+  "/root/federloom/examples/nginx/docker/acquis.yaml": {
+    "mtime": 1784461029.7654989,
+    "ast_hash": "525f59c366464a5313d352427c9df5cd",
+    "semantic_hash": "525f59c366464a5313d352427c9df5cd"
+  },
+  "/root/federloom/examples/nginx/docker/config.yaml": {
+    "mtime": 1784461029.7694988,
+    "ast_hash": "e2920e817d1a23f1b6c4e6ed68ea681c",
+    "semantic_hash": "e2920e817d1a23f1b6c4e6ed68ea681c"
+  },
+  "/root/federloom/examples/nginx/docker/docker-compose.yml": {
+    "mtime": 1784461029.7694988,
+    "ast_hash": "0822e5a7acdc1e294fa4ddc026134ce9",
+    "semantic_hash": "0822e5a7acdc1e294fa4ddc026134ce9"
+  },
+  "/root/federloom/examples/nginx/docker/rules.yaml": {
+    "mtime": 1784461029.7694988,
+    "ast_hash": "1975c72a715d21db44f59838759549e0",
+    "semantic_hash": "1975c72a715d21db44f59838759549e0"
+  },
+  "/root/federloom/examples/nginx/os/README.md": {
+    "mtime": 1784461029.7694988,
+    "ast_hash": "e17b15f27ca573d1d0854106d41a30cd",
+    "semantic_hash": "e17b15f27ca573d1d0854106d41a30cd"
+  },
+  "/root/federloom/examples/nginx/os/config.yaml": {
+    "mtime": 1784461029.7694988,
+    "ast_hash": "25488cdb26e9fed0531c595b9a5b113c",
+    "semantic_hash": "25488cdb26e9fed0531c595b9a5b113c"
+  },
+  "/root/federloom/examples/nginx/os/rules.yaml": {
+    "mtime": 1784461029.7694988,
+    "ast_hash": "4834c5ecfcb2a944b93879142c5d2a05",
+    "semantic_hash": "4834c5ecfcb2a944b93879142c5d2a05"
+  },
+  "/root/federloom/examples/traefik/docker/README.md": {
+    "mtime": 1784461029.7764986,
+    "ast_hash": "c44376a0df811b6144de6da418da0893",
+    "semantic_hash": "c44376a0df811b6144de6da418da0893"
+  },
+  "/root/federloom/examples/traefik/docker/acquis.yaml": {
+    "mtime": 1784461029.7764986,
+    "ast_hash": "b9d77489aa75be65ca5fe1515b982bb5",
+    "semantic_hash": "b9d77489aa75be65ca5fe1515b982bb5"
+  },
+  "/root/federloom/examples/traefik/docker/config.yaml": {
+    "mtime": 1784461029.7764986,
+    "ast_hash": "997c9105a245dbda329ef673e3d34b08",
+    "semantic_hash": "997c9105a245dbda329ef673e3d34b08"
+  },
+  "/root/federloom/examples/traefik/docker/docker-compose.yml": {
+    "mtime": 1784461029.7764986,
+    "ast_hash": "a95c1e35dd8f49843776f3e420eae22a",
+    "semantic_hash": "a95c1e35dd8f49843776f3e420eae22a"
+  },
+  "/root/federloom/examples/traefik/docker/rules.yaml": {
+    "mtime": 1784461029.7764986,
+    "ast_hash": "1975c72a715d21db44f59838759549e0",
+    "semantic_hash": "1975c72a715d21db44f59838759549e0"
+  },
+  "/root/federloom/examples/vps-fail2ban/README.md": {
+    "mtime": 1784461029.7824986,
+    "ast_hash": "79fb0fa02f3ad54eee73f9e4eb84f1d3",
+    "semantic_hash": "79fb0fa02f3ad54eee73f9e4eb84f1d3"
+  },
+  "/root/federloom/examples/vps-fail2ban/config.yaml": {
+    "mtime": 1784461029.7824986,
+    "ast_hash": "ff4e5217292d9013a9996217727ea741",
+    "semantic_hash": "ff4e5217292d9013a9996217727ea741"
+  },
+  "/root/federloom/examples/vps-fail2ban/rules.yaml": {
+    "mtime": 1784461029.7904985,
+    "ast_hash": "07b82be766a8ae1b16aa6754efe37d82",
+    "semantic_hash": "07b82be766a8ae1b16aa6754efe37d82"
+  },
+  "/root/federloom/examples/wordpress/docker/README.md": {
+    "mtime": 1784461029.7944984,
+    "ast_hash": "87d91bd62ac43ab7fc48339546c077b7",
+    "semantic_hash": "87d91bd62ac43ab7fc48339546c077b7"
+  },
+  "/root/federloom/examples/wordpress/docker/acquis.yaml": {
+    "mtime": 1784461029.8004982,
+    "ast_hash": "1251b5e1039607f4e1abd9c6be45d53b",
+    "semantic_hash": "1251b5e1039607f4e1abd9c6be45d53b"
+  },
+  "/root/federloom/examples/wordpress/docker/config.yaml": {
+    "mtime": 1784461029.8064983,
+    "ast_hash": "58ef9dee37a3f0a432349a7065bb9f46",
+    "semantic_hash": "58ef9dee37a3f0a432349a7065bb9f46"
+  },
+  "/root/federloom/examples/wordpress/docker/docker-compose.yml": {
+    "mtime": 1784461029.8064983,
+    "ast_hash": "5667920887ffd038b13b868c293c3754",
+    "semantic_hash": "5667920887ffd038b13b868c293c3754"
+  },
+  "/root/federloom/examples/wordpress/docker/rules.yaml": {
+    "mtime": 1784461029.8074982,
+    "ast_hash": "1975c72a715d21db44f59838759549e0",
+    "semantic_hash": "1975c72a715d21db44f59838759549e0"
   }
 }
